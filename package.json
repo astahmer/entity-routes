@@ -4,8 +4,9 @@
     "description": "Design your API around your entities in minutes",
     "source": "src/index.ts",
     "main": "dist/index.js",
-    "module": "dist/index.module.js",
+    "module": "dist/index.js",
     "unpkg": "dist/index.umd.js",
+    "types": "dist/index.d.ts",
     "publishConfig": {
         "access": "public"
     },
@@ -14,9 +15,8 @@
         "tsc": "tsc",
         "commit": "git-cz",
         "prettier": "prettier --write \"./{src,tests}/**/*.ts\"",
-        "build": "node build.js",
-        "dev": "microbundle watch",
-        "tscpaths": "tscpaths -p tsconfig.json -s ./src -o ./dist",
+        "webpack": "webpack",
+        "start": "node -r ts-node/register dist/index",
         "release": "standard-version"
     },
     "config": {
@@ -40,18 +40,24 @@
         "@types/koa-bodyparser": "^4.3.0",
         "@types/koa-router": "^7.4.0",
         "@types/ramda": "^0.27.3",
+        "@zerollup/ts-transform-paths": "^1.7.17",
+        "clean-webpack-plugin": "^3.0.0",
         "commitizen": "^4.0.4",
+        "dotenv": "^8.2.0",
         "husky": "^4.2.5",
-        "microbundle": "^0.12.0-next.8",
         "prettier": "^2.0.4",
         "pretty-quick": "^2.0.1",
         "rimraf": "^3.0.2",
-        "shelljs": "^0.8.3",
         "standard-version": "^7.1.0",
+        "ts-loader": "^7.0.1",
         "ts-node": "^8.9.0",
         "tsconfig-paths": "^3.9.0",
-        "tscpaths": "0.0.9",
-        "typescript": "^3.8.3"
+        "tsconfig-paths-webpack-plugin": "^3.2.0",
+        "typescript": "^3.8.3",
+        "webpack": "^4.43.0",
+        "webpack-cli": "^3.3.11",
+        "webpack-loader-helper": "^1.0.0",
+        "webpack-node-externals": "^1.7.2"
     },
     "keywords": [
         "entity",

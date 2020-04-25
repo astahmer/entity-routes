@@ -10,6 +10,11 @@ export const Router = KoaRouter;
 
 let connectionManager: ConnectionManager;
 
+declare const module: any;
+if (module.hot) {
+    module.hot.accept(console.log);
+}
+
 /** Make an EntityRoute out of each given entities and assign them a global options object (overridable with @EntityRoute) */
 export async function useEntitiesRoutes({
     app,
