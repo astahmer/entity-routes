@@ -1,6 +1,4 @@
 import { concat, mergeWith } from "ramda";
-import { EntityMetadata, getRepository } from "typeorm";
-
 import { EntityGroupsMetadata } from "./EntityGroupsMetadata";
 import {
     OperationGroups,
@@ -9,53 +7,40 @@ import {
     ALL_OPERATIONS,
     RouteOperations,
     RouteOperation,
+    MetaKey,
+    GROUPS_METAKEY,
 } from "@/mapping/decorators/Groups";
 
 export const ENTITY_META_SYMBOL = Symbol("entityMeta");
 
-export class GroupsMetadata<PropNameType = string> {
-    /** The key under which the Reflect metadata will be store on the target entity */
-    protected metaKey: string;
+export class GroupsMetadata {
+    /** The key under which the Reflect metadata will be stored on the target entity */
+    readonly metaKey: MetaKey;
 
     /** Entity class constructor, used to retrieve its related EntityMetadata */
-    protected entityTarget: Function;
-
-    /** EntityMetadata associated with the class */
-    protected [ENTITY_META_SYMBOL]: EntityMetadata;
+    readonly entityTarget: Function;
 
     /** Every entity's props decorated with @Groups */
-    protected decoratedProps: PropNameType[] = [];
+    readonly decoratedProps: string[] = [];
 
-    /** An array of Operations containing global props (exposed no matter which route context) */
-    protected globals: OperationGroups<PropNameType> = {};
+    /** An object of Operations containing global props (exposed no matter which route context) */
+    readonly globals: OperationGroups = {};
 
     /** An object with route specific OperationsGroups */
-    protected routes: ContextOperations<PropNameType> = {};
+    readonly routes: ContextOperations = {};
 
     /**
-     * An object with every exposed props merged (globals + specific + parents globals + specific) for each route context > Operations
-     * */
-    protected exposedPropsByContexts: ContextOperations<PropNameType> = {};
+     * An object with every exposed props merged
+     * (globals + specific + parents globals + specific) for each route context > Operations
+     */
+    readonly exposedPropsByContexts: ContextOperations = {};
 
-    get entityMeta() {
-        return this[ENTITY_META_SYMBOL];
-    }
-
-    set entityMeta(newVal) {
-        this[ENTITY_META_SYMBOL] = newVal;
-    }
-
-    constructor(metaKey: string, entityOrMeta: EntityMetadata | Function) {
+    constructor(metaKey: MetaKey, entityTarget: Function) {
         this.metaKey = metaKey;
-
-        if (entityOrMeta instanceof EntityMetadata) {
-            this.entityMeta = entityOrMeta;
-        } else {
-            this.entityTarget = entityOrMeta;
-        }
+        this.entityTarget = entityTarget;
     }
 
-    addPropToGlobalGroups(groups: GroupsOperationOrAll, propName: PropNameType) {
+    addPropToGlobalGroups(groups: GroupsOperationOrAll, propName: string) {
         if (groups === "all") {
             groups = ALL_OPERATIONS;
         }
@@ -67,10 +52,13 @@ export class GroupsMetadata<PropNameType = string> {
             }
             this.globals[groups[i]].push(propName);
         }
-        this.decoratedProps.push(propName);
+
+        if (!this.decoratedProps.includes(propName)) {
+            this.decoratedProps.push(propName);
+        }
     }
 
-    addPropToRoutesGroups(groups: RouteOperations, propName: PropNameType) {
+    addPropToRoutesGroups(groups: RouteOperations, propName: string) {
         let route;
         for (route in groups) {
             let i = 0;
@@ -94,7 +82,10 @@ export class GroupsMetadata<PropNameType = string> {
                 this.routes[route][operation].push(propName);
             }
         }
-        this.decoratedProps.push(propName);
+
+        if (!this.decoratedProps.includes(propName)) {
+            this.decoratedProps.push(propName);
+        }
     }
 
     /**
@@ -104,7 +95,7 @@ export class GroupsMetadata<PropNameType = string> {
      * this.routes = { user: ["create", "details", "delete"], category: ["create", "update"] };
      * return ['details', 'list', 'create', 'delete'] // for route = 'user'
      */
-    mergeGlobalsAndRouteSpecificGroups<PropNameType>(route: string): OperationGroups<PropNameType> {
+    getOwnExposedProps(route: string): OperationGroups {
         let groups;
         if (this.globals && this.routes[route]) {
             groups = mergeWith(concat, this.globals, this.routes[route]);
@@ -116,59 +107,75 @@ export class GroupsMetadata<PropNameType = string> {
     }
 
     /**
-     * Get groups metadata for a given entity and merge global groups with route specific groups
-     */
-    getEntityRouteGroups(target: string | Function, tableName: string): OperationGroups<PropNameType> {
-        const groupsMeta: EntityGroupsMetadata = Reflect.getOwnMetadata(this.metaKey, target);
-
-        // If no groups are set on this entity
-        if (!groupsMeta) {
-            return;
-        }
-
-        return groupsMeta.mergeGlobalsAndRouteSpecificGroups(tableName);
-    }
-
-    /**
      * Merge groups with every parent entities
      */
-    mergeGroupsWithParentEntities(routeContext: EntityMetadata) {
-        if (!this.entityMeta) {
-            this.entityMeta = getRepository(this.entityTarget).metadata;
-        }
+    getExposedProps(tableName: string) {
+        const inheritanceTree = getInheritanceTree(this.entityTarget);
 
-        let props = this.getEntityRouteGroups(this.entityMeta.target, routeContext.tableName);
+        let props = getOwnExposedProps(this.entityTarget, tableName, this.metaKey);
         let i = 1; // Skip itself
         let parentProps;
 
-        for (i; i < this.entityMeta.inheritanceTree.length; i++) {
-            parentProps = this.getEntityRouteGroups(this.entityMeta.inheritanceTree[i], routeContext.tableName);
+        for (i; i < inheritanceTree.length; i++) {
+            parentProps = getOwnExposedProps(inheritanceTree[i], tableName, this.metaKey);
 
             if (parentProps) {
                 props = mergeWith(concat, props, parentProps);
             }
         }
 
-        if (!this.exposedPropsByContexts[routeContext.tableName]) {
-            this.exposedPropsByContexts[routeContext.tableName] = {};
+        // Cache exposed props
+        if (!this.exposedPropsByContexts[tableName]) {
+            this.exposedPropsByContexts[tableName] = {};
         }
 
-        this.exposedPropsByContexts[routeContext.tableName] = props;
+        this.exposedPropsByContexts[tableName] = props;
         return props;
-    }
-
-    /**
-     * Get exposed props (from groups) for a given entity (using its EntityMetadata) on a specific operation
-     */
-    getExposedProps(operation: RouteOperation, routeContext: EntityMetadata) {
-        let exposedProps = this.exposedPropsByContexts[routeContext.tableName];
-
-        if (!exposedProps || !exposedProps[operation]) {
-            exposedProps = this.mergeGroupsWithParentEntities(routeContext);
-        }
-
-        return exposedProps && (exposedProps[operation] ? exposedProps[operation] : []);
     }
 }
 
 export type GroupsMetaByRoutes<G extends GroupsMetadata = GroupsMetadata> = Record<string, G>;
+
+/**
+ * Get groups metadata for a given entity and merge global groups with route specific groups
+ */
+export function getOwnExposedProps(
+    target: Function,
+    tableName: string,
+    metaKey: MetaKey = GROUPS_METAKEY
+): OperationGroups {
+    const groupsMeta: EntityGroupsMetadata = Reflect.getOwnMetadata(metaKey, target);
+
+    return groupsMeta?.getOwnExposedProps(tableName);
+}
+
+/**
+ * Get exposed props (from groups) for a given context (tableName)
+ */
+export function getExposedProps(target: Function, tableName: string, metaKey: MetaKey = GROUPS_METAKEY) {
+    const groupsMeta: EntityGroupsMetadata = Reflect.getOwnMetadata(metaKey, target);
+
+    return groupsMeta?.getExposedProps(tableName);
+}
+
+/**
+ * Gets given's entity all inherited classes.
+ * Gives in order from parents to children.
+ * For example Post extends ContentModel which extends Unit it will give
+ * [Unit, ContentModel, Post]
+ *
+ * Taken from typeorm/src/metadata-builder/MetadataUtils.ts
+ * @see https://github.com/typeorm/typeorm/
+ */
+export function getInheritanceTree(entity: Function): Function[] {
+    const tree: Function[] = [entity];
+    const getPrototypeOf = (object: Function): void => {
+        const proto = Object.getPrototypeOf(object);
+        if (proto && proto.name) {
+            tree.push(proto);
+            getPrototypeOf(proto);
+        }
+    };
+    getPrototypeOf(entity);
+    return tree;
+}

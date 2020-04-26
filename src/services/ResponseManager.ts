@@ -13,7 +13,6 @@ import { AliasManager } from "@/serializer/AliasManager";
 import { SubresourceManager, SubresourceRelation } from "@/services/SubresourceManager";
 
 // TODO JWt (AuthProvider ?)
-// TODO Decorators reunite with filters etc ? (DependsOn into src/mapping)
 // TODO get rid of ramda
 // import { isTokenValid, JwtDecoded } from "../JWT";
 import { isType, isDev } from "@/functions/asserts";

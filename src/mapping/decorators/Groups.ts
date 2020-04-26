@@ -33,7 +33,7 @@ export function Groups(
     alias?: string
 ): PropertyDecorator | MethodDecorator {
     return registerGroupsDecorator<EntityGroupsMetadata>({
-        metaKey: "groups",
+        metaKey: GROUPS_METAKEY,
         metaClass: EntityGroupsMetadata,
         groups,
         alias,
@@ -45,17 +45,8 @@ export function registerGroupsDecorator<G extends GroupsMetadata>({
     metaClass,
     groups,
     alias,
-    propNameHook,
-    groupsMetaHook,
-}: {
-    metaKey: string;
-    metaClass: new (metaKey: string, entityOrMeta: EntityMetadata | Function) => G;
-    groups: GroupsOperationOrAll | RouteOperations;
-    alias?: string;
-    propNameHook?: Function;
-    groupsMetaHook?: Function;
-}) {
-    return (target: object, propName: string, descriptor: PropertyDescriptor) => {
+}: RegisterGroupsDecoratorArgs<G>): PropertyDecorator | MethodDecorator {
+    return (target: object, propName: string, descriptor?: PropertyDescriptor) => {
         let groupsMeta: G = Reflect.getOwnMetadata(metaKey, target.constructor);
         if (!groupsMeta) {
             groupsMeta = new metaClass(metaKey, target.constructor);
@@ -63,11 +54,7 @@ export function registerGroupsDecorator<G extends GroupsMetadata>({
 
         // Is a computed property (method decorator)
         if (descriptor) {
-            propName = COMPUTED_PREFIX + propName + (alias ? ALIAS_PREFIX + alias : "");
-        }
-
-        if (propNameHook) {
-            propName = propNameHook(propName);
+            propName = formatGroupsMethodName(propName, alias);
         }
 
         if (Array.isArray(groups)) {
@@ -78,13 +65,19 @@ export function registerGroupsDecorator<G extends GroupsMetadata>({
             groupsMeta.addPropToRoutesGroups(groups, propName);
         }
 
-        if (groupsMetaHook) {
-            groupsMeta = groupsMetaHook(groupsMeta);
-        }
-
         Reflect.defineMetadata(metaKey, groupsMeta, target.constructor);
     };
 }
+
+export type RegisterGroupsDecoratorArgs<G extends GroupsMetadata> = {
+    metaKey: GroupsMetadata["metaKey"];
+    /** Metadata class stored */
+    metaClass: new (metaKey: MetaKey, entityOrMeta: EntityMetadata | Function) => G;
+    /** Groups array or array by (route) context, or just "all" */
+    groups: GroupsOperationOrAll | RouteOperations;
+    /** Alias to be used rather than function name if @Groups is used as MethodDecorator */
+    alias?: string;
+};
 
 export type RouteDefaultOperation = "create" | "list" | "details" | "update" | "delete";
 export type RouteOperation = RouteDefaultOperation | string;
@@ -95,14 +88,24 @@ export type GroupsOperationOrAll = GroupsOperation[] | "all";
 export type RouteOperations = Record<string, GroupsOperationOrAll>;
 
 /** An object with Operation as keys and an array of entity props as values  */
-export type OperationGroups<PropNameType = string> = PartialRecord<RouteOperation, PropNameType[]>;
+export type OperationGroups = PartialRecord<RouteOperation, string[]>;
 
 /**
  * An object containing many routeContext (keys) associated to OperationsGroups (values)
  * A route context key is the tableName of the EntityRoute (/users => user, /pictures => picture).
  */
-export type ContextOperations<PropName = string> = Record<string, OperationGroups<PropName>>;
+export type ContextOperations = Record<string, OperationGroups>;
 
+export const GROUPS_METAKEY = Symbol("groups");
 export const ALL_OPERATIONS: GroupsOperation[] = ["create", "list", "details", "update"];
 export const COMPUTED_PREFIX = "_COMPUTED_";
 export const ALIAS_PREFIX = "_ALIAS_";
+
+export type MetaKey = string | Symbol;
+export const getGroupsMetadata = <G extends GroupsMetadata = EntityGroupsMetadata>(
+    entity: Function,
+    metaKey: MetaKey = GROUPS_METAKEY
+) => Reflect.getOwnMetadata(metaKey, entity) as G;
+
+export const formatGroupsMethodName = (propName: string, alias?: string) =>
+    COMPUTED_PREFIX + propName + (alias ? ALIAS_PREFIX + alias : "");

@@ -8,7 +8,13 @@ module.exports = {
     transform: {
         "^.+\\.tsx?$": "ts-jest",
     },
-    // testEnvironment: "node",
+    testEnvironment: "node",
+    moduleNameMapper: {
+        "^@/(.*)$": "<rootDir>/src/$1",
+        "^$/(.*)$": "<rootDir>/$1",
+    },
+    // setupFilesAfterEnv: ["<rootDir>/tests/setup.ts"],
+    setupFilesAfterEnv: ["jest-extended"],
     // coverageThreshold: {
     //     global: {
     //         branches: threshold,
