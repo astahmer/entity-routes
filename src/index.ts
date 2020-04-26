@@ -1,3 +1,5 @@
+import "source-map-support/register";
+
 export * from "./container";
 export * from "./filters";
 export * from "./functions";

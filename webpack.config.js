@@ -20,7 +20,7 @@ const pollInterval = 500;
 const mode = process.env.NODE_ENV;
 
 const isDev = mode === "development";
-const withHMR = isDev && process.env.HMR;
+const withHMR = isDev && process.env.HMR === "true";
 
 module.exports = {
     mode,
@@ -31,7 +31,7 @@ module.exports = {
         poll: pollInterval,
     },
     target: "node",
-    devtool: "inline-cheap-module-source-map",
+    devtool: withHMR ? "inline-cheap-module-source-map" : "source-map",
     externals: [
         nodeExternals({
             whitelist: [`webpack/hot/poll?${pollInterval}`],
