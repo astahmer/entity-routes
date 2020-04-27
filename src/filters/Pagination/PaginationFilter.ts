@@ -7,10 +7,8 @@ import {
     DefaultFilterOptions,
     QueryParams,
     QueryParamValue,
-    FilterProperty,
-    AbstractFilterConfig,
 } from "../AbstractFilter";
-import { registerFilterDecorator } from "..";
+import { AliasManager } from "@/serializer";
 
 export class PaginationFilter extends AbstractFilter<PaginationFilterOptions> {
     /** Returns every filterable properties  */
@@ -36,7 +34,7 @@ export class PaginationFilter extends AbstractFilter<PaginationFilterOptions> {
      * @example req = /pictures/?orderBy=title:desc&orderBy=downloads:desc
      * will generate this SQL: ORDER BY `picture`.`title` DESC, `picture`.`downloads` DESC
      */
-    protected addOrderBy(qb: SelectQueryBuilder<any>, orderBy: QueryParamValue) {
+    protected addOrderBy(qb: SelectQueryBuilder<any>, aliasManager: AliasManager, orderBy: QueryParamValue) {
         if (!Array.isArray(orderBy)) {
             orderBy = [orderBy];
         }
@@ -73,7 +71,8 @@ export class PaginationFilter extends AbstractFilter<PaginationFilterOptions> {
                     qb,
                     this.entityMetadata,
                     propPath,
-                    props[0]
+                    props[0],
+                    aliasManager
                 );
 
                 qb.addOrderBy(entityAlias + "." + propName, direction);
@@ -81,19 +80,19 @@ export class PaginationFilter extends AbstractFilter<PaginationFilterOptions> {
         }
     }
 
-    apply({ queryParams, qb }: AbstractFilterApplyArgs) {
+    apply({ queryParams, qb, aliasManager }: AbstractFilterApplyArgs) {
         // Apply filter for each property decorator
         this.filterProperties.forEach((orderBy) => {
-            this.addOrderBy(qb, orderBy);
+            this.addOrderBy(qb, aliasManager, orderBy);
         });
 
         // Apply filter for each query params
         const { orderBy, take, skip } = this.getFilterParamsByTypes(queryParams);
 
         if (orderBy) {
-            this.addOrderBy(qb, orderBy);
+            this.addOrderBy(qb, aliasManager, orderBy);
         } else {
-            this.addOrderBy(qb, this.config.options.defaultOrderBys);
+            this.addOrderBy(qb, aliasManager, this.config.options.defaultOrderBys);
         }
 
         if (take || this.config.options.defaultRetrievedItemsLimit) {

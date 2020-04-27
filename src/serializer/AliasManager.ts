@@ -5,12 +5,7 @@ export type AliasList = Record<string, number>;
 
 export class AliasManager {
     // TODO WeakMap + pass aliasKey
-    aliases: AliasList;
-
-    public resetList() {
-        this.aliases = {};
-        return this.aliases;
-    }
+    readonly aliases: AliasList = {};
 
     /**
      * Appends a number (of occurences) to a propertName in order to avoid ambiguous sql names
@@ -21,6 +16,7 @@ export class AliasManager {
 
     public generate(entityTableName: string, propName: string) {
         const key = entityTableName + "." + propName;
+        console.log(this.aliases);
         this.aliases[key] = this.aliases[key] ? this.aliases[key] + 1 : 1;
         return entityTableName + "_" + propName + "_" + this.aliases[key];
     }

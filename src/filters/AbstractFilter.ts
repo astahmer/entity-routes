@@ -1,6 +1,7 @@
 import { pick } from "ramda";
 import { EntityMetadata, SelectQueryBuilder, WhereExpression } from "typeorm";
 import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
+import Container from "typedi";
 
 import { Normalizer } from "@/serializer/Normalizer";
 import { AliasManager } from "@/serializer/AliasManager";
@@ -9,14 +10,14 @@ import { isDefined } from "@/functions/asserts";
 export abstract class AbstractFilter<FilterOptions extends DefaultFilterOptions = DefaultFilterOptions> {
     protected config: AbstractFilterConfig<FilterOptions>;
     protected entityMetadata: EntityMetadata;
-    protected normalizer: Normalizer;
-    protected aliasManager: AliasManager;
 
-    constructor({ config, entityMetadata, normalizer, aliasManager }: AbstractFilterConstructor) {
+    get normalizer() {
+        return Container.get(Normalizer);
+    }
+
+    constructor({ config, entityMetadata }: AbstractFilterConstructor) {
         this.config = config as AbstractFilterConfig<FilterOptions>;
         this.entityMetadata = entityMetadata;
-        this.normalizer = normalizer;
-        this.aliasManager = aliasManager;
     }
 
     // TODO Implement an interface that forces to have a getDescription method listing every possible filter key
@@ -40,7 +41,7 @@ export abstract class AbstractFilter<FilterOptions extends DefaultFilterOptions 
     }
 
     /** This method should add conditions to the queryBuilder using queryParams  */
-    abstract apply({ queryParams, qb, whereExp }: AbstractFilterApplyArgs): void;
+    abstract apply({ queryParams, qb, whereExp, aliasManager }: AbstractFilterApplyArgs): void;
 
     /** Return column metadata if param exists in this entity properties or is a valid propPath from this entity */
     protected getColumnMetaForPropPath(param: string) {
@@ -99,8 +100,6 @@ export abstract class AbstractFilter<FilterOptions extends DefaultFilterOptions 
 export type AbstractFilterConstructor = {
     entityMetadata: EntityMetadata;
     config: AbstractFilterConfig;
-    normalizer: Normalizer;
-    aliasManager: AliasManager;
 };
 
 export type QueryParamValue = string | string[];
@@ -110,6 +109,7 @@ export type AbstractFilterApplyArgs = {
     queryParams?: QueryParams;
     qb?: SelectQueryBuilder<any>;
     whereExp?: WhereExpression;
+    aliasManager: AliasManager;
 };
 
 export type FilterProperty = string | [string, string];

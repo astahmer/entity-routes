@@ -5,61 +5,86 @@ import { getDependsOnMetadata } from "@/mapping/decorators/DependsOn";
 import { ALIAS_PREFIX, COMPUTED_PREFIX, RouteOperation } from "@/mapping/decorators/Groups";
 
 import { EntityRouteOptions, GenericEntity } from "@/services/EntityRoute";
-import { EntityMapper } from "@/mapping/EntityMapper";
 import { sortObjectByKeys } from "@/functions/object";
 import { lowerFirstLetter } from "@/functions/primitives";
 
-import { AliasManager } from "./AliasManager";
 import { isType, isEntity } from "@/functions/asserts";
 import { RequestContext } from "@/services";
+import Container, { Service } from "typedi";
+import { MappingManager } from "@/services/MappingManager";
+import { AliasManager } from "@/serializer/AliasManager";
 
-type NormalizerOptions = Pick<
+export type NormalizerOptions = Pick<
     EntityRouteOptions,
     "shouldMaxDepthReturnRelationPropsId" | "shouldEntityWithOnlyIdBeFlattenedToIri" | "shouldSetSubresourcesIriOnItem"
 >;
+@Service()
 export class Normalizer {
-    constructor(
-        private metadata: EntityMetadata,
-        private mapper: EntityMapper,
-        private aliasManager: AliasManager,
-        private options: NormalizerOptions
-    ) {}
+    get manager() {
+        return Container.get(MappingManager);
+    }
 
     /** Retrieve collection of entities with only exposed props (from groups) */
     public async getCollection<Entity extends GenericEntity>(
+        entityMetadata: EntityMetadata,
         qb: SelectQueryBuilder<Entity>,
-        operation?: RouteOperation
+        aliasManager: AliasManager,
+        operation: RouteOperation = "list",
+        options: EntityRouteOptions
     ): Promise<[Entity[], number]> {
-        const selectProps = this.mapper.getSelectProps(operation, this.metadata, true);
+        const selectProps = this.manager.getSelectProps(entityMetadata, operation, entityMetadata, true);
 
         qb.select(selectProps);
 
-        this.joinAndSelectExposedProps(operation, qb, this.metadata, "", this.metadata.tableName);
-        this.joinAndSelectPropsThatComputedPropsDependsOn(operation, qb, this.metadata);
+        this.joinAndSelectExposedProps(
+            entityMetadata,
+            operation,
+            qb,
+            entityMetadata,
+            "",
+            entityMetadata.tableName,
+            options,
+            aliasManager
+        );
+        this.joinAndSelectPropsThatComputedPropsDependsOn(entityMetadata, operation, qb, entityMetadata, aliasManager);
 
         const results = await qb.getManyAndCount();
-        const items = await Promise.all(results[0].map((item) => this.recursiveFormatItem(item, operation)));
+        const items = await Promise.all(
+            results[0].map((item) => this.recursiveFormatItem(item, operation, entityMetadata, options))
+        );
 
         return [items, results[1]];
     }
 
     /** Retrieve a specific entity with only exposed props (from groups) */
     public async getItem<Entity extends GenericEntity>(
+        entityMetadata: EntityMetadata,
         qb: SelectQueryBuilder<Entity>,
+        aliasManager: AliasManager,
         entityId: RequestContext["entityId"],
-        operation: RouteOperation
+        operation: RouteOperation = "details",
+        options: EntityRouteOptions
     ) {
-        const selectProps = this.mapper.getSelectProps(operation, this.metadata, true);
+        const selectProps = this.manager.getSelectProps(entityMetadata, operation, entityMetadata, true);
 
         qb.select(selectProps);
 
         // If item is a subresource, there is no entityId since the entity was joined on its parent using inverse side prop
         if (entityId) {
-            qb.where(this.metadata.tableName + ".id = :id", { id: entityId });
+            qb.where(entityMetadata.tableName + ".id = :id", { id: entityId });
         }
 
-        this.joinAndSelectExposedProps(operation, qb, this.metadata, "", this.metadata.tableName);
-        this.joinAndSelectPropsThatComputedPropsDependsOn(operation, qb, this.metadata);
+        this.joinAndSelectExposedProps(
+            entityMetadata,
+            operation,
+            qb,
+            entityMetadata,
+            "",
+            entityMetadata.tableName,
+            options,
+            aliasManager
+        );
+        this.joinAndSelectPropsThatComputedPropsDependsOn(entityMetadata, operation, qb, entityMetadata, aliasManager);
 
         const result = await qb.getOne();
 
@@ -68,7 +93,7 @@ export class Normalizer {
             throw new Error("Not found.");
         }
 
-        const item: Entity = await this.recursiveFormatItem(result, operation);
+        const item: Entity = await this.recursiveFormatItem(result, operation, entityMetadata, options);
 
         return item;
     }
@@ -87,6 +112,7 @@ export class Normalizer {
         entityMetadata: EntityMetadata,
         propPath: string,
         currentProp: string,
+        aliasManager: AliasManager,
         prevAlias?: string
     ): any {
         const column = entityMetadata.findColumnWithPropertyName(currentProp);
@@ -101,7 +127,7 @@ export class Normalizer {
             };
         } else {
             // Relation
-            const { isJoinAlreadyMade, alias } = this.aliasManager.getAliasForRelation(qb, relation);
+            const { isJoinAlreadyMade, alias } = aliasManager.getAliasForRelation(qb, relation);
 
             if (!isJoinAlreadyMade) {
                 qb.leftJoin((prevAlias || relation.entityMetadata.tableName) + "." + relation.propertyName, alias);
@@ -110,7 +136,14 @@ export class Normalizer {
             const splitPath = propPath.split(".");
             const nextPropPath = splitPath.slice(1).join(".");
 
-            return this.makeJoinsFromPropPath(qb, relation.inverseEntityMetadata, nextPropPath, splitPath[1], alias);
+            return this.makeJoinsFromPropPath(
+                qb,
+                relation.inverseEntityMetadata,
+                nextPropPath,
+                splitPath[1],
+                aliasManager,
+                alias
+            );
         }
     }
 
@@ -124,7 +157,9 @@ export class Normalizer {
      * */
     public async recursiveFormatItem<Entity extends GenericEntity>(
         item: Entity,
-        operation: RouteOperation
+        operation: RouteOperation,
+        rootMetadata: EntityMetadata,
+        options: EntityRouteOptions
     ): Promise<Entity> {
         let key, prop, entityMetadata;
         try {
@@ -136,15 +171,17 @@ export class Normalizer {
 
         for (key in item) {
             prop = item[key as keyof Entity];
-            if (Array.isArray(prop) && !this.mapper.isPropSimple(entityMetadata, key)) {
-                const propArray = prop.map((nestedItem: Entity) => this.recursiveFormatItem(nestedItem, operation));
+            if (Array.isArray(prop) && !this.manager.isPropSimple(entityMetadata, key)) {
+                const propArray = prop.map((nestedItem: Entity) =>
+                    this.recursiveFormatItem(nestedItem, operation, rootMetadata, options)
+                );
                 item[key as keyof Entity] = (await Promise.all(propArray)) as any;
             } else if (isType<GenericEntity>(prop, isEntity(prop))) {
-                item[key as keyof Entity] = await this.recursiveFormatItem(prop, operation);
+                item[key as keyof Entity] = await this.recursiveFormatItem(prop, operation, rootMetadata, options);
             } else if (
                 !isPrimitive(prop) &&
                 !((prop as any) instanceof Date) &&
-                !this.mapper.isPropSimple(entityMetadata, key)
+                !this.manager.isPropSimple(entityMetadata, key)
             ) {
                 delete item[key as keyof Entity];
             }
@@ -152,12 +189,12 @@ export class Normalizer {
             // TODO Remove properties selected by DependsOn ? options in Route>App ? default = true
         }
 
-        if (this.options.shouldEntityWithOnlyIdBeFlattenedToIri && isEntity(item) && Object.keys(item).length === 1) {
+        if (options.shouldEntityWithOnlyIdBeFlattenedToIri && isEntity(item) && Object.keys(item).length === 1) {
             item = item.getIri() as any;
             return item;
         } else {
-            await this.setComputedPropsOnItem(item, operation, entityMetadata);
-            if (this.options.shouldSetSubresourcesIriOnItem) {
+            await this.setComputedPropsOnItem(rootMetadata, item, operation, entityMetadata);
+            if (options.shouldSetSubresourcesIriOnItem) {
                 this.setSubresourcesIriOnItem(item, entityMetadata);
             }
             return sortObjectByKeys(item);
@@ -174,37 +211,57 @@ export class Normalizer {
      * @param prevProp used to left join further
      */
     private joinAndSelectExposedProps(
+        rootMetadata: EntityMetadata,
         operation: RouteOperation,
         qb: SelectQueryBuilder<any>,
         entityMetadata: EntityMetadata,
-        currentPath?: string,
-        prevProp?: string
+        currentPath: string,
+        prevProp: string,
+        options: EntityRouteOptions,
+        aliasManager: AliasManager
     ) {
         if (prevProp && prevProp !== entityMetadata.tableName) {
-            const selectProps = this.mapper.getSelectProps(operation, entityMetadata, true, prevProp);
+            const selectProps = this.manager.getSelectProps(rootMetadata, operation, entityMetadata, true, prevProp);
             qb.addSelect(selectProps);
         }
 
         const newPath = (currentPath ? currentPath + "." : "") + entityMetadata.tableName;
-        const relationProps = this.mapper.getRelationPropsMetas(operation, entityMetadata);
+        const relationProps = this.manager.getRelationPropsMetas(rootMetadata, operation, entityMetadata);
 
         relationProps.forEach((relation) => {
-            const circularProp = this.mapper.isRelationPropCircular(
+            const circularProp = this.manager.isRelationPropCircular(
                 newPath + "." + relation.inverseEntityMetadata.tableName,
                 relation.inverseEntityMetadata,
-                relation
+                relation,
+                options
             );
 
-            const { isJoinAlreadyMade, alias } = this.aliasManager.getAliasForRelation(qb, relation);
+            const { isJoinAlreadyMade, alias } = aliasManager.getAliasForRelation(qb, relation);
 
-            if (!isJoinAlreadyMade && (!circularProp || this.options.shouldMaxDepthReturnRelationPropsId)) {
+            if (!isJoinAlreadyMade && (!circularProp || options.shouldMaxDepthReturnRelationPropsId)) {
                 qb.leftJoin(prevProp + "." + relation.propertyName, alias);
             }
 
             if (!circularProp) {
-                this.joinAndSelectExposedProps(operation, qb, relation.inverseEntityMetadata, newPath, alias);
-                this.joinAndSelectPropsThatComputedPropsDependsOn(operation, qb, relation.inverseEntityMetadata, alias);
-            } else if (this.options.shouldMaxDepthReturnRelationPropsId) {
+                this.joinAndSelectExposedProps(
+                    rootMetadata,
+                    operation,
+                    qb,
+                    relation.inverseEntityMetadata,
+                    newPath,
+                    alias,
+                    options,
+                    aliasManager
+                );
+                this.joinAndSelectPropsThatComputedPropsDependsOn(
+                    rootMetadata,
+                    operation,
+                    qb,
+                    relation.inverseEntityMetadata,
+                    aliasManager,
+                    alias
+                );
+            } else if (options.shouldMaxDepthReturnRelationPropsId) {
                 qb.addSelect(alias + ".id");
             }
         });
@@ -212,13 +269,17 @@ export class Normalizer {
 
     /** Join and select any props marked as needed for each computed prop (with @DependsOn) in order to be able to retrieve them later */
     private joinAndSelectPropsThatComputedPropsDependsOn(
+        rootMetadata: EntityMetadata,
         operation: RouteOperation,
         qb: SelectQueryBuilder<any>,
         entityMetadata: EntityMetadata,
+        aliasManager: AliasManager,
         alias?: string
     ) {
         const dependsOnMeta = getDependsOnMetadata(entityMetadata.target as Function);
-        const computedProps = this.mapper.getComputedProps(operation, entityMetadata).map(getComputedPropMethodAndKey);
+        const computedProps = this.manager
+            .getComputedProps(rootMetadata, operation, entityMetadata)
+            .map(getComputedPropMethodAndKey);
         computedProps.forEach((computed) => {
             if (dependsOnMeta[computed.computedPropMethod]) {
                 dependsOnMeta[computed.computedPropMethod].forEach((propPath) => {
@@ -227,7 +288,8 @@ export class Normalizer {
                         qb,
                         entityMetadata,
                         propPath,
-                        props[0]
+                        props[0],
+                        aliasManager
                     );
 
                     const selectProp = (alias || entityAlias) + "." + propName;
@@ -242,12 +304,13 @@ export class Normalizer {
     }
 
     private async setComputedPropsOnItem<U extends GenericEntity>(
+        rootMetadata: EntityMetadata,
         item: U,
         operation: RouteOperation,
         entityMetadata: EntityMetadata
     ) {
-        const computedProps = this.mapper
-            .getComputedProps(operation, entityMetadata)
+        const computedProps = this.manager
+            .getComputedProps(rootMetadata, operation, entityMetadata)
             .map((computed) => getComputedPropMethodAndKey(computed));
         const propsPromises = await Promise.all(
             computedProps.map((computed) => (item[computed.computedPropMethod as keyof U] as any)())
@@ -257,7 +320,7 @@ export class Normalizer {
 
     /** For each item's subresources, add their corresponding IRIs to this item */
     private setSubresourcesIriOnItem<U extends GenericEntity>(item: U, entityMetadata: EntityMetadata) {
-        const subresourceProps = this.mapper.getSubresourceProps(entityMetadata);
+        const subresourceProps = this.manager.getSubresourceProps(entityMetadata);
 
         let key;
         for (key in subresourceProps) {

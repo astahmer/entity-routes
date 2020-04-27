@@ -1,6 +1,3 @@
-// import "source-map-support/register";
-// TOOD only import if not jest ? or just remove it
-
 export * from "./container";
 export * from "./filters";
 export * from "./functions";

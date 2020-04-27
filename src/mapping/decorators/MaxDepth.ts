@@ -15,16 +15,19 @@ export function MaxDepth(max: number = 2): ClassDecorator | PropertyDecorator {
     return (target: Object, propName: string) => {
         // If propName is defined => PropertyDecorator, else it's a ClassDecorator
         target = propName ? target.constructor : target;
-        const maxDepth = Reflect.getOwnMetadata("maxDepth", target) || { enabled: false, fields: {} };
+        const maxDepth = Reflect.getOwnMetadata(MAX_DEPTH_METAKEY, target) || { enabled: false, fields: {} };
         if (propName) {
             maxDepth.fields[propName] = max;
         } else {
             maxDepth.enabled = true;
             maxDepth.depthLvl = max;
         }
-        Reflect.defineMetadata("maxDepth", maxDepth, target);
+        Reflect.defineMetadata(MAX_DEPTH_METAKEY, maxDepth, target);
     };
 }
+
+export const MAX_DEPTH_METAKEY = Symbol("maxDepth");
+export const getMaxDepthMetadata = (entity: Function) => Reflect.getOwnMetadata(MAX_DEPTH_METAKEY, entity);
 
 export type MaxDeptMetas = Record<string, MaxDeptMetasItem>;
 export type MaxDeptMetasItem = {

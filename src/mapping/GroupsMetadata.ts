@@ -11,8 +11,6 @@ import {
     GROUPS_METAKEY,
 } from "@/mapping/decorators/Groups";
 
-export const ENTITY_META_SYMBOL = Symbol("entityMeta");
-
 export class GroupsMetadata {
     /** The key under which the Reflect metadata will be stored on the target entity */
     readonly metaKey: MetaKey;

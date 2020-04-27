@@ -1,36 +1,36 @@
 import { path, pluck } from "ramda";
 import { EntityMetadata, ObjectType } from "typeorm";
 import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
+import { Service } from "typedi";
 
-import { RouteOperation } from "@/mapping/decorators/Groups";
-import { MaxDeptMetas } from "@/mapping/decorators/MaxDepth";
+import { RouteOperation, GROUPS_METAKEY } from "@/mapping/decorators/Groups";
 
 import { getRouteSubresourcesMetadata, EntityRouteOptions } from "@/services/EntityRoute";
-import { EntityGroupsMetadata } from "./EntityGroupsMetadata";
-import { ENTITY_META_SYMBOL, GroupsMetaByRoutes, GroupsMetadata } from "./GroupsMetadata";
+import { GroupsMetadata, GroupsMetaByRoutes } from "@/mapping/GroupsMetadata";
+import { EntityGroupsMetadata } from "@/mapping/EntityGroupsMetadata";
+import { MaxDeptMetas, getMaxDepthMetadata } from "@/mapping";
 
-export type MappingItem = {
-    mapping: MappingResponse;
-    exposedProps: string[];
-    selectProps: string[];
-    relationProps: string[];
-    [ENTITY_META_SYMBOL]: EntityMetadata;
-};
-
-export type MappingResponse = Record<string, MappingItem>;
-
-type EntityMapperOptions = Pick<EntityRouteOptions, "defaultMaxDepthLvl" | "isMaxDepthEnabledByDefault">;
-
-export class EntityMapper {
+@Service()
+export class MappingManager {
     private groupsMetas: Record<string, GroupsMetaByRoutes<any>> = {};
     private maxDepthMetas: MaxDeptMetas = {};
 
-    constructor(private metadata: EntityMetadata, private options: EntityMapperOptions) {}
-
     /** Make the mapping object for this entity on a given operation */
-    public make(operation: RouteOperation, pretty?: boolean): MappingItem | any {
-        const mapping = this.getMappingFor({}, operation, this.metadata, "", this.metadata.tableName);
-        return pretty ? this.prettify(mapping) : mapping;
+    public make(
+        rootMetadata: EntityMetadata,
+        operation: RouteOperation,
+        options: EntityMapperMakeOptions
+    ): MappingItem | Record<string, any> {
+        const mapping = this.getMappingFor(
+            rootMetadata,
+            {},
+            operation,
+            rootMetadata,
+            "",
+            rootMetadata.tableName,
+            options
+        );
+        return options.pretty ? this.prettify(mapping) : mapping;
     }
 
     /**
@@ -45,23 +45,16 @@ export class EntityMapper {
     }
 
     /** Get selects props (from groups) of a given entity for a specific operation */
-    public getExposedProps(operation: RouteOperation, entityMetadata: EntityMetadata) {
-        return this.getGroupsMetadataFor(entityMetadata, EntityGroupsMetadata).getExposedProps(
+    public getExposedProps(rootMetadata: EntityMetadata, operation: RouteOperation, entityMetadata: EntityMetadata) {
+        return this.getGroupsMetadataFor(entityMetadata, EntityGroupsMetadata).getExposedPropsOn(
             operation,
-            this.metadata
-        );
-    }
-
-    /** Get selects props (from groups) of a given entity for a specific operation */
-    public getExposedPropsByTypes(operation: RouteOperation, entityMetadata: EntityMetadata) {
-        return this.getGroupsMetadataFor(entityMetadata, EntityGroupsMetadata).getExposedPropsByTypes(
-            operation,
-            this.metadata
+            rootMetadata
         );
     }
 
     /** Get selects props (from groups) of a given entity for a specific operation */
     public getSelectProps(
+        rootMetadata: EntityMetadata,
         operation: RouteOperation,
         entityMetadata: EntityMetadata,
         withPrefix = true,
@@ -69,25 +62,29 @@ export class EntityMapper {
     ) {
         return this.getGroupsMetadataFor(entityMetadata, EntityGroupsMetadata).getSelectProps(
             operation,
-            this.metadata,
+            rootMetadata,
             withPrefix,
             prefix
         );
     }
 
     /** Get relation props metas (from groups) of a given entity for a specific operation */
-    public getRelationPropsMetas(operation: RouteOperation, entityMetadata: EntityMetadata) {
+    public getRelationPropsMetas(
+        rootMetadata: EntityMetadata,
+        operation: RouteOperation,
+        entityMetadata: EntityMetadata
+    ) {
         return this.getGroupsMetadataFor(entityMetadata, EntityGroupsMetadata).getRelationPropsMetas(
             operation,
-            this.metadata
+            rootMetadata
         );
     }
 
     /** Get computed props metas (from groups) of a given entity for a specific operation */
-    public getComputedProps(operation: RouteOperation, entityMetadata: EntityMetadata) {
+    public getComputedProps(rootMetadata: EntityMetadata, operation: RouteOperation, entityMetadata: EntityMetadata) {
         return this.getGroupsMetadataFor(entityMetadata, EntityGroupsMetadata).getComputedProps(
             operation,
-            this.metadata
+            rootMetadata
         );
     }
 
@@ -95,8 +92,10 @@ export class EntityMapper {
     public getGroupsMetadataFor<G extends GroupsMetadata>(
         entityMetadata: EntityMetadata,
         metaClass: new (metaKey: string, entityOrMeta: EntityMetadata | ObjectType<G>) => G,
-        metaKey = "groups"
+        metaKeyProp = GROUPS_METAKEY
     ): G {
+        // since TS doesn't allow Symbol as index (why ??)
+        const metaKey = (metaKeyProp as any) as string;
         if (!this.groupsMetas[metaKey]) {
             this.groupsMetas[metaKey] = {};
         }
@@ -121,7 +120,12 @@ export class EntityMapper {
      * @param entityMetadata
      * @param relation
      */
-    public isRelationPropCircular(currentPath: string, entityMetadata: EntityMetadata, relation: RelationMetadata) {
+    public isRelationPropCircular(
+        currentPath: string,
+        entityMetadata: EntityMetadata,
+        relation: RelationMetadata,
+        options: EntityMapperOptions
+    ) {
         const currentDepthLvl = currentPath.split(entityMetadata.tableName).length - 1;
         if (currentDepthLvl > 1) {
             // console.log("current: " + currentDepthLvl, entityMetadata.tableName + "." + relation.propertyName);
@@ -131,10 +135,10 @@ export class EntityMapper {
             const maxDepthLvl =
                 (maxDepthMeta && maxDepthMeta.fields[relation.inverseSidePropertyPath]) ||
                 (maxDepthMeta && maxDepthMeta.depthLvl) ||
-                this.options.defaultMaxDepthLvl;
+                options.defaultMaxDepthLvl;
 
             // Checks for global option, class & prop decorator
-            const hasGlobalMaxDepth = this.options.isMaxDepthEnabledByDefault && currentDepthLvl >= maxDepthLvl;
+            const hasGlobalMaxDepth = options.isMaxDepthEnabledByDefault && currentDepthLvl >= maxDepthLvl;
             const hasLocalClassMaxDepth = maxDepthMeta && maxDepthMeta.enabled && currentDepthLvl >= maxDepthLvl;
             const hasSpecificPropMaxDepth =
                 maxDepthMeta && maxDepthMeta.fields[relation.propertyName] && currentDepthLvl >= maxDepthLvl;
@@ -160,7 +164,7 @@ export class EntityMapper {
     /** Retrieve & store entity maxDepthMeta for each entity */
     private getMaxDepthMetaFor(entityMetadata: EntityMetadata) {
         if (!this.maxDepthMetas[entityMetadata.tableName]) {
-            this.maxDepthMetas[entityMetadata.tableName] = Reflect.getOwnMetadata("maxDepth", entityMetadata.target);
+            this.maxDepthMetas[entityMetadata.tableName] = getMaxDepthMetadata(entityMetadata.target as Function);
         }
         return this.maxDepthMetas[entityMetadata.tableName];
     }
@@ -175,14 +179,16 @@ export class EntityMapper {
      * @param currentTableNamePath used to check max depth
      */
     private getMappingFor(
+        rootMetadata: EntityMetadata,
         mapping: MappingResponse,
         operation: RouteOperation,
         entityMetadata: EntityMetadata,
         currentPath: string,
-        currentTableNamePath: string
+        currentTableNamePath: string,
+        options: EntityMapperOptions
     ) {
-        const selectProps = this.getSelectProps(operation, entityMetadata, false);
-        const relationProps = this.getRelationPropsMetas(operation, entityMetadata);
+        const selectProps = this.getSelectProps(rootMetadata, operation, entityMetadata, false);
+        const relationProps = this.getRelationPropsMetas(rootMetadata, operation, entityMetadata);
 
         const nestedMapping: MappingItem = {
             selectProps,
@@ -196,18 +202,21 @@ export class EntityMapper {
             const circularProp = this.isRelationPropCircular(
                 currentTableNamePath,
                 relationProps[i].entityMetadata,
-                relationProps[i]
+                relationProps[i],
+                options
             );
             if (circularProp) {
                 continue;
             }
 
             nestedMapping.mapping[relationProps[i].propertyName] = this.getMappingFor(
+                rootMetadata,
                 mapping,
                 operation,
                 relationProps[i].inverseEntityMetadata,
                 currentPath + "." + relationProps[i].propertyName,
-                currentTableNamePath + "." + relationProps[i].inverseEntityMetadata.tableName
+                currentTableNamePath + "." + relationProps[i].inverseEntityMetadata.tableName,
+                options
             );
         }
 
@@ -257,3 +266,20 @@ export class EntityMapper {
         return { ...primitives, ...relations };
     }
 }
+
+export const ENTITY_META_SYMBOL = Symbol("entityMeta");
+
+export type MappingItem = {
+    mapping: MappingResponse;
+    exposedProps: string[];
+    selectProps: string[];
+    relationProps: string[];
+    [ENTITY_META_SYMBOL]: EntityMetadata;
+};
+
+export type MappingResponse = Record<string, MappingItem>;
+
+export type EntityMapperOptions = Pick<EntityRouteOptions, "defaultMaxDepthLvl" | "isMaxDepthEnabledByDefault">;
+export type EntityMapperMakeOptions = EntityMapperOptions & {
+    pretty?: boolean;
+};

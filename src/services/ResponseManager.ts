@@ -1,35 +1,39 @@
 import { Middleware, Context } from "koa";
 import { Connection, DeleteResult, QueryRunner, Repository, SelectQueryBuilder } from "typeorm";
 import { QueryDeepPartialEntity } from "typeorm/query-builder/QueryPartialEntity";
+import Container from "typedi";
 
 import { RouteActionClass } from "@/services/AbstractRouteAction";
 import { RouteOperation } from "@/mapping/decorators/Groups";
-import { getRouteFiltersMeta, RouteFiltersMeta, GenericEntity } from "@/services/EntityRoute";
+import { getRouteFiltersMeta, RouteFiltersMeta, GenericEntity, EntityRouteOptions } from "@/services/EntityRoute";
 import { AbstractFilter, AbstractFilterConfig, QueryParams } from "@/filters/AbstractFilter";
-import { EntityMapper } from "@/mapping/EntityMapper";
-import { Denormalizer, EntityErrorResponse, EntityErrorResults } from "@/serializer/Denormalizer";
+import { EntityErrorResponse, EntityErrorResults, Denormalizer } from "@/serializer/Denormalizer";
 import { Normalizer } from "@/serializer/Normalizer";
 import { AliasManager } from "@/serializer/AliasManager";
 import { SubresourceManager, SubresourceRelation } from "@/services/SubresourceManager";
 
 // TODO JWt (AuthProvider ?)
 // TODO get rid of ramda
+// TODO (global) Use object as fn arguments rather than chaining them
+// TODO Remove insertItem/updateItem & just use saveItem
+// TODO Hooks (before/afterPersist (create+update), before/afterValidate, before/afterLoad (list+details ?), beforeAfter/remove)
 // import { isTokenValid, JwtDecoded } from "../JWT";
 import { isType, isDev } from "@/functions/asserts";
+import { MappingManager } from "./MappingManager";
 
 export class ResponseManager<Entity extends GenericEntity> {
     private filtersMeta: RouteFiltersMeta;
 
-    constructor(
-        private connection: Connection,
-        private repository: Repository<Entity>,
-        private subresourceManager: SubresourceManager<Entity>,
-        private aliasManager: AliasManager,
-        private denormalizer: Denormalizer<Entity>,
-        private normalizer: Normalizer,
-        private mapper: EntityMapper
-    ) {
-        this.filtersMeta = getRouteFiltersMeta(repository.metadata.target as Function);
+    get normalizer() {
+        return Container.get(Normalizer);
+    }
+
+    get denormalizer() {
+        return Container.get(Denormalizer) as Denormalizer;
+    }
+
+    get mappingManager() {
+        return Container.get(MappingManager);
     }
 
     get metadata() {
@@ -40,8 +44,21 @@ export class ResponseManager<Entity extends GenericEntity> {
         return Object.values(this.filtersMeta);
     }
 
+    constructor(
+        private connection: Connection,
+        private repository: Repository<Entity>,
+        private subresourceManager: SubresourceManager<Entity>,
+        private options: EntityRouteOptions
+    ) {
+        this.filtersMeta = getRouteFiltersMeta(repository.metadata.target as Function);
+    }
+
     public async create(ctx: RequestContext<Entity>, queryRunner: QueryRunner) {
         const { operation, values, subresourceRelation } = ctx;
+
+        if (!Object.keys(values).length) {
+            return { error: "Body can't be empty on create operation" };
+        }
 
         // Auto-join subresource parent on body values
         if (
@@ -53,11 +70,7 @@ export class ResponseManager<Entity extends GenericEntity> {
             };
         }
 
-        if (!Object.keys(values).length) {
-            return { error: "Body can't be empty on create operation" };
-        }
-
-        const insertResult = await this.denormalizer.insertItem(ctx, {}, queryRunner);
+        const insertResult = await this.denormalizer.insertItem(this.metadata, ctx, {}, queryRunner, this.options);
 
         if (isType<EntityErrorResponse>(insertResult, "hasValidationErrors" in insertResult)) {
             return insertResult;
@@ -88,15 +101,22 @@ export class ResponseManager<Entity extends GenericEntity> {
         // Apply a max item to retrieve
         qb.take(500);
 
+        const aliasManager = new AliasManager();
         if (subresourceRelation) {
-            this.subresourceManager.joinSubresourceOnInverseSide(qb, subresourceRelation);
+            this.subresourceManager.joinSubresourceOnInverseSide(qb, aliasManager, subresourceRelation);
         }
 
         if (this.filtersMeta) {
-            this.applyFilters(queryParams, qb);
+            this.applyFilters(queryParams, qb, aliasManager);
         }
 
-        const collectionResult = await this.normalizer.getCollection(qb, operation || "list");
+        const collectionResult = await this.normalizer.getCollection(
+            this.metadata,
+            qb,
+            aliasManager,
+            operation || "list",
+            this.options
+        );
 
         return {
             items: collectionResult[0],
@@ -111,18 +131,26 @@ export class ResponseManager<Entity extends GenericEntity> {
         const repository = queryRunner.manager.getRepository<Entity>(this.metadata.target);
         const qb = repository.createQueryBuilder(this.metadata.tableName);
 
+        const aliasManager = new AliasManager();
         if (subresourceRelation) {
-            this.subresourceManager.joinSubresourceOnInverseSide(qb, subresourceRelation);
+            this.subresourceManager.joinSubresourceOnInverseSide(qb, aliasManager, subresourceRelation);
         }
 
-        return await this.normalizer.getItem<Entity>(qb, entityId, operation || "details");
+        return await this.normalizer.getItem<Entity>(
+            this.metadata,
+            qb,
+            aliasManager,
+            entityId,
+            operation || "details",
+            this.options
+        );
     }
 
     public async update(ctx: RequestContext<Entity>, queryRunner: QueryRunner) {
         const { operation, values, entityId, decoded } = ctx;
 
         (values as any).id = entityId;
-        const result = await this.denormalizer.updateItem(ctx, {}, queryRunner);
+        const result = await this.denormalizer.updateItem(this.metadata, ctx, {}, queryRunner, this.options);
 
         if (isType<EntityErrorResponse>(result, "hasValidationErrors" in result)) {
             return result;
@@ -178,8 +206,6 @@ export class ResponseManager<Entity extends GenericEntity> {
             if (ctx.params.id) params.entityId = parseInt(ctx.params.id);
             if (params.isUpdateOrCreate) params.values = ctx.request.body;
             if (operation === "list") params.queryParams = ctx.query;
-
-            this.aliasManager.resetList();
 
             // Create query runner to retrieve requestContext in subscribers
             const queryRunner = this.connection.createQueryRunner();
@@ -247,7 +273,7 @@ export class ResponseManager<Entity extends GenericEntity> {
                     operation: operation + ".mapping",
                     entity: this.metadata.tableName,
                 },
-                routeMapping: this.mapper.make(operation, pretty),
+                routeMapping: this.mappingManager.make(this.metadata, operation, { ...this.options, pretty }),
             };
             next();
         };
@@ -258,15 +284,14 @@ export class ResponseManager<Entity extends GenericEntity> {
         return new config.class({
             config,
             entityMetadata: this.metadata,
-            normalizer: this.normalizer,
-            aliasManager: this.aliasManager,
         });
     }
 
     /** Apply every registered filters on this route */
-    private applyFilters(queryParams: QueryParams, qb: SelectQueryBuilder<Entity>) {
+    private applyFilters(queryParams: QueryParams, qb: SelectQueryBuilder<Entity>, aliasManager: AliasManager) {
+        // TODO Cache filter class rather than creating new ones every time
         this.filters.forEach((filterOptions) => {
-            this.makeFilter(filterOptions).apply({ queryParams, qb, whereExp: qb });
+            this.makeFilter(filterOptions).apply({ queryParams, qb, whereExp: qb, aliasManager });
         });
     }
 }

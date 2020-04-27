@@ -5,11 +5,7 @@ import { entityRoutesContainer } from "..";
 import { IRouteAction } from "@/services/AbstractRouteAction";
 import { RouteOperation, RouteDefaultOperation } from "@/mapping/decorators/Groups";
 import { AbstractFilterConfig } from "@/filters/AbstractFilter";
-import { EntityMapper } from "@/mapping/EntityMapper";
 import { CRUD_ACTIONS, CustomActionClass, ResponseManager, CustomAction } from "@/services/ResponseManager";
-import { Denormalizer } from "@/serializer/Denormalizer";
-import { Normalizer } from "@/serializer/Normalizer";
-import { AliasManager } from "@/serializer/AliasManager";
 import { RouteSubresourcesMeta, SubresourceManager } from "@/services/SubresourceManager";
 import { isType } from "@/functions/asserts";
 
@@ -27,10 +23,6 @@ export class EntityRouteService<Entity extends GenericEntity> {
 
     // Managers/services
     public readonly connection: Connection;
-    public readonly mapper: EntityMapper;
-    public readonly aliasManager: AliasManager;
-    public readonly normalizer: Normalizer;
-    public readonly denormalizer: Denormalizer<Entity>;
     public readonly subresourceManager: SubresourceManager<Entity>;
     public readonly responseManager: ResponseManager<Entity>;
 
@@ -42,30 +34,12 @@ export class EntityRouteService<Entity extends GenericEntity> {
 
         // Managers/services
         this.connection = getConnection();
-        this.mapper = new EntityMapper(this.repository.metadata, {
-            defaultMaxDepthLvl: this.options.defaultMaxDepthLvl,
-            isMaxDepthEnabledByDefault: this.options.isMaxDepthEnabledByDefault,
-        });
-        this.aliasManager = new AliasManager();
-        this.normalizer = new Normalizer(this.repository.metadata, this.mapper, this.aliasManager, {
-            shouldEntityWithOnlyIdBeFlattenedToIri: this.options.shouldEntityWithOnlyIdBeFlattenedToIri,
-            shouldMaxDepthReturnRelationPropsId: this.options.shouldEntityWithOnlyIdBeFlattenedToIri,
-            shouldSetSubresourcesIriOnItem: this.options.shouldSetSubresourcesIriOnItem,
-        });
-        this.denormalizer = new Denormalizer(this.repository, this.mapper);
-        this.subresourceManager = new SubresourceManager<Entity>(
-            this.repository,
-            this.routeMetadata,
-            this.aliasManager
-        );
+        this.subresourceManager = new SubresourceManager<Entity>(this.repository, this.routeMetadata);
         this.responseManager = new ResponseManager<Entity>(
             this.connection,
             this.repository,
             this.subresourceManager,
-            this.aliasManager,
-            this.denormalizer,
-            this.normalizer,
-            this.mapper
+            this.options
         );
 
         // Add this EntityRoute to the list (used by subresources/custom actions/services)
@@ -133,8 +107,9 @@ export class EntityRouteService<Entity extends GenericEntity> {
         this.options.actions.forEach((action) => {
             if ("class" in action && !this.customActions[action.class.name]) {
                 this.customActions[action.class.name] = new action.class({
-                    entityRoute: this as any,
                     middlewares: action.middlewares || [],
+                    entityMetadata: this.repository.metadata,
+                    routeMetadata: this.routeMetadata,
                 });
             }
         });

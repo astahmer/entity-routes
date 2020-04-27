@@ -1,5 +1,4 @@
 import { EntityMetadata, getRepository } from "typeorm";
-import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
 
 import { GroupsMetadata } from "./GroupsMetadata";
 import { RouteOperation, COMPUTED_PREFIX, MetaKey } from "./decorators/Groups";

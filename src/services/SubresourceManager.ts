@@ -9,11 +9,7 @@ import { getRouteSubresourcesMetadata, RouteMetadata, GenericEntity } from "./En
 export class SubresourceManager<Entity extends GenericEntity> {
     private subresourcesMeta: RouteSubresourcesMeta<Entity>;
 
-    constructor(
-        private repository: Repository<Entity>,
-        private routeMetadata: RouteMetadata,
-        private aliasManager: AliasManager
-    ) {
+    constructor(private repository: Repository<Entity>, private routeMetadata: RouteMetadata) {
         this.subresourcesMeta = getRouteSubresourcesMetadata(repository.metadata.target as Function);
     }
 
@@ -96,8 +92,12 @@ export class SubresourceManager<Entity extends GenericEntity> {
     }
 
     /** Joins a subresource on its inverse side property */
-    public joinSubresourceOnInverseSide(qb: SelectQueryBuilder<Entity>, subresourceRelation: SubresourceRelation) {
-        const alias = this.aliasManager.generate(
+    public joinSubresourceOnInverseSide(
+        qb: SelectQueryBuilder<Entity>,
+        aliasManager: AliasManager,
+        subresourceRelation: SubresourceRelation
+    ) {
+        const alias = aliasManager.generate(
             this.metadata.tableName,
             subresourceRelation.relation.inverseSidePropertyPath
         );

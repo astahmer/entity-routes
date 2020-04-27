@@ -8,4 +8,4 @@ export async function validateEntity<T extends GenericEntity>(entity: T, options
     return validator.execute(entity, options);
 }
 
-// TODO @ValidationGroups extends GroupsMetadata ? & also use it for base validator ?
+// TODO Remove validators & just expose this method
