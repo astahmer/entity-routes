@@ -1,5 +1,5 @@
 import { getOwnExposedProps, getExposedProps, GroupsMetadata, getGroupsMetadata } from "@/index";
-import { TestGroups } from "./decorators/TestGroups";
+import { TestGroups } from "../decorators/TestGroups";
 
 describe("GroupsMetadata", () => {
     it("can add prop to global groups", () => {

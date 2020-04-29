@@ -1,5 +1,3 @@
-import { GenericEntity } from "@/services/EntityRoute";
-
 export const isDev = () => process.env.NODE_ENV === "development";
 
 export const isDefined = (value: any) =>

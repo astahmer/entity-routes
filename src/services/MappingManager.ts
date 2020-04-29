@@ -1,25 +1,27 @@
 import { path, pluck } from "ramda";
 import { EntityMetadata, ObjectType } from "typeorm";
-import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
-import { Service } from "typedi";
+import Container, { Service } from "typedi";
 
-import { RouteOperation, GROUPS_METAKEY } from "@/mapping/decorators/Groups";
+import { RouteOperation, GROUPS_METAKEY } from "@/decorators/Groups";
 
-import { getRouteSubresourcesMetadata, EntityRouteOptions } from "@/services/EntityRoute";
+import { EntityRouteOptions } from "@/services/EntityRouter";
 import { GroupsMetadata, GroupsMetaByRoutes } from "@/mapping/GroupsMetadata";
 import { EntityGroupsMetadata } from "@/mapping/EntityGroupsMetadata";
-import { MaxDeptMetas, getMaxDepthMetadata } from "@/mapping";
+import { RelationManager } from "@/serializer/RelationManager";
 
 @Service()
 export class MappingManager {
     private groupsMetas: Record<string, GroupsMetaByRoutes<any>> = {};
-    private maxDepthMetas: MaxDeptMetas = {};
+
+    get relationManager() {
+        return Container.get(RelationManager);
+    }
 
     /** Make the mapping object for this entity on a given operation */
     public make(
         rootMetadata: EntityMetadata,
         operation: RouteOperation,
-        options: EntityMapperMakeOptions
+        options: EntityMapperMakeOptions = {}
     ): MappingItem | Record<string, any> {
         const mapping = this.getMappingFor(
             rootMetadata,
@@ -107,66 +109,12 @@ export class MappingManager {
         return this.groupsMetas[metaKey][entityMetadata.tableName];
     }
 
-    /** Get subresources of a given entity */
-    public getSubresourceProps(entityMetadata: EntityMetadata) {
-        return getRouteSubresourcesMetadata(entityMetadata.target as Function).properties;
-    }
-
-    /**
-     * Checks if this prop/relation entity was already fetched
-     * Should stop if this prop/relation entity has a MaxDepth decorator or if it is enabled by default
-     *
-     * @param currentPath dot delimited path to keep track of the nesting max depth
-     * @param entityMetadata
-     * @param relation
-     */
-    public isRelationPropCircular(
-        currentPath: string,
-        entityMetadata: EntityMetadata,
-        relation: RelationMetadata,
-        options: EntityMapperOptions
-    ) {
-        const currentDepthLvl = currentPath.split(entityMetadata.tableName).length - 1;
-        if (currentDepthLvl > 1) {
-            // console.log("current: " + currentDepthLvl, entityMetadata.tableName + "." + relation.propertyName);
-            const maxDepthMeta = this.getMaxDepthMetaFor(entityMetadata);
-
-            // Most specific maxDepthLvl found (prop > class > global options)
-            const maxDepthLvl =
-                (maxDepthMeta && maxDepthMeta.fields[relation.inverseSidePropertyPath]) ||
-                (maxDepthMeta && maxDepthMeta.depthLvl) ||
-                options.defaultMaxDepthLvl;
-
-            // Checks for global option, class & prop decorator
-            const hasGlobalMaxDepth = options.isMaxDepthEnabledByDefault && currentDepthLvl >= maxDepthLvl;
-            const hasLocalClassMaxDepth = maxDepthMeta && maxDepthMeta.enabled && currentDepthLvl >= maxDepthLvl;
-            const hasSpecificPropMaxDepth =
-                maxDepthMeta && maxDepthMeta.fields[relation.propertyName] && currentDepthLvl >= maxDepthLvl;
-
-            // Should stop getting nested relations ?
-            if (hasGlobalMaxDepth || hasLocalClassMaxDepth || hasSpecificPropMaxDepth) {
-                return { prop: relation.propertyName, value: "CIRCULAR lvl: " + currentDepthLvl };
-            }
-        }
-
-        return null;
-    }
-
-    /** Checks that a prop is of type (simple-array | simple-json | set) */
     public isPropSimple(entityMetadata: EntityMetadata, propName: string) {
         const column = entityMetadata.findColumnWithPropertyName(propName);
-        if (column) {
-            const type = column.type.toString();
-            return column.type.toString().includes("simple") || type === "set";
-        }
-    }
+        if (!column) return false;
 
-    /** Retrieve & store entity maxDepthMeta for each entity */
-    private getMaxDepthMetaFor(entityMetadata: EntityMetadata) {
-        if (!this.maxDepthMetas[entityMetadata.tableName]) {
-            this.maxDepthMetas[entityMetadata.tableName] = getMaxDepthMetadata(entityMetadata.target as Function);
-        }
-        return this.maxDepthMetas[entityMetadata.tableName];
+        const type = column.type.toString();
+        return column.type.toString().includes("simple") || type === "set";
     }
 
     /**
@@ -185,7 +133,7 @@ export class MappingManager {
         entityMetadata: EntityMetadata,
         currentPath: string,
         currentTableNamePath: string,
-        options: EntityMapperOptions
+        options: EntityMapperOptions = {}
     ) {
         const selectProps = this.getSelectProps(rootMetadata, operation, entityMetadata, false);
         const relationProps = this.getRelationPropsMetas(rootMetadata, operation, entityMetadata);
@@ -199,7 +147,7 @@ export class MappingManager {
         };
 
         for (let i = 0; i < relationProps.length; i++) {
-            const circularProp = this.isRelationPropCircular(
+            const circularProp = this.relationManager.isRelationPropCircular(
                 currentTableNamePath,
                 relationProps[i].entityMetadata,
                 relationProps[i],

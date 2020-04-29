@@ -1,11 +1,11 @@
 import * as Koa from "koa";
 import * as KoaRouter from "koa-router";
 import { ObjectType, getConnectionManager, Connection, ConnectionManager } from "typeorm";
-import { EntityRouteOptions, getRouteMetadata, EntityRouteService } from "@/services/EntityRoute";
+import { EntityRouteOptions, getRouteMetadata, EntityRouter } from "@/services/EntityRouter";
 
 export type ServerApp = Koa;
 
-export const entityRoutesContainer: Record<string, EntityRouteService<any>> = {};
+export const entityRoutesContainer: Record<string, EntityRouter<any>> = {};
 export const Router = KoaRouter;
 
 let connectionManager: ConnectionManager;
@@ -32,7 +32,7 @@ export async function useEntitiesRoutes({
     const entityRoutes = entities.reduce((acc, entity) => {
         const routeMeta = getRouteMetadata(entity);
         if (routeMeta) {
-            acc.push(new EntityRouteService(entity, options));
+            acc.push(new EntityRouter(entity, options));
         }
 
         return acc;
@@ -50,7 +50,7 @@ export const defaultEntityRouteOptions: EntityRouteOptions = {
     shouldSetSubresourcesIriOnItem: true,
 };
 
-type UseEntitiesRoutes = {
+export type UseEntitiesRoutes = {
     app: ServerApp;
     connections: Connection[];
     entities: ObjectType<any>[];

@@ -1,15 +1,15 @@
 import { concat, mergeWith } from "ramda";
 import { EntityGroupsMetadata } from "./EntityGroupsMetadata";
 import {
+    MetaKey,
     OperationGroups,
     ContextOperations,
     GroupsOperationOrAll,
     ALL_OPERATIONS,
     RouteOperations,
     RouteOperation,
-    MetaKey,
     GROUPS_METAKEY,
-} from "@/mapping/decorators/Groups";
+} from "@/decorators/Groups";
 
 export class GroupsMetadata {
     /** The key under which the Reflect metadata will be stored on the target entity */

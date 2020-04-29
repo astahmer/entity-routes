@@ -1,17 +1,13 @@
-import {
-    STRATEGY_TYPES,
-    SearchFilterOptions,
-    FilterProperty,
-    getSearchFilterDefaultConfig,
-    AbstractFilterConfig,
-    registerFilterDecorator,
-} from "..";
+import { SearchFilterOptions, getSearchFilterDefaultConfig } from "@/filters/SearchFilter";
+import { FilterProperty, AbstractFilterConfig } from "@/filters/AbstractFilter";
+import { registerFilterDecorator } from "@/filters/registerFilterDecorator";
+import { StrategyType } from "@/filters/WhereManager";
 
 /**
  * SearchFilter PropertyDecorator
- * @example [at]SearchFilter(STRATEGY_TYPES.EXISTS)
+ * @example [at]SearchFilter(StrategyType.EXISTS)
  */
-export function Search(strategy?: STRATEGY_TYPES): PropertyDecorator;
+export function Search(strategy?: StrategyType): PropertyDecorator;
 
 /**
  * SearchFilter ClassDecorator
@@ -22,14 +18,14 @@ export function Search(options?: SearchFilterOptions): ClassDecorator;
 /**
  * SearchFilter ClassDecorator
  * @example
- * [at]SearchFilter(["id", "banks.id", ["banks.coverPicture", "STRATEGY_TYPES.EXISTS"]], {
- *      defaultWhereStrategy: STRATEGY_TYPES.STARTS_WITH
+ * [at]SearchFilter(["id", "banks.id", ["banks.coverPicture", "EXISTS"]], {
+ *      defaultWhereStrategy: "STARTS_WITH"
  * })
  */
 export function Search(properties: FilterProperty[], options?: SearchFilterOptions): ClassDecorator;
 
 export function Search(
-    propParamOrFilterPropertiesOrOptions?: STRATEGY_TYPES | FilterProperty[] | SearchFilterOptions,
+    propParamOrFilterPropertiesOrOptions?: StrategyType | FilterProperty[] | SearchFilterOptions,
     options?: SearchFilterOptions
 ): ClassDecorator | PropertyDecorator {
     // If ClassDecorator & skipping properties

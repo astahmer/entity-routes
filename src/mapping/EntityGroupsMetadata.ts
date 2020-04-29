@@ -1,7 +1,7 @@
 import { EntityMetadata, getRepository } from "typeorm";
 
 import { GroupsMetadata } from "./GroupsMetadata";
-import { RouteOperation, COMPUTED_PREFIX, MetaKey } from "./decorators/Groups";
+import { RouteOperation, COMPUTED_PREFIX, MetaKey } from "@/decorators/Groups";
 
 export class EntityGroupsMetadata extends GroupsMetadata {
     /** EntityMetadata associated with the class */
@@ -9,7 +9,8 @@ export class EntityGroupsMetadata extends GroupsMetadata {
         if (this._cachedEntityMeta) return this._cachedEntityMeta;
 
         const repository = getRepository(this.entityTarget);
-        return repository.metadata;
+        this._cachedEntityMeta = repository.metadata;
+        return this._cachedEntityMeta;
     }
 
     private _cachedEntityMeta: EntityMetadata;

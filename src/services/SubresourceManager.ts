@@ -1,10 +1,9 @@
-import { Repository, SelectQueryBuilder } from "typeorm";
+import { Repository } from "typeorm";
 import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
 
 import { entityRoutesContainer, Router } from "@/container";
-import { AliasManager } from "@/serializer/AliasManager";
 import { CRUD_ACTIONS } from "./ResponseManager";
-import { getRouteSubresourcesMetadata, RouteMetadata, GenericEntity } from "./EntityRoute";
+import { getRouteSubresourcesMetadata, RouteMetadata, GenericEntity } from "./EntityRouter";
 
 export class SubresourceManager<Entity extends GenericEntity> {
     private subresourcesMeta: RouteSubresourcesMeta<Entity>;
@@ -89,25 +88,6 @@ export class SubresourceManager<Entity extends GenericEntity> {
                 );
             });
         }
-    }
-
-    /** Joins a subresource on its inverse side property */
-    public joinSubresourceOnInverseSide(
-        qb: SelectQueryBuilder<Entity>,
-        aliasManager: AliasManager,
-        subresourceRelation: SubresourceRelation
-    ) {
-        const alias = aliasManager.generate(
-            this.metadata.tableName,
-            subresourceRelation.relation.inverseSidePropertyPath
-        );
-
-        qb.innerJoin(
-            this.metadata.tableName + "." + subresourceRelation.relation.inverseSidePropertyPath,
-            alias,
-            alias + ".id = :parentId",
-            { parentId: subresourceRelation.id }
-        );
     }
 
     /** Retrieve informations on a subresource relation */

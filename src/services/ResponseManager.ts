@@ -1,25 +1,26 @@
 import { Middleware, Context } from "koa";
-import { Connection, DeleteResult, QueryRunner, Repository, SelectQueryBuilder } from "typeorm";
+import { Connection, DeleteResult, QueryRunner, Repository, SelectQueryBuilder, getRepository } from "typeorm";
 import { QueryDeepPartialEntity } from "typeorm/query-builder/QueryPartialEntity";
 import Container from "typedi";
 
 import { RouteActionClass } from "@/services/AbstractRouteAction";
-import { RouteOperation } from "@/mapping/decorators/Groups";
-import { getRouteFiltersMeta, RouteFiltersMeta, GenericEntity, EntityRouteOptions } from "@/services/EntityRoute";
+import { RouteOperation } from "@/decorators/Groups";
+import { getRouteFiltersMeta, RouteFiltersMeta, GenericEntity, EntityRouteOptions } from "@/services/EntityRouter";
 import { AbstractFilter, AbstractFilterConfig, QueryParams } from "@/filters/AbstractFilter";
-import { EntityErrorResponse, EntityErrorResults, Denormalizer } from "@/serializer/Denormalizer";
+import { EntityErrorResponse, Denormalizer } from "@/serializer/Denormalizer";
 import { Normalizer } from "@/serializer/Normalizer";
 import { AliasManager } from "@/serializer/AliasManager";
-import { SubresourceManager, SubresourceRelation } from "@/services/SubresourceManager";
+import { SubresourceRelation } from "@/services/SubresourceManager";
 
 // TODO JWt (AuthProvider ?)
 // TODO get rid of ramda
 // TODO (global) Use object as fn arguments rather than chaining them
-// TODO Remove insertItem/updateItem & just use saveItem
 // TODO Hooks (before/afterPersist (create+update), before/afterValidate, before/afterLoad (list+details ?), beforeAfter/remove)
 // import { isTokenValid, JwtDecoded } from "../JWT";
 import { isType, isDev } from "@/functions/asserts";
 import { MappingManager } from "./MappingManager";
+import { EntityErrorResults } from "@/serializer/Validator";
+import { RelationManager } from "@/serializer/RelationManager";
 
 export class ResponseManager<Entity extends GenericEntity> {
     private filtersMeta: RouteFiltersMeta;
@@ -36,6 +37,10 @@ export class ResponseManager<Entity extends GenericEntity> {
         return Container.get(MappingManager);
     }
 
+    get relationManager() {
+        return Container.get(RelationManager);
+    }
+
     get metadata() {
         return this.repository.metadata;
     }
@@ -47,14 +52,13 @@ export class ResponseManager<Entity extends GenericEntity> {
     constructor(
         private connection: Connection,
         private repository: Repository<Entity>,
-        private subresourceManager: SubresourceManager<Entity>,
         private options: EntityRouteOptions
     ) {
         this.filtersMeta = getRouteFiltersMeta(repository.metadata.target as Function);
     }
 
-    public async create(ctx: RequestContext<Entity>, queryRunner: QueryRunner) {
-        const { operation, values, subresourceRelation } = ctx;
+    public async create(ctx: RequestContext<Entity>) {
+        const { operation = "create", values, subresourceRelation } = ctx;
 
         if (!Object.keys(values).length) {
             return { error: "Body can't be empty on create operation" };
@@ -70,7 +74,11 @@ export class ResponseManager<Entity extends GenericEntity> {
             };
         }
 
-        const insertResult = await this.denormalizer.insertItem(this.metadata, ctx, {}, queryRunner, this.options);
+        const insertResult = await this.denormalizer.saveItem({
+            ctx,
+            rootMetadata: this.metadata,
+            routeOptions: this.options,
+        });
 
         if (isType<EntityErrorResponse>(insertResult, "hasValidationErrors" in insertResult)) {
             return insertResult;
@@ -80,7 +88,7 @@ export class ResponseManager<Entity extends GenericEntity> {
             subresourceRelation &&
             (subresourceRelation.relation.isOneToMany || subresourceRelation.relation.isManyToMany)
         ) {
-            const repository = queryRunner.manager.getRepository<Entity>(this.metadata.target);
+            const repository = getRepository<Entity>(this.metadata.target);
             const qb = repository.createQueryBuilder(this.metadata.tableName);
             await qb
                 .relation(subresourceRelation.relation.target, subresourceRelation.relation.propertyName)
@@ -88,14 +96,31 @@ export class ResponseManager<Entity extends GenericEntity> {
                 .add(insertResult);
         }
 
-        return this.getDetails({ ...ctx, operation, entityId: insertResult.id }, queryRunner);
+        return this.getDetails({ ...ctx, operation, entityId: insertResult.id });
+    }
+
+    public async update(ctx: RequestContext<Entity>) {
+        const { operation = "update", values, entityId } = ctx;
+
+        (values as any).id = entityId;
+        const result = await this.denormalizer.saveItem({
+            ctx,
+            rootMetadata: this.metadata,
+            routeOptions: this.options,
+        });
+
+        if (isType<EntityErrorResponse>(result, "hasValidationErrors" in result)) {
+            return result;
+        }
+
+        return this.getDetails({ ...ctx, operation, entityId: result.id });
     }
 
     /** Returns an entity with every mapped props (from groups) for a given id */
-    public async getList(ctx: RequestContext<Entity>, queryRunner: QueryRunner) {
+    public async getList(ctx: RequestContext<Entity>) {
         const { operation, queryParams, subresourceRelation } = ctx;
 
-        const repository = queryRunner.manager.getRepository<Entity>(this.metadata.target);
+        const repository = getRepository<Entity>(this.metadata.target);
         const qb = repository.createQueryBuilder(this.metadata.tableName);
 
         // Apply a max item to retrieve
@@ -103,7 +128,7 @@ export class ResponseManager<Entity extends GenericEntity> {
 
         const aliasManager = new AliasManager();
         if (subresourceRelation) {
-            this.subresourceManager.joinSubresourceOnInverseSide(qb, aliasManager, subresourceRelation);
+            this.relationManager.joinSubresourceOnInverseSide(qb, this.metadata, aliasManager, subresourceRelation);
         }
 
         if (this.filtersMeta) {
@@ -125,15 +150,15 @@ export class ResponseManager<Entity extends GenericEntity> {
     }
 
     /** Returns an entity with every mapped props (from groups) for a given id */
-    public async getDetails(ctx: RequestContext<Entity>, queryRunner: QueryRunner) {
+    public async getDetails(ctx: RequestContext<Entity>) {
         const { operation, entityId, subresourceRelation } = ctx;
 
-        const repository = queryRunner.manager.getRepository<Entity>(this.metadata.target);
+        const repository = getRepository<Entity>(this.metadata.target);
         const qb = repository.createQueryBuilder(this.metadata.tableName);
 
         const aliasManager = new AliasManager();
         if (subresourceRelation) {
-            this.subresourceManager.joinSubresourceOnInverseSide(qb, aliasManager, subresourceRelation);
+            this.relationManager.joinSubresourceOnInverseSide(qb, this.metadata, aliasManager, subresourceRelation);
         }
 
         return await this.normalizer.getItem<Entity>(
@@ -146,23 +171,10 @@ export class ResponseManager<Entity extends GenericEntity> {
         );
     }
 
-    public async update(ctx: RequestContext<Entity>, queryRunner: QueryRunner) {
-        const { operation, values, entityId, decoded } = ctx;
-
-        (values as any).id = entityId;
-        const result = await this.denormalizer.updateItem(this.metadata, ctx, {}, queryRunner, this.options);
-
-        if (isType<EntityErrorResponse>(result, "hasValidationErrors" in result)) {
-            return result;
-        }
-
-        return this.getDetails({ ...ctx, operation, decoded, entityId: result.id }, queryRunner);
-    }
-
-    public async delete({ entityId, subresourceRelation }: RequestContext<Entity>, queryRunner: QueryRunner) {
+    public async delete({ entityId, subresourceRelation }: RequestContext<Entity>) {
         // Remove relation if used on a subresource
         if (subresourceRelation) {
-            const repository = queryRunner.manager.getRepository<Entity>(this.metadata.target);
+            const repository = getRepository<Entity>(this.metadata.target);
             const qb = repository.createQueryBuilder(this.metadata.tableName);
 
             const query = qb
@@ -176,7 +188,7 @@ export class ResponseManager<Entity extends GenericEntity> {
             }
             return { affected: 1, raw: { insertId: entityId } };
         } else {
-            return queryRunner.manager.getRepository(this.metadata.target).delete(entityId);
+            return getRepository(this.metadata.target).delete(entityId);
         }
     }
 
@@ -225,10 +237,10 @@ export class ResponseManager<Entity extends GenericEntity> {
     /** Returns the response method on a given operation for this entity */
     public makeResponseMiddleware(operation: RouteOperation): Middleware {
         return async (ctx) => {
-            const { requestContext: params, queryRunner } = ctx.state as RequestState<Entity>;
+            const { requestContext: params } = ctx.state as RequestState<Entity>;
 
             const method = CRUD_ACTIONS[operation].method;
-            let response: IRouteResponse = {
+            let response: RouteResponse = {
                 "@context": {
                     operation,
                     entity: this.metadata.tableName,
@@ -237,7 +249,7 @@ export class ResponseManager<Entity extends GenericEntity> {
             if (params.isUpdateOrCreate) response["@context"].errors = null;
 
             try {
-                const result = await this[method]({ operation, ...params }, queryRunner);
+                const result = await this[method]({ operation, ...params });
 
                 if (isType<EntityErrorResponse>(result, "hasValidationErrors" in result)) {
                     response["@context"].errors = result.errors;
@@ -338,8 +350,10 @@ export type CustomActionFunction = BaseCustomAction & {
 export type CustomAction = CustomActionClass | CustomActionFunction;
 
 export type JwtDecoded<Payload = Record<string, any>> = { iat: number; exp: number } & Payload;
+
+/** EntityRoute request context wrapping Koa's Context */
 export type RequestContext<Entity extends GenericEntity = GenericEntity> = {
-    /** Request context */
+    /** Koa Request context */
     ctx: Context;
     /** Current route entity id */
     entityId?: string | number;
@@ -350,19 +364,20 @@ export type RequestContext<Entity extends GenericEntity = GenericEntity> = {
     /** Request body values sent */
     values?: QueryDeepPartialEntity<Entity>;
     /** Request query params */
-    queryParams?: any;
+    queryParams?: any; // TODO Typings
     /** Custom operation for a custom action */
     operation?: RouteOperation;
     /** Decoded JWT Token */
-    decoded?: JwtDecoded;
+    decoded?: JwtDecoded; // TODO data?: any instead
 };
 
+/** Custom state to pass to Koa's Context */
 export type RequestState<Entity extends GenericEntity = GenericEntity> = {
     requestContext: RequestContext<Entity>;
     queryRunner: QueryRunner;
 };
 
-interface IRouteResponse {
+export type RouteResponse = {
     "@context": {
         /** Current route operation */
         operation: string;
@@ -383,7 +398,7 @@ interface IRouteResponse {
     deleted?: any;
     /** Entity props */
     [k: string]: any;
-}
+};
 
 /** Return type of EntityRoute.getList */
 type CollectionResult<Entity extends GenericEntity> = {

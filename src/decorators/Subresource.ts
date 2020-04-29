@@ -1,4 +1,4 @@
-import { getRouteSubresourcesMetadata, ROUTE_SUBRESOURCES } from "@/services/EntityRoute";
+import { getRouteSubresourcesMetadata, ROUTE_SUBRESOURCES } from "@/services/EntityRouter";
 import { RouteSubresourcesMeta, SubresourceOperation } from "@/services/SubresourceManager";
 import { EntityReference } from "@/utils-types";
 

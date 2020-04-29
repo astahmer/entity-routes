@@ -3,28 +3,24 @@ import { Connection, getConnection, getRepository, ObjectType, Repository, Objec
 
 import { entityRoutesContainer } from "..";
 import { IRouteAction } from "@/services/AbstractRouteAction";
-import { RouteOperation, RouteDefaultOperation } from "@/mapping/decorators/Groups";
+import { RouteOperation } from "@/decorators/Groups";
 import { AbstractFilterConfig } from "@/filters/AbstractFilter";
 import { CRUD_ACTIONS, CustomActionClass, ResponseManager, CustomAction } from "@/services/ResponseManager";
 import { RouteSubresourcesMeta, SubresourceManager } from "@/services/SubresourceManager";
 import { isType } from "@/functions/asserts";
 
-// Actually make it a service ? @Service
-// Or at least EntityMapper, AliasManager, Normalizer, Denormalizer, SubresourceManager, ResponseManager
-// Make them independant from each other, extrac their function outside class scope & use it in class scope as accelerator
-export class EntityRouteService<Entity extends GenericEntity> {
-    // Entity Route specifics
-    public readonly repository: Repository<Entity>;
-    public readonly options: EntityRouteOptions;
-    public readonly customActions: Record<string, IRouteAction> = {};
-
-    // Meta
+export class EntityRouter<Entity extends GenericEntity> {
     public readonly routeMetadata: RouteMetadata;
+    public readonly responseManager: ResponseManager<Entity>;
+    public readonly subresourceManager: SubresourceManager<Entity>;
+
+    // Entity Route specifics
+    private readonly repository: Repository<Entity>;
+    private readonly options: EntityRouteOptions;
+    private readonly customActions: Record<string, IRouteAction> = {};
 
     // Managers/services
-    public readonly connection: Connection;
-    public readonly subresourceManager: SubresourceManager<Entity>;
-    public readonly responseManager: ResponseManager<Entity>;
+    private readonly connection: Connection;
 
     constructor(entity: ObjectType<Entity>, globalOptions: EntityRouteOptions = {}) {
         // Entity Route specifics
@@ -35,12 +31,7 @@ export class EntityRouteService<Entity extends GenericEntity> {
         // Managers/services
         this.connection = getConnection();
         this.subresourceManager = new SubresourceManager<Entity>(this.repository, this.routeMetadata);
-        this.responseManager = new ResponseManager<Entity>(
-            this.connection,
-            this.repository,
-            this.subresourceManager,
-            this.options
-        );
+        this.responseManager = new ResponseManager<Entity>(this.connection, this.repository, this.options);
 
         // Add this EntityRoute to the list (used by subresources/custom actions/services)
         entityRoutesContainer[entity.name] = this as any;
@@ -131,38 +122,6 @@ export const getRouteSubresourcesMetadata = <Entity extends GenericEntity>(
 export const ROUTE_FILTERS_METAKEY = Symbol("filters");
 export const getRouteFiltersMeta = (entity: Function): RouteFiltersMeta =>
     Reflect.getOwnMetadata(ROUTE_FILTERS_METAKEY, entity);
-
-/**
- * @example
- *
- * [at]PaginationFilter([], { all: true })
- * [at]SearchFilter(["id", { name: "startsWith" }])
- * [at]EntityRoute("/users", ["create", "list", "details", "update", "delete"], {
- *     actions: [
- *         {
- *             verb: "get",
- *             path: "/custom",
- *             class: CustomAction,
- *             middlewares: [
- *                 async function(ctx, next) {
- *                     console.log("before custom action");
- *                     await next();
- *                     console.log("after custom action");
- *                 },
- *             ],
- *         },
- *     ],
- * })
- */
-export const EntityRoute = (
-    path: string,
-    operations: RouteDefaultOperation[] = [],
-    options: EntityRouteOptions = {}
-): ClassDecorator => {
-    return (target: Function) => {
-        Reflect.defineMetadata(ROUTE_METAKEY, { path, operations, options }, target);
-    };
-};
 
 export type GenericEntity = ObjectLiteral & { id: string | number };
 

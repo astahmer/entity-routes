@@ -3,15 +3,16 @@ import { Context, Middleware } from "koa";
 import { QueryRunner, getRepository, EntityMetadata } from "typeorm";
 import Container from "typedi";
 
-import { GroupsOperation } from "@/mapping/decorators/Groups";
-import { RouteMetadata } from "@/services/EntityRoute";
+import { GroupsOperation } from "@/decorators/Groups";
+import { RouteMetadata } from "@/services/EntityRouter";
 import { CustomActionClass, CustomAction } from "@/services/ResponseManager";
 
 import { isType } from "@/functions/asserts";
-import { GenericEntity } from "@/services/EntityRoute";
+import { GenericEntity } from "@/services/EntityRouter";
 import { Router } from "@/container";
-import { Normalizer, Denormalizer } from "../index";
 import { MappingManager } from "./MappingManager";
+import { Cleaner } from "@/serializer/Cleaner";
+import { Formater } from "@/serializer/Formater";
 
 export type RouteActionConstructorArgs = {
     middlewares: Middleware[];
@@ -30,12 +31,12 @@ export abstract class AbstractRouteAction implements IRouteAction {
     protected routeMetadata: RouteMetadata;
     protected entityMetadata: EntityMetadata;
 
-    get normalizer() {
-        return Container.get(Normalizer);
+    get formater() {
+        return Container.get(Formater) as Formater;
     }
 
-    get denormalizer() {
-        return Container.get(Denormalizer) as Denormalizer;
+    get cleaner() {
+        return Container.get(Cleaner) as Cleaner;
     }
 
     get mappingManager() {
@@ -59,21 +60,21 @@ export abstract class AbstractRouteAction implements IRouteAction {
         entity: Entity,
         operation: GroupsOperation = "details"
     ) {
-        const cleaned = this.denormalizer.cleanItem(
-            this.entityMetadata,
+        const cleaned = this.cleaner.cleanItem({
+            rootMetadata: this.entityMetadata,
             operation,
-            entity as any,
-            this.routeMetadata.options
-        );
+            values: entity as any,
+            options: this.routeMetadata.options,
+        });
         const repository = getRepository<Entity>(entity.constructor.name);
         const entityInstance: Entity = repository.manager.create(repository.metadata.targetName, cleaned as any);
 
-        return this.normalizer.recursiveFormatItem(
-            entityInstance,
+        return this.formater.formatItem({
+            item: entityInstance,
             operation,
-            this.entityMetadata,
-            this.routeMetadata.options
-        );
+            entityMetadata: this.entityMetadata,
+            options: this.routeMetadata.options,
+        });
     }
 
     protected throw(ctx: Context, message: string) {

@@ -1,11 +1,6 @@
-import {
-    PaginationFilterOptions,
-    FilterProperty,
-    getPaginationFilterDefaultConfig,
-    registerFilterDecorator,
-    OrderDirection,
-    AbstractFilterConfig,
-} from "..";
+import { PaginationFilterOptions, getPaginationFilterDefaultConfig, OrderDirection } from "@/filters/PaginationFilter";
+import { FilterProperty, AbstractFilterConfig } from "@/filters/AbstractFilter";
+import { registerFilterDecorator } from "@/filters/registerFilterDecorator";
 
 /**
  * Pagination ClassDecorator without properties

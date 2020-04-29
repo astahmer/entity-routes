@@ -1,7 +1,7 @@
 import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
 import { EntityMetadata } from "typeorm";
 import { entityRoutesContainer } from "@/container";
-import { getRouteMetadata } from "@/services/EntityRoute";
+import { getRouteMetadata } from "@/services/EntityRouter";
 
 export const iriRegex = new RegExp(/\/api\/(\w+)\//g, "i");
 export function formatIriToId<B extends Boolean>(iri: string, asInt?: B): B extends true ? number : string;

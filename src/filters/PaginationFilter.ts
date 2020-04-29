@@ -7,10 +7,16 @@ import {
     DefaultFilterOptions,
     QueryParams,
     QueryParamValue,
-} from "../AbstractFilter";
+} from "./AbstractFilter";
 import { AliasManager } from "@/serializer";
+import { RelationManager } from "@/serializer/RelationManager";
+import { Container } from "typedi";
 
 export class PaginationFilter extends AbstractFilter<PaginationFilterOptions> {
+    get relationManager() {
+        return Container.get(RelationManager);
+    }
+
     /** Returns every filterable properties  */
     get filterProperties() {
         return this.config.properties
@@ -67,7 +73,7 @@ export class PaginationFilter extends AbstractFilter<PaginationFilterOptions> {
             if (props.length === 1) {
                 qb.addOrderBy(this.entityMetadata.tableName + "." + props, direction);
             } else {
-                const { entityAlias, propName } = this.normalizer.makeJoinsFromPropPath(
+                const { entityAlias, propName } = this.relationManager.makeJoinsFromPropPath(
                     qb,
                     this.entityMetadata,
                     propPath,
