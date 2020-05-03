@@ -1,7 +1,7 @@
 import { DependsOn, getDependsOnMetadata } from "@/index";
 
 describe("@DependsOn", () => {
-    it("can retrieve metadata wtih getDependsOnMetadata", () => {
+    it("can retrieve metadata with getDependsOnMetadata", () => {
         class User {
             id: number;
             name: string;

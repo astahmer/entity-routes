@@ -27,10 +27,10 @@ export function MaxDepth(max: number = 2): ClassDecorator | PropertyDecorator {
 }
 
 export const MAX_DEPTH_METAKEY = Symbol("maxDepth");
-export const getMaxDepthMetadata = (entity: Function) => Reflect.getOwnMetadata(MAX_DEPTH_METAKEY, entity);
+export const getMaxDepthMetadata = (entity: Function): MaxDeptMetadata =>
+    Reflect.getOwnMetadata(MAX_DEPTH_METAKEY, entity);
 
-export type MaxDeptMetas = Record<string, MaxDeptMetasItem>;
-export type MaxDeptMetasItem = {
+export type MaxDeptMetadata = {
     enabled?: EntityMetadata;
     depthLvl?: number;
     fields: {

@@ -6,15 +6,17 @@ import { AliasManager } from "@/serializer/AliasManager";
 import { RouteOperation } from "@/decorators/Groups";
 import { EntityRouteOptions, GenericEntity } from "@/services/EntityRouter";
 import { getDependsOnMetadata } from "@/decorators/DependsOn";
-import { MappingManager, EntityMapperOptions } from "@/services/MappingManager";
+import { MappingManager } from "@/services/MappingManager";
 import { SubresourceRelation } from "@/services/SubresourceManager";
 import { Service } from "typedi";
-import { MaxDeptMetas, getMaxDepthMetadata } from "@/decorators/MaxDepth";
+import { MaxDeptMetadata, getMaxDepthMetadata } from "@/decorators/MaxDepth";
 import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
+import { isDev } from "@/functions/index";
+import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
 
 @Service()
 export class RelationManager {
-    private maxDepthMetas: MaxDeptMetas = {};
+    private maxDepthMetas: Record<string, MaxDeptMetadata> = {};
 
     get mappingManager() {
         return Container.get(MappingManager);
@@ -36,9 +38,14 @@ export class RelationManager {
         currentProp: string,
         aliasManager: AliasManager,
         prevAlias?: string
-    ): any {
+    ): { entityAlias: string; propName: string; columnMeta: ColumnMetadata } {
         const column = entityMetadata.findColumnWithPropertyName(currentProp);
         const relation = column ? column.relationMetadata : entityMetadata.findRelationWithPropertyPath(currentProp);
+
+        if (!column && !relation) {
+            isDev() && console.warn(`No prop named <${currentProp}> found in entity <${entityMetadata.tableName}>`);
+            return { entityAlias: undefined, propName: undefined, columnMeta: undefined };
+        }
 
         // Flat primitive property OR enum/simple-json/simple-array
         if (column && !relation) {
@@ -85,7 +92,7 @@ export class RelationManager {
         entityMetadata: EntityMetadata,
         currentPath: string,
         prevProp: string,
-        options: EntityRouteOptions,
+        options: JoinAndSelectExposedPropsOptions,
         aliasManager: AliasManager
     ) {
         if (prevProp && prevProp !== entityMetadata.tableName) {
@@ -209,12 +216,11 @@ export class RelationManager {
         currentPath: string,
         entityMetadata: EntityMetadata,
         relation: RelationMetadata,
-        options: EntityMapperOptions
+        options: IsRelationPropCircularOptions
     ) {
         const currentDepthLvl = currentPath.split(entityMetadata.tableName).length - 1;
         if (currentDepthLvl <= 1) return;
 
-        // console.log("current: " + currentDepthLvl, entityMetadata.tableName + "." + relation.propertyName);
         const maxDepthMeta = this.getMaxDepthMetaFor(entityMetadata);
 
         // Most specific maxDepthLvl found (prop > class > global options)
@@ -231,7 +237,7 @@ export class RelationManager {
 
         // Should stop getting nested relations ?
         if (hasGlobalMaxDepth || hasLocalClassMaxDepth || hasSpecificPropMaxDepth) {
-            return { prop: relation.propertyName, depth: currentDepthLvl };
+            return { entityMetadata, prop: relation.propertyName, depth: currentDepthLvl };
         }
     }
 
@@ -243,3 +249,11 @@ export class RelationManager {
         return this.maxDepthMetas[entityMetadata.tableName];
     }
 }
+
+export type JoinAndSelectExposedPropsOptions = Pick<EntityRouteOptions, "shouldMaxDepthReturnRelationPropsId"> &
+    IsRelationPropCircularOptions;
+
+export type IsRelationPropCircularOptions = Pick<
+    EntityRouteOptions,
+    "defaultMaxDepthLvl" | "isMaxDepthEnabledByDefault"
+>;

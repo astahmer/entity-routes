@@ -1,6 +1,5 @@
 import { Middleware, Context } from "koa";
 import { Connection, DeleteResult, QueryRunner, Repository, SelectQueryBuilder, getRepository } from "typeorm";
-import { QueryDeepPartialEntity } from "typeorm/query-builder/QueryPartialEntity";
 import Container from "typedi";
 
 import { RouteActionClass } from "@/services/AbstractRouteAction";
@@ -198,7 +197,6 @@ export class ResponseManager<Entity extends GenericEntity> {
     ): Middleware {
         return async (ctx, next) => {
             if (subresourceRelation) {
-                subresourceRelation = subresourceRelation;
                 subresourceRelation.id = parseInt(ctx.params[subresourceRelation.param]);
             }
 
@@ -217,7 +215,7 @@ export class ResponseManager<Entity extends GenericEntity> {
 
             if (ctx.params.id) params.entityId = parseInt(ctx.params.id);
             if (params.isUpdateOrCreate) params.values = ctx.request.body;
-            if (operation === "list") params.queryParams = ctx.query;
+            if (operation === "list") params.queryParams = ctx.query || {};
 
             // Create query runner to retrieve requestContext in subscribers
             const queryRunner = this.connection.createQueryRunner();
@@ -362,7 +360,7 @@ export type RequestContext<Entity extends GenericEntity = GenericEntity> = {
     /** Is update or create operation ? To check if there is a body sent */
     isUpdateOrCreate?: boolean;
     /** Request body values sent */
-    values?: QueryDeepPartialEntity<Entity>;
+    values?: Partial<Entity>;
     /** Request query params */
     queryParams?: any; // TODO Typings
     /** Custom operation for a custom action */

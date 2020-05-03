@@ -26,7 +26,7 @@ export class Denormalizer<Entity extends GenericEntity = GenericEntity> {
         const { operation, values } = ctx;
         const repository = getRepository<Entity>(rootMetadata.target);
         const cleanedItem = this.cleaner.cleanItem({ rootMetadata, operation, values, options: routeOptions });
-        const item = repository.create((cleanedItem as any) as DeepPartial<Entity>);
+        const item = repository.create(cleanedItem as DeepPartial<Entity>);
 
         const defaultValidatorOptions: Partial<DenormalizerValidatorOptions> =
             operation === "update" ? { skipMissingProperties: false } : {};

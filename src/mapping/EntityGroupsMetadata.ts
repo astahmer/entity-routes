@@ -60,6 +60,6 @@ export class EntityGroupsMetadata extends GroupsMetadata {
             exposedProps = this.getExposedProps(routeContext.tableName);
         }
 
-        return exposedProps && (exposedProps[operation] ? exposedProps[operation] : []);
+        return exposedProps ? (exposedProps[operation] ? exposedProps[operation] : []) : [];
     }
 }

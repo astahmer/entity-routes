@@ -1,4 +1,5 @@
 import { SelectQueryBuilder } from "typeorm";
+import { Container } from "typedi";
 
 import {
     AbstractFilter,
@@ -10,7 +11,7 @@ import {
 } from "./AbstractFilter";
 import { AliasManager } from "@/serializer";
 import { RelationManager } from "@/serializer/RelationManager";
-import { Container } from "typedi";
+import { OrderByOptions } from "@/decorators/Pagination";
 
 export class PaginationFilter extends AbstractFilter<PaginationFilterOptions> {
     get relationManager() {
@@ -22,6 +23,36 @@ export class PaginationFilter extends AbstractFilter<PaginationFilterOptions> {
         return this.config.properties
             ? this.config.properties.map((prop) => (typeof prop === "string" ? prop : prop[0]).split(":")[0])
             : [];
+    }
+
+    apply({
+        queryParams = {},
+        qb,
+        aliasManager,
+    }: Pick<AbstractFilterApplyArgs, "queryParams" | "qb" | "aliasManager">) {
+        // Apply filter for each property provided if autoApply is enabled
+        if (this.config.options.autoApplyOrderBys) {
+            this.filterProperties.forEach((orderBy) => {
+                this.addOrderBy(qb, aliasManager, orderBy);
+            });
+        }
+
+        // Apply filter for each query params
+        const { orderBy, take, skip } = this.getFilterParamsByTypes(queryParams);
+
+        if (orderBy) {
+            this.addOrderBy(qb, aliasManager, orderBy);
+        } else {
+            this.addOrderBy(qb, aliasManager, this.config.options.defaultOrderBys);
+        }
+
+        if (take || this.config.options.defaultRetrievedItemsLimit) {
+            qb.take(take || this.config.options.defaultRetrievedItemsLimit);
+        }
+
+        if (skip) {
+            qb.skip(skip);
+        }
     }
 
     protected getFilterParamsByTypes(queryParams: QueryParams) {
@@ -70,6 +101,7 @@ export class PaginationFilter extends AbstractFilter<PaginationFilterOptions> {
                 props.push("id");
             }
 
+            // Add orderBy or join props until we can add orderBy to the last section of propPath
             if (props.length === 1) {
                 qb.addOrderBy(this.entityMetadata.tableName + "." + props, direction);
             } else {
@@ -85,36 +117,14 @@ export class PaginationFilter extends AbstractFilter<PaginationFilterOptions> {
             }
         }
     }
-
-    apply({ queryParams, qb, aliasManager }: AbstractFilterApplyArgs) {
-        // Apply filter for each property decorator
-        this.filterProperties.forEach((orderBy) => {
-            this.addOrderBy(qb, aliasManager, orderBy);
-        });
-
-        // Apply filter for each query params
-        const { orderBy, take, skip } = this.getFilterParamsByTypes(queryParams);
-
-        if (orderBy) {
-            this.addOrderBy(qb, aliasManager, orderBy);
-        } else {
-            this.addOrderBy(qb, aliasManager, this.config.options.defaultOrderBys);
-        }
-
-        if (take || this.config.options.defaultRetrievedItemsLimit) {
-            qb.take(take || this.config.options.defaultRetrievedItemsLimit);
-        }
-
-        if (skip) {
-            qb.skip(skip);
-        }
-    }
 }
 
 export type PaginationFilterOptions = DefaultFilterOptions & {
     defaultOrderBys?: string | string[];
     defaultOrderDirection?: OrderDirection;
     defaultRetrievedItemsLimit?: number;
+    /** If true, will order by every properties given without needing to add orderBy queryParam */
+    autoApplyOrderBys?: boolean;
 };
 
 export type OrderDirectionCaps = "ASC" | "DESC";
@@ -123,15 +133,12 @@ export const isDirection = (value: string): value is OrderDirection => ["asc", "
 
 export type PaginationTypes = "orderBy" | "take" | "skip";
 
-export const getPaginationFilterDefaultConfig = (
-    options?: PaginationFilterOptions
-): FilterDefaultConfig<PaginationFilterOptions> => ({
+export const getPaginationFilterDefaultConfig = (): FilterDefaultConfig<PaginationFilterOptions & OrderByOptions> => ({
     class: PaginationFilter,
     options: {
         all: false,
         defaultOrderBys: "id",
         defaultOrderDirection: "asc",
         defaultRetrievedItemsLimit: 100,
-        ...options,
     },
 });

@@ -123,7 +123,7 @@ export const ROUTE_FILTERS_METAKEY = Symbol("filters");
 export const getRouteFiltersMeta = (entity: Function): RouteFiltersMeta =>
     Reflect.getOwnMetadata(ROUTE_FILTERS_METAKEY, entity);
 
-export type GenericEntity = ObjectLiteral & { id: string | number };
+export type GenericEntity = ObjectLiteral & { id: string | number; getIri?: () => string };
 
 export type RouteMetadata = {
     /** The path prefix for every action of this route */

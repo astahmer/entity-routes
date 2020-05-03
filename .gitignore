@@ -2,3 +2,5 @@ node_modules
 .rts2*
 dist
 .env
+jest_*
+.vscode

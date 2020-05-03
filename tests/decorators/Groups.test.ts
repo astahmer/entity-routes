@@ -8,7 +8,7 @@ import {
 import { TestGroups } from "./TestGroups";
 
 describe("@Groups", () => {
-    it("can retrieve metadata wtih getGroupsMetadata", () => {
+    it("can retrieve metadata with getGroupsMetadata", () => {
         class Entity {
             @TestGroups("all")
             thing: string;

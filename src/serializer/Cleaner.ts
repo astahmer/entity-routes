@@ -1,10 +1,8 @@
 import { EntityMetadata } from "typeorm";
-import { QueryDeepPartialEntity } from "typeorm/query-builder/QueryPartialEntity";
-import { isObject, isPrimitive } from "util";
 import Container, { Service } from "typedi";
 
 import { RequestContext } from "@/services/ResponseManager";
-import { isType } from "@/functions/asserts";
+import { isType, isObject, isPrimitive } from "@/functions/asserts";
 import { Primitive } from "@/functions/primitives";
 import { formatIriToId } from "@/functions/entity";
 import { GenericEntity, EntityRouteOptions } from "@/services/EntityRouter";
@@ -17,8 +15,8 @@ export class Cleaner<Entity extends GenericEntity = GenericEntity> {
         return Container.get(MappingManager);
     }
 
-    /** Return a clone of this request body values with only mapped props */
-    public cleanItem({ rootMetadata, values, operation, options }: CleanerArgs): RequestContext<Entity>["values"] {
+    /** Return a clone of item with only mapped props */
+    public cleanItem({ rootMetadata, values, operation, options = {} }: CleanerArgs): RequestContext<Entity>["values"] {
         const routeMapping = this.mappingManager.make(rootMetadata, operation, options);
         return this.recursiveClean(values as RequestContext<Entity>["values"], {}, [], routeMapping as MappingItem);
     }
@@ -29,7 +27,7 @@ export class Cleaner<Entity extends GenericEntity = GenericEntity> {
         clone: any,
         currentPath: string[],
         routeMapping: MappingItem
-    ): QueryDeepPartialEntity<Entity> {
+    ): Partial<Entity> {
         let key: string, prop, mapping, nestedMapping;
 
         // If item is an iri/id (coming frsom an array), just return it in object with proper id
@@ -52,13 +50,13 @@ export class Cleaner<Entity extends GenericEntity = GenericEntity> {
 
             if (Array.isArray(prop)) {
                 if (!this.mappingManager.isPropSimple(mapping[ENTITY_META_SYMBOL], key)) {
-                    clone[key] = prop.map((nestedItem) =>
+                    clone[key] = prop.map((nestedItem: Partial<Entity>) =>
                         this.recursiveClean(nestedItem, {}, currentPath.concat(key), routeMapping)
                     );
                 } else {
                     clone[key] = prop;
                 }
-            } else if (isType<QueryDeepPartialEntity<Entity>>(prop, isObject(prop))) {
+            } else if (isType<Partial<Entity>>(prop, isObject(prop))) {
                 nestedMapping = this.mappingManager.getNestedMappingAt(currentPath.concat(key), mapping);
                 if (hasAnyNestedPropMapped(nestedMapping)) {
                     clone[key] = this.recursiveClean(prop, {}, currentPath.concat(key), routeMapping);
@@ -99,5 +97,5 @@ export type CleanerArgs<Entity extends GenericEntity = GenericEntity> = Pick<
 > &
     Pick<SaveItemArgs, "rootMetadata"> & {
         rootMetadata: EntityMetadata;
-        options: EntityRouteOptions;
+        options?: EntityRouteOptions;
     };

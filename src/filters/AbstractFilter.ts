@@ -8,10 +8,10 @@ import { AliasManager } from "@/serializer/AliasManager";
 import { isDefined } from "@/functions/asserts";
 
 export abstract class AbstractFilter<FilterOptions extends DefaultFilterOptions = DefaultFilterOptions> {
-    protected config: AbstractFilterConfig<FilterOptions>;
-    protected entityMetadata: EntityMetadata;
+    protected readonly config: AbstractFilterConfig<FilterOptions>;
+    protected readonly entityMetadata: EntityMetadata;
 
-    get normalizer() {
+    protected get normalizer() {
         return Container.get(Normalizer);
     }
 
@@ -78,7 +78,7 @@ export abstract class AbstractFilter<FilterOptions extends DefaultFilterOptions 
     }
 
     /** Returns an array of valid query params to filter */
-    protected getPropertiesToFilter(queryParams: QueryParams) {
+    protected getPropertiesToFilter(queryParams: AbstractFilterApplyArgs["queryParams"]) {
         return Object.keys(queryParams).reduce((acc, param: string) => {
             if (
                 this.isFilterEnabledForProperty(param) &&
@@ -91,7 +91,7 @@ export abstract class AbstractFilter<FilterOptions extends DefaultFilterOptions 
         }, []);
     }
 
-    protected getPropertiesQueryParamsToFilter(queryParams: QueryParams) {
+    protected getPropertiesQueryParamsToFilter(queryParams: AbstractFilterApplyArgs["queryParams"]) {
         const params = this.getPropertiesToFilter(queryParams);
         return pick(params, queryParams);
     }
@@ -106,13 +106,15 @@ export type QueryParamValue = string | string[];
 export type QueryParams = Record<string, QueryParamValue>;
 
 export type AbstractFilterApplyArgs = {
-    queryParams?: QueryParams;
-    qb?: SelectQueryBuilder<any>;
-    whereExp?: WhereExpression;
+    queryParams: QueryParams;
+    qb: SelectQueryBuilder<any>;
+    whereExp: WhereExpression;
     aliasManager: AliasManager;
 };
 
-export type FilterProperty = string | [string, string];
+// @example: properties?: FilterProperty<T extends GenericEntity ? Props<T> : string, OrderDirection>[]
+// export type FilterProperty<T = string, U = string> = T | [T, U];
+export type FilterProperty<U = string> = string | [string, U];
 
 export type WhereType = "and" | "or";
 export type WhereMethod = "where" | "andWhere" | "orWhere";
@@ -129,8 +131,6 @@ export type SqlOperator = "LIKE" | "NOT_LIKE" | "IN" | "NOT_IN" | "IS" | "IS_NOT
 export type WhereOperator = "=" | "!=" | COMPARISON_OPERATOR | SqlOperator;
 
 export type DefaultFilterOptions = {
-    /** Property or dot delimited property path to apply the filter on */
-    [key: string]: any;
     /** Make all (not nested) properties filterable by default */
     all?: boolean;
     /** Make all nested property paths filtereable by default */
@@ -143,4 +143,7 @@ export type AbstractFilterConfig<Options = DefaultFilterOptions> = {
     options: Options;
 };
 
-export type FilterDefaultConfig<Options = DefaultFilterOptions> = Omit<AbstractFilterConfig<Options>, "properties">;
+export type FilterDefaultConfig<Options = DefaultFilterOptions> = Omit<
+    AbstractFilterConfig<Partial<Options>>,
+    "properties"
+>;

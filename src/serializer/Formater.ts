@@ -1,16 +1,15 @@
 import { EntityMetadata, getRepository } from "typeorm";
-import { isPrimitive } from "util";
+import Container, { Service } from "typedi";
 
 import { ALIAS_PREFIX, COMPUTED_PREFIX, RouteOperation } from "@/decorators/Groups";
 
-import { EntityRouteOptions, GenericEntity } from "@/services/EntityRouter";
+import { EntityRouteOptions, GenericEntity, getRouteSubresourcesMetadata } from "@/services/EntityRouter";
 import { sortObjectByKeys } from "@/functions/object";
 import { lowerFirstLetter } from "@/functions/primitives";
 
-import { isType, isEntity } from "@/functions/asserts";
-import Container, { Service } from "typedi";
+import { isType, isEntity, isPrimitive } from "@/functions/asserts";
 import { MappingManager } from "@/services/MappingManager";
-import { RequestContext, getRouteSubresourcesMetadata } from "@/services/index";
+import { RequestContext } from "@/services/index";
 
 @Service()
 export class Formater<Entity extends GenericEntity = GenericEntity> {
@@ -19,8 +18,8 @@ export class Formater<Entity extends GenericEntity = GenericEntity> {
     }
 
     /** Return a clone of this request body values with only mapped props */
-    public formatItem({ item, operation, entityMetadata, options }: FormaterArgs<Entity>) {
-        return this.recursiveFormatItem<Entity>(item, operation, entityMetadata, options);
+    public formatItem({ item, operation, entityMetadata, options = {} }: FormaterArgs<Entity>) {
+        return this.recursiveFormatItem<Entity>(item, {}, operation, entityMetadata, options);
     }
 
     /**
@@ -33,11 +32,12 @@ export class Formater<Entity extends GenericEntity = GenericEntity> {
      * */
     private async recursiveFormatItem<Entity extends GenericEntity>(
         item: Entity,
+        clone: any,
         operation: RouteOperation,
         rootMetadata: EntityMetadata,
-        options: EntityRouteOptions
+        options: FormaterOptions = {}
     ): Promise<Entity> {
-        let key, prop, entityMetadata;
+        let key: string, prop, entityMetadata;
         try {
             const repository = getRepository(item.constructor.name);
             entityMetadata = repository.metadata;
@@ -49,37 +49,49 @@ export class Formater<Entity extends GenericEntity = GenericEntity> {
             prop = item[key as keyof Entity];
             if (Array.isArray(prop) && !this.mappingManager.isPropSimple(entityMetadata, key)) {
                 const propArray = prop.map((nestedItem: Entity) =>
-                    this.recursiveFormatItem(nestedItem, operation, rootMetadata, options)
+                    this.recursiveFormatItem(
+                        nestedItem,
+                        clone[key as keyof typeof clone] || {},
+                        operation,
+                        rootMetadata,
+                        options
+                    )
                 );
-                item[key as keyof Entity] = (await Promise.all(propArray)) as any;
+                clone[key] = (await Promise.all(propArray)) as any;
             } else if (isType<GenericEntity>(prop, isEntity(prop))) {
-                item[key as keyof Entity] = await this.recursiveFormatItem(prop, operation, rootMetadata, options);
+                clone[key] = await this.recursiveFormatItem(
+                    prop,
+                    clone[key as keyof typeof clone] || {},
+                    operation,
+                    rootMetadata,
+                    options
+                );
             } else if (
-                !isPrimitive(prop) &&
-                !((prop as any) instanceof Date) &&
-                !this.mappingManager.isPropSimple(entityMetadata, key)
+                isPrimitive(prop) ||
+                (prop as any) instanceof Date ||
+                this.mappingManager.isPropSimple(entityMetadata, key)
             ) {
-                delete item[key as keyof Entity];
+                clone[key] = prop;
             }
 
             // TODO Remove properties selected by DependsOn ? options in Route>App ? default = true
         }
 
         if (options.shouldEntityWithOnlyIdBeFlattenedToIri && isEntity(item) && Object.keys(item).length === 1) {
-            item = item.getIri() as any;
-            return item;
+            return "getIri" in item ? item.getIri() : (("/" + entityMetadata.tableName + "/" + item.id) as any);
         } else {
-            await this.setComputedPropsOnItem(rootMetadata, item, operation, entityMetadata);
+            await this.setComputedPropsOnItem(rootMetadata, item, clone, operation, entityMetadata);
             if (options.shouldSetSubresourcesIriOnItem) {
-                this.setSubresourcesIriOnItem(item, entityMetadata);
+                this.setSubresourcesIriOnItem(clone, entityMetadata);
             }
-            return sortObjectByKeys(item);
+            return sortObjectByKeys(clone);
         }
     }
 
     private async setComputedPropsOnItem<U extends GenericEntity>(
         rootMetadata: EntityMetadata,
         item: U,
+        clone: any,
         operation: RouteOperation,
         entityMetadata: EntityMetadata
     ) {
@@ -89,7 +101,7 @@ export class Formater<Entity extends GenericEntity = GenericEntity> {
         const propsPromises = await Promise.all(
             computedProps.map((computed) => (item[computed.computedPropMethod as keyof U] as any)())
         );
-        propsPromises.forEach((result, i) => (item[computedProps[i].propKey as keyof U] = result));
+        propsPromises.forEach((result, i) => (clone[computedProps[i].propKey as keyof U] = result));
     }
 
     /** For each item's subresources, add their corresponding IRIs to this item */
@@ -99,7 +111,8 @@ export class Formater<Entity extends GenericEntity = GenericEntity> {
         let key;
         for (key in subresourceProps) {
             if (!item[key as keyof U]) {
-                (item as any)[key as keyof U] = item.getIri() + "/" + key;
+                (item as any)[key as keyof U] =
+                    ("getIri" in item ? item.getIri() : "/" + entityMetadata.tableName + "/" + item.id) + "/" + key;
             }
         }
     }
@@ -133,8 +146,12 @@ export const getComputedPropMethodAndKey = (computed: string) => {
     return { computedPropMethod, propKey };
 };
 
+export type FormaterOptions = Pick<
+    EntityRouteOptions,
+    "shouldEntityWithOnlyIdBeFlattenedToIri" | "shouldSetSubresourcesIriOnItem"
+>;
 export type FormaterArgs<Entity extends GenericEntity = GenericEntity> = Pick<RequestContext<Entity>, "operation"> & {
     item: Entity;
     entityMetadata: EntityMetadata;
-    options: EntityRouteOptions;
+    options?: FormaterOptions;
 };

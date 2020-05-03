@@ -29,7 +29,7 @@ export function Subresource(
     };
 }
 
-type SubresourceOptions = {
+export type SubresourceOptions = {
     path?: string;
     operations?: SubresourceOperation[];
     maxDepth?: number;

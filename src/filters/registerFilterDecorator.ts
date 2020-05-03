@@ -1,45 +1,32 @@
 import { getRouteFiltersMeta, ROUTE_FILTERS_METAKEY, RouteFiltersMeta } from "@/services/EntityRouter";
 
-import { FilterProperty, AbstractFilterConfig, DefaultFilterOptions } from "./AbstractFilter";
+import { FilterProperty, AbstractFilterConfig, DefaultFilterOptions, FilterDefaultConfig } from "./AbstractFilter";
 
-export function registerFilterDecorator({
+export function registerFilterDecorator<Options = DefaultFilterOptions>({
+    target,
     defaultConfig,
-    propsOrOptions,
-    propFilterHook,
-}: {
-    defaultConfig: Partial<AbstractFilterConfig>;
-    propsOrOptions: FilterProperty[] | DefaultFilterOptions;
-    propFilterHook?: (propName: string, filterConfig?: any) => FilterProperty;
-}): PropertyDecorator | ClassDecorator {
-    return (target: object | Function, propName: string, _descriptor?: PropertyDescriptor) => {
-        if (typeof target === "object") {
-            target = target.constructor;
-        }
+    options = {} as Options,
+    properties = [],
+}: RegisterFilterDecoratorArgs<Partial<Options>>) {
+    // All filters config registered on Entity
+    const filtersMeta: RouteFiltersMeta = getRouteFiltersMeta(target as Function) || {};
 
-        const filtersMeta: RouteFiltersMeta = getRouteFiltersMeta(target as Function) || {};
-        const filter: AbstractFilterConfig = filtersMeta[defaultConfig.class.name];
+    // Retrieve current config or init one with default config
+    const config: Partial<AbstractFilterConfig> = filtersMeta[defaultConfig.class.name] || defaultConfig;
 
-        // If all entity properties are enabled as filter, ignore this property decorator
-        if (filter && filter.options.all) {
-            return;
-        }
+    // Merge current/default with params
+    config.options = { ...defaultConfig.options, ...config.options, ...options };
+    config.properties = [...new Set([...(config.properties || []), ...properties])];
 
-        if (propName) {
-            // Property Decorator
-            const propFilter = propFilterHook(propName, filter || defaultConfig);
-
-            if (filter) {
-                filter.properties.push(propFilter);
-            } else {
-                defaultConfig.properties = [propFilter];
-            }
-        } else if (Array.isArray(propsOrOptions)) {
-            // Class Decorator & properties were not skipped
-            defaultConfig.properties = filter ? filter.properties.concat(propsOrOptions) : propsOrOptions;
-        }
-
-        // Update filter
-        filtersMeta[defaultConfig.class.name] = defaultConfig as AbstractFilterConfig;
-        Reflect.defineMetadata(ROUTE_FILTERS_METAKEY, filtersMeta, target);
-    };
+    // Update filter
+    filtersMeta[defaultConfig.class.name] = config as AbstractFilterConfig;
+    Reflect.defineMetadata(ROUTE_FILTERS_METAKEY, filtersMeta, target);
 }
+
+export type RegisterFilterDecoratorArgs<Options = DefaultFilterOptions> = {
+    /** Entity class constructor */
+    target: Object;
+    defaultConfig: FilterDefaultConfig<Options>;
+    options?: Options;
+    properties?: FilterProperty[];
+};

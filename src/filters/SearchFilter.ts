@@ -250,14 +250,11 @@ export class SearchFilter extends AbstractFilter<SearchFilterOptions> {
 
 export type SearchFilterOptions = DefaultFilterOptions & { defaultWhereStrategy?: StrategyType };
 
-export const getSearchFilterDefaultConfig = (
-    options: SearchFilterOptions
-): FilterDefaultConfig<SearchFilterOptions> => ({
+export const getSearchFilterDefaultConfig = (): FilterDefaultConfig<SearchFilterOptions> => ({
     class: SearchFilter,
     options: {
         all: false,
         defaultWhereStrategy: "EXACT",
-        ...options,
     },
 });
 
@@ -279,10 +276,10 @@ export type FilterParam = {
 
 type NestedConditionsFilters = Record<string, any>;
 
-type ApplyFilterParamArgs = AbstractFilterApplyArgs & {
+type ApplyFilterParamArgs = Omit<AbstractFilterApplyArgs, "queryParams"> & {
     filter: FilterParam;
 };
 
-type ApplyNestedConditionFiltersArgs = AbstractFilterApplyArgs & {
+type ApplyNestedConditionFiltersArgs = Omit<AbstractFilterApplyArgs, "queryParams"> & {
     nestedConditionsFilters: NestedConditionsFilters;
 };

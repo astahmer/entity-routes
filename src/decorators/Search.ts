@@ -2,6 +2,7 @@ import { SearchFilterOptions, getSearchFilterDefaultConfig } from "@/filters/Sea
 import { FilterProperty, AbstractFilterConfig } from "@/filters/AbstractFilter";
 import { registerFilterDecorator } from "@/filters/registerFilterDecorator";
 import { StrategyType } from "@/filters/WhereManager";
+import { isType } from "@/index";
 
 /**
  * SearchFilter PropertyDecorator
@@ -25,26 +26,36 @@ export function Search(options?: SearchFilterOptions): ClassDecorator;
 export function Search(properties: FilterProperty[], options?: SearchFilterOptions): ClassDecorator;
 
 export function Search(
-    propParamOrFilterPropertiesOrOptions?: StrategyType | FilterProperty[] | SearchFilterOptions,
-    options?: SearchFilterOptions
+    stratOrPropsOrOptions?: StrategyType | FilterProperty[] | SearchFilterOptions,
+    options: SearchFilterOptions = {}
 ): ClassDecorator | PropertyDecorator {
-    // If ClassDecorator & skipping properties
-    if (
-        !Array.isArray(propParamOrFilterPropertiesOrOptions) &&
-        typeof propParamOrFilterPropertiesOrOptions === "object"
-    ) {
-        options = propParamOrFilterPropertiesOrOptions;
-    }
-    const defaultConfig = getSearchFilterDefaultConfig(options);
+    return (target: object | Function, propName: string) => {
+        // If propName is defined => PropertyDecorator, else it's a ClassDecorator
+        const isPropDecorator = !!propName;
+        target = isPropDecorator ? target.constructor : target;
 
-    // Property Decorator
-    const propFilterHook = (propName: string, filterConfig: AbstractFilterConfig<SearchFilterOptions>) => {
-        return [propName, propParamOrFilterPropertiesOrOptions || filterConfig.options.defaultWhereStrategy];
+        const defaultConfig = getSearchFilterDefaultConfig();
+        let properties: FilterProperty[] = [];
+
+        // PropDecorator
+        if (isType<StrategyType>(stratOrPropsOrOptions, isPropDecorator)) {
+            const whereStrategy =
+                stratOrPropsOrOptions || options.defaultWhereStrategy || defaultConfig.options.defaultWhereStrategy;
+            properties.push([propName, whereStrategy] as FilterProperty);
+        } else {
+            // ClassDecorator
+            if (Array.isArray(stratOrPropsOrOptions)) {
+                properties = stratOrPropsOrOptions;
+            } else {
+                options = stratOrPropsOrOptions;
+            }
+        }
+
+        registerFilterDecorator({
+            target,
+            defaultConfig,
+            properties,
+            options,
+        });
     };
-
-    return registerFilterDecorator({
-        defaultConfig,
-        propsOrOptions: propParamOrFilterPropertiesOrOptions as any,
-        propFilterHook: propFilterHook as any,
-    });
 }

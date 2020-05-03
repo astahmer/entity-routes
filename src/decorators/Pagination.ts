@@ -1,5 +1,5 @@
 import { PaginationFilterOptions, getPaginationFilterDefaultConfig, OrderDirection } from "@/filters/PaginationFilter";
-import { FilterProperty, AbstractFilterConfig } from "@/filters/AbstractFilter";
+import { FilterProperty } from "@/filters/AbstractFilter";
 import { registerFilterDecorator } from "@/filters/registerFilterDecorator";
 
 /**
@@ -14,24 +14,32 @@ export function Pagination(options?: PaginationFilterOptions): ClassDecorator;
  * Pagination ClassDecorator with properties
  * @example [at]Pagination(["id", ["name", "desc"], { defaultRetrievedItemsLimit: 10 })
  */
-export function Pagination(properties?: FilterProperty[], options?: PaginationFilterOptions): ClassDecorator;
+export function Pagination(
+    properties?: FilterProperty<OrderDirection>[],
+    options?: PaginationFilterOptions
+): ClassDecorator;
 
 export function Pagination(
-    propertiesOrOptions?: FilterProperty[] | PaginationFilterOptions,
-    options?: PaginationFilterOptions
+    propsOrOptions?: FilterProperty[] | PaginationFilterOptions,
+    options: PaginationFilterOptions = {}
 ) {
-    let properties: any[] = [];
-    // If ClassDecorator & skipping properties
-    if (!Array.isArray(propertiesOrOptions)) {
-        options = propertiesOrOptions;
-    }
+    return (target: object | Function) => {
+        const defaultConfig = getPaginationFilterDefaultConfig();
+        let properties: FilterProperty[] = [];
 
-    const defaultConfig = getPaginationFilterDefaultConfig(options);
+        if (Array.isArray(propsOrOptions)) {
+            properties = propsOrOptions;
+        } else {
+            options = propsOrOptions;
+        }
 
-    return registerFilterDecorator({
-        defaultConfig,
-        propsOrOptions: properties,
-    }) as ClassDecorator;
+        registerFilterDecorator({
+            target,
+            defaultConfig,
+            properties,
+            options,
+        });
+    };
 }
 
 /**
@@ -40,16 +48,18 @@ export function Pagination(
  * @example [at]OrderBy("asc")
  */
 export function OrderBy(direction?: OrderDirection, relationPropName?: string): PropertyDecorator {
-    const defaultConfig = getPaginationFilterDefaultConfig();
+    return (target: object | Function, propName: string) => {
+        const defaultConfig = getPaginationFilterDefaultConfig();
+        const withRelationPropName = relationPropName ? "." + relationPropName : "";
+        const propFilter =
+            propName + withRelationPropName + ":" + (direction || defaultConfig.options.defaultOrderDirection);
 
-    const withRelationPropName = relationPropName ? "." + relationPropName : "";
-    const propFilterHook = (propName: string, filterConfig: AbstractFilterConfig<PaginationFilterOptions>) => {
-        return propName + withRelationPropName + ":" + (direction || filterConfig.options.defautOrderDirection);
+        registerFilterDecorator<OrderByOptions>({
+            target,
+            defaultConfig,
+            properties: [propFilter],
+            options: { direction, relationPropName },
+        });
     };
-
-    return registerFilterDecorator({
-        defaultConfig,
-        propsOrOptions: { direction, relationPropName },
-        propFilterHook,
-    });
 }
+export type OrderByOptions = { direction: OrderDirection; relationPropName: string };

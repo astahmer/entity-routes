@@ -3,9 +3,14 @@ import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
 
 export type AliasList = Record<string, number>;
 
+// TODO Rename to AliasHandler
+// mv RelationManager to services ?
 export class AliasManager {
-    // TODO WeakMap + pass aliasKey
     readonly aliases: AliasList = {};
+
+    public getAliasKey(entityTableName: string, propName: string) {
+        return entityTableName + "." + propName;
+    }
 
     /**
      * Appends a number (of occurences) to a propertName in order to avoid ambiguous sql names
@@ -13,17 +18,14 @@ export class AliasManager {
      * @param entity add one to the counter on this property name
      * @param propName add one to the counter on this property name
      */
-
     public generate(entityTableName: string, propName: string) {
-        const key = entityTableName + "." + propName;
-        console.log(this.aliases);
-        this.aliases[key] = this.aliases[key] ? this.aliases[key] + 1 : 1;
-        return entityTableName + "_" + propName + "_" + this.aliases[key];
+        const key = this.getAliasKey(entityTableName, propName);
+        this.aliases[key] = (this.aliases[key] || 0) + 1;
+        return this.getPropertyLastAlias(entityTableName, propName);
     }
 
     public getPropertyLastAlias(entityTableName: string, propName: string) {
-        const key = entityTableName + "." + propName;
-        return entityTableName + "_" + propName + "_" + this.aliases[key];
+        return entityTableName + "_" + propName + "_" + this.aliases[this.getAliasKey(entityTableName, propName)];
     }
 
     public isJoinAlreadyMade(qb: SelectQueryBuilder<any>, relation: RelationMetadata) {
