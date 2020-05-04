@@ -132,16 +132,15 @@ export class SearchFilter extends AbstractFilter<SearchFilterOptions> {
         nestedConditionsFilters: NestedConditionsFilters,
         filter: FilterParam
     ) {
-        const regex = /(and|or)|(\((\w+)\))/i;
         const conditionPath = [];
         let matches;
         let str = filter.nestedCondition;
         let wasPreviousMatchIdentifier = filter.nestedCondition.startsWith("(");
 
-        while ((matches = regex.exec(str)) !== null) {
+        while ((matches = nestedConditionRegex.exec(str)) !== null) {
             // This is necessary to avoid infinite loops with zero-width matches
-            if (matches.index === regex.lastIndex) {
-                regex.lastIndex++;
+            if (matches.index === nestedConditionRegex.lastIndex) {
+                nestedConditionRegex.lastIndex++;
             }
 
             const [, type, identifierRaw, identifier] = matches;
@@ -259,6 +258,7 @@ export const getSearchFilterDefaultConfig = (): FilterDefaultConfig<SearchFilter
     },
 });
 
+const nestedConditionRegex = /(and|or)|(\((\w+)\))/i; // TODO check if equals to complexfilter ?
 const complexFilterRegex = /(?:((?:(?:(and|or)|(?:\(\w+\))))*):)?/;
 const propRegex = /((?:(?:\w)+\.?)+)/;
 const strategyRegex = /(?:(?:(?:;(\w+))|(<>|><|<\||>\||<|>|)?))?(!?)/;
