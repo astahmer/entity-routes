@@ -32,9 +32,12 @@ export class WhereManager {
      * Returns where strategy formatted as a valid keyof StrategyType
      * @example
      * strategyRaw = "startsWith" -> return "STARTS_WITH"
+     * strategyRaw = "STARTS_WITH" -> return "STARTS_WITH" // untouched
      */
     public formatWhereStrategy(strategyRaw: string) {
-        return camelToSnake(strategyRaw).toUpperCase() as StrategyType;
+        const strategy =
+            strategyRaw[0] === strategyRaw[0].toUpperCase() ? strategyRaw : camelToSnake(strategyRaw).toUpperCase();
+        return strategy as StrategyType;
     }
 
     public getWhereOperatorByStrategy(strategy: StrategyType, not: boolean, propCount: number): WhereOperator {
