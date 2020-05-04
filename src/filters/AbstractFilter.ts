@@ -70,7 +70,7 @@ export abstract class AbstractFilter<FilterOptions extends DefaultFilterOptions 
      */
     protected isFilterEnabledForProperty(propPath: string) {
         const allNestedProps = this.config.options.allNested ? true : propPath.split(".").length === 1;
-        if (this.config.options.all && allNestedProps) {
+        if (this.config.options.all || (this.config.options.allShallow && allNestedProps)) {
             return true;
         } else {
             return this.filterProperties.indexOf(propPath) !== -1;
@@ -130,8 +130,10 @@ export type SqlOperator = "LIKE" | "NOT_LIKE" | "IN" | "NOT_IN" | "IS" | "IS_NOT
 export type WhereOperator = "=" | "!=" | COMPARISON_OPERATOR | SqlOperator;
 
 export type DefaultFilterOptions = {
-    /** Make all (not nested) properties filterable by default */
+    /** Make all property paths filtereable by default */
     all?: boolean;
+    /** Make all (not nested) properties filterable by default */
+    allShallow?: boolean;
     /** Make all nested property paths filtereable by default */
     allNested?: boolean;
 };

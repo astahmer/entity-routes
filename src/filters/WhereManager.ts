@@ -14,8 +14,11 @@ export class WhereManager {
      * propPath = "profilePicture.id" -> return "EXACT"
      */
     public getPropertyDefaultWhereStrategy(config: AbstractFilterConfig<SearchFilterOptions>, propPath: string) {
+        const isNestedProp = propPath.includes(".");
+        const shouldReturnDefault =
+            config.options.all || isNestedProp ? config.options.allNested : config.options.allShallow;
         // If all entity props are enabled as filters, return default where strategy
-        if (config.options.all) {
+        if (shouldReturnDefault) {
             return config.options.defaultWhereStrategy || "EXACT";
         }
 

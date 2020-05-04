@@ -254,6 +254,8 @@ export const getSearchFilterDefaultConfig = (): FilterDefaultConfig<SearchFilter
     class: SearchFilter,
     options: {
         all: false,
+        allNested: false,
+        allShallow: false,
         defaultWhereStrategy: "EXACT",
     },
 });
