@@ -33,11 +33,12 @@ export class SearchFilter extends AbstractFilter<SearchFilterOptions> {
         return Container.get(WhereManager);
     }
 
-    public apply({ queryParams, qb, whereExp, aliasManager }: AbstractFilterApplyArgs) {
+    public apply({ queryParams, qb, aliasManager }: AbstractFilterApplyArgs) {
         if (!queryParams) {
             return;
         }
 
+        const whereExp = qb as WhereExpression;
         const { filters, nestedConditionsFilters } = this.getFiltersLists(queryParams);
         filters.forEach((filter) => this.applyFilterParam({ qb, whereExp, filter, aliasManager }));
         this.applyNestedConditionsFilters({ qb, whereExp, nestedConditionsFilters, aliasManager });
@@ -278,8 +279,10 @@ type NestedConditionsFilters = Record<string, any>;
 
 type ApplyFilterParamArgs = Omit<AbstractFilterApplyArgs, "queryParams"> & {
     filter: FilterParam;
+    whereExp: WhereExpression;
 };
 
 type ApplyNestedConditionFiltersArgs = Omit<AbstractFilterApplyArgs, "queryParams"> & {
     nestedConditionsFilters: NestedConditionsFilters;
+    whereExp: WhereExpression;
 };

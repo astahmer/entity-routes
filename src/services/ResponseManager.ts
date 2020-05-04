@@ -301,7 +301,7 @@ export class ResponseManager<Entity extends GenericEntity> {
     private applyFilters(queryParams: QueryParams, qb: SelectQueryBuilder<Entity>, aliasManager: AliasManager) {
         // TODO Cache filter class rather than creating new ones every time
         this.filters.forEach((filterOptions) => {
-            this.makeFilter(filterOptions).apply({ queryParams, qb, whereExp: qb, aliasManager });
+            this.makeFilter(filterOptions).apply({ queryParams, qb, aliasManager });
         });
     }
 }

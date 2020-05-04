@@ -1,5 +1,5 @@
 import { pick } from "ramda";
-import { EntityMetadata, SelectQueryBuilder, WhereExpression } from "typeorm";
+import { EntityMetadata, SelectQueryBuilder } from "typeorm";
 import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
 import Container from "typedi";
 
@@ -41,7 +41,7 @@ export abstract class AbstractFilter<FilterOptions extends DefaultFilterOptions 
     }
 
     /** This method should add conditions to the queryBuilder using queryParams  */
-    abstract apply({ queryParams, qb, whereExp, aliasManager }: AbstractFilterApplyArgs): void;
+    abstract apply({ queryParams, qb, aliasManager }: AbstractFilterApplyArgs): void;
 
     /** Return column metadata if param exists in this entity properties or is a valid propPath from this entity */
     protected getColumnMetaForPropPath(param: string) {
@@ -108,7 +108,6 @@ export type QueryParams = Record<string, QueryParamValue>;
 export type AbstractFilterApplyArgs = {
     queryParams: QueryParams;
     qb: SelectQueryBuilder<any>;
-    whereExp: WhereExpression;
     aliasManager: AliasManager;
 };
 
