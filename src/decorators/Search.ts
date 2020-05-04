@@ -8,7 +8,7 @@ import { isType } from "@/index";
  * SearchFilter PropertyDecorator
  * @example [at]SearchFilter(StrategyType.EXISTS)
  */
-export function Search(strategy?: StrategyType): PropertyDecorator;
+export function Search(strategy: StrategyType): PropertyDecorator;
 
 /**
  * SearchFilter ClassDecorator
@@ -23,10 +23,10 @@ export function Search(options?: SearchFilterOptions): ClassDecorator;
  *      defaultWhereStrategy: "STARTS_WITH"
  * })
  */
-export function Search(properties: FilterProperty[], options?: SearchFilterOptions): ClassDecorator;
+export function Search(properties: FilterProperty<StrategyType>[], options?: SearchFilterOptions): ClassDecorator;
 
 export function Search(
-    stratOrPropsOrOptions?: StrategyType | FilterProperty[] | SearchFilterOptions,
+    stratOrPropsOrOptions?: StrategyType | FilterProperty<StrategyType>[] | SearchFilterOptions,
     options: SearchFilterOptions = {}
 ): ClassDecorator | PropertyDecorator {
     return (target: object | Function, propName: string) => {
