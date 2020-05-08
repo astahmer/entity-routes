@@ -203,6 +203,7 @@ export class SearchFilter extends AbstractFilter<SearchFilterOptions> {
                 aliasManager
             );
 
+            if (!column) return;
             this.whereManager.addWhereByStrategy({ whereExp, entityAlias, filter, propName, column });
         }
     }
