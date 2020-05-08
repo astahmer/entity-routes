@@ -1,4 +1,5 @@
 import { Primitive } from "@/functions/primitives";
+import { WhereType } from "@/filters/AbstractFilter";
 
 export const isTestEnv = () => process.env.NODE_ENV === "test";
 export const isDev = () => process.env.NODE_ENV === "development" || isTestEnv();
@@ -17,3 +18,4 @@ export const isPromise = <T = any>(p: any): p is Promise<T> =>
 export const isType = <T>(_value: any, condition?: boolean): _value is T => condition;
 
 export const isEntity = (value: any) => value instanceof Object && "id" in value;
+export const isWhereType = (property: string): property is WhereType => ["and", "or"].includes(property);

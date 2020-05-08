@@ -13,7 +13,7 @@ import {
     WhereMethod,
     WhereType,
 } from "./AbstractFilter";
-import { isDefined } from "@/functions/asserts";
+import { isDefined, isWhereType } from "@/functions/asserts";
 import { setNestedKey, sortObjectByKeys } from "@/functions/object";
 import { formatIriToId, isIriValidForProperty } from "@/functions/entity";
 import { RelationManager } from "@/serializer/RelationManager";
@@ -162,11 +162,11 @@ export class SearchFilter extends AbstractFilter<SearchFilterOptions> {
         }
 
         if (!path(conditionPath, nestedConditionsFilters)) {
-            setNestedKey(nestedConditionsFilters, conditionPath, []);
+            setNestedKey(nestedConditionsFilters, conditionPath, {});
         }
 
-        const filters: FilterParam[] = path(conditionPath, nestedConditionsFilters);
-        filters.push(filter);
+        const filters: Record<string | number, FilterParam> = path(conditionPath, nestedConditionsFilters);
+        filters[Object.keys(filters).length] = filter;
     }
 
     /** Apply a filter param by adding a where clause to its property & add needed joins if the property is nested */
@@ -214,37 +214,65 @@ export class SearchFilter extends AbstractFilter<SearchFilterOptions> {
         nestedConditionsFilters,
         aliasManager,
     }: ApplyNestedConditionFiltersArgs) {
+        let nested: FilterParam | NestedConditionsFilters;
         const recursiveBrowseFilter = (
             object: Record<string, any>,
             whereExp: WhereExpression,
-            isWhereType: boolean
+            whereType: WhereType = "and"
         ) => {
             for (let property in sortObjectByKeys(object)) {
-                if (Array.isArray(object[property])) {
-                    // Avoid losing the "OR" if it's parsed first
-                    const sortedFilters = sortBy(prop("type"), object[property]);
+                nested = object[property];
+                if (!isWhereType(property)) {
+                    const entries = Object.entries(sortObjectByKeys(nested));
+                    const {
+                        nestedConditions,
+                        filterParams,
+                    }: {
+                        nestedConditions: [WhereType, NestedConditionsFilters][];
+                        filterParams: FilterParam[];
+                    } = entries.reduce(
+                        (acc, [key, value]) => {
+                            if (isWhereType(key)) {
+                                acc.nestedConditions.push([key, value]);
+                            } else {
+                                acc.filterParams.push(value);
+                            }
 
-                    // Add parenthesis around condition identifier
-                    whereExp.andWhere(
-                        new Brackets((nestedWhereExp) => {
-                            sortedFilters.forEach((filter: FilterParam) => {
-                                this.applyFilterParam({ qb, whereExp: nestedWhereExp, filter, aliasManager });
-                            });
-                        })
+                            return acc;
+                        },
+                        { nestedConditions: [], filterParams: [] }
                     );
-                } else if (typeof object[property] === "object" && isWhereType) {
-                    whereExp[(property.toLowerCase() + "Where") as WhereMethod](
-                        new Brackets((nestedWhereExp) => {
-                            recursiveBrowseFilter(object[property], nestedWhereExp, false);
-                        })
+
+                    if (filterParams.length) {
+                        // Avoid losing the "OR" if it's parsed first
+                        const sortedFilterParams = sortBy(prop("type"), filterParams);
+
+                        // Add parenthesis around condition identifier
+                        whereExp[(whereType + "Where") as WhereMethod](
+                            new Brackets((nestedWhereExp) => {
+                                sortedFilterParams.forEach((filter: FilterParam) => {
+                                    this.applyFilterParam({ qb, whereExp: nestedWhereExp, filter, aliasManager });
+                                });
+                            })
+                        );
+                    }
+
+                    // Recursively apply nested conditions
+                    nestedConditions.forEach(([whereType, condition]) =>
+                        recursiveBrowseFilter(condition, whereExp, whereType)
                     );
                 } else {
-                    recursiveBrowseFilter(object[property], whereExp, true);
+                    // and|or object containing either FilterParam or an other and|or object
+                    // Wrap nested filters in WhereType
+                    whereExp[(property.toLowerCase() + "Where") as WhereMethod](
+                        new Brackets((nestedWhereExp) => {
+                            recursiveBrowseFilter(nested, nestedWhereExp);
+                        })
+                    );
                 }
             }
         };
-
-        recursiveBrowseFilter(nestedConditionsFilters, whereExp, true);
+        recursiveBrowseFilter(nestedConditionsFilters, whereExp);
     }
 }
 
