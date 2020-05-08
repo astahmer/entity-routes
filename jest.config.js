@@ -1,7 +1,7 @@
 // For a detailed explanation regarding each configuration property, visit:
 // https://jestjs.io/docs/en/configuration.html
 
-// const threshold = 50;
+const threshold = 50;
 
 module.exports = {
     roots: ["<rootDir>/tests"],
@@ -20,13 +20,14 @@ module.exports = {
         },
     },
     // setupFilesAfterEnv: ["<rootDir>/tests/setup.ts"],
-    // coverageThreshold: {
-    //     global: {
-    //         branches: threshold,
-    //         functions: threshold,
-    //         lines: threshold,
-    //         statements: threshold,
-    //     },
-    // },
-    // coverageReporters: ["json", "lcov", "text", "clover"],
+    collectCoverageFrom: ["<rootDir>/src/**/*.ts"],
+    coverageThreshold: {
+        global: {
+            branches: threshold,
+            functions: threshold,
+            lines: threshold,
+            statements: threshold,
+        },
+    },
+    coverageReporters: ["json", "lcov", "text", "clover"],
 };
