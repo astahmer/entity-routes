@@ -13,7 +13,10 @@ export class WhereManager {
      * propPath = "name" -> return "STARTS_WITH"
      * propPath = "profilePicture.id" -> return "EXACT"
      */
-    public getPropertyDefaultWhereStrategy(config: AbstractFilterConfig<SearchFilterOptions>, propPath: string) {
+    public getPropertyDefaultWhereStrategy(
+        config: AbstractFilterConfig<SearchFilterOptions, StrategyType>,
+        propPath: string
+    ) {
         const isNestedProp = propPath.includes(".");
         const shouldReturnDefault =
             config.options.all || isNestedProp ? config.options.allNested : config.options.allShallow;
@@ -294,7 +297,7 @@ export class WhereManager {
 
     /** Returns strategy given from queryParamKey or default one for this propPath if none given/not valid */
     public getWhereStrategyIdentifier(
-        config: AbstractFilterConfig<SearchFilterOptions>,
+        config: AbstractFilterConfig<SearchFilterOptions, StrategyType>,
         strategyRaw: string,
         propPath: string,
         comparison: COMPARISON_OPERATOR

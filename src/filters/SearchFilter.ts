@@ -24,7 +24,7 @@ import { StrategyType, WhereManager } from "@/filters/WhereManager";
 /**
  * Add a/multiple where clause on any (deep?) properties of the decorated entity
  */
-export class SearchFilter extends AbstractFilter<SearchFilterOptions> {
+export class SearchFilter extends AbstractFilter<SearchFilterOptions, StrategyType> {
     get relationManager() {
         return Container.get(RelationManager);
     }

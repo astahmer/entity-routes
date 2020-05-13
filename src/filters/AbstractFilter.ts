@@ -7,8 +7,8 @@ import { Normalizer } from "@/serializer/Normalizer";
 import { AliasManager } from "@/serializer/AliasManager";
 import { isDefined } from "@/functions/asserts";
 
-export abstract class AbstractFilter<FilterOptions extends DefaultFilterOptions = DefaultFilterOptions> {
-    protected readonly config: AbstractFilterConfig<FilterOptions>;
+export abstract class AbstractFilter<FilterOptions extends DefaultFilterOptions = DefaultFilterOptions, T = string> {
+    protected readonly config: AbstractFilterConfig<FilterOptions, T>;
     protected readonly entityMetadata: EntityMetadata;
 
     protected get normalizer() {
@@ -16,7 +16,7 @@ export abstract class AbstractFilter<FilterOptions extends DefaultFilterOptions 
     }
 
     constructor({ config, entityMetadata }: AbstractFilterConstructor) {
-        this.config = config as AbstractFilterConfig<FilterOptions>;
+        this.config = config as AbstractFilterConfig<FilterOptions, T>;
         this.entityMetadata = entityMetadata;
     }
 
@@ -99,7 +99,7 @@ export abstract class AbstractFilter<FilterOptions extends DefaultFilterOptions 
 
 export type AbstractFilterConstructor = {
     entityMetadata: EntityMetadata;
-    config: AbstractFilterConfig;
+    config: Omit<AbstractFilterConfig, "class">;
 };
 
 export type QueryParamValue = string | string[];
@@ -138,9 +138,9 @@ export type DefaultFilterOptions = {
     allNested?: boolean;
 };
 
-export type AbstractFilterConfig<Options = DefaultFilterOptions> = {
+export type AbstractFilterConfig<Options = DefaultFilterOptions, T = string> = {
     class: new ({ entityMetadata, config }: AbstractFilterConstructor) => any;
-    properties: FilterProperty[];
+    properties: FilterProperty<T>[];
     options: Options;
 };
 
