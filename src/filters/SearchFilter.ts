@@ -289,10 +289,67 @@ export const getSearchFilterDefaultConfig = (): FilterDefaultConfig<SearchFilter
     },
 });
 
-const nestedConditionRegex = /(and|or)|(\((\w+)\))/i; // TODO check if equals to complexfilter ?
+/**
+ * Match complex filter (where type with optional condition identifier)
+ * 1 group is the whole condition string without the colon at the end and the 2nd group is for the whereType (and|or)
+ *
+ * testedString => [fullMatch, group1, group2]
+ * @example
+ * and: => [and:, and, and]
+ * or:  => [and:, and, and]
+ * and(conditionIdentifier): => [and(conditionIdentifier):, and(conditionIdentifier), and]
+ * or(randomStringName): => [or(randomStringName):, or(randomStringName), or]
+ * and(firstCondition)or(nestedCondition): => [and(firstCondition)or(nestedCondition):, and(firstCondition)or(nestedCondition), or]
+ */
 const complexFilterRegex = /(?:((?:(?:(and|or)|(?:\(\w+\))))*):)?/;
+
+/**
+ * Match nested condition in complex filter
+ * Will either match WhereType (and|or) OR conditionIdentifier (\w+) if there is any
+ *
+ * testedString => [fullMatch, group1, group2]
+ * @example
+ * and(key) => [(key), (key), key]
+ * or => [or, or]
+ */
+const nestedConditionRegex = /(and|or)|(\((\w+)\))/i;
+
+/**
+ * Match a prop path, shallow or deep
+ * @example
+ * id
+ * owner.email
+ * owner.role.name
+ */
 const propRegex = /((?:(?:\w)+\.?)+)/;
+
+/**
+ * Match a WhereStrategy, either using words or comparison operator
+ *
+ * testedString => [fullMatch, strategyRaw, comparisonOperator, not]
+ * @example
+ * id;greaterThan => [;greaterThan, greaterThan]
+ * id;greaterThan => [;greaterThan!, greaterThan, !]
+ * id;> => [>, >]
+ * id;>! => [>!, >, !]
+ */
 const strategyRegex = /(?:(?:(?:;(\w+))|(<>|><|<\||>\||<|>|)?))?(!?)/;
+
+/**
+ * Match a SearchFilter queryParam
+ * Is a merge of ComplexFilterRegex + PropRegex + StrategyRegex merged
+ *
+ * Below are valid SearchFilter queryParam strings
+ * @example
+ * id<
+ * id;greaterThan!
+ * owner.id!
+ * and:owner.role.id
+ * and:owner.role.name;endsWith
+ * or(key1):owner.birthDate<>
+ * or(key1)and(nestedKey2):owner.id>
+ * or(key1)and(nestedKey2):owner.email;startsWith!
+ */
 const queryParamRegex = new RegExp(complexFilterRegex.source + propRegex.source + strategyRegex.source, "i");
 
 export type FilterParam = {
@@ -306,14 +363,14 @@ export type FilterParam = {
     comparison: COMPARISON_OPERATOR;
 };
 
-type NestedConditionsFilters = Record<string, any>;
+export type NestedConditionsFilters = Record<string, any>;
 
-type ApplyFilterParamArgs = Omit<AbstractFilterApplyArgs, "queryParams"> & {
+export type ApplyFilterParamArgs = Omit<AbstractFilterApplyArgs, "queryParams"> & {
     filter: FilterParam;
     whereExp: WhereExpression;
 };
 
-type ApplyNestedConditionFiltersArgs = Omit<AbstractFilterApplyArgs, "queryParams"> & {
+export type ApplyNestedConditionFiltersArgs = Omit<AbstractFilterApplyArgs, "queryParams"> & {
     nestedConditionsFilters: NestedConditionsFilters;
     whereExp: WhereExpression;
 };
