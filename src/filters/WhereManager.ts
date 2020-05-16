@@ -1,9 +1,16 @@
-import { COMPARISON_OPERATOR, WhereOperator, WhereMethod, AbstractFilterConfig } from "@/filters/AbstractFilter";
+import {
+    COMPARISON_OPERATOR,
+    WhereOperator,
+    WhereMethod,
+    AbstractFilterConfig,
+    QueryParamValue,
+} from "@/filters/AbstractFilter";
 import { parseStringAsBoolean, camelToSnake } from "@/functions/primitives";
 import { FilterParam, SearchFilterOptions } from "@/filters/SearchFilter";
 import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
 import { Brackets, WhereExpression } from "typeorm";
 import { Service } from "typedi";
+import { isType } from "@/functions/index";
 
 @Service()
 export class WhereManager {
@@ -49,7 +56,17 @@ export class WhereManager {
         return strategy as StrategyType;
     }
 
-    public getWhereOperatorByStrategy(strategy: StrategyType, not: boolean, propCount: number): WhereOperator {
+    /**
+     *
+     * @param strategy any StrategyType except BETWEEN which is a special case
+     * @param not if true then the condition is reversed
+     * @param propCount specific to BETWEEN_STRICT strategy, if 1 returns the opposite sign
+     */
+    public getWhereOperatorByStrategy(
+        strategy: Exclude<StrategyType, "BETWEEN">,
+        not?: boolean,
+        propCount?: number
+    ): WhereOperator {
         let operator;
         switch (strategy) {
             default:
@@ -76,7 +93,7 @@ export class WhereManager {
                 break;
 
             case "BETWEEN_STRICT":
-                if (propCount === 0) {
+                if (!propCount) {
                     operator = !not ? ">" : "<=";
                 } else {
                     operator = !not ? "<" : ">=";
@@ -103,7 +120,7 @@ export class WhereManager {
         return operator as WhereOperator;
     }
 
-    public getWhereParamByStrategy(strategy: StrategyType, propName: string, value: string | boolean | Date) {
+    public getWhereParamByStrategy(strategy: StrategyType, propName: string, value: QueryParamValue | boolean | Date) {
         switch (strategy) {
             default:
                 return { [propName]: value };
@@ -133,11 +150,11 @@ export class WhereManager {
     }
 
     public getWhereParamValueByStrategy(
-        strategy: StrategyType,
+        strategy: Exclude<StrategyType, "BETWEEN">,
         column: ColumnMetadata,
-        value: string,
-        not: boolean,
-        propCount: number
+        value: QueryParamValue,
+        not?: boolean,
+        propCount?: number
     ) {
         // If property is a datetime and the searched value only contains Date (=without time)
         if (column.type === "datetime" && value.indexOf(":") === -1) {
@@ -151,15 +168,8 @@ export class WhereManager {
                 case "LESS_THAN":
                     return value + " " + DAY.START;
 
-                case "BETWEEN":
-                    if (Array.isArray(value)) {
-                        value[0] = value[0] + " " + (!not ? DAY.END : DAY.START);
-                        value[1] = value[1] + " " + (!not ? DAY.START : DAY.END);
-                    }
-                    return value;
-
                 case "BETWEEN_STRICT":
-                    if (propCount === 0) {
+                    if (!propCount) {
                         return value + " " + (!not ? DAY.END : DAY.START);
                     } else {
                         return value + " " + (!not ? DAY.START : DAY.END);
@@ -168,7 +178,7 @@ export class WhereManager {
                 default:
                     break;
             }
-        } else if (typeof column.type === "function" && column.type.name === "Boolean") {
+        } else if (isType<string>(value, isColumnBoolean(column))) {
             // Returns string converted to boolean (inversed by not operator)
             return not ? !parseStringAsBoolean(value) : parseStringAsBoolean(value);
         }
@@ -212,27 +222,13 @@ export class WhereManager {
         strategy: StrategyType;
         entityAlias: string;
         propName: string;
-        rawValue: string;
+        rawValue: QueryParamValue;
         propCount?: number;
         not: boolean;
         column: ColumnMetadata;
     }) {
         const paramName = propCount ? propName + "_" + propCount : propName;
-        const value = this.getWhereParamValueByStrategy(strategy, column, rawValue, not, propCount);
-
-        if ("EXISTS" === strategy) {
-            // use not (if given) to reverse query param value
-            not = not ? !parseStringAsBoolean(rawValue) : parseStringAsBoolean(rawValue);
-        }
-
-        if ("BETWEEN" !== strategy) {
-            const whereOperator = this.getWhereOperatorByStrategy(strategy, not, propCount);
-            const whereParamSlot = this.getWhereParamSlotByStrategy(strategy, paramName);
-            const whereParam = this.getWhereParamByStrategy(strategy, paramName, value);
-
-            const whereCondition = `${entityAlias}.${propName} ${whereOperator} ${whereParamSlot}`;
-            return { whereOperator, whereCondition, whereParam };
-        } else {
+        if ("BETWEEN" === strategy) {
             // Quite specific case for BETWEEN strategy
             const whereOperator = (not ? "NOT " : "") + "BETWEEN";
             const whereParamSlot = `:${paramName + "_1"} AND :${paramName + "_2"}`;
@@ -241,6 +237,22 @@ export class WhereManager {
             const whereCondition = `${entityAlias}.${propName} ${whereOperator} ${whereParamSlot}`;
             return { whereOperator, whereCondition, whereParam };
         }
+
+        const value = this.getWhereParamValueByStrategy(strategy, column, rawValue, not, propCount);
+
+        if (isType<string>(rawValue, "EXISTS" === strategy)) {
+            // use not (if given) to reverse query param value
+            not = not ? !parseStringAsBoolean(rawValue) : parseStringAsBoolean(rawValue);
+        }
+
+        const whereOperator = this.getWhereOperatorByStrategy(strategy, not, propCount);
+        const whereParamSlot = this.getWhereParamSlotByStrategy(strategy, paramName);
+        const whereParam = this.getWhereParamByStrategy(strategy, paramName, value);
+
+        const whereCondition = `${entityAlias}.${propName} ${whereOperator}${
+            whereParamSlot ? " " + whereParamSlot : whereParamSlot
+        }`;
+        return { whereOperator, whereCondition, whereParam };
     }
 
     /** Add where condition by a given strategy type  */
@@ -289,9 +301,9 @@ export class WhereManager {
             const { whereCondition, whereParam } = this.getWhereArgs({
                 strategy: filter.strategy,
                 not: filter.not,
-                entityAlias: entityAlias,
+                entityAlias,
                 propName,
-                rawValue: filter.value as string,
+                rawValue: filter.value,
                 column,
             });
             whereExp[mainMethod](whereCondition, whereParam);
@@ -303,7 +315,7 @@ export class WhereManager {
         config: AbstractFilterConfig<SearchFilterOptions, StrategyType>,
         strategyRaw: string,
         propPath: string,
-        comparison: COMPARISON_OPERATOR
+        comparison?: COMPARISON_OPERATOR
     ): StrategyType {
         let strategyIdentifier: StrategyType;
         if (strategyRaw) {
@@ -369,3 +381,6 @@ export enum DAY {
     START = "00:00:00",
     END = "23:59:59",
 }
+
+export const isColumnBoolean = (column: ColumnMetadata) =>
+    typeof column.type === "function" ? column.type.name === "Boolean" : ["bool", "boolean"].includes(column.type);
