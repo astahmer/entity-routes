@@ -1,14 +1,112 @@
-import { getRouteFiltersMeta } from "@/index";
+import { getRouteFiltersMeta, AbstractFilter, AbstractFilterApplyArgs, RouteFiltersMeta } from "@/index";
 import { createTestConnection, closeTestConnection } from "@@/tests/testConnection";
-import { Cache, CacheFilter, CacheFilterOptions } from "@@/tests/filters/CacheFilter";
-import { GroupBy, GroupByFilter } from "@@/tests/filters/GroupByFilter";
-import { getRepository, Entity, PrimaryGeneratedColumn, Column, ManyToOne } from "typeorm";
+import { Cache, CacheFilter, CacheFilterOptions } from "@@/tests/filters/sample/CacheFilter";
+import { GroupBy, GroupByFilter } from "@@/tests/filters/sample/GroupByFilter";
+import { getRepository, Entity, PrimaryGeneratedColumn, Column, ManyToOne, EntityMetadata, Repository } from "typeorm";
 
 describe("AbstractFilter", () => {
     class AbstractEntity {
         @PrimaryGeneratedColumn()
         id: number;
     }
+
+    describe("protected methods", () => {
+        @Entity()
+        class Role extends AbstractEntity {
+            @Column()
+            identifier: string;
+        }
+
+        @Entity()
+        class User extends AbstractEntity {
+            @Column()
+            firstName: string;
+
+            @ManyToOne(() => Role)
+            role: Role;
+        }
+
+        class TestAbstractFilter extends AbstractFilter {
+            apply() {}
+
+            // Protected methods
+
+            getColumnMetaForPropPath(param: string) {
+                return super.getColumnMetaForPropPath(param);
+            }
+
+            getColumnMetaForPropPathInEntity(propPath: string | string[], entityMetadata: EntityMetadata) {
+                return super.getColumnMetaForPropPathInEntity(propPath, entityMetadata);
+            }
+
+            isFilterEnabledForProperty(propPath: string) {
+                return super.isFilterEnabledForProperty(propPath);
+            }
+
+            getPropertiesToFilter(queryParams: AbstractFilterApplyArgs["queryParams"]) {
+                return super.getPropertiesToFilter(queryParams);
+            }
+
+            getPropertiesQueryParamsToFilter(queryParams: AbstractFilterApplyArgs["queryParams"]) {
+                return super.getPropertiesQueryParamsToFilter(queryParams);
+            }
+        }
+
+        let filter: TestAbstractFilter;
+        beforeAll(async () => {
+            await createTestConnection([User, Role]);
+            filter = new TestAbstractFilter({
+                config: { options: {}, properties: ["firstName", "role.id"] },
+                entityMetadata: getRepository(User).metadata,
+            });
+        });
+        afterAll(closeTestConnection);
+
+        describe("getColumnMetaForPropPath", () => {
+            it("should return column", () => {
+                expect(filter.getColumnMetaForPropPath("firstName").propertyName).toEqual("firstName");
+                expect(filter.getColumnMetaForPropPath("role.identifier").propertyName).toEqual("identifier");
+            });
+            it("should not find any column", () => {
+                expect(filter.getColumnMetaForPropPath("notExistingKey")).toEqual(null);
+            });
+        });
+
+        describe("getColumnMetaForPropPathInEntity", () => {
+            let entityMetadata: EntityMetadata;
+            beforeAll(() => (entityMetadata = getRepository(User).metadata));
+
+            it("should return column on shallow path", () => {
+                expect(filter.getColumnMetaForPropPathInEntity("firstName", entityMetadata)?.propertyName).toEqual(
+                    "firstName"
+                );
+            });
+            it("should return column on nested prop with dot-delimited path", () => {
+                expect(filter.getColumnMetaForPropPathInEntity("role.identifier", entityMetadata).propertyName).toEqual(
+                    "identifier"
+                );
+            });
+            it("should return column on nested prop array path", () => {
+                expect(filter.getColumnMetaForPropPathInEntity(["role", "id"], entityMetadata).propertyName).toEqual(
+                    "id"
+                );
+            });
+            it("should not find any column", () => {
+                expect(filter.getColumnMetaForPropPathInEntity("notExistingKey", entityMetadata)).toEqual(null);
+            });
+        });
+
+        describe("isFilterEnabledForProperty", () => {
+            it("should return true on enabled props", () => {
+                expect(filter.isFilterEnabledForProperty("firstName")).toEqual(true);
+                expect(filter.isFilterEnabledForProperty("role.id")).toEqual(true);
+            });
+            it("should return false on other props", () => {
+                expect(filter.isFilterEnabledForProperty("id")).toEqual(false);
+                expect(filter.isFilterEnabledForProperty("role.identifier")).toEqual(false);
+            });
+        });
+    });
 
     describe("Cache example filter", () => {
         @Cache(true, 60)
@@ -28,7 +126,7 @@ describe("AbstractFilter", () => {
             role: Role;
         }
 
-        beforeAll(async () => createTestConnection([User, Role]));
+        beforeAll(() => createTestConnection([User, Role]));
         afterAll(closeTestConnection);
 
         it("can register filter using @Cache decorator without options", () => {
@@ -90,23 +188,34 @@ describe("AbstractFilter", () => {
             role: Role;
         }
 
-        beforeAll(async () => createTestConnection([User, Role]));
+        let filtersMeta: RouteFiltersMeta,
+            repository: Repository<User>,
+            entityMetadata: EntityMetadata,
+            groupByFilter: GroupByFilter;
+        beforeAll(async () => {
+            await createTestConnection([User, Role]);
+            filtersMeta = getRouteFiltersMeta(User);
+            repository = getRepository(User);
+            entityMetadata = repository.metadata;
+            groupByFilter = new GroupByFilter({ config: filtersMeta["GroupByFilter"], entityMetadata });
+        });
         afterAll(closeTestConnection);
 
         it("has valid entityProperties", () => {
-            const filtersMeta = getRouteFiltersMeta(User);
-            const repository = getRepository(User);
-            const entityMetadata = repository.metadata;
-            const groupByFilter = new GroupByFilter({ config: filtersMeta["GroupByFilter"], entityMetadata });
             expect(groupByFilter.entityProperties).toEqual(["id", "firstName", "role"]);
         });
 
         it("has valid filterProperties", () => {
-            const filtersMeta = getRouteFiltersMeta(User);
-            const repository = getRepository(User);
-            const entityMetadata = repository.metadata;
-            const groupByFilter = new GroupByFilter({ config: filtersMeta["GroupByFilter"], entityMetadata });
             expect(groupByFilter.filterProperties).toEqual(["firstName", "role.id"]);
+        });
+
+        it("can be used as ClassDecorator", () => {
+            expect(filtersMeta["GroupByFilter"].properties).toEqual(["firstName", "role.id"]);
+
+            const qb = repository.createQueryBuilder();
+            groupByFilter.apply({ qb });
+            // each provided properties should be used as groupBy
+            expect(qb.expressionMap.groupBys).toEqual(filtersMeta["GroupByFilter"].properties);
         });
 
         it("can be used as PropertyDecorator", () => {
@@ -115,19 +224,6 @@ describe("AbstractFilter", () => {
             const entityMetadata = repository.metadata;
             const groupByFilter = new GroupByFilter({ config: filtersMeta["GroupByFilter"], entityMetadata });
             expect(filtersMeta["GroupByFilter"].properties).toEqual(["identifier"]);
-
-            const qb = repository.createQueryBuilder();
-            groupByFilter.apply({ qb });
-            // each provided properties should be used as groupBy
-            expect(qb.expressionMap.groupBys).toEqual(filtersMeta["GroupByFilter"].properties);
-        });
-
-        it("can be used as ClassDecorator", () => {
-            const filtersMeta = getRouteFiltersMeta(User);
-            const repository = getRepository(User);
-            const entityMetadata = repository.metadata;
-            const groupByFilter = new GroupByFilter({ config: filtersMeta["GroupByFilter"], entityMetadata });
-            expect(filtersMeta["GroupByFilter"].properties).toEqual(["firstName", "role.id"]);
 
             const qb = repository.createQueryBuilder();
             groupByFilter.apply({ qb });

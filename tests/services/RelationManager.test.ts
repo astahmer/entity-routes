@@ -61,8 +61,9 @@ describe("AliasManager", () => {
         }
     }
 
-    beforeAll(async () => createTestConnection([Category, Role, Image, User]));
+    beforeAll(() => createTestConnection([Category, Role, Image, User]));
     afterAll(closeTestConnection);
+
     it("can make joins from prop path", () => {
         const aliasManager = new AliasManager();
         const manager = Container.get(RelationManager);
@@ -102,7 +103,8 @@ describe("AliasManager", () => {
 
         manager.joinAndSelectExposedProps(metadata, "details", qb, metadata, "", metadata.tableName, {}, aliasManager);
 
-        // should have joined & selected every props that is exposed on User entity (rootMetadata) & User context (metadata) for operation "details"
+        // should have joined & selected every props that are exposed
+        // on User entity (rootMetadata) & User context (metadata) for operation "details"
         expect(qb.expressionMap.joinAttributes.map((join) => join.alias.name)).toEqual([
             "user_role_1",
             "role_category_1",

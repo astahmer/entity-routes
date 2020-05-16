@@ -9,87 +9,87 @@ import {
 import { createTestConnection, closeTestConnection } from "@@/tests/testConnection";
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, getRepository } from "typeorm";
 
+class AbstractEntity {
+    @PrimaryGeneratedColumn()
+    id: number;
+}
+
+@Entity()
+class Role extends AbstractEntity {
+    @Column()
+    identifier: string;
+}
 describe("Pagination filter", () => {
-    class AbstractEntity {
-        @PrimaryGeneratedColumn()
-        id: number;
-    }
+    it("can register filter using @Pagination decorator without options", async () => {
+        @Pagination()
+        @Entity()
+        class User extends AbstractEntity {
+            @Column()
+            firstName: string;
 
-    @Entity()
-    class Role extends AbstractEntity {
-        @Column()
-        identifier: string;
-    }
+            @ManyToOne(() => Role)
+            role: Role;
+        }
 
-    describe("Pagination filter", () => {
-        it("can register filter using @Pagination decorator without options", async () => {
-            @Pagination()
-            @Entity()
-            class User extends AbstractEntity {
-                @Column()
-                firstName: string;
+        await createTestConnection([User, Role]);
 
-                @ManyToOne(() => Role)
-                role: Role;
-            }
+        const defaultConfig = getPaginationFilterDefaultConfig();
 
-            await createTestConnection([User, Role]);
-
-            const defaultConfig = getPaginationFilterDefaultConfig();
-
-            expect(getRouteFiltersMeta(User)).toEqual({
-                PaginationFilter: {
-                    ...defaultConfig,
-                    properties: [],
-                },
-            });
-
-            closeTestConnection();
+        expect(getRouteFiltersMeta(User)).toEqual({
+            PaginationFilter: {
+                ...defaultConfig,
+                properties: [],
+            },
         });
 
-        it("can register filter using @Pagination decorator with options", async () => {
-            @Pagination({ defaultOrderDirection: "desc", defaultRetrievedItemsLimit: 25 })
-            @Entity()
-            class User extends AbstractEntity {
-                @Column()
-                firstName: string;
+        closeTestConnection();
+    });
 
-                @ManyToOne(() => Role)
-                role: Role;
-            }
+    it("can register filter using @Pagination decorator with options", async () => {
+        @Pagination({ defaultOrderDirection: "desc", defaultRetrievedItemsLimit: 25 })
+        @Entity()
+        class User extends AbstractEntity {
+            @Column()
+            firstName: string;
 
-            await createTestConnection([User, Role]);
+            @ManyToOne(() => Role)
+            role: Role;
+        }
 
-            const defaultConfig = getPaginationFilterDefaultConfig();
+        await createTestConnection([User, Role]);
 
-            expect(getRouteFiltersMeta(User)).toEqual({
-                PaginationFilter: {
-                    ...defaultConfig,
-                    options: {
-                        ...defaultConfig.options,
-                        defaultOrderDirection: "desc",
-                        defaultRetrievedItemsLimit: 25,
-                    },
-                    properties: [],
+        const defaultConfig = getPaginationFilterDefaultConfig();
+
+        expect(getRouteFiltersMeta(User)).toEqual({
+            PaginationFilter: {
+                ...defaultConfig,
+                options: {
+                    ...defaultConfig.options,
+                    defaultOrderDirection: "desc",
+                    defaultRetrievedItemsLimit: 25,
                 },
-            });
-
-            closeTestConnection();
+                properties: [],
+            },
         });
+
+        closeTestConnection();
+    });
+
+    describe("apply", () => {
+        @Pagination(["firstName", ["role.identifier", "desc"]], { defaultRetrievedItemsLimit: 50 })
+        @Entity()
+        class User extends AbstractEntity {
+            @Column()
+            firstName: string;
+
+            @ManyToOne(() => Role)
+            role: Role;
+        }
+
+        beforeAll(() => createTestConnection([User, Role]));
+        afterAll(closeTestConnection);
 
         it("can register filter using @Pagination decorator on specific properties only", async () => {
-            @Pagination(["firstName", ["role.identifier", "desc"]], { defaultRetrievedItemsLimit: 50 })
-            @Entity()
-            class User extends AbstractEntity {
-                @Column()
-                firstName: string;
-
-                @ManyToOne(() => Role)
-                role: Role;
-            }
-
-            await createTestConnection([User, Role]);
-
             const defaultConfig = getPaginationFilterDefaultConfig();
 
             expect(getRouteFiltersMeta(User)).toEqual({
@@ -102,23 +102,9 @@ describe("Pagination filter", () => {
                     properties: ["firstName", ["role.identifier", "desc"]],
                 },
             });
-
-            closeTestConnection();
         });
 
         it("can be applied with options & queryParam value", async () => {
-            @Pagination(["firstName", ["role.identifier", "desc"]], { defaultRetrievedItemsLimit: 50 })
-            @Entity()
-            class User extends AbstractEntity {
-                @Column()
-                firstName: string;
-
-                @ManyToOne(() => Role)
-                role: Role;
-            }
-
-            await createTestConnection([User, Role]);
-
             const filtersMeta = getRouteFiltersMeta(User);
             const repository = getRepository(User);
             const entityMetadata = repository.metadata;
@@ -141,8 +127,9 @@ describe("Pagination filter", () => {
             expect(qb.expressionMap.orderBys).toEqual({ "user.firstName": "ASC", "user_role_1.identifier": "ASC" });
             expect(qb.expressionMap.take).toEqual(15);
             expect(qb.expressionMap.skip).toEqual(30);
-
-            closeTestConnection();
         });
     });
+
+    // TODO OrderBy
+    // TODO describe protected methods
 });

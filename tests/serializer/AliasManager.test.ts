@@ -23,7 +23,7 @@ describe("AliasManager", () => {
         role: Role;
     }
 
-    beforeAll(async () => createTestConnection([Role, User]));
+    beforeAll(() => createTestConnection([Role, User]));
     afterAll(closeTestConnection);
 
     it("generate", () => {

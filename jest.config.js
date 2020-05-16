@@ -29,5 +29,5 @@ module.exports = {
             statements: threshold,
         },
     },
-    coverageReporters: ["json", "lcov", "text", "clover"],
+    coverageReporters: ["lcov", "text"],
 };

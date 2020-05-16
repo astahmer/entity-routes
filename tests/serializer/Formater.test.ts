@@ -67,11 +67,10 @@ describe("Formater", () => {
         writer: User;
     }
 
-    beforeAll(async () => createTestConnection([Role, User, Article, Comment]));
+    beforeAll(() => createTestConnection([Role, User, Article, Comment]));
     afterAll(closeTestConnection);
 
-    it("formatItem properly", async () => {
-        const entityMetadata = getRepository(User).metadata;
+    describe("formatItem properly", () => {
         const formater = Container.get(Formater) as Formater<User>;
 
         const item = new User();
@@ -93,33 +92,42 @@ describe("Formater", () => {
         item.role = role;
         item.articles = [article1, article2];
 
-        const formated = await formater.formatItem({ item, operation: "details", entityMetadata });
-        // Computed prop (identifier) should have been added and keys sorted alphabetically
-        expect(formated).toEqual({
-            articles: [{ id: 1 }, { id: 2 }],
-            email: "email@test.com",
-            id: 1,
-            identifier: "1_Alex",
-            name: "Alex",
-            role: { id: 1, startDate: role.startDate, title: "Admin" },
+        it("Computed prop (identifier) should have been added and keys sorted alphabetically", async () => {
+            const entityMetadata = getRepository(User).metadata;
+
+            const formated = await formater.formatItem({ item, operation: "details", entityMetadata });
+            expect(formated).toEqual({
+                articles: [{ id: 1 }, { id: 2 }],
+                email: "email@test.com",
+                id: 1,
+                identifier: "1_Alex",
+                name: "Alex",
+                role: { id: 1, startDate: role.startDate, title: "Admin" },
+            });
         });
 
-        const formatedWithSubresource = await formater.formatItem({
-            item,
-            operation: "details",
-            entityMetadata,
-            options: { shouldSetSubresourcesIriOnItem: true },
-        });
-        // Subresource (comments) should have been added
-        expect(formatedWithSubresource.comments).toEqual("/user/1/comments");
+        it("Subresource (comments) should have been added", async () => {
+            const entityMetadata = getRepository(User).metadata;
 
-        const formatedWithFlatIri = await formater.formatItem({
-            item,
-            operation: "details",
-            entityMetadata,
-            options: { shouldEntityWithOnlyIdBeFlattenedToIri: true },
+            const formatedWithSubresource = await formater.formatItem({
+                item,
+                operation: "details",
+                entityMetadata,
+                options: { shouldSetSubresourcesIriOnItem: true },
+            });
+            expect(formatedWithSubresource.comments).toEqual("/user/1/comments");
         });
-        // Articles should have been flattened to iri
-        expect(formatedWithFlatIri.articles).toEqual(["/article/1", "/article/2"]);
+
+        it("Relations (articles) should have been flattened to iri", async () => {
+            const entityMetadata = getRepository(User).metadata;
+
+            const formatedWithFlatIri = await formater.formatItem({
+                item,
+                operation: "details",
+                entityMetadata,
+                options: { shouldEntityWithOnlyIdBeFlattenedToIri: true },
+            });
+            expect(formatedWithFlatIri.articles).toEqual(["/article/1", "/article/2"]);
+        });
     });
 });

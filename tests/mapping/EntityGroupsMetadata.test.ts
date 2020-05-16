@@ -1,5 +1,5 @@
-import { Entity, ManyToOne, Column, PrimaryGeneratedColumn, getRepository } from "typeorm";
-import { getGroupsMetadata, Groups, formatGroupsMethodName } from "@/index";
+import { Entity, ManyToOne, Column, PrimaryGeneratedColumn, getRepository, EntityMetadata } from "typeorm";
+import { getGroupsMetadata, Groups, formatGroupsMethodName, GroupsMetadata, EntityGroupsMetadata } from "@/index";
 import { createTestConnection, closeTestConnection } from "../testConnection";
 
 describe("EntityGroupsMetadata", () => {
@@ -32,7 +32,7 @@ describe("EntityGroupsMetadata", () => {
         }
     }
 
-    beforeAll(async () => createTestConnection([User, Role]));
+    beforeAll(() => createTestConnection([User, Role]));
     afterAll(closeTestConnection);
 
     it("should getExposedPropsOn", () => {
@@ -44,19 +44,27 @@ describe("EntityGroupsMetadata", () => {
         ]);
     });
 
-    it("should getSelectProps", () => {
-        const metadata = getGroupsMetadata(User);
-        const roleEntityMetadata = getRepository(Role).metadata;
+    describe("should getSelectProps", () => {
+        let metadata: EntityGroupsMetadata, roleEntityMetadata: EntityMetadata;
+        beforeAll(() => {
+            metadata = getGroupsMetadata(User);
+            roleEntityMetadata = getRepository(Role).metadata;
+        });
 
-        // Getting groups on User entity with "user" context on "details" operation
-        expect(metadata.getSelectProps("details", metadata.entityMeta)).toEqual(["user.name"]);
-        // Getting groups on User entity with "role" context on "details" operation
-        expect(metadata.getSelectProps("details", roleEntityMetadata)).toEqual([]);
+        it('on User entity with "user" context on "details" operation', () => {
+            expect(metadata.getSelectProps("details", metadata.entityMeta)).toEqual(["user.name"]);
+        });
+        it('on User entity with "role" context on "details" operation', () => {
+            expect(metadata.getSelectProps("details", roleEntityMetadata)).toEqual([]);
+        });
 
-        // Getting groups on User entity with "role" context on "list" operation
-        expect(metadata.getSelectProps("list", roleEntityMetadata)).toEqual(["user.name"]);
-        expect(metadata.getSelectProps("list", roleEntityMetadata, true, "UserEntity")).toEqual(["UserEntity.name"]);
-        expect(metadata.getSelectProps("list", roleEntityMetadata, false)).toEqual(["name"]);
+        it('on User entity with "role" context on "list" operation', () => {
+            expect(metadata.getSelectProps("list", roleEntityMetadata)).toEqual(["user.name"]);
+            expect(metadata.getSelectProps("list", roleEntityMetadata, true, "UserEntity")).toEqual([
+                "UserEntity.name",
+            ]);
+            expect(metadata.getSelectProps("list", roleEntityMetadata, false)).toEqual(["name"]);
+        });
     });
 
     it("should getRelationPropsMetas", () => {

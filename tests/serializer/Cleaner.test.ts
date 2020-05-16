@@ -45,11 +45,10 @@ describe("Cleaner", () => {
         }
     }
 
-    beforeAll(async () => createTestConnection([Role, User]));
+    beforeAll(() => createTestConnection([Role, User]));
     afterAll(closeTestConnection);
 
-    it("cleanItem properly", () => {
-        const entityMetadata = getRepository(User).metadata;
+    describe("cleanItem properly", () => {
         const cleaner = Container.get(Cleaner) as Cleaner<User>;
 
         const values = new User();
@@ -65,19 +64,24 @@ describe("Cleaner", () => {
 
         values.role = role;
 
-        // Role.startDate/endDate should have been excluded
-        expect(cleaner.cleanItem({ values, operation: "create", rootMetadata: entityMetadata })).toEqual({
-            id: 1,
-            name: "Alex",
-            email: "email@test.com",
-            role: { id: 1, title: "Admin" },
+        it("Role.startDate/endDate should have been excluded", () => {
+            const entityMetadata = getRepository(User).metadata;
+            expect(cleaner.cleanItem({ values, operation: "create", rootMetadata: entityMetadata })).toEqual({
+                id: 1,
+                name: "Alex",
+                email: "email@test.com",
+                role: { id: 1, title: "Admin" },
+            });
         });
 
-        // Anything in role except id should have been excluded along with User.email
-        expect(cleaner.cleanItem({ values, operation: "update", rootMetadata: entityMetadata })).toEqual({
-            id: 1,
-            name: "Alex",
-            role: { id: 1 },
+        it("Anything in role except id should have been excluded along with User.email", () => {
+            const entityMetadata = getRepository(User).metadata;
+
+            expect(cleaner.cleanItem({ values, operation: "update", rootMetadata: entityMetadata })).toEqual({
+                id: 1,
+                name: "Alex",
+                role: { id: 1 },
+            });
         });
     });
 });

@@ -9,9 +9,7 @@ describe("GroupsMetadata", () => {
         }
 
         const metadata = getGroupsMetadata<GroupsMetadata>(User);
-        expect(metadata.globals["create"]).toBeDefined();
-        expect(metadata.globals["create"]).toBeArray();
-        expect(metadata.globals["create"]).toContain("name");
+        expect(metadata.globals["create"]).toEqual(["name"]);
     });
 
     it("can add prop to routes groups", () => {
@@ -21,7 +19,6 @@ describe("GroupsMetadata", () => {
         }
 
         const metadata = getGroupsMetadata<GroupsMetadata>(User);
-        expect(metadata.routes["user"]).toBeDefined();
         expect(metadata.routes["user"]).toEqual({
             list: ["name"],
         });
