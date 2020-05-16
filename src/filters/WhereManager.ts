@@ -17,20 +17,23 @@ export class WhereManager {
         config: AbstractFilterConfig<SearchFilterOptions, StrategyType>,
         propPath: string
     ) {
+        const fallbackStrategy = "EXACT";
         const isNestedProp = propPath.includes(".");
         const shouldReturnDefault =
             config.options.all || isNestedProp ? config.options.allNested : config.options.allShallow;
         // If all entity props are enabled as filters, return default where strategy
         if (shouldReturnDefault) {
-            return config.options.defaultWhereStrategy || "EXACT";
+            return config.options.defaultWhereStrategy || fallbackStrategy;
         }
 
         const propFilter = config.properties.find((propFilter) =>
             typeof propFilter === "string" ? propFilter === propPath : propFilter[0] === propPath
         );
 
+        if (!propFilter) return fallbackStrategy;
+
         return typeof propFilter === "string"
-            ? config.options.defaultWhereStrategy || "EXACT"
+            ? config.options.defaultWhereStrategy || fallbackStrategy
             : this.formatWhereStrategy(propFilter[1]);
     }
 
