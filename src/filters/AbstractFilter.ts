@@ -6,6 +6,7 @@ import Container from "typedi";
 import { Normalizer } from "@/serializer/Normalizer";
 import { AliasManager } from "@/serializer/AliasManager";
 import { isDefined } from "@/functions/asserts";
+import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
 
 export abstract class AbstractFilter<FilterOptions extends DefaultFilterOptions = DefaultFilterOptions, T = string> {
     protected readonly config: AbstractFilterConfig<FilterOptions, T>;
@@ -44,15 +45,26 @@ export abstract class AbstractFilter<FilterOptions extends DefaultFilterOptions 
     abstract apply({ queryParams, qb, aliasManager }: AbstractFilterApplyArgs): void;
 
     /** Return column metadata if param exists in this entity properties or is a valid propPath from this entity */
-    protected getColumnMetaForPropPath(param: string) {
-        const propPath = param.indexOf(".") !== -1 ? param.split(".") : [param];
-        return this.getColumnMetaForPropPathInEntity(propPath, this.entityMetadata);
+    protected getPropMetaAtPath(propPath: string | string[]): ColumnMetadata;
+    protected getPropMetaAtPath<T extends boolean>(
+        propPath: string | string[],
+        options: GetPropMetaAtPathOptions<T>
+    ): T extends true ? RelationMetadata : ColumnMetadata;
+    protected getPropMetaAtPath(propPath: string | string[], options?: GetPropMetaAtPathOptions) {
+        return this.getPropMetaAtPathInEntity(propPath, this.entityMetadata, options);
     }
 
-    protected getColumnMetaForPropPathInEntity(
+    protected getPropMetaAtPathInEntity(propPath: string | string[], entityMetadata: EntityMetadata): ColumnMetadata;
+    protected getPropMetaAtPathInEntity<T extends boolean>(
         propPath: string | string[],
-        entityMetadata: EntityMetadata
-    ): ColumnMetadata {
+        entityMetadata: EntityMetadata,
+        options: GetPropMetaAtPathOptions<T>
+    ): T extends true ? RelationMetadata : ColumnMetadata;
+    protected getPropMetaAtPathInEntity(
+        propPath: string | string[],
+        entityMetadata: EntityMetadata,
+        options?: GetPropMetaAtPathOptions
+    ): ColumnMetadata | RelationMetadata {
         propPath = Array.isArray(propPath) ? propPath : propPath.split(".");
 
         const column = entityMetadata.findColumnWithPropertyName(propPath[0]);
@@ -63,8 +75,12 @@ export abstract class AbstractFilter<FilterOptions extends DefaultFilterOptions 
             return null;
         }
 
+        if (relation && nextProp.length === 1 && nextProp[0] === "id" && options?.shouldReturnRelationInsteadOfId) {
+            return relation;
+        }
+
         return relation && nextProp.length
-            ? this.getColumnMetaForPropPathInEntity(nextProp, relation.inverseEntityMetadata)
+            ? this.getPropMetaAtPathInEntity(nextProp, relation.inverseEntityMetadata)
             : column;
     }
 
@@ -86,7 +102,7 @@ export abstract class AbstractFilter<FilterOptions extends DefaultFilterOptions 
         return Object.keys(queryParams).reduce((acc, param: string) => {
             if (
                 this.isFilterEnabledForProperty(param) &&
-                this.getColumnMetaForPropPath(param) &&
+                this.getPropMetaAtPath(param) &&
                 isDefined(queryParams[param])
             ) {
                 acc.push(param);
@@ -152,3 +168,5 @@ export type FilterDefaultConfig<Options = DefaultFilterOptions> = Omit<
     AbstractFilterConfig<Partial<Options>>,
     "properties"
 >;
+
+export type GetPropMetaAtPathOptions<T = boolean> = { shouldReturnRelationInsteadOfId: T };

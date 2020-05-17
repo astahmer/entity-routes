@@ -1,8 +1,16 @@
-import { getRouteFiltersMeta, AbstractFilter, AbstractFilterApplyArgs, RouteFiltersMeta } from "@/index";
+import {
+    getRouteFiltersMeta,
+    AbstractFilter,
+    AbstractFilterApplyArgs,
+    RouteFiltersMeta,
+    GetPropMetaAtPathOptions,
+} from "@/index";
 import { createTestConnection, closeTestConnection } from "@@/tests/testConnection";
 import { Cache, CacheFilter, CacheFilterOptions } from "@@/tests/filters/sample/CacheFilter";
 import { GroupBy, GroupByFilter } from "@@/tests/filters/sample/GroupByFilter";
 import { getRepository, Entity, PrimaryGeneratedColumn, Column, ManyToOne, EntityMetadata, Repository } from "typeorm";
+import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
+import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
 
 describe("AbstractFilter", () => {
     class AbstractEntity {
@@ -31,12 +39,27 @@ describe("AbstractFilter", () => {
 
             // Protected methods
 
-            getColumnMetaForPropPath(param: string) {
-                return super.getColumnMetaForPropPath(param);
+            getPropMetaAtPath(propPath: string | string[]): ColumnMetadata;
+            getPropMetaAtPath<T>(
+                propPath: string | string[],
+                options: GetPropMetaAtPathOptions<T>
+            ): T extends true ? RelationMetadata : ColumnMetadata;
+            getPropMetaAtPath(propPath: string | string[], options?: GetPropMetaAtPathOptions) {
+                return super.getPropMetaAtPath(propPath, options);
             }
 
-            getColumnMetaForPropPathInEntity(propPath: string | string[], entityMetadata: EntityMetadata) {
-                return super.getColumnMetaForPropPathInEntity(propPath, entityMetadata);
+            getPropMetaAtPathInEntity(propPath: string | string[], entityMetadata: EntityMetadata): ColumnMetadata;
+            getPropMetaAtPathInEntity<T extends boolean>(
+                propPath: string | string[],
+                entityMetadata: EntityMetadata,
+                options: GetPropMetaAtPathOptions<T>
+            ): T extends true ? RelationMetadata : ColumnMetadata;
+            getPropMetaAtPathInEntity(
+                propPath: string | string[],
+                entityMetadata: EntityMetadata,
+                options?: GetPropMetaAtPathOptions
+            ) {
+                return super.getPropMetaAtPathInEntity(propPath, entityMetadata, options);
             }
 
             isFilterEnabledForProperty(propPath: string) {
@@ -56,43 +79,55 @@ describe("AbstractFilter", () => {
         beforeAll(async () => {
             await createTestConnection([User, Role]);
             filter = new TestAbstractFilter({
-                config: { options: {}, properties: ["firstName", "role.id"] },
+                config: { options: {}, properties: ["firstName", "role", "role.id"] },
                 entityMetadata: getRepository(User).metadata,
             });
         });
         afterAll(closeTestConnection);
 
-        describe("getColumnMetaForPropPath", () => {
+        describe("getPropMetaAtPath", () => {
             it("should return column", () => {
-                expect(filter.getColumnMetaForPropPath("firstName").propertyName).toEqual("firstName");
-                expect(filter.getColumnMetaForPropPath("role.identifier").propertyName).toEqual("identifier");
+                expect(filter.getPropMetaAtPath("firstName").propertyName).toEqual("firstName");
+                expect(filter.getPropMetaAtPath("role.identifier").propertyName).toEqual("identifier");
             });
             it("should not find any column", () => {
-                expect(filter.getColumnMetaForPropPath("notExistingKey")).toEqual(null);
+                expect(filter.getPropMetaAtPath("notExistingKey")).toEqual(null);
             });
         });
 
-        describe("getColumnMetaForPropPathInEntity", () => {
+        describe("getPropMetaAtPathInEntity", () => {
             let entityMetadata: EntityMetadata;
             beforeAll(() => (entityMetadata = getRepository(User).metadata));
 
             it("should return column on shallow path", () => {
-                expect(filter.getColumnMetaForPropPathInEntity("firstName", entityMetadata)?.propertyName).toEqual(
+                expect(filter.getPropMetaAtPathInEntity("firstName", entityMetadata)?.propertyName).toEqual(
                     "firstName"
                 );
             });
+
+            it("should return id column on shallow path that leads to a relation", () => {
+                expect(filter.getPropMetaAtPathInEntity("role", entityMetadata).propertyName).toEqual("id");
+            });
+
+            it("should return relation on shallow path if options.shouldReturnRelationInsteadOfId is true", () => {
+                expect(
+                    filter.getPropMetaAtPathInEntity("role", entityMetadata, { shouldReturnRelationInsteadOfId: true })
+                        .propertyName
+                ).toEqual("role");
+            });
+
             it("should return column on nested prop with dot-delimited path", () => {
-                expect(filter.getColumnMetaForPropPathInEntity("role.identifier", entityMetadata).propertyName).toEqual(
+                expect(filter.getPropMetaAtPathInEntity("role.identifier", entityMetadata).propertyName).toEqual(
                     "identifier"
                 );
             });
+
             it("should return column on nested prop array path", () => {
-                expect(filter.getColumnMetaForPropPathInEntity(["role", "id"], entityMetadata).propertyName).toEqual(
-                    "id"
-                );
+                expect(filter.getPropMetaAtPathInEntity(["role", "id"], entityMetadata).propertyName).toEqual("id");
             });
+
             it("should not find any column", () => {
-                expect(filter.getColumnMetaForPropPathInEntity("notExistingKey", entityMetadata)).toEqual(null);
+                expect(filter.getPropMetaAtPathInEntity("notExistingKey", entityMetadata)).toEqual(null);
             });
         });
 

@@ -86,7 +86,7 @@ export class PaginationFilter extends AbstractFilter<PaginationFilterOptions> {
             ).toUpperCase() as OrderDirectionCaps;
 
             // Checks that given direction is valid & that filter is both enabled & valid
-            const column = this.getColumnMetaForPropPath(propPath);
+            const column = this.getPropMetaAtPath(propPath);
             if (!isDirection(direction) || !this.isFilterEnabledForProperty(propPath) || !column) {
                 continue;
             }

@@ -57,7 +57,7 @@ export class SearchFilter extends AbstractFilter<SearchFilterOptions, StrategyTy
         }
 
         const [, nestedConditionRaw, typeRaw, propPath, strategyRaw, comparison, not] = matches;
-        const column = this.getColumnMetaForPropPath(propPath);
+        const column = this.getPropMetaAtPath(propPath);
 
         // Checks that propPath is enabled/valid && has a search value
         if (!this.isFilterEnabledForProperty(propPath) || !column || !isDefined(rawValue)) {
@@ -178,7 +178,7 @@ export class SearchFilter extends AbstractFilter<SearchFilterOptions, StrategyTy
         // Handle case when filter.propPath is a direct relation of entity
         // (ex: pictures;exists=true instead of pictures.id;exists=true)
         if (props.length === 1) {
-            column = this.getColumnMetaForPropPath(filter.propPath);
+            column = this.getPropMetaAtPath(filter.propPath);
 
             // Adding ".id" if it was not explicitly given in propPath so that we can add necessary joins
             if (column.propertyName === "id") {
