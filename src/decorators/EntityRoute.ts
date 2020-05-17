@@ -23,12 +23,17 @@ import { RouteDefaultOperation } from "@/decorators/Groups";
  *     ],
  * })
  */
-export const EntityRoute = (
-    path: string,
-    operations: RouteDefaultOperation[] = [],
+export function EntityRoute(
+    args: EntityRouteArgs = { operations: [] },
     options: EntityRouteOptions = {}
-): ClassDecorator => {
+): ClassDecorator {
     return (target: Function) => {
-        Reflect.defineMetadata(ROUTE_METAKEY, { path, operations, options }, target);
+        Reflect.defineMetadata(
+            ROUTE_METAKEY,
+            { path: args.path || target.constructor.name, operations: args.operations, options },
+            target
+        );
     };
-};
+}
+
+export type EntityRouteArgs = { path?: string; operations: RouteDefaultOperation[] };

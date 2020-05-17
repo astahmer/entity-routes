@@ -22,7 +22,13 @@ export const isIriValidForProperty = (iri: string, column: ColumnMetadata) => {
     return sameAsRouteName || sameAsTableName;
 };
 
-export function idToIRI(entityMeta: EntityMetadata, id: number) {
+export function idToIRI(entityMeta: EntityMetadata, id: number, options?: IdToIRIOptions) {
     const routeMetadata = getRouteMetadata(entityMeta.target as Function);
-    return routeMetadata && "/api" + routeMetadata.path + "/" + id;
+    if (!routeMetadata || options?.useClassNameAsEntrypoint) {
+        return `/api/${entityMeta.tableName}/${id}`;
+    } else {
+        return `/api/${routeMetadata.path}/${id}`;
+    }
 }
+
+export type IdToIRIOptions = { useClassNameAsEntrypoint: boolean };
