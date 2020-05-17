@@ -10,6 +10,7 @@ import {
     FilterParam,
     ApplyNestedConditionFiltersArgs,
     COMPARISON_OPERATOR,
+    formatIriToId,
 } from "@/index";
 import { createTestConnection, closeTestConnection } from "@@/tests/testConnection";
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, getRepository } from "typeorm";
@@ -198,6 +199,7 @@ describe("Search filter", () => {
             const queryParams = {
                 notExistingEntityKey: "abc",
                 firstName: "astahmer",
+                role: ["/api/role/123", "/api/role/456"],
                 "id>": "15",
                 "or:isAdmin": "true",
                 "or(mailCondition):email;endsWith": "@gmail.com",
@@ -212,6 +214,16 @@ describe("Search filter", () => {
                 strategy: "EXACT",
                 not: false,
                 value: [queryParams.firstName],
+                comparison: undefined,
+            };
+            const roleCondition: FilterParam = {
+                type: "and",
+                isNestedConditionFilter: false,
+                nestedCondition: undefined,
+                propPath: "role",
+                strategy: "EXACT",
+                not: false,
+                value: queryParams.role.map((iri) => formatIriToId(iri)),
                 comparison: undefined,
             };
             const idCondition: FilterParam = {
@@ -270,16 +282,26 @@ describe("Search filter", () => {
                 or: { nestedMailCondition: { "0": startsWithCondition, "1": exactCondition } },
             };
 
+            it("should return undefined on unrecognized queryParam", () => {
+                expect(filter.getFilterParam("ab:123", null)).toEqual(undefined);
+            });
+
             it("firstNameCondition", () => {
                 expect(filter.getFilterParam("firstName", queryParams.firstName)).toEqual(firstNameCondition);
+            });
+
+            it("roleCondition", () => {
+                expect(filter.getFilterParam("role", queryParams.role)).toEqual(roleCondition);
             });
 
             it("idCondition", () => {
                 expect(filter.getFilterParam("id>", queryParams["id>"])).toEqual(idCondition);
             });
+
             it("isAdminCondition", () => {
                 expect(filter.getFilterParam("or:isAdmin", queryParams["or:isAdmin"])).toEqual(isAdminCondition);
             });
+
             it("endsWithCondition", () => {
                 expect(
                     filter.getFilterParam(
@@ -288,6 +310,7 @@ describe("Search filter", () => {
                     )
                 ).toEqual(endsWithCondition);
             });
+
             it("startsWithCondition", () => {
                 expect(
                     filter.getFilterParam(
@@ -308,7 +331,7 @@ describe("Search filter", () => {
 
             it("getFiltersLists", () => {
                 const { filters, nestedConditionsFilters } = filter.getFiltersLists(queryParams);
-                expect(filters).toEqual([firstNameCondition, idCondition, isAdminCondition]);
+                expect(filters).toEqual([firstNameCondition, roleCondition, idCondition, isAdminCondition]);
                 expect(nestedConditionsFilters).toEqual({ or: { mailCondition } });
             });
         });

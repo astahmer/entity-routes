@@ -11,9 +11,11 @@ export function formatIriToId(iri: string, asInt?: boolean) {
 
 export const getEntrypointFromIri = (iri: string) => iri.match(iriRegex)[1];
 export const isIriValidForProperty = (iri: string, column: ColumnMetadata) => {
-    if (!iri.startsWith("/api/") || !column.relationMetadata) return;
+    if (!iri.startsWith("/api/") || !column) return;
 
-    const tableName = column.relationMetadata.inverseEntityMetadata.tableName + "s";
+    const tableName = column.relationMetadata
+        ? column.relationMetadata.inverseEntityMetadata.tableName
+        : column.entityMetadata.tableName;
     const entrypoint = getEntrypointFromIri(iri);
     const sameAsRouteName =
         entityRoutesContainer[tableName] && entrypoint === entityRoutesContainer[tableName].routeMetadata.path;
