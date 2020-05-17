@@ -45,18 +45,50 @@ describe("WhereManager", () => {
 
     const manager = Container.get(WhereManager);
 
-    it("getPropertyDefaultWhereStrategy", () => {
+    describe("getPropertyDefaultWhereStrategy", () => {
         const defaultConfig = getSearchFilterDefaultConfig();
-        const config: AbstractFilterConfig<SearchFilterOptions, StrategyType> = {
-            ...defaultConfig,
-            options: {
-                ...defaultConfig.options,
-                defaultWhereStrategy: "STARTS_WITH",
-            },
-            properties: ["firstName", ["role.identifier", "CONTAINS"]],
-        };
-        expect(manager.getPropertyDefaultWhereStrategy(config, "firstName")).toEqual("STARTS_WITH");
-        expect(manager.getPropertyDefaultWhereStrategy(config, "role.identifier")).toEqual("CONTAINS");
+
+        it("should return defaultWhereStrategy when none found on prop", () => {
+            const config: AbstractFilterConfig<SearchFilterOptions, StrategyType> = {
+                ...defaultConfig,
+                options: {
+                    ...defaultConfig.options,
+                    defaultWhereStrategy: "STARTS_WITH",
+                },
+                properties: ["firstName", ["role.identifier", "CONTAINS"]],
+            };
+            expect(manager.getPropertyDefaultWhereStrategy(config, "firstName")).toEqual("STARTS_WITH");
+        });
+
+        it("should return prop strategy when defined on prop", () => {
+            const config: AbstractFilterConfig<SearchFilterOptions, StrategyType> = {
+                ...defaultConfig,
+                options: {
+                    ...defaultConfig.options,
+                    defaultWhereStrategy: "STARTS_WITH",
+                },
+                properties: ["firstName", ["role.identifier", "CONTAINS"]],
+            };
+            expect(manager.getPropertyDefaultWhereStrategy(config, "role.identifier")).toEqual("CONTAINS");
+        });
+
+        it("should fallback to 'EXACT' strategy if none found on prop & defined as default", () => {
+            const config: AbstractFilterConfig<SearchFilterOptions, StrategyType> = {
+                class: defaultConfig.class,
+                options: {},
+                properties: ["firstName", ["role.identifier", "CONTAINS"]],
+            };
+            expect(manager.getPropertyDefaultWhereStrategy(config, "firstName")).toEqual("EXACT");
+        });
+
+        it("should fallback to 'EXACT' strategy if none defined as default & all props are enabled as filter", () => {
+            const config: AbstractFilterConfig<SearchFilterOptions, StrategyType> = {
+                class: defaultConfig.class,
+                options: { all: true },
+                properties: ["firstName", ["role.identifier", "CONTAINS"]],
+            };
+            expect(manager.getPropertyDefaultWhereStrategy(config, "firstName")).toEqual("EXACT");
+        });
     });
 
     describe("formatWhereStrategy", () => {
