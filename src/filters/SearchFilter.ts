@@ -87,7 +87,7 @@ export class SearchFilter extends AbstractFilter<SearchFilterOptions, StrategyTy
                       .map((val) => val.trim())
                       .filter(Boolean)
                 : rawValue;
-        const value = Array.isArray(formatedValue) ? formatedValue.map(formatIri) : formatIri(formatedValue);
+        const value = formatedValue.map(formatIri);
 
         return {
             type,
