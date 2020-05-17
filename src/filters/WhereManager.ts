@@ -27,7 +27,7 @@ export class WhereManager {
         const fallbackStrategy = "EXACT";
         const isNestedProp = propPath.includes(".");
         const shouldReturnDefault =
-            config.options.all || isNestedProp ? config.options.allNested : config.options.allShallow;
+            config.options.all || (isNestedProp ? config.options.allNested : config.options.allShallow);
         // If all entity props are enabled as filters, return default where strategy
         if (shouldReturnDefault) {
             return config.options.defaultWhereStrategy || fallbackStrategy;
