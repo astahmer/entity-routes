@@ -22,10 +22,10 @@ export class EntityRouter<Entity extends GenericEntity> {
     // Managers/services
     private readonly connection: Connection;
 
-    constructor(entity: ObjectType<Entity>, globalOptions: EntityRouteOptions = {}) {
+    constructor(entity: ObjectType<Entity>, routeMetadata: RouteMetadata, globalOptions: EntityRouteOptions = {}) {
         // Entity Route specifics
         this.repository = getRepository(entity);
-        this.routeMetadata = getRouteMetadata(entity);
+        this.routeMetadata = routeMetadata;
         this.options = { ...globalOptions, ...this.routeMetadata.options };
 
         // Managers/services

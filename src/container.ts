@@ -32,7 +32,7 @@ export async function useEntitiesRoutes({
     const entityRoutes = entities.reduce((acc, entity) => {
         const routeMeta = getRouteMetadata(entity);
         if (routeMeta) {
-            acc.push(new EntityRouter(entity, options));
+            acc.push(new EntityRouter(entity, routeMeta, options));
         }
 
         return acc;
