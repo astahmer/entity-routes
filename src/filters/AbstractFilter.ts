@@ -97,7 +97,7 @@ export abstract class AbstractFilter<FilterOptions extends DefaultFilterOptions 
         }
     }
 
-    /** Returns an array of valid query params to filter */
+    /** Returns an array of valid query params keys to filter */
     protected getPropertiesToFilter(queryParams: AbstractFilterApplyArgs["queryParams"]) {
         return Object.keys(queryParams).reduce((acc, param: string) => {
             if (
@@ -111,6 +111,7 @@ export abstract class AbstractFilter<FilterOptions extends DefaultFilterOptions 
         }, []);
     }
 
+    /** Returns an object of valid query params key/value pairs to filter */
     protected getPropertiesQueryParamsToFilter(queryParams: AbstractFilterApplyArgs["queryParams"]) {
         const params = this.getPropertiesToFilter(queryParams);
         return pick(params, queryParams);

@@ -141,6 +141,32 @@ describe("AbstractFilter", () => {
                 expect(filter.isFilterEnabledForProperty("role.identifier")).toEqual(false);
             });
         });
+
+        it("getPropertiesToFilter should return an array of registered propPath", () => {
+            expect(
+                filter.getPropertiesToFilter({
+                    id: "123",
+                    firstName: "alex",
+                    role: "/api/role/321",
+                    "role.id": "321",
+                    "role.identifier": "abc",
+                    notExistingKey: "xyz",
+                })
+            ).toEqual(["firstName", "role", "role.id"]);
+        });
+
+        it("getPropertiesQueryParamsToFilter should have stripped queryParams from unregistered filters propPath", () => {
+            expect(
+                filter.getPropertiesQueryParamsToFilter({
+                    id: "123",
+                    firstName: "alex",
+                    role: "/api/role/321",
+                    "role.id": "321",
+                    "role.identifier": "abc",
+                    notExistingKey: "xyz",
+                })
+            ).toEqual({ firstName: "alex", role: "/api/role/321", "role.id": "321" });
+        });
     });
 
     describe("Cache example filter", () => {
