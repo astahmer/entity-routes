@@ -13,7 +13,7 @@
     "scripts": {
         "test": "jest --runInBand",
         "test:clear": "jest --clearCache",
-        "test:coverage": "jest --coverage",
+        "test:coverage": "jest --coverage --runInBand --detectOpenHandles",
         "tsc": "tsc",
         "commit": "git-cz",
         "prettier": "prettier --write \"./{src,tests}/**/*.ts\"",
