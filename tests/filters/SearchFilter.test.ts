@@ -349,6 +349,8 @@ describe("Search filter", () => {
                 "or(first):email;endsWith": "@gmail.com",
                 "or(first)or(second):role.identifier": ["astahmer", "alex"],
                 "or(first)or(second)or:role.id;exists!": "true",
+                "or(first)(third):id": "1",
+                "or(first)(third):role.id<>": ["5", "10"],
             };
             // TODO Graphli-like sandbox to display queryParams->SQL results ?
 
@@ -364,8 +366,26 @@ describe("Search filter", () => {
                 { type: "or", condition: "(user.isAdmin = :isAdmin)" },
                 {
                     type: "or",
-                    condition:
-                        "(((user.birthDate > :birthDate) AND (user.email LIKE :email)) OR ((user_role_1.identifier = :identifier OR user_role_1.identifier = :identifier_1) OR (user_role_1.id IS NULL)))",
+                    condition: `
+                        (
+                            (
+                                (user.birthDate > :birthDate) AND (user.email LIKE :email)
+                            ) AND (
+                                (user.id = :id) AND user_role_1.id BETWEEN :id_1 AND :id_2
+                            ) OR (
+                                (user_role_1.identifier = :identifier OR user_role_1.identifier = :identifier_1)
+                                OR (user_role_1.id IS NULL)
+                            )
+                        )`
+                        // Kind of annoying formating to get back to TypeORM result
+                        // But at least it is "readable" above
+                        .trimLeft()
+                        .replace(/\s\s+/g, " ")
+                        .replace(/\( /g, "(")
+                        .replace(/\) /g, ")")
+                        .replace(/\)AND/g, ") AND")
+                        .replace(/\)OR/g, ") OR")
+                        .replace(/ \)/g, ")"),
                 },
             ]);
         });
