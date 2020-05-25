@@ -5,6 +5,7 @@ import {
     PaginationFilter,
     PaginationFilterOptions,
     AliasManager,
+    OrderBy,
 } from "@/index";
 import { createTestConnection, closeTestConnection } from "@@/tests/testConnection";
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, getRepository } from "typeorm";
@@ -157,7 +158,61 @@ describe("Pagination filter", () => {
 
         closeTestConnection();
     });
+});
 
-    // TODO OrderBy
-    // TODO describe protected methods
+describe("OrderBy", () => {
+    it("can register filter using @OrderBy decorator", async () => {
+        @Entity()
+        class User extends AbstractEntity {
+            @OrderBy()
+            @Column()
+            firstName: string;
+
+            @OrderBy("desc", "identifier")
+            @ManyToOne(() => Role)
+            role: Role;
+        }
+
+        await createTestConnection([User, Role]);
+
+        const defaultConfig = getPaginationFilterDefaultConfig();
+
+        expect(getRouteFiltersMeta(User)).toEqual({
+            PaginationFilter: {
+                ...defaultConfig,
+                properties: ["firstName:asc", "role.identifier:desc"],
+            },
+        });
+
+        closeTestConnection();
+    });
+
+    it("append .id to relations propPath", async () => {
+        @Entity()
+        class User extends AbstractEntity {
+            @OrderBy("desc", "non")
+            @Column()
+            firstName: string;
+
+            @OrderBy()
+            @ManyToOne(() => Role)
+            role: Role;
+        }
+
+        await createTestConnection([User, Role]);
+
+        const filtersMeta = getRouteFiltersMeta(User);
+        const repository = getRepository(User);
+        const entityMetadata = repository.metadata;
+        const paginationFilter = new PaginationFilter({ config: filtersMeta["PaginationFilter"], entityMetadata });
+
+        let qb = repository.createQueryBuilder(entityMetadata.tableName);
+        let aliasManager = new AliasManager();
+        paginationFilter.apply({ qb, aliasManager, queryParams: { orderBy: "role" } });
+
+        // pagination filter should have set default orderBy from decorator properties
+        expect(qb.expressionMap.orderBys).toEqual({ "user_role_1.id": "ASC" });
+
+        closeTestConnection();
+    });
 });

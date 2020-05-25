@@ -55,10 +55,9 @@ export function OrderBy(direction?: OrderDirection, relationPropName?: string): 
             propName + withRelationPropName + ":" + (direction || defaultConfig.options.defaultOrderDirection);
 
         registerFilterDecorator<OrderByOptions>({
-            target,
+            target: target.constructor,
             defaultConfig,
             properties: [propFilter],
-            options: { direction, relationPropName },
         });
     };
 }
