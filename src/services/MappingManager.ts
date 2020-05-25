@@ -7,7 +7,7 @@ import { RouteOperation, GROUPS_METAKEY } from "@/decorators/Groups";
 import { EntityRouteOptions } from "@/services/EntityRouter";
 import { GroupsMetadata, GroupsMetaByRoutes } from "@/mapping/GroupsMetadata";
 import { EntityGroupsMetadata } from "@/mapping/EntityGroupsMetadata";
-import { RelationManager } from "@/serializer/RelationManager";
+import { RelationManager } from "@/services/RelationManager";
 
 @Service()
 export class MappingManager {

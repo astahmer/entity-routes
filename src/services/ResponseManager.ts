@@ -19,7 +19,7 @@ import { SubresourceRelation } from "@/services/SubresourceManager";
 import { isType, isDev } from "@/functions/asserts";
 import { MappingManager } from "./MappingManager";
 import { EntityErrorResults } from "@/serializer/Validator";
-import { RelationManager } from "@/serializer/RelationManager";
+import { RelationManager } from "@/services/RelationManager";
 
 export class ResponseManager<Entity extends GenericEntity> {
     private filtersMeta: RouteFiltersMeta;

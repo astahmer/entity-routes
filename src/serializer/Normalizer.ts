@@ -5,7 +5,7 @@ import { MappingManager } from "@/services/MappingManager";
 import { AliasManager } from "@/serializer/AliasManager";
 import { Formater } from "@/serializer/Formater";
 import { EntityRouteOptions, GenericEntity } from "@/services/EntityRouter";
-import { RelationManager } from "@/serializer/RelationManager";
+import { RelationManager } from "@/services/RelationManager";
 import { RequestContext } from "@/services/ResponseManager";
 
 @Service()

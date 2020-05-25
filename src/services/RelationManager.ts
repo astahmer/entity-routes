@@ -23,8 +23,7 @@ export class RelationManager {
     }
 
     /**
-     *Add left joins to get a nested property
-
+     * Add left joins to get a nested property
      * @param qb current queryBuilder instance
      * @param entityMetadata current meta to search column or relation in
      * @param propPath dot delimited property path leading to a nested property

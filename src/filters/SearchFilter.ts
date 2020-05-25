@@ -16,7 +16,7 @@ import {
 import { isDefined, isWhereType } from "@/functions/asserts";
 import { setNestedKey, sortObjectByKeys } from "@/functions/object";
 import { formatIriToId, isIriValidForProperty } from "@/functions/entity";
-import { RelationManager } from "@/serializer/RelationManager";
+import { RelationManager } from "@/services/RelationManager";
 import { StrategyType, WhereManager } from "@/filters/WhereManager";
 
 // TODO Split in classes
