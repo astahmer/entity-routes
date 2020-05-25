@@ -130,6 +130,34 @@ describe("Pagination filter", () => {
         });
     });
 
+    it("can auto apply orderBy properties using option", async () => {
+        @Pagination(["firstName", ["role.identifier", "desc"]], { autoApplyOrderBys: true })
+        @Entity()
+        class User extends AbstractEntity {
+            @Column()
+            firstName: string;
+
+            @ManyToOne(() => Role)
+            role: Role;
+        }
+
+        await createTestConnection([User, Role]);
+
+        const filtersMeta = getRouteFiltersMeta(User);
+        const repository = getRepository(User);
+        const entityMetadata = repository.metadata;
+        const paginationFilter = new PaginationFilter({ config: filtersMeta["PaginationFilter"], entityMetadata });
+
+        let qb = repository.createQueryBuilder(entityMetadata.tableName);
+        let aliasManager = new AliasManager();
+        paginationFilter.apply({ qb, aliasManager, queryParams: undefined });
+
+        // pagination filter should have set default orderBy from decorator properties
+        expect(qb.expressionMap.orderBys).toEqual({ "user.firstName": "ASC", "user_role_1.identifier": "ASC" });
+
+        closeTestConnection();
+    });
+
     // TODO OrderBy
     // TODO describe protected methods
 });

@@ -33,18 +33,13 @@ export class PaginationFilter extends AbstractFilter<PaginationFilterOptions> {
         // Apply filter for each property provided if autoApply is enabled
         if (this.config.options.autoApplyOrderBys) {
             this.filterProperties.forEach((orderBy) => {
-                this.addOrderBy(qb, aliasManager, orderBy);
+                this.addOrderBy(qb, aliasManager, orderBy || this.config.options.defaultOrderBys);
             });
         }
 
         // Apply filter for each query params
         const { orderBy, take, skip } = this.getFilterParamsByTypes(queryParams);
-
-        if (orderBy) {
-            this.addOrderBy(qb, aliasManager, orderBy);
-        } else {
-            this.addOrderBy(qb, aliasManager, this.config.options.defaultOrderBys);
-        }
+        this.addOrderBy(qb, aliasManager, orderBy || this.config.options.defaultOrderBys);
 
         if (take || this.config.options.defaultRetrievedItemsLimit) {
             qb.take(take || this.config.options.defaultRetrievedItemsLimit);
