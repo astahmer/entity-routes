@@ -41,21 +41,6 @@ describe("Search filter", () => {
         beforeAll(() => createTestConnection([User, Role]));
         afterAll(closeTestConnection);
 
-        it("can register filter using @Search decorator with options", async () => {
-            const defaultConfig = getSearchFilterDefaultConfig();
-
-            expect(getRouteFiltersMeta(User)).toEqual({
-                SearchFilter: {
-                    ...defaultConfig,
-                    options: {
-                        ...defaultConfig.options,
-                        allShallow: true,
-                    },
-                    properties: [],
-                },
-            });
-        });
-
         it("can apply filter on all shallow props (User direct props) only", () => {
             const filtersMeta = getRouteFiltersMeta(User);
             const repository = getRepository(User);

@@ -1,5 +1,5 @@
 import { SearchFilterOptions, getSearchFilterDefaultConfig } from "@/filters/SearchFilter";
-import { FilterProperty, AbstractFilterConfig } from "@/filters/AbstractFilter";
+import { FilterProperty } from "@/filters/AbstractFilter";
 import { registerFilterDecorator } from "@/filters/registerFilterDecorator";
 import { StrategyType } from "@/filters/WhereManager";
 import { isType } from "@/index";
@@ -8,7 +8,7 @@ import { isType } from "@/index";
  * SearchFilter PropertyDecorator
  * @example [at]SearchFilter(StrategyType.EXISTS)
  */
-export function Search(strategy: StrategyType): PropertyDecorator;
+export function Search(strategy?: StrategyType): PropertyDecorator;
 
 /**
  * SearchFilter ClassDecorator
@@ -39,9 +39,7 @@ export function Search(
 
         // PropDecorator
         if (isType<StrategyType>(stratOrPropsOrOptions, isPropDecorator)) {
-            const whereStrategy =
-                stratOrPropsOrOptions || options.defaultWhereStrategy || defaultConfig.options.defaultWhereStrategy;
-            properties.push([propName, whereStrategy] as FilterProperty);
+            properties.push(stratOrPropsOrOptions ? ([propName, stratOrPropsOrOptions] as FilterProperty) : propName);
         } else {
             // ClassDecorator
             if (Array.isArray(stratOrPropsOrOptions)) {
