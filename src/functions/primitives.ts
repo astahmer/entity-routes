@@ -27,3 +27,6 @@ export function getRandomInt(min: number, max: number) {
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
+
+/** Limit a number between a [min,max] */
+export const limit = (nb: number, [min, max]: [number, number]) => Math.min(Math.max(nb, min), max);
