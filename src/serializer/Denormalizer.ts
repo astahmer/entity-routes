@@ -28,7 +28,7 @@ export class Denormalizer<Entity extends GenericEntity = GenericEntity> {
         const cleanedItem = this.cleaner.cleanItem({ rootMetadata, operation, values, options: routeOptions });
         const item = repository.create(cleanedItem as DeepPartial<Entity>);
 
-        const defaultValidatorOptions: Partial<DenormalizerValidatorOptions> =
+        const defaultValidatorOptions: Partial<ValidateItemOptions> =
             operation === "update" ? { skipMissingProperties: false } : {};
         const errors = await this.validator.validateItem(rootMetadata, item, {
             ...defaultValidatorOptions,
@@ -52,7 +52,7 @@ export type SaveItemArgs<Entity extends GenericEntity = GenericEntity> = {
     /** Request context */
     ctx: RequestContext<Entity>;
     /** Used by class-validator & entity-validator */
-    validatorOptions?: DenormalizerValidatorOptions;
+    validatorOptions?: ValidateItemOptions;
     /** EntityRoute specific options */
     routeOptions?: EntityRouteOptions;
 };

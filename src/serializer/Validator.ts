@@ -10,7 +10,7 @@ import { GenericEntity } from "@/services/EntityRouter";
 @Service()
 export class Validator<Entity extends GenericEntity = GenericEntity> {
     /** Validates sent values & return a record of validation errors */
-    public async validateItem(rootMetadata: EntityMetadata, item: Entity, options: DenormalizerValidatorOptions) {
+    public async validateItem(rootMetadata: EntityMetadata, item: Entity, options: ValidateItemOptions = {}) {
         const errors: EntityErrorResults = {};
         await this.recursiveValidate(rootMetadata, item, "", errors, options);
         return errors;
@@ -22,22 +22,24 @@ export class Validator<Entity extends GenericEntity = GenericEntity> {
         item: Entity,
         currentPath: string,
         errorResults: Record<string, EntityError[]>,
-        options: DenormalizerValidatorOptions
+        options: ValidateItemOptions = {}
     ) {
         let key: string, prop: any;
 
         const keys = Object.keys(item);
         // If user is updating entity and item is just an existing relation, no need to validate it since it's missing properties
-        if ((options.skipMissingProperties || currentPath.includes(".")) && keys.length === 1 && keys[0] === "id") {
+        if ((options?.skipMissingProperties || currentPath.includes(".")) && keys.length === 1 && keys[0] === "id") {
             return [];
         }
 
         const routeEntityName = rootMetadata.name.toLocaleLowerCase();
         // Add default groups [entity, entity_operation]
-        const groups = (options.groups || []).concat([
-            routeEntityName,
-            routeEntityName + "_" + options.context.operation,
-        ]);
+        let groups = options?.groups || [];
+        if (!options?.noAutoGroups) {
+            groups = groups
+                .concat(routeEntityName)
+                .concat(options?.context?.operation ? [routeEntityName + "_" + options?.context?.operation] : []);
+        }
         const validationOptions = { ...options, groups };
 
         const [propErrors, classErrors] = await Promise.all([
@@ -111,4 +113,10 @@ export type EntityError = {
 };
 export type EntityErrorResults = Record<string, EntityError[]>;
 
-export type DenormalizerValidatorOptions = ValidatorOptions & EntityValidatorFunctionOptions<RequestContext>;
+export type ValidateItemBaseOptions = {
+    /*** When true, do NOT add automatically entity name & operation groups */
+    noAutoGroups?: boolean;
+};
+export type ValidateItemOptions = ValidatorOptions &
+    EntityValidatorFunctionOptions<RequestContext> &
+    ValidateItemBaseOptions;
