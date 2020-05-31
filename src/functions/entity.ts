@@ -1,7 +1,7 @@
 import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
 import { EntityMetadata } from "typeorm";
-import { entityRoutesContainer } from "@/container";
-import { getRouteMetadata } from "@/services/EntityRouter";
+import { getRouteMetadata } from "@/router/EntityRouter";
+import { getEntityRouters } from "@/router/container";
 
 export const iriRegex = new RegExp(/\/api\/(\w+)\//g, "i");
 export function formatIriToId<B extends Boolean>(iri: string, asInt?: B): B extends true ? number : string;
@@ -13,12 +13,12 @@ export const getEntrypointFromIri = (iri: string) => iri.match(iriRegex)[1];
 export const isIriValidForProperty = (iri: string, column: ColumnMetadata) => {
     if (!iri.startsWith("/api/") || !column) return;
 
+    const entityRouters = getEntityRouters();
     const tableName = column.relationMetadata
         ? column.relationMetadata.inverseEntityMetadata.tableName
         : column.entityMetadata.tableName;
     const entrypoint = getEntrypointFromIri(iri);
-    const sameAsRouteName =
-        entityRoutesContainer[tableName] && entrypoint === entityRoutesContainer[tableName].routeMetadata.path;
+    const sameAsRouteName = entityRouters[tableName] && entrypoint === entityRouters[tableName].routeMetadata.path;
     const sameAsTableName = entrypoint === tableName;
 
     return sameAsRouteName || sameAsTableName;

@@ -1,4 +1,4 @@
-import { GenericEntity } from "./services/EntityRouter";
+import { GenericEntity } from "./router/EntityRouter";
 import { ObjectType } from "typeorm";
 
 export type PartialRecord<K extends keyof any, T> = Partial<Record<K, T>>;

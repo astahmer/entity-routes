@@ -1,4 +1,4 @@
-import { EntityRouteOptions, ROUTE_METAKEY } from "@/services/EntityRouter";
+import { EntityRouteOptions, ROUTE_METAKEY } from "@/router/EntityRouter";
 import { RouteDefaultOperation } from "@/decorators/Groups";
 
 /**

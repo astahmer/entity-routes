@@ -5,7 +5,7 @@ import { RequestContext } from "@/services/ResponseManager";
 import { isType, isObject, isPrimitive } from "@/functions/asserts";
 import { Primitive } from "@/functions/primitives";
 import { formatIriToId } from "@/functions/entity";
-import { GenericEntity, EntityRouteOptions } from "@/services/EntityRouter";
+import { GenericEntity, EntityRouteOptions } from "@/router/EntityRouter";
 import { MappingManager, MappingItem, ENTITY_META_SYMBOL } from "@/services/MappingManager";
 import { SaveItemArgs } from "@/serializer/Denormalizer";
 

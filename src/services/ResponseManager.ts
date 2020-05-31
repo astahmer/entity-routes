@@ -2,9 +2,9 @@ import { Middleware, Context } from "koa";
 import { Connection, DeleteResult, QueryRunner, Repository, SelectQueryBuilder, getRepository } from "typeorm";
 import Container from "typedi";
 
-import { RouteActionClass } from "@/services/AbstractRouteAction";
+import { RouteActionClass } from "@/router/AbstractRouteAction";
 import { RouteOperation } from "@/decorators/Groups";
-import { getRouteFiltersMeta, RouteFiltersMeta, GenericEntity, EntityRouteOptions } from "@/services/EntityRouter";
+import { getRouteFiltersMeta, RouteFiltersMeta, GenericEntity, EntityRouteOptions } from "@/router/EntityRouter";
 import { AbstractFilter, AbstractFilterConfig, QueryParams } from "@/filters/AbstractFilter";
 import { EntityErrorResponse, Denormalizer } from "@/serializer/Denormalizer";
 import { Normalizer } from "@/serializer/Normalizer";
@@ -20,6 +20,9 @@ import { isType, isDev } from "@/functions/asserts";
 import { MappingManager } from "./MappingManager";
 import { EntityErrorResults } from "@/serializer/Validator";
 import { RelationManager } from "@/services/RelationManager";
+
+// TODO RouteManager ? for makeRequestContextMw / makeResponseMw / makeRouteMappingMw / make/apply filters
+// TODO remove public from every services methods when not needed
 
 export class ResponseManager<Entity extends GenericEntity> {
     private filtersMeta: RouteFiltersMeta;

@@ -4,7 +4,6 @@ import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
 export type AliasList = Record<string, number>;
 
 // TODO Rename to AliasHandler
-// mv RelationManager to services ?
 export class AliasManager {
     readonly aliases: AliasList = {};
 

@@ -4,7 +4,7 @@ import Container, { Service } from "typedi";
 import { MappingManager } from "@/services/MappingManager";
 import { AliasManager } from "@/serializer/AliasManager";
 import { Formater } from "@/serializer/Formater";
-import { EntityRouteOptions, GenericEntity } from "@/services/EntityRouter";
+import { EntityRouteOptions, GenericEntity } from "@/router/EntityRouter";
 import { RelationManager } from "@/services/RelationManager";
 import { RequestContext } from "@/services/ResponseManager";
 

@@ -1,9 +1,10 @@
 import { Repository } from "typeorm";
 import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
 
-import { entityRoutesContainer, Router } from "@/container";
+import { getEntityRouters } from "@/router/container";
 import { CRUD_ACTIONS } from "./ResponseManager";
-import { getRouteSubresourcesMetadata, RouteMetadata, GenericEntity } from "./EntityRouter";
+import { getRouteSubresourcesMetadata, RouteMetadata, GenericEntity } from "../router/EntityRouter";
+import { BridgeRouter } from "@/bridges/routers/BridgeRouter";
 
 export class SubresourceManager<Entity extends GenericEntity> {
     private subresourcesMeta: RouteSubresourcesMeta<Entity>;
@@ -18,12 +19,14 @@ export class SubresourceManager<Entity extends GenericEntity> {
 
     /** Recursively add subresources routes for this entity */
     public makeSubresourcesRoutes(
-        router: typeof Router,
+        router: BridgeRouter,
         nestedPath?: { current: string[]; parent: string; maxDepths?: number[] }
     ) {
         if (!Object.keys(this.subresourcesMeta.properties).length) {
             return;
         }
+
+        const entityRouters = getEntityRouters();
 
         // For each subresources of this entity
         for (let key in this.subresourcesMeta.properties) {
@@ -36,7 +39,7 @@ export class SubresourceManager<Entity extends GenericEntity> {
             );
 
             const relationTableName = subresourceRelation.relation.inverseEntityMetadata.tableName;
-            const nestedEntityRoute = entityRoutesContainer[subresourceProp.entityTarget.name];
+            const nestedEntityRoute = entityRouters[subresourceProp.entityTarget.name];
 
             // If subresource entity has no EntityRoute, then it can't make a subresource out of it
             if (!nestedEntityRoute) {
@@ -69,11 +72,17 @@ export class SubresourceManager<Entity extends GenericEntity> {
             // Generates details endpoint at subresourcePath
             if (isSubresourceSingle && subresourceProp.operations.includes("details")) {
                 subresourceProp.operations.forEach((operation) => {
-                    (<any>router)[CRUD_ACTIONS[operation].verb](
-                        subresourcePath,
-                        nestedEntityRoute.responseManager.makeRequestContextMiddleware(operation, subresourceRelation),
-                        nestedEntityRoute.responseManager.makeResponseMiddleware(operation)
+                    const requestContextMw = nestedEntityRoute.responseManager.makeRequestContextMiddleware(
+                        operation,
+                        subresourceRelation
                     );
+                    const responseMw = nestedEntityRoute.responseManager.makeResponseMiddleware(operation);
+
+                    router.register({
+                        path: subresourcePath,
+                        methods: [CRUD_ACTIONS[operation].verb],
+                        middlewares: [requestContextMw, responseMw],
+                    });
                 });
 
                 continue;
@@ -81,11 +90,18 @@ export class SubresourceManager<Entity extends GenericEntity> {
 
             // Generates endpoint at subresourcePath for each operation
             subresourceProp.operations.forEach((operation) => {
-                (<any>router)[CRUD_ACTIONS[operation].verb](
-                    subresourcePath + CRUD_ACTIONS[operation].path,
-                    nestedEntityRoute.responseManager.makeRequestContextMiddleware(operation, subresourceRelation),
-                    nestedEntityRoute.responseManager.makeResponseMiddleware(operation)
+                const requestContextMw = nestedEntityRoute.responseManager.makeRequestContextMiddleware(
+                    operation,
+                    subresourceRelation
                 );
+                const responseMw = nestedEntityRoute.responseManager.makeResponseMiddleware(operation);
+
+                const path = subresourcePath + CRUD_ACTIONS[operation].path;
+                router.register({
+                    path,
+                    methods: [CRUD_ACTIONS[operation].verb],
+                    middlewares: [requestContextMw, responseMw],
+                });
             });
         }
     }

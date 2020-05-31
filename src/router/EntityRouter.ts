@@ -1,50 +1,47 @@
-import * as Router from "koa-router";
 import { Connection, getConnection, getRepository, ObjectType, Repository, ObjectLiteral } from "typeorm";
 
-import { entityRoutesContainer } from "..";
-import { IRouteAction } from "@/services/AbstractRouteAction";
 import { RouteOperation } from "@/decorators/Groups";
 import { AbstractFilterConfig } from "@/filters/AbstractFilter";
-import { CRUD_ACTIONS, CustomActionClass, ResponseManager, CustomAction } from "@/services/ResponseManager";
+import { CRUD_ACTIONS, ResponseManager, CustomAction } from "@/services/ResponseManager";
 import { RouteSubresourcesMeta, SubresourceManager } from "@/services/SubresourceManager";
-import { isType } from "@/functions/asserts";
+import {
+    BridgeRouter,
+    BridgeRouterClassReference,
+    BridgeRouterRegisterFn,
+    makeRouterFromActions,
+} from "@/bridges/routers/BridgeRouter";
+import { formatRouteName } from "@/functions/route";
+import { RouteActionConstructorData } from "@/router/AbstractRouteAction";
 
 export class EntityRouter<Entity extends GenericEntity> {
-    public readonly routeMetadata: RouteMetadata;
     public readonly responseManager: ResponseManager<Entity>;
     public readonly subresourceManager: SubresourceManager<Entity>;
 
     // Entity Route specifics
     private readonly repository: Repository<Entity>;
-    private readonly options: EntityRouteOptions;
-    private readonly customActions: Record<string, IRouteAction> = {};
+    private readonly options: EntityRouteConfig;
 
     // Managers/services
     private readonly connection: Connection;
 
-    constructor(entity: ObjectType<Entity>, routeMetadata: RouteMetadata, globalOptions: EntityRouteOptions = {}) {
+    constructor(
+        public readonly entity: ObjectType<Entity>,
+        public readonly routeMetadata: RouteMetadata,
+        public readonly globalOptions: EntityRouterOptions
+    ) {
         // Entity Route specifics
         this.repository = getRepository(entity);
-        this.routeMetadata = routeMetadata;
         this.options = { ...globalOptions, ...this.routeMetadata.options };
 
         // Managers/services
         this.connection = getConnection();
         this.subresourceManager = new SubresourceManager<Entity>(this.repository, this.routeMetadata);
         this.responseManager = new ResponseManager<Entity>(this.connection, this.repository, this.options);
-
-        // Add this EntityRoute to the list (used by subresources/custom actions/services)
-        entityRoutesContainer[entity.name] = this as any;
-
-        // Instanciate and store every custom action classes
-        if (this.options.actions) {
-            this.initCustomActionsClasses();
-        }
     }
 
-    /** Make a Koa Router for each given operations (and their associated mapping route) for this entity and its subresources and return it */
-    public makeRouter() {
-        const router = new Router();
+    /** Make a Router for each given operations (and their associated mapping route) for this entity and its subresources and return it */
+    public makeRouter<T = any>() {
+        const router = new BridgeRouter<T>(this.globalOptions.routerClass, this.globalOptions.routerRegisterFn);
 
         // CRUD routes
         let i = 0;
@@ -56,54 +53,44 @@ export class EntityRouter<Entity extends GenericEntity> {
             const requestContextMw = this.responseManager.makeRequestContextMiddleware(operation);
             const responseMw = this.responseManager.makeResponseMiddleware(operation);
 
-            (<any>router)[verb](path, requestContextMw, responseMw);
+            router.register({
+                path,
+                name: formatRouteName(path, operation),
+                methods: [verb],
+                middlewares: [requestContextMw, responseMw],
+            });
 
             if (operation === "delete") continue;
 
             const mappingMethod = this.responseManager.makeRouteMappingMiddleware(operation);
-            (<any>router)[verb](path + "/mapping", mappingMethod);
+            router.register({
+                path: path + "/mapping",
+                name: formatRouteName(path, operation) + "_mapping",
+                methods: [verb],
+                middlewares: [mappingMethod],
+            });
         }
 
         // Subresoures routes
-        this.subresourceManager.makeSubresourcesRoutes(router as any); // TODO typings
+        this.subresourceManager.makeSubresourcesRoutes(router);
 
         // Custom actions routes
         if (this.options.actions) {
-            i = 0;
-            for (i; i < this.options.actions.length; i++) {
-                const actionItem = this.options.actions[i];
-                const { operation, verb, path: actionPath, middlewares } = actionItem;
-                const path = this.routeMetadata.path + actionPath;
-                const requestContextMw = this.responseManager.makeRequestContextMiddleware(operation);
-                let customActionMw;
-
-                if (isType<CustomActionClass>(actionItem, "class" in actionItem)) {
-                    const { action, class: actionClass } = actionItem;
-                    const method = (action as keyof IRouteAction) || "onRequest";
-                    customActionMw = this.customActions[actionClass.name][method].bind(
-                        this.customActions[actionClass.name]
-                    );
-                } else {
-                    customActionMw = actionItem.handler;
-                }
-
-                (<any>router)[verb](path, ...(middlewares || []), requestContextMw, customActionMw);
-            }
+            const actions: CustomAction[] = this.options.actions.map(this.addRequestContextMwToAction.bind(this));
+            const data = { entityMetadata: this.repository.metadata, routeMetadata: this.routeMetadata };
+            makeRouterFromActions<RouteActionConstructorData>(actions, { router }, data);
         }
 
         return router;
     }
 
-    private initCustomActionsClasses() {
-        this.options.actions.forEach((action) => {
-            if ("class" in action && !this.customActions[action.class.name]) {
-                this.customActions[action.class.name] = new action.class({
-                    middlewares: action.middlewares || [],
-                    entityMetadata: this.repository.metadata,
-                    routeMetadata: this.routeMetadata,
-                });
-            }
-        });
+    private addRequestContextMwToAction(action: CustomAction): CustomAction {
+        return {
+            ...action,
+            middlewares: (action.middlewares || []).concat(
+                this.responseManager.makeRequestContextMiddleware(action.operation)
+            ),
+        };
     }
 }
 
@@ -131,13 +118,24 @@ export type RouteMetadata = {
     /** List of operations to create a route for */
     operations: RouteOperation[];
     /** Specific options to be used on this EntityRoute, if none specified, will default to global options */
-    options?: EntityRouteOptions;
+    options?: EntityRouteConfig;
 };
 
 export type RouteFiltersMeta = Record<string, AbstractFilterConfig>;
 
-export type EntityRouteOptions = {
+export type EntityRouterClassOptions<T = any> = {
+    /** Router class reference */
+    routerClass: BridgeRouterClassReference<T>;
+    /** Router adapter function that makes the link between BridgeRouter register & actual router class route registering functions */
+    routerRegisterFn: BridgeRouterRegisterFn<T>;
+};
+
+export type EntityRouteBaseOptions = {
+    /** Custom actions using current EntityRouter prefix/instance */
     actions?: CustomAction[];
+};
+
+export type EntityRouteOptions = {
     isMaxDepthEnabledByDefault?: boolean;
     /** Level of depth at which the nesting should stop */
     defaultMaxDepthLvl?: number;
@@ -148,3 +146,6 @@ export type EntityRouteOptions = {
     /** Should set subresource IRI for prop decorated with @Subresource */
     shouldSetSubresourcesIriOnItem?: boolean;
 };
+export type EntityRouteConfig = EntityRouteBaseOptions & EntityRouteOptions;
+
+export type EntityRouterOptions = EntityRouterClassOptions & EntityRouteConfig;

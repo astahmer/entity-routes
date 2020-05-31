@@ -2,10 +2,10 @@ import { DeepPartial, getRepository, EntityMetadata } from "typeorm";
 import Container, { Service } from "typedi";
 
 import { RequestContext } from "@/services/ResponseManager";
-import { GenericEntity, EntityRouteOptions } from "@/services/EntityRouter";
+import { GenericEntity, EntityRouteOptions } from "@/router/EntityRouter";
 import { MappingManager } from "@/services/MappingManager";
 import { Cleaner } from "@/serializer/Cleaner";
-import { DenormalizerValidatorOptions, EntityErrorResults, Validator } from "@/serializer/Validator";
+import { ValidateItemOptions, EntityErrorResults, Validator } from "@/serializer/Validator";
 
 @Service()
 export class Denormalizer<Entity extends GenericEntity = GenericEntity> {

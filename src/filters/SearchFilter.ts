@@ -19,11 +19,7 @@ import { formatIriToId, isIriValidForProperty } from "@/functions/entity";
 import { RelationManager } from "@/services/RelationManager";
 import { StrategyType, WhereManager } from "@/filters/WhereManager";
 
-// TODO Split in classes
-
-/**
- * Add a/multiple where clause on any (deep?) properties of the decorated entity
- */
+/** Add a/multiple where clause on any (deep?) properties of the decorated entity  */
 export class SearchFilter extends AbstractFilter<SearchFilterOptions, StrategyType> {
     get relationManager() {
         return Container.get(RelationManager);

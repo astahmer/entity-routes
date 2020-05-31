@@ -1,4 +1,4 @@
-import { getRouteFiltersMeta, ROUTE_FILTERS_METAKEY, RouteFiltersMeta } from "@/services/EntityRouter";
+import { getRouteFiltersMeta, ROUTE_FILTERS_METAKEY, RouteFiltersMeta } from "@/router/EntityRouter";
 
 import { FilterProperty, AbstractFilterConfig, DefaultFilterOptions, FilterDefaultConfig } from "./AbstractFilter";
 

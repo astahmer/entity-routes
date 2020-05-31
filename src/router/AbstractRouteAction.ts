@@ -1,30 +1,16 @@
 import { NextFunction } from "connect";
 import { Context, Middleware } from "koa";
 import { QueryRunner, getRepository, EntityMetadata } from "typeorm";
-import Container from "typedi";
+import { Container } from "typedi";
 
 import { GroupsOperation } from "@/decorators/Groups";
-import { RouteMetadata } from "@/services/EntityRouter";
-import { CustomActionClass, CustomAction } from "@/services/ResponseManager";
+import { RouteMetadata, EntityRouterOptions } from "@/router/EntityRouter";
 
-import { isType } from "@/functions/asserts";
-import { GenericEntity } from "@/services/EntityRouter";
-import { Router } from "@/container";
-import { MappingManager } from "./MappingManager";
+import { GenericEntity } from "@/router/EntityRouter";
+import { MappingManager } from "../services/MappingManager";
 import { Cleaner } from "@/serializer/Cleaner";
 import { Formater } from "@/serializer/Formater";
-
-export type RouteActionConstructorArgs = {
-    middlewares: Middleware[];
-    routeMetadata: RouteMetadata;
-    entityMetadata: EntityMetadata;
-};
-
-export interface IRouteAction {
-    onRequest(ctx: Context, next: NextFunction): Promise<any>;
-}
-
-export type RouteActionClass = new (args?: RouteActionConstructorArgs, ...data: any) => IRouteAction;
+import { BridgeRouter } from "@/bridges/routers/BridgeRouter";
 
 export abstract class AbstractRouteAction implements IRouteAction {
     protected middlewares: Middleware[];
@@ -43,7 +29,7 @@ export abstract class AbstractRouteAction implements IRouteAction {
         return Container.get(MappingManager);
     }
 
-    constructor(args: RouteActionConstructorArgs) {
+    constructor(args: RouteActionConstructorArgs & RouteActionConstructorData) {
         const { middlewares, routeMetadata, entityMetadata } = args;
         this.middlewares = middlewares;
         this.routeMetadata = routeMetadata;
@@ -83,25 +69,26 @@ export abstract class AbstractRouteAction implements IRouteAction {
     }
 }
 
-export type CustomActionParams = Pick<RouteActionConstructorArgs, "entityMetadata" | "routeMetadata">;
-export function makeRouterFromCustomActions(actions: CustomAction[], routeParams?: CustomActionParams) {
-    const router = new Router();
-    actions.forEach((actionItem) => {
-        const { verb, path, middlewares } = actionItem;
-        let customActionMw;
+export type RouteActionConstructorArgs = { middlewares: Middleware[] };
+export type RouteActionConstructorData = { routeMetadata: RouteMetadata; entityMetadata: EntityMetadata };
 
-        if (isType<CustomActionClass>(actionItem, "class" in actionItem)) {
-            const { action, class: actionClass, middlewares } = actionItem;
-            const instance = new actionClass({ middlewares, ...routeParams });
-            const method = (action as keyof IRouteAction) || "onRequest";
-
-            customActionMw = instance[method].bind(instance);
-        } else {
-            customActionMw = actionItem.handler;
-        }
-
-        router[verb](path, ...(middlewares || []), customActionMw);
-    });
-
-    return router;
+export interface IRouteAction {
+    onRequest(ctx: Context, next: NextFunction): Promise<any>;
 }
+
+export type RouteActionClass<T extends object = object> = new (
+    args?: RouteActionConstructorArgs,
+    data?: T
+) => IRouteAction;
+
+// TODO Rename to RouteAction instead of CustomAction
+export type CustomActionRouterConfigNew = Pick<EntityRouterOptions, "routerClass" | "routerRegisterFn">;
+export type CustomActionRouterConfigWithInstance = {
+    /** Existing router to pass on which custom actions routes will be registered */
+    router: BridgeRouter;
+};
+export type CustomActionRouterConfig = CustomActionRouterConfigWithInstance | CustomActionRouterConfigNew;
+export type CustomActionOptions<T extends object = object> = {
+    /** Args to pass to CustomActionClass on creating a new instance */
+    args?: T;
+};

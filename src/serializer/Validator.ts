@@ -5,7 +5,7 @@ import Container, { Service } from "typedi";
 
 import { RequestContext } from "@/services/ResponseManager";
 import { isEntity } from "@/functions/asserts";
-import { GenericEntity } from "@/services/EntityRouter";
+import { GenericEntity } from "@/router/EntityRouter";
 
 @Service()
 export class Validator<Entity extends GenericEntity = GenericEntity> {

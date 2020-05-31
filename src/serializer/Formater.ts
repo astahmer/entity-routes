@@ -3,7 +3,7 @@ import Container, { Service } from "typedi";
 
 import { ALIAS_PREFIX, COMPUTED_PREFIX, RouteOperation } from "@/decorators/Groups";
 
-import { EntityRouteOptions, GenericEntity, getRouteSubresourcesMetadata } from "@/services/EntityRouter";
+import { EntityRouteOptions, GenericEntity, getRouteSubresourcesMetadata } from "@/router/EntityRouter";
 import { sortObjectByKeys } from "@/functions/object";
 import { lowerFirstLetter } from "@/functions/primitives";
 
@@ -80,6 +80,8 @@ export class Formater<Entity extends GenericEntity = GenericEntity> {
         if (options.shouldEntityWithOnlyIdBeFlattenedToIri && isEntity(item) && Object.keys(item).length === 1) {
             return "getIri" in item ? item.getIri() : (("/" + entityMetadata.tableName + "/" + item.id) as any);
         } else {
+            // TODO wrap setComputedProps in promise and keep looping through items rather than wait for it to complete
+            // = go for parallel calls rather than sequentials
             await this.setComputedPropsOnItem(rootMetadata, item, clone, operation, entityMetadata);
             if (options.shouldSetSubresourcesIriOnItem) {
                 this.setSubresourcesIriOnItem(clone, entityMetadata);

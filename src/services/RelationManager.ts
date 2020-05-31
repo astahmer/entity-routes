@@ -4,7 +4,7 @@ import { Container } from "typedi/Container";
 import { getComputedPropMethodAndKey } from "@/serializer/Formater";
 import { AliasManager } from "@/serializer/AliasManager";
 import { RouteOperation } from "@/decorators/Groups";
-import { EntityRouteOptions, GenericEntity } from "@/services/EntityRouter";
+import { EntityRouteOptions, GenericEntity } from "@/router/EntityRouter";
 import { getDependsOnMetadata } from "@/decorators/DependsOn";
 import { MappingManager } from "@/services/MappingManager";
 import { SubresourceRelation } from "@/services/SubresourceManager";

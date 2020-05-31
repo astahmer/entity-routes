@@ -4,7 +4,7 @@ import Container, { Service } from "typedi";
 
 import { RouteOperation, GROUPS_METAKEY } from "@/decorators/Groups";
 
-import { EntityRouteOptions } from "@/services/EntityRouter";
+import { EntityRouteOptions } from "@/router/EntityRouter";
 import { GroupsMetadata, GroupsMetaByRoutes } from "@/mapping/GroupsMetadata";
 import { EntityGroupsMetadata } from "@/mapping/EntityGroupsMetadata";
 import { RelationManager } from "@/services/RelationManager";
