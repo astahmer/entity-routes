@@ -9,7 +9,7 @@ describe("@EntityRoute", () => {
 
         const metadata = getRouteMetadata(User);
         expect(metadata).toEqual({
-            path: User.constructor.name,
+            path: User.name,
             operations: [],
             options: {},
         });
@@ -40,7 +40,7 @@ describe("@EntityRoute", () => {
 
         const metadata = getRouteMetadata(User);
         expect(metadata).toEqual({
-            path: User.constructor.name,
+            path: User.name,
             operations: ["create", "list"],
             options: { defaultMaxDepthLvl: 3, shouldMaxDepthReturnRelationPropsId: false },
         });
