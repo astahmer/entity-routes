@@ -31,8 +31,6 @@
     "dependencies": {
         "@astahmer/entity-validator": "^0.1.1",
         "class-validator": "^0.12.1",
-        "koa": "^2.11.0",
-        "koa-router": "^8.0.8",
         "ramda": "^0.27.0",
         "reflect-metadata": "^0.1.13",
         "typedi": "^0.8.0",
@@ -51,6 +49,8 @@
         "husky": "^4.2.5",
         "jest": "^25.4.0",
         "jest-extended": "^0.11.5",
+        "koa": "^2.11.0",
+        "koa-router": "^8.0.8",
         "prettier": "^2.0.4",
         "pretty-quick": "^2.0.1",
         "sql.js": "^1.2.2",
