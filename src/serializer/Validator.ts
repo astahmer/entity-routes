@@ -3,8 +3,7 @@ import { EntityMetadata } from "typeorm";
 import { EntityValidatorFunctionOptions, EntityValidator } from "@astahmer/entity-validator";
 import Container, { Service } from "typedi";
 
-import { RequestContext } from "@/services/ResponseManager";
-import { isEntity } from "@/functions/asserts";
+import { isType, isObject } from "@/functions/asserts";
 import { GenericEntity } from "@/router/EntityRouter";
 
 @Service()
@@ -87,7 +86,7 @@ export class Validator {
                 for (i; i < prop.length; i++) {
                     promises.push(makePromise(prop[i], `${path}${key}[${i}]`));
                 }
-            } else if (isEntity(prop)) {
+            } else if (!(prop instanceof Date) && isType<Entity>(prop, isObject(prop))) {
                 promises.push(makePromise(prop, `${path}${key}`));
             }
         }

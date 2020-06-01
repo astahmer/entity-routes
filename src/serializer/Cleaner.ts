@@ -61,6 +61,8 @@ export class Cleaner {
                 } else {
                     clone[key] = prop;
                 }
+            } else if (isType<Date>(prop, (prop as any) instanceof Date)) {
+                clone[key] = prop;
             } else if (isType<Partial<Entity>>(prop, isObject(prop))) {
                 nestedMapping = this.mappingManager.getNestedMappingAt(currentPath.concat(key), mapping);
                 if (hasAnyNestedPropMapped(nestedMapping)) {
