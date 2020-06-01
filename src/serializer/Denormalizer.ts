@@ -1,7 +1,7 @@
-import { DeepPartial, getRepository, EntityMetadata } from "typeorm";
-import Container, { Service } from "typedi";
+import { getRepository, EntityMetadata } from "typeorm";
+import { Container, Service } from "typedi";
 
-import { RequestContext } from "@/services/ResponseManager";
+import { RequestContextMinimal } from "@/services/ResponseManager";
 import { GenericEntity, EntityRouteOptions } from "@/router/EntityRouter";
 import { MappingManager } from "@/services/MappingManager";
 import { Cleaner } from "@/serializer/Cleaner";
@@ -31,15 +31,12 @@ export class Denormalizer {
         const { operation, values } = ctx;
         const repository = getRepository<Entity>(rootMetadata.target);
         const cleanedItem = this.cleaner.cleanItem({ rootMetadata, operation, values, options: routeOptions });
-        const item = repository.create(cleanedItem as DeepPartial<Entity>);
+        const item = repository.create(cleanedItem);
 
         const defaultValidatorOptions: Partial<ValidateItemOptions> =
             operation === "update" ? { skipMissingProperties: false } : {};
-        const errors = await this.validator.validateItem(rootMetadata, item, {
-            ...defaultValidatorOptions,
-            ...validatorOptions,
-            context: ctx,
-        });
+        const validationOptions = { ...defaultValidatorOptions, ...validatorOptions, context: ctx };
+        const errors = await this.validator.validateItem(rootMetadata, item, validationOptions);
 
         if (Object.keys(errors).length) {
             return { hasValidationErrors: true, errors } as EntityErrorResponse;
@@ -55,7 +52,7 @@ export type SaveItemArgs<Entity extends GenericEntity = GenericEntity> = {
     /** Metadata from entity to save */
     rootMetadata: EntityMetadata;
     /** Request context */
-    ctx: RequestContext<Entity>;
+    ctx: RequestContextMinimal<Entity>;
     /** Used by class-validator & entity-validator */
     validatorOptions?: ValidateItemOptions;
     /** EntityRoute specific options */

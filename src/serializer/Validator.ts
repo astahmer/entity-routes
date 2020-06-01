@@ -1,8 +1,9 @@
 import { validate, ValidatorOptions } from "class-validator";
 import { EntityMetadata } from "typeorm";
 import { EntityValidatorFunctionOptions, EntityValidator } from "@astahmer/entity-validator";
-import Container, { Service } from "typedi";
+import { Container, Service } from "typedi";
 
+import { RequestContextMinimal } from "@/services/ResponseManager";
 import { isType, isObject } from "@/functions/asserts";
 import { GenericEntity } from "@/router/EntityRouter";
 
@@ -121,5 +122,5 @@ export type ValidateItemBaseOptions = {
     noAutoGroups?: boolean;
 };
 export type ValidateItemOptions = ValidatorOptions &
-    EntityValidatorFunctionOptions<RequestContext> &
+    EntityValidatorFunctionOptions<RequestContextMinimal> &
     ValidateItemBaseOptions;

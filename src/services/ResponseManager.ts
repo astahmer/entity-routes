@@ -372,6 +372,11 @@ export type RequestContext<Entity extends GenericEntity = GenericEntity> = {
     /** Decoded JWT Token */
     decoded?: JwtDecoded; // TODO data?: any instead
 };
+export type RequestContextMinimal<Entity extends GenericEntity = GenericEntity> = Pick<
+    RequestContext<Entity>,
+    "operation" | "values"
+> &
+    Partial<Omit<RequestContext<Entity>, "operation" | "values">>;
 
 /** Custom state to pass to Koa's Context */
 export type RequestState<Entity extends GenericEntity = GenericEntity> = {
