@@ -28,7 +28,7 @@ export async function makeEntityRouters<T = any>({ connection, entities, options
     connectionManager.connections.push(connection);
 
     // Fix class-validator shitty default behavior with groups
-    entities.forEach(setEntityValidatorsDefaultOption);
+    setEntityValidatorsDefaultOption(entities);
 
     // Instantiate every EntityRouter
     const entityRouters: EntityRouter<GenericEntity>[] = entities.reduce((acc, entity) => {
@@ -63,14 +63,17 @@ export type MakeEntityRouters<T = any> = {
 };
 
 /** Set "always" validator option to true when no groups are passed to validation decorators */
-function setEntityValidatorsDefaultOption(entity: Function) {
+export function setEntityValidatorsDefaultOption(entities: Function[]) {
     const validationMetaStorage = getMetadataStorage();
-    const metadatas = validationMetaStorage.getTargetValidationMetadatas(entity, entity.name);
 
-    let i = 0;
-    for (i; i < metadatas.length; i++) {
-        if (!metadatas[i].groups || !metadatas[i].groups?.length) {
-            metadatas[i].always = true;
+    entities.forEach((entity) => {
+        const metadatas = validationMetaStorage.getTargetValidationMetadatas(entity, entity.name);
+
+        let i = 0;
+        for (i; i < metadatas.length; i++) {
+            if (!metadatas[i].groups || !metadatas[i].groups?.length) {
+                metadatas[i].always = true;
+            }
         }
-    }
+    });
 }
