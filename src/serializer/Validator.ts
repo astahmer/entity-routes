@@ -8,16 +8,20 @@ import { isEntity } from "@/functions/asserts";
 import { GenericEntity } from "@/router/EntityRouter";
 
 @Service()
-export class Validator<Entity extends GenericEntity = GenericEntity> {
+export class Validator {
     /** Validates sent values & return a record of validation errors */
-    public async validateItem(rootMetadata: EntityMetadata, item: Entity, options: ValidateItemOptions = {}) {
+    public async validateItem<Entity extends GenericEntity = GenericEntity>(
+        rootMetadata: EntityMetadata,
+        item: Entity,
+        options: ValidateItemOptions = {}
+    ) {
         const errors: EntityErrorResults = {};
         await this.recursiveValidate(rootMetadata, item, "", errors, options);
         return errors;
     }
 
     /** Recursively validate sent values & returns errors for each entity not passing validation */
-    private async recursiveValidate(
+    private async recursiveValidate<Entity extends GenericEntity = GenericEntity>(
         rootMetadata: EntityMetadata,
         item: Entity,
         currentPath: string,

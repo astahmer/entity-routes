@@ -19,7 +19,7 @@ export class Normalizer {
     }
 
     get formater() {
-        return Container.get(Formater) as Formater;
+        return Container.get(Formater);
     }
 
     /** Retrieve collection of entities with only exposed props (from groups) */
@@ -28,7 +28,7 @@ export class Normalizer {
         qb: SelectQueryBuilder<Entity>,
         aliasManager: AliasManager,
         operation: RequestContext["operation"] = "list",
-        options: EntityRouteOptions
+        options: EntityRouteOptions = {}
     ): Promise<[Entity[], number]> {
         const selectProps = this.mappingManager.getSelectProps(entityMetadata, operation, entityMetadata, true);
 
@@ -69,7 +69,7 @@ export class Normalizer {
         aliasManager: AliasManager,
         entityId: RequestContext["entityId"],
         operation: RequestContext["operation"] = "details",
-        options: EntityRouteOptions
+        options: EntityRouteOptions = {}
     ) {
         const selectProps = this.mappingManager.getSelectProps(entityMetadata, operation, entityMetadata, true);
 

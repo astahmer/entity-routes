@@ -8,21 +8,26 @@ import { Cleaner } from "@/serializer/Cleaner";
 import { ValidateItemOptions, EntityErrorResults, Validator } from "@/serializer/Validator";
 
 @Service()
-export class Denormalizer<Entity extends GenericEntity = GenericEntity> {
+export class Denormalizer {
     get mappingManager() {
         return Container.get(MappingManager);
     }
 
     get cleaner() {
-        return Container.get(Cleaner) as Cleaner;
+        return Container.get(Cleaner);
     }
 
     get validator() {
-        return Container.get(Validator) as Validator;
+        return Container.get(Validator);
     }
 
     /** Clean & validate item and then save it if there was no error */
-    public async saveItem({ ctx, rootMetadata, validatorOptions, routeOptions }: SaveItemArgs<Entity>) {
+    public async saveItem<Entity extends GenericEntity = GenericEntity>({
+        ctx,
+        rootMetadata,
+        validatorOptions,
+        routeOptions,
+    }: SaveItemArgs<Entity>) {
         const { operation, values } = ctx;
         const repository = getRepository<Entity>(rootMetadata.target);
         const cleanedItem = this.cleaner.cleanItem({ rootMetadata, operation, values, options: routeOptions });

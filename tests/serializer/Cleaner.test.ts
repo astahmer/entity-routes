@@ -49,7 +49,7 @@ describe("Cleaner", () => {
     afterAll(closeTestConnection);
 
     describe("cleanItem properly", () => {
-        const cleaner = Container.get(Cleaner) as Cleaner<User>;
+        const cleaner = Container.get(Cleaner);
 
         const values = new User();
         values.id = 1;

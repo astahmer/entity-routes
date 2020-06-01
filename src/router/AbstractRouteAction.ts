@@ -19,11 +19,11 @@ export abstract class AbstractRouteAction implements IRouteAction {
     protected entityMetadata: EntityMetadata;
 
     get formater() {
-        return Container.get(Formater) as Formater;
+        return Container.get(Formater);
     }
 
     get cleaner() {
-        return Container.get(Cleaner) as Cleaner;
+        return Container.get(Cleaner);
     }
 
     get mappingManager() {

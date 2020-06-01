@@ -71,7 +71,7 @@ describe("Formater", () => {
     afterAll(closeTestConnection);
 
     describe("formatItem properly", () => {
-        const formater = Container.get(Formater) as Formater<User>;
+        const formater = Container.get(Formater);
 
         const item = new User();
         item.id = 1;

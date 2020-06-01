@@ -10,7 +10,7 @@ describe("Validator", () => {
         id: number;
     }
 
-    const validator = Container.get(Validator) as Validator;
+    const validator = Container.get(Validator);
 
     it("validateItem properly", async () => {
         @Entity()

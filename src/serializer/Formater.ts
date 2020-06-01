@@ -12,13 +12,18 @@ import { MappingManager } from "@/services/MappingManager";
 import { RequestContext } from "@/services/index";
 
 @Service()
-export class Formater<Entity extends GenericEntity = GenericEntity> {
+export class Formater {
     get mappingManager() {
         return Container.get(MappingManager);
     }
 
     /** Return a clone of this request body values with only mapped props */
-    public formatItem({ item, operation, entityMetadata, options = {} }: FormaterArgs<Entity>) {
+    public formatItem<Entity extends GenericEntity = GenericEntity>({
+        item,
+        operation,
+        entityMetadata,
+        options = {},
+    }: FormaterArgs<Entity>) {
         return this.recursiveFormatItem<Entity>(item, {}, operation, entityMetadata, options);
     }
 
@@ -90,9 +95,9 @@ export class Formater<Entity extends GenericEntity = GenericEntity> {
         }
     }
 
-    private async setComputedPropsOnItem<U extends GenericEntity>(
+    private async setComputedPropsOnItem<Entity extends GenericEntity>(
         rootMetadata: EntityMetadata,
-        item: U,
+        item: Entity,
         clone: any,
         operation: RouteOperation,
         entityMetadata: EntityMetadata
@@ -101,19 +106,19 @@ export class Formater<Entity extends GenericEntity = GenericEntity> {
             .getComputedProps(rootMetadata, operation, entityMetadata)
             .map((computed) => getComputedPropMethodAndKey(computed));
         const propsPromises = await Promise.all(
-            computedProps.map((computed) => (item[computed.computedPropMethod as keyof U] as any)())
+            computedProps.map((computed) => (item[computed.computedPropMethod as keyof Entity] as any)())
         );
-        propsPromises.forEach((result, i) => (clone[computedProps[i].propKey as keyof U] = result));
+        propsPromises.forEach((result, i) => (clone[computedProps[i].propKey as keyof Entity] = result));
     }
 
     /** For each item's subresources, add their corresponding IRIs to this item */
-    private setSubresourcesIriOnItem<U extends GenericEntity>(item: U, entityMetadata: EntityMetadata) {
+    private setSubresourcesIriOnItem<Entity extends GenericEntity>(item: Entity, entityMetadata: EntityMetadata) {
         const subresourceProps = getRouteSubresourcesMetadata(entityMetadata.target as Function).properties;
 
         let key;
         for (key in subresourceProps) {
-            if (!item[key as keyof U]) {
-                (item as any)[key as keyof U] =
+            if (!item[key as keyof Entity]) {
+                (item as any)[key as keyof Entity] =
                     ("getIri" in item ? item.getIri() : "/" + entityMetadata.tableName + "/" + item.id) + "/" + key;
             }
         }

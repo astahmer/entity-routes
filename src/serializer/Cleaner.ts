@@ -10,19 +10,24 @@ import { MappingManager, MappingItem, ENTITY_META_SYMBOL } from "@/services/Mapp
 import { SaveItemArgs } from "@/serializer/Denormalizer";
 
 @Service()
-export class Cleaner<Entity extends GenericEntity = GenericEntity> {
+export class Cleaner {
     get mappingManager() {
         return Container.get(MappingManager);
     }
 
     /** Return a clone of item with only mapped props */
-    public cleanItem({ rootMetadata, values, operation, options = {} }: CleanerArgs): RequestContext<Entity>["values"] {
+    public cleanItem<Entity extends GenericEntity = GenericEntity>({
+        rootMetadata,
+        values,
+        operation,
+        options = {},
+    }: CleanerArgs): RequestContext<Entity>["values"] {
         const routeMapping = this.mappingManager.make(rootMetadata, operation, options);
         return this.recursiveClean(values as RequestContext<Entity>["values"], {}, [], routeMapping as MappingItem);
     }
 
     /** Removes non-mapped (deep?) properties from sent values & format entity.id */
-    private recursiveClean(
+    private recursiveClean<Entity extends GenericEntity = GenericEntity>(
         item: RequestContext<Entity>["values"] | string,
         clone: any,
         currentPath: string[],

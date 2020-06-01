@@ -33,7 +33,7 @@ export class ResponseManager<Entity extends GenericEntity> {
     }
 
     get denormalizer() {
-        return Container.get(Denormalizer) as Denormalizer;
+        return Container.get(Denormalizer);
     }
 
     get mappingManager() {
