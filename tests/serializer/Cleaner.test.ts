@@ -16,11 +16,9 @@ describe("Cleaner", () => {
         @Column()
         title: string;
 
-        @Groups({ user: ["create"] })
         @Column()
         startDate: Date;
 
-        @Groups({ user: ["create"] })
         @Column()
         endDate: Date;
     }
