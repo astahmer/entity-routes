@@ -59,6 +59,10 @@ export class Validator {
             errorResults[currentPath || routeEntityName] = itemErrors;
         }
 
+        if (options?.shouldOnlyValidateShallowProps) {
+            return itemErrors;
+        }
+
         // Recursively validates item.props
         const makePromise = (nestedItem: Entity, path: string): Promise<void> =>
             new Promise(async (resolve) => {
@@ -120,6 +124,8 @@ export type EntityErrorResults = Record<string, EntityError[]>;
 export type ValidateItemBaseOptions = {
     /*** When true, do NOT add automatically entity name & operation groups */
     noAutoGroups?: boolean;
+    /** When true, only validates shallow props (=avoid recursive validations) */
+    shouldOnlyValidateShallowProps?: boolean;
 };
 export type ValidateItemOptions = ValidatorOptions &
     EntityValidatorFunctionOptions<RequestContextMinimal> &
