@@ -148,4 +148,4 @@ export type EntityRouteOptions = {
 };
 export type EntityRouteConfig = EntityRouteBaseOptions & EntityRouteOptions;
 
-export type EntityRouterOptions = EntityRouterClassOptions & EntityRouteConfig;
+export type EntityRouterOptions<T = any> = EntityRouterClassOptions<T> & EntityRouteConfig;

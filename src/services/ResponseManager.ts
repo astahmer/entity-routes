@@ -1,6 +1,5 @@
-import { Middleware, Context } from "koa";
 import { Connection, DeleteResult, QueryRunner, Repository, SelectQueryBuilder, getRepository } from "typeorm";
-import Container from "typedi";
+import { Container } from "typedi";
 
 import { RouteActionClass } from "@/router/AbstractRouteAction";
 import { RouteOperation } from "@/decorators/Groups";
@@ -20,6 +19,8 @@ import { isType, isDev } from "@/functions/asserts";
 import { MappingManager } from "./MappingManager";
 import { EntityErrorResults } from "@/serializer/Validator";
 import { RelationManager } from "@/services/RelationManager";
+import { Context } from "@/utils-types";
+import { Middleware } from "koa"; // TODO use Middleware from/util-types = wrap ctx since ctx.params/body.state do not exist for Express
 
 // TODO RouteManager ? for makeRequestContextMw / makeResponseMw / makeRouteMappingMw / make/apply filters
 // TODO remove public from every services methods when not needed
@@ -337,14 +338,14 @@ export type BaseCustomAction = Omit<CrudAction, "method"> & {
 };
 
 export type CustomActionClass = BaseCustomAction & {
-    /** Class that implements IRouteAction, onRequest method will be called by default unless a custom action parameter is defined */
+    /** Class that implements IRouteAction, onRequest method will be called by default unless a method key is provided */
     class?: RouteActionClass;
-    /** Custom method name of RouteAction class to call for this verb+path, mostly useful to re-use the same class for multiple actions */
-    action?: string;
+    /** Method name of RouteAction class to call for this verb+path, mostly useful to re-use the same class for multiple actions */
+    method?: string;
 };
 
 export type CustomActionFunction = BaseCustomAction & {
-    /** Custom handler (actually is a middleware) */
+    /** Route handler (actually is a middleware) */
     handler?: Function;
 };
 
@@ -354,7 +355,7 @@ export type JwtDecoded<Payload = Record<string, any>> = { iat: number; exp: numb
 
 /** EntityRoute request context wrapping Koa's Context */
 export type RequestContext<Entity extends GenericEntity = GenericEntity> = {
-    /** Koa Request context */
+    /** Koa/Express Request context */
     ctx: Context;
     /** Current route entity id */
     entityId?: string | number;

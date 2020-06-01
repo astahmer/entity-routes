@@ -1,5 +1,4 @@
 import { NextFunction } from "connect";
-import { Context, Middleware } from "koa";
 import { QueryRunner, getRepository, EntityMetadata } from "typeorm";
 import { Container } from "typedi";
 
@@ -11,6 +10,8 @@ import { MappingManager } from "../services/MappingManager";
 import { Cleaner } from "@/serializer/Cleaner";
 import { Formater } from "@/serializer/Formater";
 import { BridgeRouter } from "@/bridges/routers/BridgeRouter";
+import { Context } from "@/utils-types";
+import { Middleware } from "koa"; // TODO use Middleware from/util-types = wrap ctx since ctx.params/body.state do not exist for Express
 
 export abstract class AbstractRouteAction implements IRouteAction {
     protected middlewares: Middleware[];
@@ -38,10 +39,6 @@ export abstract class AbstractRouteAction implements IRouteAction {
 
     abstract onRequest(ctx: Context, next: NextFunction): Promise<any>;
 
-    protected getQueryRunner(ctx: Context): QueryRunner {
-        return ctx.state.queryRunner;
-    }
-
     protected async serializeItem<Entity extends GenericEntity = GenericEntity>(
         entity: Entity,
         operation: GroupsOperation = "details"
@@ -62,18 +59,13 @@ export abstract class AbstractRouteAction implements IRouteAction {
             options: this.routeMetadata.options,
         });
     }
-
-    protected throw(ctx: Context, message: string) {
-        ctx.body = { error: message };
-        ctx.status = 400;
-    }
 }
 
 export type RouteActionConstructorArgs = { middlewares: Middleware[] };
 export type RouteActionConstructorData = { routeMetadata: RouteMetadata; entityMetadata: EntityMetadata };
 
 export interface IRouteAction {
-    onRequest(ctx: Context, next: NextFunction): Promise<any>;
+    onRequest(ctx: Context, next?: NextFunction): any;
 }
 
 export type RouteActionClass<T extends object = object> = new (
@@ -82,12 +74,14 @@ export type RouteActionClass<T extends object = object> = new (
 ) => IRouteAction;
 
 // TODO Rename to RouteAction instead of CustomAction
-export type CustomActionRouterConfigNew = Pick<EntityRouterOptions, "routerClass" | "routerRegisterFn">;
-export type CustomActionRouterConfigWithInstance = {
+export type CustomActionRouterConfigNew<T = any> = Pick<EntityRouterOptions<T>, "routerClass" | "routerRegisterFn">;
+export type CustomActionRouterConfigWithInstance<T = any> = {
     /** Existing router to pass on which custom actions routes will be registered */
-    router: BridgeRouter;
+    router: BridgeRouter<T>;
 };
-export type CustomActionRouterConfig = CustomActionRouterConfigWithInstance | CustomActionRouterConfigNew;
+export type CustomActionRouterConfig<T = any> =
+    | CustomActionRouterConfigWithInstance<T>
+    | CustomActionRouterConfigNew<T>;
 export type CustomActionOptions<T extends object = object> = {
     /** Args to pass to CustomActionClass on creating a new instance */
     args?: T;

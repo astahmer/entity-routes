@@ -1,5 +1,8 @@
-import { GenericEntity } from "./router/EntityRouter";
+import { IncomingMessage, ServerResponse } from "http";
+import { NextFunction } from "connect";
 import { ObjectType } from "typeorm";
+
+import { GenericEntity } from "./router/EntityRouter";
 
 export type PartialRecord<K extends keyof any, T> = Partial<Record<K, T>>;
 export type Props<T extends GenericEntity> = NonFunctionKeys<T>;
@@ -20,3 +23,6 @@ export type EntityKeys<T extends GenericEntity> = {
 }[keyof T];
 
 export type EntityReference = <Entity extends GenericEntity>(type?: Entity) => ObjectType<Entity>;
+
+export type Middleware = (ctx: Context, next: NextFunction) => any;
+export type Context = { req: IncomingMessage; res: ServerResponse };

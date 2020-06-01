@@ -5,12 +5,12 @@ import { formatRouteName } from "@/functions/route";
 import { isType } from "@/functions/asserts";
 
 export class BridgeRouter<T = any> {
-    instance: T;
-    routes: BridgeRouterRoute[] = [];
+    readonly instance: T;
+    readonly routes: BridgeRouterRoute[] = [];
 
     constructor(
         public readonly routerClass: BridgeRouterClassReference<T>,
-        private registerFn: BridgeRouterRegisterFn<T>
+        private readonly registerFn: BridgeRouterRegisterFn<T>
     ) {
         this.instance = new routerClass();
     }
@@ -33,9 +33,9 @@ export type BridgeRouterRoute = {
 export type BridgeRouterClassReference<T = any> = new (...args: any) => T;
 export type BridgeRouterRegisterFn<T = any> = (instance: T, route: BridgeRouterRoute) => any;
 
-export function makeRouterFromActions<Data extends object = object>(
+export function makeRouterFromActions<Data extends object = object, RouterClass = any>(
     actions: CustomAction[],
-    config: CustomActionRouterConfig,
+    config: CustomActionRouterConfig<RouterClass>,
     data?: Data
 ) {
     const router = "router" in config ? config.router : new BridgeRouter(config.routerClass, config.routerRegisterFn);
@@ -45,11 +45,11 @@ export function makeRouterFromActions<Data extends object = object>(
         let customActionMw;
 
         if (isType<CustomActionClass>(item, "class" in item)) {
-            const { action, class: actionClass, middlewares } = item;
+            const { method, class: actionClass, middlewares } = item;
             const instance = new actionClass({ middlewares, ...data });
-            const method = (action as keyof IRouteAction) || "onRequest";
+            const methodProp = (method as keyof IRouteAction) || "onRequest";
 
-            customActionMw = instance[method].bind(instance);
+            customActionMw = instance[methodProp].bind(instance);
         } else {
             customActionMw = item.handler;
         }
