@@ -1,8 +1,9 @@
-import { PrimaryGeneratedColumn, Entity, Column, ManyToOne, getRepository } from "typeorm";
+import { PrimaryGeneratedColumn, Entity, Column, ManyToOne, getRepository, OneToMany } from "typeorm";
 import { Validator, RequestContext } from "@/index";
 import { createTestConnection, closeTestConnection } from "@@/tests/testConnection";
 import { Container } from "typedi";
-import { IsString, IsEmail, IsDate } from "class-validator";
+import { IsString, IsEmail, IsDate, registerDecorator, ValidationArguments } from "class-validator";
+import { registerEntityDecorator } from "@astahmer/entity-validator";
 
 describe("Validator", () => {
     class AbstractEntity {
@@ -270,6 +271,150 @@ describe("Validator", () => {
         const errors = await validator.validateItem(rootMetadata, values, { noAutoGroups: true });
         expect(errors).toEqual({
             user: [{ constraints: { isEmail: "email must be an email" }, currentPath: "", property: "email" }],
+        });
+
+        return closeTestConnection();
+    });
+
+    it("should run nested validations in parallel async promises", async () => {
+        @RoleValidator()
+        @Entity()
+        class Role extends AbstractEntity {
+            @IsString()
+            @Column()
+            title: string;
+
+            @IsDate()
+            @Column()
+            startDate: Date;
+
+            @Column()
+            endDate: Date;
+
+            @ManyToOne(() => User, (user) => user.defaultRoles)
+            users: User[];
+        }
+        @Entity()
+        class User extends AbstractEntity {
+            @IsString()
+            @Column()
+            name: string;
+
+            @IsEmail()
+            @Column()
+            email: string;
+
+            @ManyToOne(() => Role)
+            role: Role;
+
+            @OneToMany(() => Role, (role) => role.id)
+            defaultRoles: Role[];
+
+            @RolePropValidator(777)
+            @ManyToOne(() => Role)
+            adminRole: Role;
+        }
+
+        function RoleValidator() {
+            return (target: Function) => {
+                registerEntityDecorator({
+                    name: "RoleValidator",
+                    target,
+                    validator: (value: Role) => {
+                        return new Promise((resolve) => {
+                            setTimeout(() => {
+                                resolve(value.id !== 321);
+                            }, 100);
+                        });
+                    },
+                });
+            };
+        }
+
+        function RolePropValidator(forbiddenId: number) {
+            return (target: Object, propertyName: string) => {
+                registerDecorator({
+                    name: "RolePropValidator",
+                    target: target.constructor,
+                    propertyName,
+                    constraints: [forbiddenId],
+                    options: { message: "That id ($constraint1) is forbidden as a Role" },
+                    validator: {
+                        validate(value: Role, args: ValidationArguments) {
+                            return new Promise((resolve) => {
+                                setTimeout(() => {
+                                    resolve(!args.constraints.includes(value.id));
+                                }, 100);
+                            });
+                        },
+                    },
+                });
+            };
+        }
+
+        await createTestConnection([User, Role]);
+
+        const values = new User();
+        values.id = 1;
+        values.name = "Alex";
+        values.email = "invalid email";
+
+        const role = new Role();
+        role.id = 123;
+        role.title = "abc";
+        role.startDate = new Date();
+
+        const role2 = new Role();
+        role2.id = 456;
+        role2.title = "def";
+        // will fail since startDate is missing
+
+        const role3 = new Role();
+        role3.id = 321; // will fail as normal validationError cause of id === 321
+        role3.title = "fail";
+        role3.startDate = new Date();
+
+        const role4 = new Role();
+        role4.id = 777; // will fail promise cause of id === 777
+        role4.title = "fail";
+        role4.startDate = new Date();
+
+        values.role = role;
+        values.defaultRoles = [role2, role3];
+        values.adminRole = role4;
+
+        const rootMetadata = getRepository(User).metadata;
+        const errors = await validator.validateItem(rootMetadata, values, { noAutoGroups: true });
+
+        expect(errors).toEqual({
+            user: [
+                {
+                    currentPath: "",
+                    property: "email",
+                    constraints: { isEmail: "email must be an email" },
+                },
+                {
+                    currentPath: "",
+                    property: "adminRole",
+                    constraints: { RolePropValidator: "That id (777) is forbidden as a Role" },
+                },
+            ],
+            "defaultRoles[0]": [
+                {
+                    currentPath: "defaultRoles[0]",
+                    property: "startDate",
+                    constraints: { isDate: "startDate must be a Date instance" },
+                },
+            ],
+            "defaultRoles[1]": [
+                {
+                    currentPath: "defaultRoles[1]",
+                    property: "class",
+                    constraints: {
+                        RoleValidator: "Failed validation cause of constraint 'RoleValidator'",
+                    },
+                },
+            ],
         });
 
         return closeTestConnection();
