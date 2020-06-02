@@ -224,4 +224,54 @@ describe("Validator", () => {
 
         return closeTestConnection();
     });
+
+    it("skip missing properties on updating a relation", async () => {
+        @Entity()
+        class Role extends AbstractEntity {
+            @IsString()
+            @Column()
+            title: string;
+
+            @IsDate()
+            @Column()
+            startDate: Date;
+
+            @IsDate()
+            @Column()
+            endDate: Date;
+        }
+
+        @Entity()
+        class User extends AbstractEntity {
+            @IsString()
+            @Column()
+            name: string;
+
+            @IsEmail()
+            @Column()
+            email: string;
+
+            @ManyToOne(() => Role)
+            role: Role;
+        }
+
+        await createTestConnection([User, Role]);
+
+        const values = new User();
+        values.id = 1;
+        values.name = "Alex";
+        values.email = "invalid email";
+
+        const role = new Role();
+        role.id = 123;
+        values.role = role;
+
+        const rootMetadata = getRepository(User).metadata;
+        const errors = await validator.validateItem(rootMetadata, values, { noAutoGroups: true });
+        expect(errors).toEqual({
+            user: [{ constraints: { isEmail: "email must be an email" }, currentPath: "", property: "email" }],
+        });
+
+        return closeTestConnection();
+    });
 });
