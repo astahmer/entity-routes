@@ -104,7 +104,8 @@ export class MappingManager {
 
         if (!this.groupsMetas[metaKey][entityMetadata.tableName]) {
             this.groupsMetas[metaKey][entityMetadata.tableName] =
-                Reflect.getOwnMetadata(metaKey, entityMetadata.target) || new metaClass(metaKey, entityMetadata);
+                Reflect.getOwnMetadata(metaKey, entityMetadata.target) ||
+                new metaClass(metaKey, entityMetadata.target as Function);
         }
         return this.groupsMetas[metaKey][entityMetadata.tableName];
     }
@@ -162,7 +163,7 @@ export class MappingManager {
                 mapping,
                 operation,
                 relationProps[i].inverseEntityMetadata,
-                currentPath + "." + relationProps[i].propertyName,
+                (currentPath ? currentPath + "." : "") + relationProps[i].propertyName,
                 currentTableNamePath + "." + relationProps[i].inverseEntityMetadata.tableName,
                 options
             );
