@@ -35,7 +35,7 @@ export class Cleaner {
     ): Partial<Entity> {
         let key: string, prop, mapping, nestedMapping;
 
-        // If item is an iri/id (coming frsom an array), just return it in object with proper id
+        // If item is an iri/id (coming from an array), just return it in object with proper id
         if (isType<Primitive>(item, isPrimitive(item))) {
             mapping = this.mappingManager.getNestedMappingAt(currentPath, routeMapping);
             return mapping && mapping.exposedProps.length === 1 && mapping.exposedProps[0] === "id"
