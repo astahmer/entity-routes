@@ -32,7 +32,7 @@ export class Validator {
 
         const keys = Object.keys(item);
         // If user is updating entity and item is just an existing relation, no need to validate it since it's missing properties
-        if ((options?.skipMissingProperties || currentPath.includes(".")) && keys.length === 1 && keys[0] === "id") {
+        if ((options?.skipMissingProperties || currentPath) && keys.length === 1 && keys[0] === "id") {
             return [];
         }
 
