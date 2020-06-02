@@ -16,7 +16,17 @@ export class Validator {
         options: ValidateItemOptions = {}
     ) {
         const errors: EntityErrorResults = {};
-        await this.recursiveValidate(rootMetadata, item, "", errors, options);
+        try {
+            await this.recursiveValidate(rootMetadata, item, "", errors, options);
+        } catch (error) {
+            errors[rootMetadata.name.toLowerCase()] = [
+                {
+                    property: "class",
+                    currentPath: "",
+                    constraints: { unknown: error.message || "Validation failed at root" },
+                },
+            ];
+        }
         return errors;
     }
 
@@ -64,7 +74,7 @@ export class Validator {
         }
 
         // Recursively validates item.props
-        const makePromise = (nestedItem: Entity, path: string): Promise<void> =>
+        const makePromise = (nestedItem: Entity, path: string, key: string): Promise<void> =>
             new Promise(async (resolve) => {
                 try {
                     const errors = await this.recursiveValidate(rootMetadata, nestedItem, path, errorResults, options);
@@ -73,8 +83,12 @@ export class Validator {
                     }
                     resolve();
                 } catch (error) {
-                    console.error(`Validation failed at path ${path}`);
+                    const defaultMsg = `Validator error at path ${path}`;
+                    console.error(defaultMsg);
                     console.error(error);
+                    errorResults[path] = [
+                        { currentPath: path, property: key, constraints: { unknown: error.message || defaultMsg } },
+                    ];
                     resolve();
                 }
             });
@@ -89,10 +103,10 @@ export class Validator {
             if (Array.isArray(prop)) {
                 let i = 0;
                 for (i; i < prop.length; i++) {
-                    promises.push(makePromise(prop[i], `${path}${key}[${i}]`));
+                    promises.push(makePromise(prop[i], `${path}${key}[${i}]`, key));
                 }
             } else if (!(prop instanceof Date) && isType<Entity>(prop, isObject(prop))) {
-                promises.push(makePromise(prop, `${path}${key}`));
+                promises.push(makePromise(prop, `${path}${key}`, key));
             }
         }
 
