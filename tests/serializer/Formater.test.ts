@@ -1,5 +1,5 @@
 import { PrimaryGeneratedColumn, Entity, Column, ManyToOne, getRepository, OneToMany } from "typeorm";
-import { Groups, DependsOn, Formater, Subresource } from "@/index";
+import { Groups, DependsOn, Formater, Subresource, makeComputedPropNameFromMethod } from "@/index";
 import { createTestConnection, closeTestConnection } from "@@/tests/testConnection";
 import { Container } from "typedi";
 
@@ -17,6 +17,10 @@ describe("Formater", () => {
 
         @Column()
         startDate: Date;
+    }
+
+    class Thing {
+        id: number;
     }
 
     @Entity()
@@ -41,6 +45,10 @@ describe("Formater", () => {
         @Subresource(() => Comment)
         @OneToMany(() => Comment, (comment) => comment.writer)
         comments: Comment[];
+
+        @Groups({ user: "all" })
+        @Column({ type: "simple-json" })
+        thing: Thing;
 
         @DependsOn(["id", "name"])
         @Groups({ user: "all" })
@@ -129,5 +137,34 @@ describe("Formater", () => {
             });
             expect(formatedWithFlatIri.articles).toEqual(["/article/1", "/article/2"]);
         });
+
+        it("return unregistered class objects (!entity) untouched", async () => {
+            const entityMetadata = getRepository(User).metadata;
+
+            const thing = new Thing();
+            thing.id = 1;
+
+            const user = new User();
+            user.id = 2;
+            user.thing = thing;
+
+            expect(await formater.formatItem({ item: user, entityMetadata })).toEqual({ id: 2, thing: { id: 1 } });
+        });
+
+        it("return item if its class is not a registered entity", async () => {
+            const entityMetadata = getRepository(User).metadata;
+
+            const thing = new Thing();
+            thing.id = 1;
+
+            expect(await formater.formatItem({ item: thing, entityMetadata })).toEqual({ id: 1 });
+        });
+    });
+
+    it("makeComputedPropNameFromMethod", () => {
+        expect(makeComputedPropNameFromMethod("getIdentifier")).toEqual("identifier");
+        expect(makeComputedPropNameFromMethod("hasIdentifier")).toEqual("identifier");
+        expect(makeComputedPropNameFromMethod("isIdentifier")).toEqual("identifier");
+        expect(() => makeComputedPropNameFromMethod("invalidAutoMethodNameIdentifier")).toThrow();
     });
 });

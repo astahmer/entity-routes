@@ -12,6 +12,7 @@ import { MappingManager } from "@/services/MappingManager";
 import { RequestContext } from "@/services/index";
 
 @Service()
+/** Format entity properly for a route response */
 export class Formater {
     get mappingManager() {
         return Container.get(MappingManager);
@@ -82,6 +83,7 @@ export class Formater {
             // TODO Remove properties selected by DependsOn ? options in Route>App ? default = true
         }
 
+        // TODO Rm getIri
         if (options.shouldEntityWithOnlyIdBeFlattenedToIri && isEntity(item) && Object.keys(item).length === 1) {
             return "getIri" in item ? item.getIri() : (("/" + entityMetadata.tableName + "/" + item.id) as any);
         } else {
@@ -131,6 +133,7 @@ export const computedPropRegex = /^(get|is|has).+/;
  * Returns a formatted version of the method name
  *
  * @param computed actual method name
+ * @example makeComputedPropNameFromMethod("getIdentifier") = "identifier"
  */
 export const makeComputedPropNameFromMethod = (computed: string) => {
     const regexResult = computed.match(computedPropRegex);
