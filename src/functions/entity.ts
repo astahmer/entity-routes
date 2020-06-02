@@ -5,7 +5,8 @@ import { getEntityRouters } from "@/router/container";
 
 export const iriRegex = new RegExp(/\/api\/(\w+)\//g, "i");
 export function formatIriToId<B extends Boolean>(iri: string, asInt?: B): B extends true ? number : string;
-export function formatIriToId(iri: string, asInt?: boolean) {
+export function formatIriToId(iri: string | number, asInt?: boolean) {
+    if (typeof iri === "number") return iri;
     return asInt ? parseInt(iri.replace(iriRegex, "")) : iri.replace(iriRegex, "");
 }
 
