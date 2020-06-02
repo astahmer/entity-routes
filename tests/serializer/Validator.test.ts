@@ -169,4 +169,59 @@ describe("Validator", () => {
 
         return closeTestConnection();
     });
+
+    it("can opt-out of recursive validation with option", async () => {
+        @Entity()
+        class Role extends AbstractEntity {
+            @IsString()
+            @Column()
+            title: string;
+
+            @IsDate()
+            @Column()
+            startDate: Date;
+
+            @IsDate()
+            @Column()
+            endDate: Date;
+        }
+
+        @Entity()
+        class User extends AbstractEntity {
+            @IsString()
+            @Column()
+            name: string;
+
+            @IsEmail()
+            @Column()
+            email: string;
+
+            @ManyToOne(() => Role)
+            role: Role;
+        }
+
+        await createTestConnection([User, Role]);
+
+        const values = new User();
+        values.id = 1;
+        values.name = "Alex";
+        values.email = "email@test.com";
+
+        const role = new Role();
+        role.id = 1;
+        role.title = "Admin";
+        role.startDate = 123 as any; // invalid date
+        role.endDate = new Date();
+
+        values.role = role;
+
+        const rootMetadata = getRepository(User).metadata;
+        const errors = await validator.validateItem(rootMetadata, values, {
+            noAutoGroups: true,
+            skipNestedEntities: true,
+        });
+        expect(errors).toEqual({});
+
+        return closeTestConnection();
+    });
 });

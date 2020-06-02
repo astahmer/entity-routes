@@ -59,7 +59,7 @@ export class Validator {
             errorResults[currentPath || routeEntityName] = itemErrors;
         }
 
-        if (options?.shouldOnlyValidateShallowProps) {
+        if (options?.skipNestedEntities) {
             return itemErrors;
         }
 
@@ -125,7 +125,7 @@ export type ValidateItemBaseOptions = {
     /*** When true, do NOT add automatically entity name & operation groups */
     noAutoGroups?: boolean;
     /** When true, only validates shallow props (=avoid recursive validations) */
-    shouldOnlyValidateShallowProps?: boolean;
+    skipNestedEntities?: boolean;
 };
 export type ValidateItemOptions = ValidatorOptions &
     EntityValidatorFunctionOptions<RequestContextMinimal> &
