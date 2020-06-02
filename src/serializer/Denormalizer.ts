@@ -3,16 +3,11 @@ import { Container, Service } from "typedi";
 
 import { RequestContextMinimal } from "@/services/ResponseManager";
 import { GenericEntity, EntityRouteOptions } from "@/router/EntityRouter";
-import { MappingManager } from "@/services/MappingManager";
 import { Cleaner } from "@/serializer/Cleaner";
 import { ValidateItemOptions, EntityErrorResults, Validator } from "@/serializer/Validator";
 
 @Service()
 export class Denormalizer {
-    get mappingManager() {
-        return Container.get(MappingManager);
-    }
-
     get cleaner() {
         return Container.get(Cleaner);
     }
