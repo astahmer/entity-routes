@@ -39,7 +39,7 @@ export class Cleaner {
         if (isType<Primitive>(item, isPrimitive(item))) {
             mapping = this.mappingManager.getNestedMappingAt(currentPath, routeMapping);
             return mapping && mapping.exposedProps.length === 1 && mapping.exposedProps[0] === "id"
-                ? { id: formatIriToId(item) }
+                ? { id: formatIriToId(item, true) }
                 : clone;
         }
 
@@ -74,7 +74,7 @@ export class Cleaner {
                 const isRelation = mapping[ENTITY_META_SYMBOL].findRelationWithPropertyPath(key);
                 // Format IRI to id && string "id" to int id
                 if (typeof prop === "string" && (isRelation || key === "id")) {
-                    clone[key] = formatIriToId(prop);
+                    clone[key] = formatIriToId(prop, true);
                 } else {
                     clone[key] = prop;
                 }
