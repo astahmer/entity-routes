@@ -11,8 +11,9 @@
         "access": "public"
     },
     "scripts": {
-        "test": "jest --runInBand",
+        "test": "jest --runInBand --detectOpenHandles",
         "test:clear": "jest --clearCache",
+        "test:watch": "jest --runInBand --detectOpenHandles --watch --no-watchman",
         "test:coverage": "jest --coverage --runInBand --detectOpenHandles",
         "tsc": "tsc",
         "commit": "git-cz",
