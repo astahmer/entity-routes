@@ -1,6 +1,5 @@
 import { IncomingMessage, ServerResponse } from "http";
-import { CustomAction, CustomActionClass } from "@/services/ResponseManager";
-import { CustomActionRouterConfig, IRouteAction } from "@/router/AbstractRouteAction";
+import { CustomActionRouterConfig, IRouteAction, CustomAction, CustomActionClass } from "@/router/AbstractRouteAction";
 import { formatRouteName } from "@/functions/route";
 import { isType } from "@/functions/asserts";
 

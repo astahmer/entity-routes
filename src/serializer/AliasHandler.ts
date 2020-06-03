@@ -3,8 +3,7 @@ import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
 
 export type AliasList = Record<string, number>;
 
-// TODO Rename to AliasHandler
-export class AliasManager {
+export class AliasHandler {
     readonly aliases: AliasList = {};
 
     public getAliasKey(entityTableName: string, propName: string) {

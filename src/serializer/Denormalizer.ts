@@ -1,10 +1,10 @@
 import { getRepository, EntityMetadata } from "typeorm";
 import { Container, Service } from "typedi";
 
-import { RequestContextMinimal } from "@/services/ResponseManager";
 import { GenericEntity, EntityRouteOptions } from "@/router/EntityRouter";
 import { Cleaner } from "@/serializer/Cleaner";
 import { ValidateItemOptions, EntityErrorResults, Validator } from "@/serializer/Validator";
+import { RequestContextMinimal } from "@/router/RouteManager";
 
 @Service()
 export class Denormalizer {

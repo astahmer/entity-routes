@@ -1,4 +1,3 @@
-import { concat, mergeWith } from "ramda";
 import { EntityGroupsMetadata } from "./EntityGroupsMetadata";
 import {
     MetaKey,
@@ -10,6 +9,7 @@ import {
     RouteOperation,
     GROUPS_METAKEY,
 } from "@/decorators/Groups";
+import { deepMerge } from "@/functions/object";
 
 export class GroupsMetadata {
     /** The key under which the Reflect metadata will be stored on the target entity */
@@ -96,7 +96,7 @@ export class GroupsMetadata {
     getOwnExposedProps(route: string): OperationGroups {
         let groups;
         if (this.globals && this.routes[route]) {
-            groups = mergeWith(concat, this.globals, this.routes[route]);
+            groups = deepMerge({}, this.globals, this.routes[route]);
         } else {
             groups = this.globals || this.routes[route];
         }
@@ -118,7 +118,7 @@ export class GroupsMetadata {
             parentProps = getOwnExposedProps(inheritanceTree[i], tableName, this.metaKey);
 
             if (parentProps) {
-                props = mergeWith(concat, props, parentProps);
+                props = deepMerge({}, props, parentProps);
             }
         }
 

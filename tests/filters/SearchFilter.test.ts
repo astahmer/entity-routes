@@ -1,6 +1,6 @@
 import {
     getRouteFiltersMeta,
-    AliasManager,
+    AliasHandler,
     Search,
     getSearchFilterDefaultConfig,
     SearchFilter,
@@ -48,15 +48,15 @@ describe("Search filter", () => {
             const searchFilter = new SearchFilter({ config: filtersMeta["SearchFilter"], entityMetadata });
 
             let qb = repository.createQueryBuilder(entityMetadata.tableName);
-            let aliasManager = new AliasManager();
-            searchFilter.apply({ qb, aliasManager, queryParams: undefined });
+            let aliasHandler = new AliasHandler();
+            searchFilter.apply({ qb, aliasHandler, queryParams: undefined });
             // Search filter should not have set any condition yet since no queryParams were used
             expect(qb.expressionMap.wheres).toEqual([]);
 
-            aliasManager = new AliasManager();
+            aliasHandler = new AliasHandler();
             qb = repository.createQueryBuilder(entityMetadata.tableName);
             const queryParams = { id: "123", firstName: "Alex", role: "789", "role.identifier": "abc456" };
-            searchFilter.apply({ qb, aliasManager, queryParams });
+            searchFilter.apply({ qb, aliasHandler, queryParams });
             // should have set conditions accordingly to queryParams
             // except "role.identifier" since options only allow shallow props to be filtered
             expect(qb.expressionMap.wheres).toEqual([
@@ -103,15 +103,15 @@ describe("Search filter", () => {
             const searchFilter = new SearchFilter({ config: filtersMeta["SearchFilter"], entityMetadata });
 
             let qb = repository.createQueryBuilder(entityMetadata.tableName);
-            let aliasManager = new AliasManager();
-            searchFilter.apply({ qb, aliasManager, queryParams: undefined });
+            let aliasHandler = new AliasHandler();
+            searchFilter.apply({ qb, aliasHandler, queryParams: undefined });
             // Search filter should not have set any condition yet since no queryParams were used
             expect(qb.expressionMap.wheres).toEqual([]);
 
-            aliasManager = new AliasManager();
+            aliasHandler = new AliasHandler();
             qb = repository.createQueryBuilder(entityMetadata.tableName);
             const queryParams = { id: "123", firstName: "Alex", role: "789", "role.identifier": "abc456" };
-            searchFilter.apply({ qb, aliasManager, queryParams });
+            searchFilter.apply({ qb, aliasHandler, queryParams });
             // should have set conditions accordingly to queryParams
             // but with only firstName & role.identifier since they alone were explicitly specified on @Search properties
             // firstName strategy is LIKE since it is the defaultWhereStrategy given in options
@@ -154,13 +154,13 @@ describe("Search filter", () => {
                 qb,
                 whereExp,
                 nestedConditionsFilters,
-                aliasManager,
+                aliasHandler,
             }: ApplyNestedConditionFiltersArgs) {
                 return super.applyNestedConditionsFilters({
                     qb,
                     whereExp,
                     nestedConditionsFilters,
-                    aliasManager,
+                    aliasHandler,
                 });
             }
         }
@@ -342,9 +342,9 @@ describe("Search filter", () => {
             const repository = getRepository(User);
             const entityMetadata = repository.metadata;
             const qb = repository.createQueryBuilder(entityMetadata.tableName);
-            const aliasManager = new AliasManager();
+            const aliasHandler = new AliasHandler();
 
-            filter.apply({ qb, aliasManager, queryParams });
+            filter.apply({ qb, aliasHandler, queryParams });
             expect(qb.expressionMap.wheres).toEqual([
                 { type: "and", condition: "(user.firstName = :firstName)" },
                 { type: "and", condition: "(user.id > :id)" },

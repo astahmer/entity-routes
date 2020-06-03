@@ -1,8 +1,8 @@
 import { PrimaryGeneratedColumn, Entity, Column, ManyToOne, getRepository } from "typeorm";
-import { AliasManager } from "@/index";
+import { AliasHandler } from "@/index";
 import { createTestConnection, closeTestConnection } from "@@/tests/testConnection";
 
-describe("AliasManager", () => {
+describe("AliasHandler", () => {
     class AbstractEntity {
         @PrimaryGeneratedColumn()
         id: number;
@@ -28,7 +28,7 @@ describe("AliasManager", () => {
 
     it("generate", () => {
         const metadata = getRepository(User).metadata;
-        const manager = new AliasManager();
+        const manager = new AliasHandler();
         const alias = manager.generate(metadata.tableName, "role");
 
         expect(alias).toEqual(metadata.tableName + "_role_1");
@@ -37,7 +37,7 @@ describe("AliasManager", () => {
 
     it("getPropertyLastAlias", () => {
         const metadata = getRepository(User).metadata;
-        const manager = new AliasManager();
+        const manager = new AliasHandler();
 
         expect(manager.generate(metadata.tableName, "role")).toEqual(
             manager.getPropertyLastAlias(metadata.tableName, "role")

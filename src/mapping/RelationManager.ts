@@ -2,16 +2,16 @@ import { SelectQueryBuilder, EntityMetadata } from "typeorm";
 import { Container } from "typedi/Container";
 
 import { getComputedPropMethodAndKey } from "@/serializer/Formater";
-import { AliasManager } from "@/serializer/AliasManager";
+import { AliasHandler } from "@/serializer/AliasHandler";
 import { RouteOperation } from "@/decorators/Groups";
 import { EntityRouteOptions, GenericEntity } from "@/router/EntityRouter";
 import { getDependsOnMetadata } from "@/decorators/DependsOn";
-import { MappingManager } from "@/services/MappingManager";
-import { SubresourceRelation } from "@/services/SubresourceManager";
+import { MappingManager } from "@/mapping/MappingManager";
+import { SubresourceRelation } from "@/router/SubresourceManager";
 import { Service } from "typedi";
 import { MaxDeptMetadata, getMaxDepthMetadata } from "@/decorators/MaxDepth";
 import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
-import { isDev } from "@/functions/index";
+import { isDev } from "@/functions/asserts";
 import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
 
 @Service()
@@ -35,7 +35,7 @@ export class RelationManager {
         entityMetadata: EntityMetadata,
         propPath: string,
         currentProp: string,
-        aliasManager: AliasManager,
+        aliasHandler: AliasHandler,
         prevAlias?: string
     ): { entityAlias: string; propName: string; columnMeta: ColumnMetadata } {
         const column = entityMetadata.findColumnWithPropertyName(currentProp);
@@ -55,7 +55,7 @@ export class RelationManager {
             };
         } else {
             // Relation
-            const { isJoinAlreadyMade, alias } = aliasManager.getAliasForRelation(qb, relation);
+            const { isJoinAlreadyMade, alias } = aliasHandler.getAliasForRelation(qb, relation);
 
             if (!isJoinAlreadyMade) {
                 qb.leftJoin((prevAlias || relation.entityMetadata.tableName) + "." + relation.propertyName, alias);
@@ -69,7 +69,7 @@ export class RelationManager {
                 relation.inverseEntityMetadata,
                 nextPropPath,
                 splitPath[1],
-                aliasManager,
+                aliasHandler,
                 alias
             );
         }
@@ -92,7 +92,7 @@ export class RelationManager {
         currentPath: string,
         prevProp: string,
         options: JoinAndSelectExposedPropsOptions,
-        aliasManager: AliasManager
+        aliasHandler: AliasHandler
     ) {
         if (prevProp && prevProp !== entityMetadata.tableName) {
             const selectProps = this.mappingManager.getSelectProps(
@@ -116,7 +116,7 @@ export class RelationManager {
                 options
             );
 
-            const { isJoinAlreadyMade, alias } = aliasManager.getAliasForRelation(qb, relation);
+            const { isJoinAlreadyMade, alias } = aliasHandler.getAliasForRelation(qb, relation);
 
             if (!isJoinAlreadyMade && (!circularProp || options.shouldMaxDepthReturnRelationPropsId)) {
                 qb.leftJoin(prevProp + "." + relation.propertyName, alias);
@@ -131,14 +131,14 @@ export class RelationManager {
                     newPath,
                     alias,
                     options,
-                    aliasManager
+                    aliasHandler
                 );
                 this.joinAndSelectPropsThatComputedPropsDependsOn(
                     rootMetadata,
                     operation,
                     qb,
                     relation.inverseEntityMetadata,
-                    aliasManager,
+                    aliasHandler,
                     alias
                 );
             } else if (options.shouldMaxDepthReturnRelationPropsId) {
@@ -153,7 +153,7 @@ export class RelationManager {
         operation: RouteOperation,
         qb: SelectQueryBuilder<any>,
         entityMetadata: EntityMetadata,
-        aliasManager: AliasManager,
+        aliasHandler: AliasHandler,
         alias?: string
     ) {
         const dependsOnMeta = getDependsOnMetadata(entityMetadata.target as Function);
@@ -169,7 +169,7 @@ export class RelationManager {
                         entityMetadata,
                         propPath,
                         props[0],
-                        aliasManager
+                        aliasHandler
                     );
 
                     const selectProp = (alias || entityAlias) + "." + propName;
@@ -187,10 +187,10 @@ export class RelationManager {
     public joinSubresourceOnInverseSide<Entity extends GenericEntity>(
         qb: SelectQueryBuilder<Entity>,
         entityMetadata: EntityMetadata,
-        aliasManager: AliasManager,
+        aliasHandler: AliasHandler,
         subresourceRelation: SubresourceRelation
     ) {
-        const alias = aliasManager.generate(
+        const alias = aliasHandler.generate(
             entityMetadata.tableName,
             subresourceRelation.relation.inverseSidePropertyPath
         );

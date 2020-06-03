@@ -1,9 +1,9 @@
 import { PrimaryGeneratedColumn, Entity, Column, ManyToOne, getRepository, OneToOne, JoinColumn } from "typeorm";
-import { Groups, AliasManager, RelationManager, DependsOn } from "@/index";
+import { Groups, AliasHandler, RelationManager, DependsOn } from "@/index";
 import { createTestConnection, closeTestConnection } from "@@/tests/testConnection";
 import { Container } from "typedi";
 
-describe("AliasManager", () => {
+describe("AliasHandler", () => {
     class AbstractEntity {
         @Groups(["list", "details"])
         @PrimaryGeneratedColumn()
@@ -65,7 +65,7 @@ describe("AliasManager", () => {
     afterAll(closeTestConnection);
 
     it("can make joins from prop path", () => {
-        const aliasManager = new AliasManager();
+        const aliasManager = new AliasHandler();
         const manager = Container.get(RelationManager);
 
         const repository = getRepository(User);
@@ -94,7 +94,7 @@ describe("AliasManager", () => {
     });
 
     it("can join and select exposed props", () => {
-        const aliasManager = new AliasManager();
+        const aliasManager = new AliasHandler();
         const manager = Container.get(RelationManager);
 
         const repository = getRepository(User);
@@ -125,7 +125,7 @@ describe("AliasManager", () => {
     });
 
     it("can join and select props that computed props depends on", () => {
-        const aliasManager = new AliasManager();
+        const aliasManager = new AliasHandler();
         const manager = Container.get(RelationManager);
 
         const repository = getRepository(User);

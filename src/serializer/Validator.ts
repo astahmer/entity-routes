@@ -3,9 +3,9 @@ import { EntityMetadata } from "typeorm";
 import { EntityValidatorFunctionOptions, EntityValidator } from "@astahmer/entity-validator";
 import { Container, Service } from "typedi";
 
-import { RequestContextMinimal } from "@/services/ResponseManager";
 import { isType, isObject } from "@/functions/asserts";
 import { GenericEntity } from "@/router/EntityRouter";
+import { RequestContextMinimal } from "@/router/RouteManager";
 
 @Service()
 export class Validator {
@@ -121,10 +121,6 @@ export async function validateEntity<T extends GenericEntity>(entity: T, options
     const validator = Container.get(EntityValidator);
     return validator.execute(entity, options);
 }
-
-export const hasAnyValidationGroupMatchingForRequest = (routeEntityName: string, operation: string) => (
-    group: string
-) => group === routeEntityName || group === routeEntityName + "_" + operation;
 
 export type EntityError = {
     currentPath: string;

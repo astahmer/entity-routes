@@ -1,13 +1,13 @@
 import { EntityMetadata } from "typeorm";
 import Container, { Service } from "typedi";
 
-import { RequestContext } from "@/services/ResponseManager";
 import { isType, isObject, isPrimitive } from "@/functions/asserts";
 import { Primitive } from "@/functions/primitives";
 import { formatIriToId } from "@/functions/entity";
 import { GenericEntity, EntityRouteOptions } from "@/router/EntityRouter";
-import { MappingManager, MappingItem, ENTITY_META_SYMBOL } from "@/services/MappingManager";
+import { MappingManager, MappingItem, ENTITY_META_SYMBOL } from "@/mapping/MappingManager";
 import { SaveItemArgs } from "@/serializer/Denormalizer";
+import { RequestContext } from "@/router/RouteManager";
 
 @Service()
 export class Cleaner {

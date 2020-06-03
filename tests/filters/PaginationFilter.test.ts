@@ -4,7 +4,7 @@ import {
     getPaginationFilterDefaultConfig,
     PaginationFilter,
     PaginationFilterOptions,
-    AliasManager,
+    AliasHandler,
     OrderBy,
 } from "@/index";
 import { createTestConnection, closeTestConnection } from "@@/tests/testConnection";
@@ -113,16 +113,16 @@ describe("Pagination filter", () => {
             const configOptions = filtersMeta["PaginationFilter"].options as PaginationFilterOptions;
 
             let qb = repository.createQueryBuilder(entityMetadata.tableName);
-            let aliasManager = new AliasManager();
-            paginationFilter.apply({ qb, aliasManager, queryParams: undefined });
+            let aliasHandler = new AliasHandler();
+            paginationFilter.apply({ qb, aliasHandler, queryParams: undefined });
             // pagination filter should not have set any orderBy for now
             expect(qb.expressionMap.orderBys).toEqual({});
             expect(qb.expressionMap.take).toEqual(configOptions.defaultRetrievedItemsLimit);
 
-            aliasManager = new AliasManager();
+            aliasHandler = new AliasHandler();
             qb = repository.createQueryBuilder(entityMetadata.tableName);
             const queryParams = { orderBy: ["firstName", "role.identifier", "role.id"], take: "15", skip: "30" };
-            paginationFilter.apply({ qb, aliasManager, queryParams });
+            paginationFilter.apply({ qb, aliasHandler, queryParams });
             // pagination filter should have set orderBys from queryParams
             // but role.id shouldn't be set since it was not explicitly provided in properties & options.autoApplyOrderBys is not true
             expect(qb.expressionMap.orderBys).toEqual({ "user.firstName": "ASC", "user_role_1.identifier": "ASC" });
@@ -150,8 +150,8 @@ describe("Pagination filter", () => {
         const paginationFilter = new PaginationFilter({ config: filtersMeta["PaginationFilter"], entityMetadata });
 
         let qb = repository.createQueryBuilder(entityMetadata.tableName);
-        let aliasManager = new AliasManager();
-        paginationFilter.apply({ qb, aliasManager, queryParams: undefined });
+        let aliasHandler = new AliasHandler();
+        paginationFilter.apply({ qb, aliasHandler, queryParams: undefined });
 
         // pagination filter should have set default orderBy from decorator properties
         expect(qb.expressionMap.orderBys).toEqual({ "user.firstName": "ASC", "user_role_1.identifier": "ASC" });
@@ -207,8 +207,8 @@ describe("OrderBy", () => {
         const paginationFilter = new PaginationFilter({ config: filtersMeta["PaginationFilter"], entityMetadata });
 
         let qb = repository.createQueryBuilder(entityMetadata.tableName);
-        let aliasManager = new AliasManager();
-        paginationFilter.apply({ qb, aliasManager, queryParams: { orderBy: "role" } });
+        let aliasHandler = new AliasHandler();
+        paginationFilter.apply({ qb, aliasHandler, queryParams: { orderBy: "role" } });
 
         // pagination filter should have set default orderBy from decorator properties
         expect(qb.expressionMap.orderBys).toEqual({ "user_role_1.id": "ASC" });

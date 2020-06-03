@@ -1,12 +1,12 @@
-import { pick } from "ramda";
 import { EntityMetadata, SelectQueryBuilder } from "typeorm";
 import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
 import Container from "typedi";
 
 import { Normalizer } from "@/serializer/Normalizer";
-import { AliasManager } from "@/serializer/AliasManager";
+import { AliasHandler } from "@/serializer/AliasHandler";
 import { isDefined } from "@/functions/asserts";
 import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
+import { pick } from "@/functions/object";
 
 export abstract class AbstractFilter<FilterOptions extends DefaultFilterOptions = DefaultFilterOptions, T = string> {
     protected readonly config: AbstractFilterConfig<FilterOptions, T>;
@@ -42,7 +42,7 @@ export abstract class AbstractFilter<FilterOptions extends DefaultFilterOptions 
     }
 
     /** This method should add conditions to the queryBuilder using queryParams  */
-    abstract apply({ queryParams, qb, aliasManager }: AbstractFilterApplyArgs): void;
+    abstract apply({ queryParams, qb, aliasHandler }: AbstractFilterApplyArgs): void;
 
     /** Return column metadata if param exists in this entity properties or is a valid propPath from this entity */
     protected getPropMetaAtPath(propPath: string | string[]): ColumnMetadata;
@@ -114,7 +114,7 @@ export abstract class AbstractFilter<FilterOptions extends DefaultFilterOptions 
     /** Returns an object of valid query params key/value pairs to filter */
     protected getPropertiesQueryParamsToFilter(queryParams: AbstractFilterApplyArgs["queryParams"]) {
         const params = this.getPropertiesToFilter(queryParams);
-        return pick(params, queryParams);
+        return pick(queryParams, params);
     }
 }
 
@@ -129,7 +129,7 @@ export type QueryParams = Record<string, QueryParamValue>;
 export type AbstractFilterApplyArgs = {
     queryParams: QueryParams;
     qb: SelectQueryBuilder<any>;
-    aliasManager: AliasManager;
+    aliasHandler: AliasHandler;
 };
 
 // @example: properties?: FilterProperty<T extends GenericEntity ? Props<T> : string, OrderDirection>[]

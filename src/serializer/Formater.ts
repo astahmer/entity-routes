@@ -8,8 +8,8 @@ import { sortObjectByKeys } from "@/functions/object";
 import { lowerFirstLetter } from "@/functions/primitives";
 
 import { isType, isEntity, isPrimitive } from "@/functions/asserts";
-import { MappingManager } from "@/services/MappingManager";
-import { RequestContext } from "@/services/index";
+import { MappingManager } from "@/mapping/MappingManager";
+import { RequestContext } from "@/router/RouteManager";
 
 @Service()
 /** Format entity properly for a route response */

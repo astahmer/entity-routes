@@ -1,5 +1,5 @@
 import { getRouteSubresourcesMetadata, ROUTE_SUBRESOURCES } from "@/router/EntityRouter";
-import { RouteSubresourcesMeta, SubresourceOperation } from "@/services/SubresourceManager";
+import { RouteSubresourcesMeta, SubresourceOperation } from "@/router/SubresourceManager";
 import { EntityReference } from "@/utils-types";
 
 export function Subresource(

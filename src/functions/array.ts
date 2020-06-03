@@ -1,4 +1,5 @@
 import { getRandomString } from "@/functions/primitives";
+import { get } from "@/functions/object";
 
 /** Split an array in chunk of given size */
 export const chunk = <T = any>(arr: T[], size: number): T[] =>
@@ -24,3 +25,12 @@ export const appendArrayDuplicates = <T = any>(array: T[], count: number, idKey:
 
     return result;
 };
+
+export const pluck = <K extends keyof T, T extends object>(arr: T[], prop: K) => arr.map((item) => item[prop]);
+
+export type SortDirection = "asc" | "desc";
+export function sortBy<T extends object, K extends keyof T>(arr: T[], key: K, dir: SortDirection = "asc") {
+    return arr.sort((objA, objB) =>
+        get(objA, key as string) - get(objB, key as string) > 0 ? (dir === "asc" ? -1 : 1) : dir === "asc" ? 1 : -1
+    );
+}

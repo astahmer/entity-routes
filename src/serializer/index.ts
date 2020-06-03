@@ -1,4 +1,4 @@
-export * from "./AliasManager";
+export * from "./AliasHandler";
 export * from "./Cleaner";
 export * from "./Denormalizer";
 export * from "./Formater";

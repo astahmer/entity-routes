@@ -1,4 +1,3 @@
-import { path, prop, sortBy } from "ramda";
 import { Brackets, WhereExpression } from "typeorm";
 import { Container } from "typedi";
 
@@ -14,10 +13,11 @@ import {
     WhereType,
 } from "./AbstractFilter";
 import { isDefined, isWhereType } from "@/functions/asserts";
-import { setNestedKey, sortObjectByKeys } from "@/functions/object";
+import { setNestedKey, sortObjectByKeys, get } from "@/functions/object";
 import { formatIriToId, isIriValidForProperty } from "@/functions/entity";
-import { RelationManager } from "@/services/RelationManager";
+import { RelationManager } from "@/mapping/RelationManager";
 import { StrategyType, WhereManager } from "@/filters/WhereManager";
+import { sortBy } from "@/functions/array";
 
 /** Add a/multiple where clause on any (deep?) properties of the decorated entity  */
 export class SearchFilter extends AbstractFilter<SearchFilterOptions, StrategyType> {
@@ -29,19 +29,19 @@ export class SearchFilter extends AbstractFilter<SearchFilterOptions, StrategyTy
         return Container.get(WhereManager);
     }
 
-    public apply({ queryParams, qb, aliasManager }: AbstractFilterApplyArgs) {
+    public apply({ queryParams, qb, aliasHandler }: AbstractFilterApplyArgs) {
         if (!queryParams) {
             return;
         }
 
         const whereExp = qb as WhereExpression;
         const { filters, nestedConditionsFilters } = this.getFiltersLists(queryParams);
-        filters.forEach((filter) => this.applyFilterParam({ qb, whereExp, filter, aliasManager }));
-        this.applyNestedConditionsFilters({ qb, whereExp, nestedConditionsFilters, aliasManager });
+        filters.forEach((filter) => this.applyFilterParam({ qb, whereExp, filter, aliasHandler }));
+        this.applyNestedConditionsFilters({ qb, whereExp, nestedConditionsFilters, aliasHandler });
 
         // Fix TypeORM queryBuilder behavior where the first parsed "where" clause is of type "OR"
         // -> it would end up as a simple where clause, losing the OR
-        qb.expressionMap.wheres = sortBy(prop("type"), qb.expressionMap.wheres);
+        qb.expressionMap.wheres = sortBy(qb.expressionMap.wheres, "type");
     }
 
     /** Returns a FilterParam from splitting a string query param key */
@@ -157,16 +157,16 @@ export class SearchFilter extends AbstractFilter<SearchFilterOptions, StrategyTy
             conditionPath.push(type ? type : identifier);
         }
 
-        if (!path(conditionPath, nestedConditionsFilters)) {
+        if (!get(nestedConditionsFilters, conditionPath.join("."))) {
             setNestedKey(nestedConditionsFilters, conditionPath, {});
         }
 
-        const filters: Record<string | number, FilterParam> = path(conditionPath, nestedConditionsFilters);
+        const filters: Record<string | number, FilterParam> = get(nestedConditionsFilters, conditionPath.join("."));
         filters[Object.keys(filters).length] = filter;
     }
 
     /** Apply a filter param by adding a where clause to its property & add needed joins if the property is nested */
-    protected applyFilterParam({ qb, whereExp, filter, aliasManager }: ApplyFilterParamArgs) {
+    protected applyFilterParam({ qb, whereExp, filter, aliasHandler }: ApplyFilterParamArgs) {
         const props = filter.propPath.split(".");
 
         let column;
@@ -196,7 +196,7 @@ export class SearchFilter extends AbstractFilter<SearchFilterOptions, StrategyTy
                 this.entityMetadata,
                 propPath,
                 props[0],
-                aliasManager
+                aliasHandler
             );
 
             if (!column) return;
@@ -209,7 +209,7 @@ export class SearchFilter extends AbstractFilter<SearchFilterOptions, StrategyTy
         qb,
         whereExp,
         nestedConditionsFilters,
-        aliasManager,
+        aliasHandler,
     }: ApplyNestedConditionFiltersArgs) {
         let nested: FilterParam | NestedConditionsFilters;
         const recursiveBrowseFilter = (
@@ -242,13 +242,18 @@ export class SearchFilter extends AbstractFilter<SearchFilterOptions, StrategyTy
 
                     if (filterParams.length) {
                         // Avoid losing the "OR" if it's parsed first
-                        const sortedFilterParams = sortBy(prop("type"), filterParams);
+                        const sortedFilterParams = sortBy(filterParams, "type");
 
                         // Add parenthesis around condition identifier
                         whereExp[(whereType + "Where") as WhereMethod](
                             new Brackets((nestedWhereExp) => {
                                 sortedFilterParams.forEach((filter: FilterParam) => {
-                                    this.applyFilterParam({ qb, whereExp: nestedWhereExp, filter, aliasManager });
+                                    this.applyFilterParam({
+                                        qb,
+                                        whereExp: nestedWhereExp,
+                                        filter,
+                                        aliasHandler,
+                                    });
                                 });
                             })
                         );

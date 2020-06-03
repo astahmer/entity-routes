@@ -1,17 +1,18 @@
 import { NextFunction } from "connect";
-import { QueryRunner, getRepository, EntityMetadata } from "typeorm";
+import { getRepository, EntityMetadata } from "typeorm";
 import { Container } from "typedi";
 
-import { GroupsOperation } from "@/decorators/Groups";
+import { GroupsOperation, RouteOperation } from "@/decorators/Groups";
 import { RouteMetadata, EntityRouterOptions } from "@/router/EntityRouter";
 
 import { GenericEntity } from "@/router/EntityRouter";
-import { MappingManager } from "../services/MappingManager";
+import { MappingManager } from "../mapping/MappingManager";
 import { Cleaner } from "@/serializer/Cleaner";
 import { Formater } from "@/serializer/Formater";
 import { BridgeRouter } from "@/bridges/routers/BridgeRouter";
 import { Context } from "@/utils-types";
 import { Middleware } from "koa"; // TODO use Middleware from/util-types = wrap ctx since ctx.params/body.state do not exist for Express
+import { CrudAction } from "@/router/RouteManager";
 
 export abstract class AbstractRouteAction implements IRouteAction {
     protected middlewares: Middleware[];
@@ -86,3 +87,24 @@ export type CustomActionOptions<T extends object = object> = {
     /** Args to pass to CustomActionClass on creating a new instance */
     args?: T;
 };
+
+export type BaseCustomAction = Omit<CrudAction, "method"> & {
+    /** Custom operation for that action */
+    operation?: RouteOperation;
+    /** List of middlewares to be called (in the same order as defined here) */
+    middlewares?: Middleware[];
+};
+
+export type CustomActionClass = BaseCustomAction & {
+    /** Class that implements IRouteAction, onRequest method will be called by default unless a method key is provided */
+    class?: RouteActionClass;
+    /** Method name of RouteAction class to call for this verb+path, mostly useful to re-use the same class for multiple actions */
+    method?: string;
+};
+
+export type CustomActionFunction = BaseCustomAction & {
+    /** Route handler (actually is a middleware) */
+    handler?: Function;
+};
+
+export type CustomAction = CustomActionClass | CustomActionFunction;

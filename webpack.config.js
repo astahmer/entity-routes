@@ -33,7 +33,7 @@ module.exports = (env) => {
         devtool: withHMR ? "inline-cheap-module-source-map" : "source-map",
         externals: [
             nodeExternals({
-                whitelist: [`webpack/hot/poll?${pollInterval}`, "@astahmer/class-validator", "ramda"],
+                whitelist: [`webpack/hot/poll?${pollInterval}`, "@astahmer/class-validator"],
             }),
         ],
         resolve: {

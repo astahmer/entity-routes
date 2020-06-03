@@ -9,8 +9,8 @@ import {
     QueryParams,
     QueryParamValue,
 } from "./AbstractFilter";
-import { AliasManager } from "@/serializer";
-import { RelationManager } from "@/services/RelationManager";
+import { AliasHandler } from "@/serializer";
+import { RelationManager } from "@/mapping/RelationManager";
 import { OrderByOptions } from "@/decorators/Pagination";
 
 export class PaginationFilter extends AbstractFilter<PaginationFilterOptions> {
@@ -28,18 +28,18 @@ export class PaginationFilter extends AbstractFilter<PaginationFilterOptions> {
     apply({
         queryParams = {},
         qb,
-        aliasManager,
-    }: Pick<AbstractFilterApplyArgs, "queryParams" | "qb" | "aliasManager">) {
+        aliasHandler,
+    }: Pick<AbstractFilterApplyArgs, "queryParams" | "qb" | "aliasHandler">) {
         // Apply filter for each property provided if autoApply is enabled
         if (this.config.options.autoApplyOrderBys) {
             this.filterProperties.forEach((orderBy) => {
-                this.addOrderBy(qb, aliasManager, orderBy || this.config.options.defaultOrderBys);
+                this.addOrderBy(qb, aliasHandler, orderBy || this.config.options.defaultOrderBys);
             });
         }
 
         // Apply filter for each query params
         const { orderBy, take, skip } = this.getFilterParamsByTypes(queryParams);
-        this.addOrderBy(qb, aliasManager, orderBy || this.config.options.defaultOrderBys);
+        this.addOrderBy(qb, aliasHandler, orderBy || this.config.options.defaultOrderBys);
 
         if (take || this.config.options.defaultRetrievedItemsLimit) {
             qb.take(take || this.config.options.defaultRetrievedItemsLimit);
@@ -66,7 +66,7 @@ export class PaginationFilter extends AbstractFilter<PaginationFilterOptions> {
      * @example req = /pictures/?orderBy=title:desc&orderBy=downloads:desc
      * will generate this SQL: ORDER BY `picture`.`title` DESC, `picture`.`downloads` DESC
      */
-    protected addOrderBy(qb: SelectQueryBuilder<any>, aliasManager: AliasManager, orderBy: QueryParamValue) {
+    protected addOrderBy(qb: SelectQueryBuilder<any>, aliasHandler: AliasHandler, orderBy: QueryParamValue) {
         if (!Array.isArray(orderBy)) {
             orderBy = [orderBy];
         }
@@ -105,7 +105,7 @@ export class PaginationFilter extends AbstractFilter<PaginationFilterOptions> {
                     this.entityMetadata,
                     propPath,
                     props[0],
-                    aliasManager
+                    aliasHandler
                 );
 
                 qb.addOrderBy(entityAlias + "." + propName, direction);

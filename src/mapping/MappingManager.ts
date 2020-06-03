@@ -1,4 +1,3 @@
-import { path, pluck } from "ramda";
 import { EntityMetadata, ObjectType } from "typeorm";
 import Container, { Service } from "typedi";
 
@@ -7,7 +6,9 @@ import { RouteOperation, GROUPS_METAKEY } from "@/decorators/Groups";
 import { EntityRouteOptions } from "@/router/EntityRouter";
 import { GroupsMetadata, GroupsMetaByRoutes } from "@/mapping/GroupsMetadata";
 import { EntityGroupsMetadata } from "@/mapping/EntityGroupsMetadata";
-import { RelationManager } from "@/services/RelationManager";
+import { RelationManager } from "@/mapping/RelationManager";
+import { pluck } from "@/functions/array";
+import { get } from "@/functions/object";
 
 @Service()
 export class MappingManager {
@@ -41,9 +42,9 @@ export class MappingManager {
      * @param currentPath dot delimited path to keep track of the properties select nesting
      */
     public getNestedMappingAt(currentPath: string | string[], mapping: MappingItem): MappingItem {
-        currentPath = Array.isArray(currentPath) ? currentPath : currentPath.split(".");
-        const currentPathArray = ["mapping"].concat(currentPath.join(".mapping.").split("."));
-        return path(currentPathArray, mapping);
+        const path = Array.isArray(currentPath) ? currentPath : currentPath.split(".");
+        const mappingPath = "mapping." + path.join(".mapping.");
+        return get(mapping, mappingPath);
     }
 
     /** Get selects props (from groups) of a given entity for a specific operation */
@@ -139,10 +140,11 @@ export class MappingManager {
         const selectProps = this.getSelectProps(rootMetadata, operation, entityMetadata, false);
         const relationProps = this.getRelationPropsMetas(rootMetadata, operation, entityMetadata);
 
+        const relationPropNames = pluck(relationProps, "propertyName");
         const nestedMapping: MappingItem = {
             selectProps,
-            relationProps: pluck("propertyName", relationProps),
-            exposedProps: selectProps.concat(pluck("propertyName", relationProps)),
+            relationProps: relationPropNames,
+            exposedProps: selectProps.concat(relationPropNames),
             [ENTITY_META_SYMBOL]: entityMetadata,
             mapping: {},
         };

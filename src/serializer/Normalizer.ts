@@ -1,13 +1,14 @@
 import { EntityMetadata, SelectQueryBuilder } from "typeorm";
 import Container, { Service } from "typedi";
 
-import { MappingManager } from "@/services/MappingManager";
-import { AliasManager } from "@/serializer/AliasManager";
+import { MappingManager } from "@/mapping/MappingManager";
+import { AliasHandler } from "@/serializer/AliasHandler";
 import { Formater } from "@/serializer/Formater";
 import { EntityRouteOptions, GenericEntity } from "@/router/EntityRouter";
-import { RelationManager } from "@/services/RelationManager";
-import { RequestContext } from "@/services/ResponseManager";
+import { RelationManager } from "@/mapping/RelationManager";
+import { RequestContext } from "@/router/RouteManager";
 
+// TODO 2 args & 3rd should be object
 @Service()
 export class Normalizer {
     get mappingManager() {
@@ -26,7 +27,7 @@ export class Normalizer {
     public async getCollection<Entity extends GenericEntity>(
         entityMetadata: EntityMetadata,
         qb: SelectQueryBuilder<Entity>,
-        aliasManager: AliasManager,
+        aliasHandler: AliasHandler,
         operation: RequestContext["operation"] = "list",
         options: EntityRouteOptions = {}
     ): Promise<[Entity[], number]> {
@@ -42,14 +43,14 @@ export class Normalizer {
             "",
             entityMetadata.tableName,
             options,
-            aliasManager
+            aliasHandler
         );
         this.relationManager.joinAndSelectPropsThatComputedPropsDependsOn(
             entityMetadata,
             operation,
             qb,
             entityMetadata,
-            aliasManager
+            aliasHandler
         );
 
         const results = await qb.getManyAndCount();
@@ -66,7 +67,7 @@ export class Normalizer {
     public async getItem<Entity extends GenericEntity>(
         entityMetadata: EntityMetadata,
         qb: SelectQueryBuilder<Entity>,
-        aliasManager: AliasManager,
+        aliasHandler: AliasHandler,
         entityId: RequestContext["entityId"],
         operation: RequestContext["operation"] = "details",
         options: EntityRouteOptions = {}
@@ -88,14 +89,14 @@ export class Normalizer {
             "",
             entityMetadata.tableName,
             options,
-            aliasManager
+            aliasHandler
         );
         this.relationManager.joinAndSelectPropsThatComputedPropsDependsOn(
             entityMetadata,
             operation,
             qb,
             entityMetadata,
-            aliasManager
+            aliasHandler
         );
 
         const result = await qb.getOne();
