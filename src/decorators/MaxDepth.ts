@@ -1,17 +1,12 @@
 import { EntityMetadata } from "typeorm";
+import { Decorator } from "@/utils-types";
 
 /**
- * Will apply MaxDepth attribute on every properties of this entity
- */
-export function MaxDepth(): ClassDecorator;
-
-/**
- * Will apply MaxDepth on that property
+ * Will apply MaxDepth attribute on every properties of this entity when used as a ClassDecorator
+ * Will apply MaxDepth on that property when used as a PropertyDecorator
  * @param max depth recursion enabled
  */
-export function MaxDepth(max: number): PropertyDecorator;
-
-export function MaxDepth(max: number = 2): ClassDecorator | PropertyDecorator {
+export function MaxDepth(max: number = 2): Decorator {
     return (target: Object, propName: string) => {
         // If propName is defined => PropertyDecorator, else it's a ClassDecorator
         target = propName ? target.constructor : target;

@@ -6,6 +6,7 @@ import { GenericEntity } from "./router/EntityRouter";
 
 export type PartialRecord<K extends keyof any, T> = Partial<Record<K, T>>;
 export type Props<T extends GenericEntity> = NonFunctionKeys<T>;
+export type Decorator = (target: Object | Function, propName?: string) => void;
 
 // https://github.com/piotrwitek/utility-types#nonfunctionkeyst
 export type NonUndefined<A> = A extends undefined ? never : A;
