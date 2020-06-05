@@ -26,7 +26,7 @@ export const getAppRoutes = (arr: Middleware[]) => {
             desc: item.methods.join(",") + " : " + item.path,
         });
         const router: Router = (midw as any).router;
-        return router && router.stack.length && router.stack.map(formatRoute);
+        return router?.stack.length && router.stack.map(formatRoute);
     };
     return arr.map(returnRoute).filter(Boolean);
 };

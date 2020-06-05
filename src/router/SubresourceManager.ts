@@ -35,7 +35,7 @@ export class SubresourceManager<Entity extends GenericEntity> {
             const subresourcePath = this.getSubresourceBasePath(
                 subresourceRelation.param,
                 subresourceProp,
-                nestedPath && nestedPath.parent
+                nestedPath?.parent
             );
 
             const relationTableName = subresourceRelation.relation.inverseEntityMetadata.tableName;
@@ -54,7 +54,7 @@ export class SubresourceManager<Entity extends GenericEntity> {
                 ? nestedPath.maxDepths.some((maxDepth) => currentDepth >= maxDepth)
                 : currentDepth >= subresourceProp.maxDepth;
 
-            const isSubresourceCircular = nestedPath && nestedPath.current.includes(relationTableName);
+            const isSubresourceCircular = nestedPath?.current.includes(relationTableName);
 
             // Ensures that it is not making circular subresources routes & that maxDepth isn't reached
             if (!hasReachedMaxDepth && !isSubresourceCircular) {
