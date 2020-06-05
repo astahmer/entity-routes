@@ -232,7 +232,7 @@ export class RelationManager {
         const hasGlobalMaxDepth = options.isMaxDepthEnabledByDefault && currentDepthLvl >= maxDepthLvl;
         const hasLocalClassMaxDepth = maxDepthMeta && maxDepthMeta.enabled && currentDepthLvl >= maxDepthLvl;
         const hasSpecificPropMaxDepth =
-            maxDepthMeta && maxDepthMeta.fields[relation.propertyName] && currentDepthLvl >= maxDepthLvl;
+            maxDepthMeta && maxDepthMeta.fields[relation.inverseSidePropertyPath] && currentDepthLvl >= maxDepthLvl;
 
         // Should stop getting nested relations ?
         if (hasGlobalMaxDepth || hasLocalClassMaxDepth || hasSpecificPropMaxDepth) {
