@@ -110,7 +110,7 @@ export const ROUTE_FILTERS_METAKEY = Symbol("filters");
 export const getRouteFiltersMeta = (entity: Function): RouteFiltersMeta =>
     Reflect.getOwnMetadata(ROUTE_FILTERS_METAKEY, entity);
 
-export type GenericEntity = ObjectLiteral & { id: string | number; getIri?: () => string };
+export type GenericEntity = ObjectLiteral & { id: string | number };
 
 export type RouteMetadata = {
     /** The path prefix for every action of this route */
@@ -136,8 +136,9 @@ export type EntityRouteBaseOptions = {
 };
 
 export type EntityRouteOptions = {
+    /** Is max depth enabled by default on all entities for any request context for this router */
     isMaxDepthEnabledByDefault?: boolean;
-    /** Level of depth at which the nesting should stop */
+    /** Default level of depth at which the nesting should stop for this router */
     defaultMaxDepthLvl?: number;
     /** In case of max depth reached on a relation, should it at retrieve its id and then stop instead of just stopping ? */
     shouldMaxDepthReturnRelationPropsId?: boolean;

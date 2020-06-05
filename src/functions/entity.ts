@@ -25,7 +25,7 @@ export const isIriValidForProperty = (iri: string, column: ColumnMetadata) => {
     return sameAsRouteName || sameAsTableName;
 };
 
-export function idToIRI(entityMeta: EntityMetadata, id: number, options?: IdToIRIOptions) {
+export function idToIRI(entityMeta: EntityMetadata, id: string | number, options?: IdToIRIOptions) {
     const routeMetadata = getRouteMetadata(entityMeta.target as Function);
     if (!routeMetadata || options?.useClassNameAsEntrypoint) {
         return `/api/${entityMeta.tableName}/${id}`;

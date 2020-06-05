@@ -10,6 +10,7 @@ import { lowerFirstLetter } from "@/functions/primitives";
 import { isType, isEntity, isPrimitive } from "@/functions/asserts";
 import { MappingManager } from "@/mapping/MappingManager";
 import { RequestContext } from "@/router/RouteManager";
+import { idToIRI } from "@/functions/index";
 
 @Service()
 /** Format entity properly for a route response */
@@ -83,9 +84,8 @@ export class Formater {
             // TODO Remove properties selected by DependsOn ? options in Route>App ? default = true
         }
 
-        // TODO Rm getIri
         if (options.shouldEntityWithOnlyIdBeFlattenedToIri && isEntity(item) && Object.keys(item).length === 1) {
-            return "getIri" in item ? item.getIri() : (("/" + entityMetadata.tableName + "/" + item.id) as any);
+            return idToIRI(entityMetadata, item.id) as any;
         } else {
             // TODO wrap setComputedProps in promise and keep looping through items rather than wait for it to complete
             // = go for parallel calls rather than sequentials
@@ -120,8 +120,7 @@ export class Formater {
         let key;
         for (key in subresourceProps) {
             if (!item[key as keyof Entity]) {
-                (item as any)[key as keyof Entity] =
-                    ("getIri" in item ? item.getIri() : "/" + entityMetadata.tableName + "/" + item.id) + "/" + key;
+                (item as any)[key as keyof Entity] = idToIRI(entityMetadata, item.id) + "/" + key;
             }
         }
     }
