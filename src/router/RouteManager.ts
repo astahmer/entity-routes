@@ -27,7 +27,7 @@ export class RouteManager<Entity extends GenericEntity> {
     constructor(
         private connection: Connection,
         private repository: Repository<Entity>,
-        private options: EntityRouteOptions
+        private options: EntityRouteOptions = {}
     ) {
         this.controller = new RouteController(repository, options);
     }
@@ -41,21 +41,21 @@ export class RouteManager<Entity extends GenericEntity> {
                 subresourceRelation.id = parseInt(ctx.params[subresourceRelation.param]);
             }
 
-            const params: RequestContext<Entity> = {
+            const requestContext: RequestContext<Entity> = {
                 ctx,
                 subresourceRelation,
                 isUpdateOrCreate: ctx.request.body && (ctx.method === "POST" || ctx.method === "PUT"),
             };
 
-            if (ctx.params.id) params.entityId = parseInt(ctx.params.id);
-            if (params.isUpdateOrCreate) params.values = ctx.request.body;
-            if (operation === "list") params.queryParams = ctx.query || {};
+            if (ctx.params.id) requestContext.entityId = parseInt(ctx.params.id);
+            if (requestContext.isUpdateOrCreate) requestContext.values = ctx.request.body;
+            if (operation === "list") requestContext.queryParams = ctx.query || {};
 
             // Create query runner to retrieve requestContext in subscribers
             const queryRunner = this.connection.createQueryRunner();
-            queryRunner.data = { requestContext: params };
+            queryRunner.data = { requestContext };
 
-            ctx.state.requestContext = params;
+            ctx.state.requestContext = requestContext;
             ctx.state.queryRunner = queryRunner;
 
             await next();
@@ -69,7 +69,7 @@ export class RouteManager<Entity extends GenericEntity> {
     /** Returns the response method on a given operation for this entity */
     public makeResponseMiddleware(operation: RouteOperation): Middleware {
         return async (ctx) => {
-            const { requestContext: params } = ctx.state as RequestState<Entity>;
+            const { requestContext = {} as RequestContext<Entity> } = ctx.state as RequestState<Entity>;
 
             const method = CRUD_ACTIONS[operation].method;
             let response: RouteResponse = {
@@ -78,10 +78,10 @@ export class RouteManager<Entity extends GenericEntity> {
                     entity: this.metadata.tableName,
                 },
             };
-            if (params.isUpdateOrCreate) response["@context"].errors = null;
+            if (requestContext.isUpdateOrCreate) response["@context"].errors = null;
 
             try {
-                const result = await this.controller[method]({ operation, ...params });
+                const result = await this.controller[method]({ operation, ...requestContext });
 
                 if (isType<EntityErrorResponse>(result, "hasValidationErrors" in result)) {
                     response["@context"].errors = result.errors;
@@ -94,7 +94,7 @@ export class RouteManager<Entity extends GenericEntity> {
                     response["@context"].totalItems = result.totalItems;
                     response.items = result.items;
                 } else if (isType<DeleteResult>(result, "raw" in result)) {
-                    response.deleted = result.affected ? params.entityId : null;
+                    response.deleted = result.affected ? requestContext.entityId : null;
                 } else {
                     response = { ...response, ...result };
                 }
@@ -110,7 +110,7 @@ export class RouteManager<Entity extends GenericEntity> {
 
     /** Returns the method of a mapping route on a given operation for this entity */
     public makeRouteMappingMiddleware(operation: RouteOperation): Middleware {
-        return async (ctx, next) => {
+        return async (ctx) => {
             const pretty = ctx.query.pretty;
             ctx.body = {
                 context: {
@@ -119,7 +119,6 @@ export class RouteManager<Entity extends GenericEntity> {
                 },
                 routeMapping: this.mappingManager.make(this.metadata, operation, { ...this.options, pretty }),
             };
-            next();
         };
     }
 }
