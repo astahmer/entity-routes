@@ -123,7 +123,7 @@ describe("Formater", () => {
                 entityMetadata,
                 options: { shouldSetSubresourcesIriOnItem: true },
             });
-            expect(formatedWithSubresource.comments).toEqual("/user/1/comments");
+            expect(formatedWithSubresource.comments).toEqual("/api/user/1/comments");
         });
 
         it("Relations (articles) should have been flattened to iri", async () => {
@@ -135,7 +135,7 @@ describe("Formater", () => {
                 entityMetadata,
                 options: { shouldEntityWithOnlyIdBeFlattenedToIri: true },
             });
-            expect(formatedWithFlatIri.articles).toEqual(["/article/1", "/article/2"]);
+            expect(formatedWithFlatIri.articles).toEqual(["/api/article/1", "/api/article/2"]);
         });
 
         it("return unregistered class objects (!entity) untouched", async () => {
