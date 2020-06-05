@@ -10,12 +10,7 @@ export class AliasHandler {
         return entityTableName + "." + propName;
     }
 
-    /**
-     * Appends a number (of occurences) to a propertName in order to avoid ambiguous sql names
-     * @param aliases current list of aliases
-     * @param entity add one to the counter on this property name
-     * @param propName add one to the counter on this property name
-     */
+    /** Appends a number (of occurences) to a propertName in order to avoid ambiguous sql names */
     public generate(entityTableName: string, propName: string) {
         const key = this.getAliasKey(entityTableName, propName);
         this.aliases[key] = (this.aliases[key] || 0) + 1;
