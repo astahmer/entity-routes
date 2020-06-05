@@ -117,12 +117,11 @@ export class RelationManager {
             );
 
             const { isJoinAlreadyMade, alias } = aliasHandler.getAliasForRelation(qb, relation);
-
-            if (!isJoinAlreadyMade && (!circularProp || options.shouldMaxDepthReturnRelationPropsId)) {
-                qb.leftJoin(prevProp + "." + relation.propertyName, alias);
-            }
+            const joinProp = prevProp + "." + relation.propertyName;
 
             if (!circularProp) {
+                !isJoinAlreadyMade && qb.leftJoin(joinProp, alias);
+
                 this.joinAndSelectExposedProps(
                     rootMetadata,
                     operation,
@@ -142,6 +141,7 @@ export class RelationManager {
                     alias
                 );
             } else if (options.shouldMaxDepthReturnRelationPropsId) {
+                !isJoinAlreadyMade && qb.leftJoin(joinProp, alias);
                 qb.addSelect(alias + ".id");
             }
         });
@@ -173,9 +173,11 @@ export class RelationManager {
                     );
 
                     const selectProp = (alias || entityAlias) + "." + propName;
-                    const isAlredySelected = qb.expressionMap.selects.find((select) => select.selection === selectProp);
+                    const isAlreadySelected = qb.expressionMap.selects.find(
+                        (select) => select.selection === selectProp
+                    );
 
-                    if (!isAlredySelected) {
+                    if (!isAlreadySelected) {
                         qb.addSelect([selectProp]);
                     }
                 });
@@ -215,10 +217,10 @@ export class RelationManager {
         currentPath: string,
         entityMetadata: EntityMetadata,
         relation: RelationMetadata,
-        options: IsRelationPropCircularOptions
+        options: IsRelationPropCircularOptions = {}
     ) {
         const currentDepthLvl = currentPath.split(entityMetadata.tableName).length - 1;
-        if (currentDepthLvl <= 1) return;
+        if (currentDepthLvl < 2) return;
 
         const maxDepthMeta = this.getMaxDepthMetaFor(entityMetadata);
 
