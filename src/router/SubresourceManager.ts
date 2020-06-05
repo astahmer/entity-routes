@@ -1,4 +1,4 @@
-import { Repository } from "typeorm";
+import { Repository, EntityMetadata } from "typeorm";
 import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
 
 import { getEntityRouters } from "@/router/container";
@@ -108,13 +108,7 @@ export class SubresourceManager<Entity extends GenericEntity> {
 
     /** Retrieve informations on a subresource relation */
     private getSubresourceRelation(key: string) {
-        const parentDetailsParam = ((this.subresourcesMeta.parent as any) as Function).name + "Id";
-        const relationMeta = this.metadata.findRelationWithPropertyPath(key);
-        return {
-            param: parentDetailsParam,
-            propertyName: key,
-            relation: relationMeta,
-        };
+        return getSubresourceRelation(this.subresourcesMeta.parent as any, this.metadata, key);
     }
 
     /** Returns a (nested?) subresource base path (= without operation suffix)  */
@@ -122,6 +116,20 @@ export class SubresourceManager<Entity extends GenericEntity> {
         const parentDetailsPath = CRUD_ACTIONS.details.path.replace(":id", ":" + param);
         return (parentPath || this.routeMetadata.path) + parentDetailsPath + "/" + subresourceProp.path;
     }
+}
+
+export function getSubresourceRelation(
+    parent: Function,
+    entityMetadata: EntityMetadata,
+    key: string
+): SubresourceRelation {
+    const parentDetailsParam = parent.name + "Id";
+    const relationMeta = entityMetadata.findRelationWithPropertyPath(key);
+    return {
+        param: parentDetailsParam,
+        propertyName: key,
+        relation: relationMeta,
+    };
 }
 
 export type SubresourceOperation = "create" | "list" | "details" | "delete";

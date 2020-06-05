@@ -1,152 +1,338 @@
-import { PrimaryGeneratedColumn, Entity, Column, ManyToOne, getRepository, OneToOne, JoinColumn } from "typeorm";
-import { Groups, AliasHandler, RelationManager, DependsOn } from "@/index";
+import {
+    PrimaryGeneratedColumn,
+    Entity,
+    Column,
+    ManyToOne,
+    getRepository,
+    OneToOne,
+    JoinColumn,
+    OneToMany,
+} from "typeorm";
+import { Groups, AliasHandler, RelationManager, DependsOn, Subresource, getSubresourceRelation } from "@/index";
 import { createTestConnection, closeTestConnection } from "@@/tests/testConnection";
 import { Container } from "typedi";
+import { log } from "@/functions/utils";
 
-describe("AliasHandler", () => {
+describe("RelationManager", () => {
     class AbstractEntity {
-        @Groups(["list", "details"])
+        @Groups("all")
         @PrimaryGeneratedColumn()
         id: number;
     }
 
-    @Entity()
-    class Image extends AbstractEntity {
-        @Groups({ user: ["details"] })
-        @Column()
-        url: string;
-    }
+    describe("simple cases", () => {
+        @Entity()
+        class Image extends AbstractEntity {
+            @Groups({ user: ["details"] })
+            @Column()
+            url: string;
 
-    @Entity()
-    class Category extends AbstractEntity {
-        @Groups({ user: ["details"] })
-        @Column()
-        name: string;
-
-        @Groups({ user: ["details"] })
-        @OneToOne(() => Image)
-        picture: Image;
-    }
-
-    @Entity()
-    class Role extends AbstractEntity {
-        @Groups({ user: ["details", "list"] })
-        @Column()
-        title: string;
-
-        @Groups({ user: ["details", "list"] })
-        @ManyToOne(() => Category)
-        category: Category;
-    }
-
-    @Entity()
-    class User extends AbstractEntity {
-        @Groups({ user: ["details", "list"] })
-        @Column()
-        name: string;
-
-        @Groups({ user: ["details"] })
-        @ManyToOne(() => Role)
-        role: Role;
-
-        @Groups({ user: ["details"] })
-        @OneToOne(() => Image)
-        @JoinColumn()
-        profilePicture: Image;
-
-        @DependsOn(["role.category.name", "profilePicture.url"])
-        @Groups({ user: ["list"] })
-        getIdentifier() {
-            return `${this.role.category.name}_${this.profilePicture.url}`;
+            @ManyToOne(() => User, (user) => user.uploadedImages)
+            uploader: () => User; // wrap it to avoid ReferenceError: Cannot access 'User' before initialization
         }
-    }
 
-    beforeAll(() => createTestConnection([Category, Role, Image, User]));
-    afterAll(closeTestConnection);
+        @Entity()
+        class Category extends AbstractEntity {
+            @Groups({ user: ["details"] })
+            @Column()
+            name: string;
 
-    it("can make joins from prop path", () => {
-        const aliasManager = new AliasHandler();
+            @Groups({ user: ["details"] })
+            @OneToOne(() => Image)
+            picture: Image;
+        }
+
+        @Entity()
+        class Role extends AbstractEntity {
+            @Groups({ user: ["details", "list"] })
+            @Column()
+            title: string;
+
+            @Groups({ user: ["details", "list"] })
+            @ManyToOne(() => Category)
+            category: Category;
+        }
+
+        @Entity()
+        class User extends AbstractEntity {
+            @Groups({ user: ["details", "list"] })
+            @Column()
+            name: string;
+
+            @Groups({ user: ["details"] })
+            @ManyToOne(() => Role)
+            role: Role;
+
+            @Groups({ user: ["details"] })
+            @OneToOne(() => Image)
+            @JoinColumn()
+            profilePicture: Image;
+
+            @Subresource(() => Image)
+            @OneToMany(() => Image, (image) => image.uploader)
+            uploadedImages: Image;
+
+            @DependsOn(["role.category.name", "profilePicture.url"])
+            @Groups({ user: ["list"] })
+            getIdentifier() {
+                return `${this.role.category.name}_${this.profilePicture.url}`;
+            }
+        }
+
+        beforeAll(() => createTestConnection([Category, Role, Image, User]));
+        afterAll(() => {
+            // since entities differ between tests suites, metadata cached on MappingManager must be cleared
+            Container.reset();
+            return closeTestConnection();
+        });
+
         const manager = Container.get(RelationManager);
 
-        const repository = getRepository(User);
-        const metadata = repository.metadata;
-        const qb = repository.createQueryBuilder(metadata.tableName);
+        it("can make joins from prop path", () => {
+            const aliasHandler = new AliasHandler();
 
-        const propPath = "role.category.picture.url";
-        const props = propPath.split(".");
-        const { entityAlias, propName, columnMeta } = manager.makeJoinsFromPropPath(
-            qb,
-            metadata,
-            propPath,
-            props[0],
-            aliasManager
-        );
+            const repository = getRepository(User);
+            const metadata = repository.metadata;
+            const qb = repository.createQueryBuilder(metadata.tableName);
 
-        // should have joined every prop leading to last section of prop path
-        expect(qb.expressionMap.joinAttributes.map((join) => join.alias.name)).toEqual([
-            "user_role_1",
-            "role_category_1",
-            "category_picture_1",
-        ]);
-        expect(entityAlias).toEqual("category_picture_1");
-        expect(propName).toEqual("url");
-        expect(columnMeta.propertyName).toEqual("url");
+            const propPath = "role.category.picture.url";
+            const props = propPath.split(".");
+            const { entityAlias, propName, columnMeta } = manager.makeJoinsFromPropPath(
+                qb,
+                metadata,
+                propPath,
+                props[0],
+                aliasHandler
+            );
+
+            // should have joined every prop leading to last section of prop path
+            expect(qb.expressionMap.joinAttributes.map((join) => join.alias.name)).toEqual([
+                "user_role_1",
+                "role_category_1",
+                "category_picture_1",
+            ]);
+            expect(entityAlias).toEqual("category_picture_1");
+            expect(propName).toEqual("url");
+            expect(columnMeta.propertyName).toEqual("url");
+        });
+
+        it("will return undefined values on unknown prop path", () => {
+            jest.spyOn(console, "warn").mockImplementation(() => {});
+            const aliasHandler = new AliasHandler();
+
+            const repository = getRepository(User);
+            const metadata = repository.metadata;
+            const qb = repository.createQueryBuilder(metadata.tableName);
+
+            const propPath = "role.category.c.d";
+            const props = propPath.split(".");
+            const { entityAlias, propName, columnMeta } = manager.makeJoinsFromPropPath(
+                qb,
+                metadata,
+                propPath,
+                props[0],
+                aliasHandler
+            );
+
+            // should have joined props untill reaching an unknown prop
+            expect(qb.expressionMap.joinAttributes.map((join) => join.alias.name)).toEqual([
+                "user_role_1",
+                "role_category_1",
+            ]);
+            expect(entityAlias).toEqual(undefined);
+            expect(propName).toEqual(undefined);
+            expect(columnMeta).toEqual(undefined);
+        });
+
+        it("can join and select exposed props", () => {
+            const aliasHandler = new AliasHandler();
+            const repository = getRepository(User);
+            const metadata = repository.metadata;
+            const qb = repository.createQueryBuilder(metadata.tableName);
+
+            manager.joinAndSelectExposedProps(
+                metadata,
+                "details",
+                qb,
+                metadata,
+                "",
+                metadata.tableName,
+                {},
+                aliasHandler
+            );
+
+            // should have joined & selected every props that are exposed
+            // on User entity (rootMetadata) & User context (metadata) for operation "details"
+            expect(qb.expressionMap.joinAttributes.map((join) => join.alias.name)).toEqual([
+                "user_role_1",
+                "role_category_1",
+                "category_picture_1",
+                "user_profilePicture_1",
+            ]);
+            expect(qb.expressionMap.selects).toEqual([
+                { selection: "user", aliasName: undefined },
+                { selection: "user_role_1.title" },
+                { selection: "user_role_1.id" },
+                { selection: "role_category_1.name" },
+                { selection: "role_category_1.id" },
+                { selection: "category_picture_1.url" },
+                { selection: "category_picture_1.id" },
+                { selection: "user_profilePicture_1.url" },
+                { selection: "user_profilePicture_1.id" },
+            ]);
+        });
+
+        it("can join and select props that computed props depends on", () => {
+            const aliasHandler = new AliasHandler();
+            const repository = getRepository(User);
+            const metadata = repository.metadata;
+            const qb = repository.createQueryBuilder(metadata.tableName);
+
+            manager.joinAndSelectPropsThatComputedPropsDependsOn(metadata, "list", qb, metadata, aliasHandler);
+
+            // should have joined & selected every props from @DependsOn of getIdentifier computed prop
+            expect(qb.expressionMap.joinAttributes.map((join) => join.alias.name)).toEqual([
+                "user_role_1",
+                "role_category_1",
+                "user_profilePicture_1",
+            ]);
+            expect(qb.expressionMap.selects).toEqual([
+                { selection: "user", aliasName: undefined },
+                { selection: "role_category_1.name" },
+                { selection: "user_profilePicture_1.url" },
+            ]);
+        });
+
+        it("can join subresource on inverse side", () => {
+            const repository = getRepository(User);
+            const metadata = repository.metadata;
+
+            const aliasHandler = new AliasHandler();
+            const qb = repository.createQueryBuilder(metadata.tableName);
+            const subresourceRelation = getSubresourceRelation(User, getRepository(Image).metadata, "uploader");
+
+            manager.joinSubresourceOnInverseSide(qb, metadata, aliasHandler, subresourceRelation);
+
+            expect(qb.expressionMap.joinAttributes.map((join) => join.alias.name)).toEqual(["user_uploadedImages_1"]);
+        });
     });
 
-    it("can join and select exposed props", () => {
-        const aliasManager = new AliasHandler();
+    describe("max depth cases", () => {
+        @Entity()
+        class Image extends AbstractEntity {
+            @Groups(["list"])
+            @Column()
+            title: string;
+
+            // @ManyToOne(() => User, (user) => user.uploadedPictures)
+            @Groups(["list"])
+            @ManyToOne(() => User)
+            uploader: () => User; // wrap it to avoid ReferenceError: Cannot access 'User' before initialization
+
+            // @OneToMany(() => User, (user) => user.avatar)
+            // usedByUsers: User[];
+        }
+        @Entity()
+        class User extends AbstractEntity {
+            @Groups(["list"])
+            @Column()
+            name: string;
+
+            // @ManyToOne(() => Image, (image) => image.usedByUsers)
+            @Groups(["list"])
+            @ManyToOne(() => Image)
+            avatar: Image;
+
+            // @OneToMany(() => Image, (image) => image.uploader)
+            // uploadedPictures: Image[];
+        }
+
+        beforeAll(() => createTestConnection([Image, User]));
+        afterAll(closeTestConnection);
+
         const manager = Container.get(RelationManager);
 
-        const repository = getRepository(User);
-        const metadata = repository.metadata;
-        const qb = repository.createQueryBuilder(metadata.tableName);
+        it("isRelationPropCircular should return undefined when not circular", () => {
+            const userMetadata = getRepository(User).metadata;
+            const imageMetadata = getRepository(Image).metadata;
+            const options = { isMaxDepthEnabledByDefault: true, defaultMaxDepthLvl: 2 };
 
-        manager.joinAndSelectExposedProps(metadata, "details", qb, metadata, "", metadata.tableName, {}, aliasManager);
+            expect(
+                manager.isRelationPropCircular(
+                    "user.image",
+                    imageMetadata,
+                    userMetadata.findRelationWithPropertyPath("avatar"),
+                    options
+                )
+            ).toEqual(undefined);
+        });
 
-        // should have joined & selected every props that are exposed
-        // on User entity (rootMetadata) & User context (metadata) for operation "details"
-        expect(qb.expressionMap.joinAttributes.map((join) => join.alias.name)).toEqual([
-            "user_role_1",
-            "role_category_1",
-            "category_picture_1",
-            "user_profilePicture_1",
-        ]);
-        expect(qb.expressionMap.selects).toEqual([
-            { selection: "user", aliasName: undefined },
-            { selection: "user_role_1.title" },
-            { selection: "user_role_1.id" },
-            { selection: "role_category_1.name" },
-            { selection: "role_category_1.id" },
-            { selection: "category_picture_1.url" },
-            { selection: "category_picture_1.id" },
-            { selection: "user_profilePicture_1.url" },
-            { selection: "user_profilePicture_1.id" },
-        ]);
+        it("isRelationPropCircular should return prop & depth when circular", () => {
+            const userMetadata = getRepository(User).metadata;
+            const imageMetadata = getRepository(Image).metadata;
+            const options = { isMaxDepthEnabledByDefault: true, defaultMaxDepthLvl: 2 };
+
+            const circularOnUploader = manager.isRelationPropCircular(
+                "user.image.user",
+                userMetadata,
+                imageMetadata.findRelationWithPropertyPath("uploader"),
+                options
+            );
+            expect(circularOnUploader.prop).toEqual("uploader");
+            expect(circularOnUploader.depth).toEqual(2);
+
+            const circularOnAvatar = manager.isRelationPropCircular(
+                "user.image.user.image",
+                imageMetadata,
+                userMetadata.findRelationWithPropertyPath("avatar"),
+                options
+            );
+            expect(circularOnAvatar.prop).toEqual("avatar");
+            expect(circularOnAvatar.depth).toEqual(2);
+
+            const circularOnUploaderDeeper = manager.isRelationPropCircular(
+                "user.image.user.image.user",
+                userMetadata,
+                imageMetadata.findRelationWithPropertyPath("uploader"),
+                options
+            );
+            expect(circularOnUploaderDeeper.prop).toEqual("uploader");
+            expect(circularOnUploaderDeeper.depth).toEqual(3);
+        });
+
+        it("joinAndSelectExposedProps - with shouldMaxDepthReturnRelationPropsId", () => {
+            const repository = getRepository(User);
+            const metadata = repository.metadata;
+
+            const qb = repository.createQueryBuilder(metadata.tableName);
+            const aliasHandler = new AliasHandler();
+
+            manager.joinAndSelectExposedProps(
+                metadata,
+                "list",
+                qb,
+                metadata,
+                "",
+                metadata.tableName,
+                { isMaxDepthEnabledByDefault: true, defaultMaxDepthLvl: 3, shouldMaxDepthReturnRelationPropsId: true },
+                aliasHandler
+            );
+
+            expect(qb.expressionMap.joinAttributes.map((join) => join.alias.name)).toEqual([
+                "user_avatar_1",
+                "image_uploader_1",
+                "image_uploader_2",
+            ]);
+            expect(qb.expressionMap.selects).toEqual([
+                { selection: "user", aliasName: undefined },
+                { selection: "user_avatar_1.title" },
+                { selection: "user_avatar_1.id" },
+                { selection: "image_uploader_1.name" },
+                { selection: "image_uploader_1.id" },
+                { selection: "user_avatar_1.title" },
+                { selection: "user_avatar_1.id" },
+                { selection: "image_uploader_2.id", aliasName: undefined },
+            ]);
+        });
     });
-
-    it("can join and select props that computed props depends on", () => {
-        const aliasManager = new AliasHandler();
-        const manager = Container.get(RelationManager);
-
-        const repository = getRepository(User);
-        const metadata = repository.metadata;
-        const qb = repository.createQueryBuilder(metadata.tableName);
-
-        manager.joinAndSelectPropsThatComputedPropsDependsOn(metadata, "list", qb, metadata, aliasManager);
-
-        // should have joined & selected every props from @DependsOn of getIdentifier computed prop
-        expect(qb.expressionMap.joinAttributes.map((join) => join.alias.name)).toEqual([
-            "user_role_1",
-            "role_category_1",
-            "user_profilePicture_1",
-        ]);
-        expect(qb.expressionMap.selects).toEqual([
-            { selection: "user", aliasName: undefined },
-            { selection: "role_category_1.name" },
-            { selection: "user_profilePicture_1.url" },
-        ]);
-    });
-
-    // TODO joinSubresourceOnInverseSide
-    // it("can join subresource on inverse side", () => {});
 });
