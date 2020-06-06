@@ -47,12 +47,16 @@ export class Validator {
         }
 
         const routeEntityName = rootMetadata.name.toLocaleLowerCase();
-        // Add default groups [entity, entity_operation]
+        // Add default groups [entity, entity_operation, operation]
         let groups = options?.groups || [];
         if (!options?.noAutoGroups) {
             groups = groups
                 .concat(routeEntityName)
-                .concat(options?.context?.operation ? [routeEntityName + "_" + options?.context?.operation] : []);
+                .concat(
+                    options?.context?.operation
+                        ? [routeEntityName + "_" + options.context.operation, options.context.operation]
+                        : []
+                );
         }
         const validationOptions = { ...options, groups };
 
