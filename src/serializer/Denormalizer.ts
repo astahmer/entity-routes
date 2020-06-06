@@ -28,8 +28,9 @@ export class Denormalizer {
         const cleanedItem = this.cleaner.cleanItem({ rootMetadata, operation, values, options: routeOptions });
         const item = repository.create(cleanedItem as Entity);
 
+        // Allow partially updating an entity
         const defaultValidatorOptions: Partial<ValidateItemOptions> =
-            operation === "update" ? { skipMissingProperties: false } : {};
+            operation === "update" ? { skipMissingProperties: true } : {};
         const validationOptions = { ...defaultValidatorOptions, ...validatorOptions, context: ctx };
         const errors = await this.validator.validateItem(rootMetadata, item, validationOptions);
 
