@@ -13,6 +13,8 @@ import { isType } from "@/functions/asserts";
 import { RelationManager } from "@/mapping/RelationManager";
 import { fromEntries } from "@/functions/object";
 import { RequestContext, CollectionResult } from "@/router/RouteManager";
+import { ValidateItemOptions } from "@/serializer/index";
+import { RouteOperation } from "@/decorators/index";
 
 export class RouteController<Entity extends GenericEntity> {
     private filtersMeta: RouteFiltersMeta;
@@ -39,12 +41,12 @@ export class RouteController<Entity extends GenericEntity> {
 
     private cachedFilters: Record<string, AbstractFilter>;
 
-    constructor(private repository: Repository<Entity>, private options: EntityRouteOptions) {
+    constructor(private repository: Repository<Entity>, private options: EntityRouteOptions = {}) {
         this.filtersMeta = getRouteFiltersMeta(repository.metadata.target as Function);
         this.cachedFilters = fromEntries(this.filters.map((config) => [config.class.name, this.makeFilter(config)]));
     }
 
-    public async create(ctx: RequestContext<Entity>) {
+    public async create(ctx: RequestContext<Entity>, options: CrudActionOptions = {}) {
         const { operation = "create", values, subresourceRelation } = ctx;
 
         if (!Object.keys(values).length) {
@@ -62,9 +64,10 @@ export class RouteController<Entity extends GenericEntity> {
         }
 
         const insertResult = await this.denormalizer.saveItem({
-            ctx,
+            ctx: { operation, values },
             rootMetadata: this.metadata,
-            routeOptions: this.options,
+            routeOptions: { ...this.options, ...(options?.routeOptions || {}) },
+            validatorOptions: options?.validatorOptions || {},
         });
 
         if (isType<EntityErrorResponse>(insertResult, "hasValidationErrors" in insertResult)) {
@@ -83,26 +86,29 @@ export class RouteController<Entity extends GenericEntity> {
                 .add(insertResult);
         }
 
-        // TODO operation = details ?
-        return this.getDetails({ ...ctx, operation, entityId: insertResult.id });
+        const responseOperation =
+            options?.responseOperation || (ctx.operation === "create" ? "details" : ctx.operation);
+        return this.getDetails({ ...ctx, operation: responseOperation, entityId: insertResult.id });
     }
 
-    public async update(ctx: RequestContext<Entity>) {
+    public async update(ctx: RequestContext<Entity>, options?: CrudActionOptions) {
         const { operation = "update", values, entityId } = ctx;
 
-        (values as any).id = entityId;
+        if (!values?.id) (values as Entity).id = entityId;
         const result = await this.denormalizer.saveItem({
-            ctx,
+            ctx: { operation, values },
             rootMetadata: this.metadata,
-            routeOptions: this.options,
+            routeOptions: { ...this.options, ...(options?.routeOptions || {}) },
+            validatorOptions: options?.validatorOptions || {},
         });
 
         if (isType<EntityErrorResponse>(result, "hasValidationErrors" in result)) {
             return result;
         }
 
-        // TODO operation = details ?
-        return this.getDetails({ ...ctx, operation, entityId: result.id });
+        const responseOperation =
+            options?.responseOperation || (ctx.operation === "update" ? "details" : ctx.operation);
+        return this.getDetails({ ...ctx, operation: responseOperation, entityId: result.id });
     }
 
     /** Returns an entity with every mapped props (from groups) for a given id */
@@ -137,7 +143,7 @@ export class RouteController<Entity extends GenericEntity> {
 
     /** Returns an entity with every mapped props (from groups) for a given id */
     public async getDetails(ctx: RequestContext<Entity>) {
-        const { operation, entityId, subresourceRelation } = ctx;
+        const { operation = "details", entityId, subresourceRelation } = ctx;
 
         const repository = getRepository<Entity>(this.metadata.target);
         const qb = repository.createQueryBuilder(this.metadata.tableName);
@@ -152,7 +158,7 @@ export class RouteController<Entity extends GenericEntity> {
             qb,
             aliasHandler,
             entityId,
-            operation || "details",
+            operation,
             this.options
         );
     }
@@ -193,3 +199,9 @@ export class RouteController<Entity extends GenericEntity> {
         );
     }
 }
+
+export type CrudActionOptions = {
+    routeOptions?: EntityRouteOptions;
+    validatorOptions?: ValidateItemOptions;
+    responseOperation?: RouteOperation;
+};
