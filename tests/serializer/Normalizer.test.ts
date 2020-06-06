@@ -63,12 +63,12 @@ describe("Normalizer", () => {
 
         const roleMetadata = getRepository(Role).metadata;
         const roleResult = (await denormalizer.saveItem({
-            ctx: { operation: "create", values: role },
+            ctx: { operation: "create", values: role as any },
             rootMetadata: roleMetadata,
         })) as Role;
 
         user.role = roleResult.id;
-        await denormalizer.saveItem({ ctx: { operation: "create", values: user }, rootMetadata });
+        await denormalizer.saveItem({ ctx: { operation: "create", values: user as any }, rootMetadata });
 
         expect(await normalizer.getCollection(rootMetadata, qb, aliasHandler)).toEqual([
             [
@@ -126,7 +126,7 @@ describe("Normalizer", () => {
         const qb = repository.createQueryBuilder(repository.metadata.tableName);
         const aliasHandler = new AliasHandler();
 
-        expect(async () => await normalizer.getItem(rootMetadata, qb, aliasHandler, 1)).rejects.toThrow();
+        expect(() => normalizer.getItem(rootMetadata, qb, aliasHandler, 1)).rejects.toThrow();
 
         const user = new User();
         user.name = "Alex";
@@ -140,12 +140,12 @@ describe("Normalizer", () => {
 
         const roleMetadata = getRepository(Role).metadata;
         const roleResult = (await denormalizer.saveItem({
-            ctx: { operation: "create", values: role },
+            ctx: { operation: "create", values: role as any },
             rootMetadata: roleMetadata,
         })) as Role;
 
         user.role = roleResult.id;
-        await denormalizer.saveItem({ ctx: { operation: "create", values: user }, rootMetadata });
+        await denormalizer.saveItem({ ctx: { operation: "create", values: user as any }, rootMetadata });
 
         expect(await normalizer.getItem(rootMetadata, qb, aliasHandler, 1)).toEqual({
             email: "alex@mail.com",

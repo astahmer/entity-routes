@@ -1,4 +1,4 @@
-import { Connection, DeleteResult, QueryRunner, Repository } from "typeorm";
+import { Connection, DeleteResult, QueryRunner, Repository, DeepPartial } from "typeorm";
 import { Container } from "typedi";
 
 import { RouteOperation } from "@/decorators/Groups";
@@ -11,6 +11,7 @@ import { EntityErrorResults } from "@/serializer/Validator";
 import { Context } from "@/utils-types";
 import { Middleware } from "koa"; // TODO use Middleware from/util-types = wrap ctx since ctx.params/body.state do not exist for Express
 import { RouteController } from "@/router/RouteController";
+import { QueryParams } from "@/filters/index";
 
 // TODO AuthProvider
 export class RouteManager<Entity extends GenericEntity> {
@@ -154,9 +155,9 @@ export type RequestContext<Entity extends GenericEntity = GenericEntity> = {
     /** Is update or create operation ? To check if there is a body sent */
     isUpdateOrCreate?: boolean;
     /** Request body values sent */
-    values?: Partial<Entity>;
+    values?: DeepPartial<Entity>;
     /** Request query params */
-    queryParams?: any; // TODO Typings
+    queryParams?: QueryParams;
     /** Custom operation for a custom action */
     operation?: RouteOperation;
 };
