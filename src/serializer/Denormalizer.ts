@@ -26,7 +26,7 @@ export class Denormalizer {
         const { operation, values } = ctx;
         const repository = getRepository<Entity>(rootMetadata.target);
         const cleanedItem = this.cleaner.cleanItem({ rootMetadata, operation, values, options: routeOptions });
-        const item = repository.create(cleanedItem as Entity);
+        const item = repository.create(cleanedItem);
 
         // Allow partially updating an entity
         const defaultValidatorOptions: Partial<ValidateItemOptions> =

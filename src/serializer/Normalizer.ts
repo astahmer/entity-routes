@@ -106,7 +106,7 @@ export class Normalizer {
             throw new Error("Not found.");
         }
 
-        const item = (await this.formater.formatItem({ item: result, operation, entityMetadata, options })) as Entity;
+        const item = await this.formater.formatItem({ item: result, operation, entityMetadata, options });
 
         return item;
     }

@@ -12,6 +12,7 @@ import { Context } from "@/utils-types";
 import { Middleware } from "koa"; // TODO use Middleware from/util-types = wrap ctx since ctx.params/body.state do not exist for Express
 import { RouteController } from "@/router/RouteController";
 import { QueryParams } from "@/filters/index";
+import { DeepPartial } from "@/utils-types";
 
 // TODO AuthProvider
 export class RouteManager<Entity extends GenericEntity> {

@@ -73,7 +73,7 @@ export class Cleaner {
             } else if (isPrimitive(prop)) {
                 const isRelation = mapping[ENTITY_META_SYMBOL].findRelationWithPropertyPath(key);
                 // Format IRI to id && string "id" to int id
-                if (typeof prop === "string" && (isRelation || key === "id")) {
+                if (isType<string>(prop, typeof prop === "string") && (isRelation || key === "id")) {
                     clone[key] = formatIriToId(prop, true);
                 } else {
                     clone[key] = prop;

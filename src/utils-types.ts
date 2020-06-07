@@ -8,6 +8,19 @@ export type PartialRecord<K extends keyof any, T> = Partial<Record<K, T>>;
 export type Props<T extends GenericEntity> = NonFunctionKeys<T>;
 export type Decorator = (target: Object | Function, propName?: string) => void;
 
+/**
+ * Same as Partial<T> but goes deeper and makes Partial<T> all its properties and sub-properties.
+ `*/
+type DP<T> = {
+    [P in keyof T]?: T[P] extends Array<infer U>
+        ? Array<DeepPartial<U>>
+        : T[P] extends ReadonlyArray<infer U>
+        ? ReadonlyArray<DeepPartial<U>>
+        : DeepPartial<T[P]>;
+};
+
+export declare type DeepPartial<T> = { [P in keyof T]?: T[P] | DP<T> };
+
 // https://github.com/piotrwitek/utility-types#nonfunctionkeyst
 export type NonUndefined<A> = A extends undefined ? never : A;
 export type NonFunctionKeys<T extends object> = {
