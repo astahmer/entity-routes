@@ -1,4 +1,4 @@
-import { Connection, DeleteResult, QueryRunner, Repository, DeepPartial } from "typeorm";
+import { Connection, DeleteResult, QueryRunner, Repository } from "typeorm";
 import { Container } from "typedi";
 
 import { RouteOperation } from "@/decorators/Groups";
@@ -8,10 +8,10 @@ import { SubresourceRelation } from "@/router/SubresourceManager";
 import { isType, isDev } from "@/functions/asserts";
 import { MappingManager } from "@/mapping/MappingManager";
 import { EntityErrorResults } from "@/serializer/Validator";
-import { Context } from "@/utils-types";
-import { Middleware } from "koa"; // TODO use Middleware from/util-types = wrap ctx since ctx.params/body.state do not exist for Express
 import { RouteController } from "@/router/RouteController";
 import { QueryParams } from "@/filters/index";
+import { ContextAdapter, Middleware } from "@/router/bridge/ContextAdapter";
+import { parseStringAsBoolean } from "@/functions/primitives";
 import { DeepPartial } from "@/utils-types";
 
 // TODO AuthProvider
@@ -46,11 +46,11 @@ export class RouteManager<Entity extends GenericEntity> {
             const requestContext: RequestContext<Entity> = {
                 ctx,
                 subresourceRelation,
-                isUpdateOrCreate: ctx.request.body && (ctx.method === "POST" || ctx.method === "PUT"),
+                isUpdateOrCreate: ctx.requestBody && (ctx.method === "POST" || ctx.method === "PUT"),
             };
 
             if (ctx.params.id) requestContext.entityId = parseInt(ctx.params.id);
-            if (requestContext.isUpdateOrCreate) requestContext.values = ctx.request.body;
+            if (requestContext.isUpdateOrCreate) requestContext.values = ctx.requestBody;
             if (operation === "list") requestContext.queryParams = ctx.query || {};
 
             // Create query runner to retrieve requestContext in subscribers
@@ -106,15 +106,17 @@ export class RouteManager<Entity extends GenericEntity> {
                 ctx.status = 400;
             }
 
-            ctx.body = response;
+            ctx.status = 200;
+            ctx.responseBody = response;
         };
     }
 
     /** Returns the method of a mapping route on a given operation for this entity */
     public makeRouteMappingMiddleware(operation: RouteOperation): Middleware {
         return async (ctx) => {
-            const pretty = ctx.query.pretty;
-            ctx.body = {
+            const pretty = parseStringAsBoolean(ctx.query.pretty as string);
+            ctx.status = 200;
+            ctx.responseBody = {
                 context: {
                     operation: operation + ".mapping",
                     entity: this.metadata.tableName,
@@ -147,8 +149,8 @@ export type CrudAction = {
 
 /** EntityRoute request context wrapping Koa's Context */
 export type RequestContext<Entity extends GenericEntity = GenericEntity> = {
-    /** Koa/Express Request context */
-    ctx: Context;
+    /** Request context adapter */
+    ctx: ContextAdapter;
     /** Current route entity id */
     entityId?: string | number;
     /** Subresource relation with parent, used to auto-join on this entity's relation inverse side */

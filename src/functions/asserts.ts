@@ -1,5 +1,6 @@
 import { Primitive } from "@/functions/primitives";
 import { WhereType } from "@/filters/AbstractFilter";
+import { CType } from "@/utils-types";
 
 export const isTestEnv = () => process.env.NODE_ENV === "test";
 export const isDev = () => process.env.NODE_ENV === "development" || isTestEnv();
@@ -19,3 +20,7 @@ export const isType = <T>(_value: any, condition?: boolean): _value is T => cond
 
 export const isEntity = (value: any) => value instanceof Object && "id" in value;
 export const isWhereType = (property: string): property is WhereType => ["and", "or"].includes(property);
+
+export const isClassRegex = /^\s*class\s+/;
+export const isClass = <T>(value: any): value is CType<T> =>
+    typeof value === "function" && isClassRegex.test(value?.toString?.());

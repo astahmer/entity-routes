@@ -37,7 +37,7 @@ describe("BridgeRouter", () => {
                     middlewares: [noop],
                 },
             ],
-            { routerClass: Router, routerRegisterFn: registerKoaRouteFromBridgeRoute }
+            { routerFactoryClass: Router, routerRegisterFn: registerKoaRouteFromBridgeRoute }
         );
 
         expect(router.routes.map((r) => r.name)).toEqual(["home_list", "register_create"]);

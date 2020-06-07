@@ -3,7 +3,13 @@ import { IsString, IsEmail, IsDate, getMetadataStorage } from "class-validator";
 import * as Router from "koa-router";
 
 import { createTestConnection, closeTestConnection } from "@@/tests/testConnection";
-import { EntityRoute, makeEntityRouters, registerKoaRouteFromBridgeRoute, getEntityRouters } from "@/index";
+import {
+    EntityRoute,
+    makeEntityRouters,
+    registerKoaRouteFromBridgeRoute,
+    getEntityRouters,
+    koaMwAdapter,
+} from "@/index";
 
 describe("maker", () => {
     class AbstractEntity {
@@ -75,7 +81,11 @@ describe("maker", () => {
             await makeEntityRouters({
                 connection: getConnection(),
                 entities,
-                options: { routerClass: Router, routerRegisterFn: registerKoaRouteFromBridgeRoute },
+                options: {
+                    routerFactoryClass: Router,
+                    routerRegisterFn: registerKoaRouteFromBridgeRoute,
+                    middlewareAdapter: koaMwAdapter,
+                },
             });
             expect(validationMetas.find((meta) => meta.propertyName === "name").always).toEqual(undefined);
 
@@ -87,7 +97,11 @@ describe("maker", () => {
             await makeEntityRouters({
                 connection: getConnection(),
                 entities,
-                options: { routerClass: Router, routerRegisterFn: registerKoaRouteFromBridgeRoute },
+                options: {
+                    routerFactoryClass: Router,
+                    routerRegisterFn: registerKoaRouteFromBridgeRoute,
+                    middlewareAdapter: koaMwAdapter,
+                },
             });
             const entityRouters = getEntityRouters();
             expect(Object.keys(entityRouters).length).toEqual(3);

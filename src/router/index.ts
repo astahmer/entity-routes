@@ -1,4 +1,5 @@
 export * from "./AbstractRouteAction";
+export * from "./bridge/index";
 export * from "./container";
 export * from "./EntityRouter";
 export * from "./maker";

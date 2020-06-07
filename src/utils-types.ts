@@ -1,12 +1,12 @@
-import { IncomingMessage, ServerResponse } from "http";
-import { NextFunction } from "connect";
 import { ObjectType } from "typeorm";
 
 import { GenericEntity } from "./router/EntityRouter";
 
+export type ObjectLiteral = Record<string, any>; // TODO use everywhere instead of record ?
 export type PartialRecord<K extends keyof any, T> = Partial<Record<K, T>>;
 export type Props<T extends GenericEntity> = NonFunctionKeys<T>;
 export type Decorator = (target: Object | Function, propName?: string) => void;
+export type CType<T = any> = new (...args: any[]) => T;
 
 /**
  * Same as Partial<T> but goes deeper and makes Partial<T> all its properties and sub-properties.
@@ -37,6 +37,3 @@ export type EntityKeys<T extends GenericEntity> = {
 }[keyof T];
 
 export type EntityReference = <Entity extends GenericEntity>(type?: Entity) => ObjectType<Entity>;
-
-export type Middleware = (ctx: Context, next: NextFunction) => any;
-export type Context = { req: IncomingMessage; res: ServerResponse };

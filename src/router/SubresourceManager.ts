@@ -3,7 +3,7 @@ import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
 
 import { getEntityRouters } from "@/router/container";
 import { getRouteSubresourcesMetadata, RouteMetadata, GenericEntity } from "../router/EntityRouter";
-import { BridgeRouter } from "@/bridges/routers/BridgeRouter";
+import { BridgeRouter } from "@/router/bridge/BridgeRouter";
 import { CRUD_ACTIONS } from "@/router/RouteManager";
 
 export class SubresourceManager<Entity extends GenericEntity> {

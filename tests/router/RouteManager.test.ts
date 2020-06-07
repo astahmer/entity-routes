@@ -2,7 +2,7 @@ import { PrimaryGeneratedColumn, Column, Entity, getRepository, getConnection } 
 import { RouteManager, RequestState, Groups, ENTITY_META_SYMBOL } from "@/index";
 import { createTestConnection, closeTestConnection, makeTestCtx } from "@@/tests/testConnection";
 
-describe("RouterManager", () => {
+describe("RouteManager", () => {
     class AbstractEntity {
         @Groups("all")
         @PrimaryGeneratedColumn()
@@ -53,8 +53,8 @@ describe("RouterManager", () => {
 
         await mw(ctx as any, noop);
 
-        expect(ctx.status).toEqual(undefined);
-        expect(ctx.body).toEqual({
+        expect(ctx.status).toEqual(200);
+        expect(ctx.responseBody).toEqual({
             "@context": {
                 operation: "list",
                 entity: "user",
@@ -76,8 +76,8 @@ describe("RouterManager", () => {
 
         await mw(ctx as any, noop);
 
-        expect(ctx.status).toEqual(undefined); // which means there was no error
-        expect(ctx.body).toMatchObject({
+        expect(ctx.status).toEqual(200); // which means there was no error
+        expect(ctx.responseBody).toMatchObject({
             context: { operation: "list.mapping", entity: "user" },
             routeMapping: {
                 selectProps: ["name", "id"],
@@ -86,6 +86,6 @@ describe("RouterManager", () => {
                 mapping: {},
             },
         });
-        expect(ctx.body.routeMapping[ENTITY_META_SYMBOL]).toBe(repository.metadata);
+        expect(ctx.responseBody.routeMapping[ENTITY_META_SYMBOL]).toBe(repository.metadata);
     });
 });

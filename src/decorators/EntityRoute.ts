@@ -30,7 +30,7 @@ export function EntityRoute(
     return (target: Function) => {
         Reflect.defineMetadata(
             ROUTE_METAKEY,
-            { path: args.path || target.name, operations: args.operations || [], options },
+            { path: args.path || "/" + target.name.toLowerCase(), operations: args.operations || [], options },
             target
         );
     };
