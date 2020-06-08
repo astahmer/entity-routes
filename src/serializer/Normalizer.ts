@@ -6,7 +6,7 @@ import { AliasHandler } from "@/serializer/AliasHandler";
 import { Formater } from "@/serializer/Formater";
 import { EntityRouteOptions, GenericEntity } from "@/router/EntityRouter";
 import { RelationManager } from "@/mapping/RelationManager";
-import { RequestContext } from "@/router/RouteManager";
+import { RequestContext } from "@/router/MiddlewareMaker";
 
 // TODO 2 args & 3rd should be object
 @Service()

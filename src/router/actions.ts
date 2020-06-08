@@ -3,7 +3,7 @@ import { EntityMetadata } from "typeorm";
 import { RouteOperation } from "@/decorators/Groups";
 import { RouteMetadata, EntityRouterFactoryOptions } from "@/router/EntityRouter";
 import { BridgeRouter, getRouterFactory } from "@/router/bridge/BridgeRouter";
-import { CrudAction } from "@/router/RouteManager";
+import { CrudAction } from "@/router/MiddlewareMaker";
 import { Middleware } from "@/router/bridge/ContextAdapter";
 import { formatRouteName } from "@/functions/route";
 import { isType } from "@/functions/asserts";

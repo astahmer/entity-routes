@@ -1,4 +1,4 @@
-import { Connection, getConnection, getRepository, ObjectType, Repository, ObjectLiteral } from "typeorm";
+import { getRepository, ObjectType, Repository, ObjectLiteral } from "typeorm";
 
 import { RouteOperation } from "@/decorators/Groups";
 import { AbstractFilterConfig } from "@/filters/AbstractFilter";
@@ -6,33 +6,29 @@ import { RouteSubresourcesMeta, SubresourceManager } from "@/router/SubresourceM
 import { BridgeRouter, getRouterFactory, BridgeRouterRegisterFn } from "@/router/bridge/BridgeRouter";
 import { formatRouteName } from "@/functions/route";
 import { RouteActionConstructorData, RouteActionConfig, makeRouterFromActions } from "@/router/actions";
-import { RouteManager, CRUD_ACTIONS } from "@/router/RouteManager";
+import { MiddlewareMaker, CRUD_ACTIONS } from "@/router/MiddlewareMaker";
 import { CType } from "@/utils-types";
 
 export class EntityRouter<Entity extends GenericEntity> {
-    public readonly routeManager: RouteManager<Entity>;
+    public readonly middlewareMaker: MiddlewareMaker<Entity>;
     public readonly subresourceManager: SubresourceManager<Entity>;
 
-    // Entity Route specifics
+    // EntityRouter specifics
     private readonly repository: Repository<Entity>;
     private readonly options: EntityRouteConfig;
-
-    // Managers/services
-    private readonly connection: Connection;
 
     constructor(
         public readonly entity: ObjectType<Entity>,
         public readonly routeMetadata: RouteMetadata,
         public readonly globalOptions: EntityRouterOptions
     ) {
-        // Entity Route specifics
+        // EntityRouter specifics
         this.repository = getRepository(entity);
         this.options = { ...globalOptions, ...this.routeMetadata.options };
 
         // Managers/services
-        this.connection = getConnection();
         this.subresourceManager = new SubresourceManager<Entity>(this.repository, this.routeMetadata);
-        this.routeManager = new RouteManager<Entity>(this.connection, this.repository, this.options);
+        this.middlewareMaker = new MiddlewareMaker<Entity>(this.repository, this.options);
     }
 
     /** Make a Router for each given operations (and their associated mapping route) for this entity and its subresources and return it */
@@ -48,8 +44,8 @@ export class EntityRouter<Entity extends GenericEntity> {
             const verb = CRUD_ACTIONS[operation].verb;
             const path = (this.routeMetadata.path + CRUD_ACTIONS[operation].path).toLowerCase();
 
-            const requestContextMw = this.routeManager.makeRequestContextMiddleware(operation);
-            const responseMw = this.routeManager.makeResponseMiddleware(operation);
+            const requestContextMw = this.middlewareMaker.makeRequestContextMiddleware(operation);
+            const responseMw = this.middlewareMaker.makeResponseMiddleware(operation);
 
             router.register({
                 path,
@@ -60,7 +56,7 @@ export class EntityRouter<Entity extends GenericEntity> {
 
             if (operation === "delete") continue;
 
-            const mappingMethod = this.routeManager.makeRouteMappingMiddleware(operation);
+            const mappingMethod = this.middlewareMaker.makeRouteMappingMiddleware(operation);
             router.register({
                 path: path + "/mapping",
                 name: formatRouteName(path, operation) + "_mapping",
@@ -86,7 +82,9 @@ export class EntityRouter<Entity extends GenericEntity> {
         return {
             ...action,
             middlewares: (action.middlewares || []).concat(
-                this.globalOptions.middlewareAdapter(this.routeManager.makeRequestContextMiddleware(action.operation))
+                this.globalOptions.middlewareAdapter(
+                    this.middlewareMaker.makeRequestContextMiddleware(action.operation)
+                )
             ),
         };
     }

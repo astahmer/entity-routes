@@ -1,6 +1,6 @@
 import { isType, isClass } from "@/functions/asserts";
 import { CType } from "@/utils-types";
-import { RouteVerb } from "@/router/RouteManager";
+import { RouteVerb } from "@/router/MiddlewareMaker";
 import { EntityRouterFactoryOptions } from "@/router/EntityRouter";
 
 export class BridgeRouter<T = any> {

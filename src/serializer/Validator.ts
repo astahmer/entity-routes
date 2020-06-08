@@ -5,7 +5,7 @@ import { Container, Service } from "typedi";
 
 import { isType, isObject } from "@/functions/asserts";
 import { GenericEntity } from "@/router/EntityRouter";
-import { RequestContextMinimal } from "@/router/RouteManager";
+import { RequestContextMinimal } from "@/router/MiddlewareMaker";
 
 @Service()
 export class Validator {

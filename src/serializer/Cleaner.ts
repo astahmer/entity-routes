@@ -7,7 +7,7 @@ import { formatIriToId } from "@/functions/entity";
 import { GenericEntity, EntityRouteOptions } from "@/router/EntityRouter";
 import { MappingManager, MappingItem, ENTITY_META_SYMBOL } from "@/mapping/MappingManager";
 import { SaveItemArgs } from "@/serializer/Denormalizer";
-import { RequestContext } from "@/router/RouteManager";
+import { RequestContext } from "@/router/MiddlewareMaker";
 
 @Service()
 export class Cleaner {

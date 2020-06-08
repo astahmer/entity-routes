@@ -1,4 +1,4 @@
-import { Connection, DeleteResult, QueryRunner, Repository } from "typeorm";
+import { Connection, DeleteResult, QueryRunner, Repository, getConnection } from "typeorm";
 import { Container } from "typedi";
 
 import { RouteOperation } from "@/decorators/Groups";
@@ -14,8 +14,7 @@ import { ContextAdapter, Middleware } from "@/router/bridge/ContextAdapter";
 import { parseStringAsBoolean } from "@/functions/primitives";
 import { DeepPartial } from "@/utils-types";
 
-// TODO AuthProvider
-export class RouteManager<Entity extends GenericEntity> {
+export class MiddlewareMaker<Entity extends GenericEntity> {
     get mappingManager() {
         return Container.get(MappingManager);
     }
@@ -24,13 +23,11 @@ export class RouteManager<Entity extends GenericEntity> {
         return this.repository.metadata;
     }
 
+    private connection: Connection;
     private controller: RouteController<Entity>;
 
-    constructor(
-        private connection: Connection,
-        private repository: Repository<Entity>,
-        private options: EntityRouteOptions = {}
-    ) {
+    constructor(private repository: Repository<Entity>, private options: EntityRouteOptions = {}) {
+        this.connection = getConnection();
         this.controller = new RouteController(repository, options);
     }
 

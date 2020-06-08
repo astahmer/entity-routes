@@ -1,8 +1,8 @@
 import { PrimaryGeneratedColumn, Column, Entity, getRepository, getConnection } from "typeorm";
-import { RouteManager, RequestState, Groups, ENTITY_META_SYMBOL } from "@/index";
+import { MiddlewareMaker, RequestState, Groups, ENTITY_META_SYMBOL } from "@/index";
 import { createTestConnection, closeTestConnection, makeTestCtx } from "@@/tests/testConnection";
 
-describe("RouteManager", () => {
+describe("MiddlewareMaker", () => {
     class AbstractEntity {
         @Groups("all")
         @PrimaryGeneratedColumn()
@@ -26,7 +26,7 @@ describe("RouteManager", () => {
     it("makeRequestContextMiddleware", async () => {
         const connection = getConnection();
         const repository = getRepository(User);
-        const manager = new RouteManager(connection, repository);
+        const manager = new MiddlewareMaker(repository);
 
         const mw = manager.makeRequestContextMiddleware("list");
         const ctx = makeTestCtx<RequestState<User>>({ query: { id: "123" } });
@@ -43,9 +43,8 @@ describe("RouteManager", () => {
     });
 
     it("makeResponseMiddleware", async () => {
-        const connection = getConnection();
         const repository = getRepository(User);
-        const manager = new RouteManager(connection, repository);
+        const manager = new MiddlewareMaker(repository);
 
         const mw = manager.makeResponseMiddleware("list");
         const ctx = makeTestCtx<RequestState<User>>({ query: { id: "123" } });
@@ -66,9 +65,8 @@ describe("RouteManager", () => {
     });
 
     it("makeRouteMappingMiddleware", async () => {
-        const connection = getConnection();
         const repository = getRepository(User);
-        const manager = new RouteManager(connection, repository);
+        const manager = new MiddlewareMaker(repository);
 
         const mw = manager.makeRouteMappingMiddleware("list");
         const ctx = makeTestCtx<RequestState<User>>();

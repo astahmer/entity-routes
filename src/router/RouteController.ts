@@ -12,7 +12,7 @@ import { AliasHandler } from "@/serializer/AliasHandler";
 import { isType } from "@/functions/asserts";
 import { RelationManager } from "@/mapping/RelationManager";
 import { fromEntries } from "@/functions/object";
-import { RequestContext, CollectionResult } from "@/router/RouteManager";
+import { RequestContext, CollectionResult } from "@/router/MiddlewareMaker";
 import { ValidateItemOptions } from "@/serializer/index";
 import { RouteOperation } from "@/decorators/index";
 
@@ -78,8 +78,7 @@ export class RouteController<Entity extends GenericEntity> {
             subresourceRelation &&
             (subresourceRelation.relation.isOneToMany || subresourceRelation.relation.isManyToMany)
         ) {
-            const repository = getRepository<Entity>(this.metadata.target);
-            const qb = repository.createQueryBuilder(this.metadata.tableName);
+            const qb = this.repository.createQueryBuilder(this.metadata.tableName);
             await qb
                 .relation(subresourceRelation.relation.target, subresourceRelation.relation.propertyName)
                 .of(subresourceRelation.id)
@@ -115,8 +114,7 @@ export class RouteController<Entity extends GenericEntity> {
     public async getList(ctx: RequestContext<Entity>) {
         const { operation = "list", queryParams, subresourceRelation } = ctx;
 
-        const repository = getRepository<Entity>(this.metadata.target);
-        const qb = repository.createQueryBuilder(this.metadata.tableName);
+        const qb = this.repository.createQueryBuilder(this.metadata.tableName);
 
         // Apply a max item to retrieve
         qb.take(100);
@@ -145,8 +143,7 @@ export class RouteController<Entity extends GenericEntity> {
     public async getDetails(ctx: RequestContext<Entity>) {
         const { operation = "details", entityId, subresourceRelation } = ctx;
 
-        const repository = getRepository<Entity>(this.metadata.target);
-        const qb = repository.createQueryBuilder(this.metadata.tableName);
+        const qb = this.repository.createQueryBuilder(this.metadata.tableName);
 
         const aliasHandler = new AliasHandler();
         if (subresourceRelation) {
@@ -166,8 +163,7 @@ export class RouteController<Entity extends GenericEntity> {
     public async delete({ entityId, subresourceRelation }: RequestContext<Entity>) {
         // Remove relation if used on a subresource
         if (subresourceRelation) {
-            const repository = getRepository<Entity>(this.metadata.target);
-            const qb = repository.createQueryBuilder(this.metadata.tableName);
+            const qb = this.repository.createQueryBuilder(this.metadata.tableName);
 
             const query = qb
                 .relation(subresourceRelation.relation.target, subresourceRelation.relation.propertyName)
@@ -180,7 +176,7 @@ export class RouteController<Entity extends GenericEntity> {
             }
             return { affected: 1, raw: { insertId: entityId } };
         } else {
-            return getRepository(this.metadata.target).delete(entityId);
+            return this.repository.delete(entityId);
         }
     }
 

@@ -4,7 +4,7 @@ import { Container, Service } from "typedi";
 import { GenericEntity, EntityRouteOptions } from "@/router/EntityRouter";
 import { Cleaner } from "@/serializer/Cleaner";
 import { ValidateItemOptions, EntityErrorResults, Validator } from "@/serializer/Validator";
-import { RequestContextMinimal } from "@/router/RouteManager";
+import { RequestContextMinimal } from "@/router/MiddlewareMaker";
 
 @Service()
 export class Denormalizer {

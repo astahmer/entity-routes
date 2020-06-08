@@ -9,7 +9,7 @@ import { lowerFirstLetter } from "@/functions/primitives";
 
 import { isType, isEntity, isPrimitive } from "@/functions/asserts";
 import { MappingManager } from "@/mapping/MappingManager";
-import { RequestContext } from "@/router/RouteManager";
+import { RequestContext } from "@/router/MiddlewareMaker";
 import { idToIRI } from "@/functions/index";
 
 @Service()

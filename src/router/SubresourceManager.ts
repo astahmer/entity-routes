@@ -4,7 +4,7 @@ import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
 import { getEntityRouters } from "@/router/container";
 import { getRouteSubresourcesMetadata, RouteMetadata, GenericEntity } from "../router/EntityRouter";
 import { BridgeRouter } from "@/router/bridge/BridgeRouter";
-import { CRUD_ACTIONS } from "@/router/RouteManager";
+import { CRUD_ACTIONS } from "@/router/MiddlewareMaker";
 
 export class SubresourceManager<Entity extends GenericEntity> {
     private subresourcesMeta: RouteSubresourcesMeta<Entity>;
@@ -72,11 +72,11 @@ export class SubresourceManager<Entity extends GenericEntity> {
             // Generates details endpoint at subresourcePath
             if (isSubresourceSingle && subresourceProp.operations.includes("details")) {
                 subresourceProp.operations.forEach((operation) => {
-                    const requestContextMw = nestedEntityRoute.routeManager.makeRequestContextMiddleware(
+                    const requestContextMw = nestedEntityRoute.middlewareMaker.makeRequestContextMiddleware(
                         operation,
                         subresourceRelation
                     );
-                    const responseMw = nestedEntityRoute.routeManager.makeResponseMiddleware(operation);
+                    const responseMw = nestedEntityRoute.middlewareMaker.makeResponseMiddleware(operation);
 
                     router.register({
                         path: subresourcePath,
@@ -90,11 +90,11 @@ export class SubresourceManager<Entity extends GenericEntity> {
 
             // Generates endpoint at subresourcePath for each operation
             subresourceProp.operations.forEach((operation) => {
-                const requestContextMw = nestedEntityRoute.routeManager.makeRequestContextMiddleware(
+                const requestContextMw = nestedEntityRoute.middlewareMaker.makeRequestContextMiddleware(
                     operation,
                     subresourceRelation
                 );
-                const responseMw = nestedEntityRoute.routeManager.makeResponseMiddleware(operation);
+                const responseMw = nestedEntityRoute.middlewareMaker.makeResponseMiddleware(operation);
 
                 const path = subresourcePath + CRUD_ACTIONS[operation].path;
                 router.register({
