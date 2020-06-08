@@ -3,14 +3,9 @@ import { Connection, getConnection, getRepository, ObjectType, Repository, Objec
 import { RouteOperation } from "@/decorators/Groups";
 import { AbstractFilterConfig } from "@/filters/AbstractFilter";
 import { RouteSubresourcesMeta, SubresourceManager } from "@/router/SubresourceManager";
-import {
-    BridgeRouter,
-    makeRouterFromActions,
-    getRouterFactory,
-    BridgeRouterRegisterFn,
-} from "@/router/bridge/BridgeRouter";
+import { BridgeRouter, getRouterFactory, BridgeRouterRegisterFn } from "@/router/bridge/BridgeRouter";
 import { formatRouteName } from "@/functions/route";
-import { RouteActionConstructorData, RouteAction } from "@/router/AbstractRouteAction";
+import { RouteActionConstructorData, RouteActionConfig, makeRouterFromActions } from "@/router/actions";
 import { RouteManager, CRUD_ACTIONS } from "@/router/RouteManager";
 import { CType } from "@/utils-types";
 
@@ -79,7 +74,7 @@ export class EntityRouter<Entity extends GenericEntity> {
 
         // Custom actions routes
         if (this.options.actions) {
-            const actions: RouteAction[] = this.options.actions.map(this.addRequestContextMwToAction.bind(this));
+            const actions: RouteActionConfig[] = this.options.actions.map(this.addRequestContextMwToAction.bind(this));
             const data = { entityMetadata: this.repository.metadata, routeMetadata: this.routeMetadata };
             makeRouterFromActions<RouteActionConstructorData>(actions, { router }, data);
         }
@@ -87,7 +82,7 @@ export class EntityRouter<Entity extends GenericEntity> {
         return router;
     }
 
-    private addRequestContextMwToAction(action: RouteAction): RouteAction {
+    private addRequestContextMwToAction(action: RouteActionConfig): RouteActionConfig {
         return {
             ...action,
             middlewares: (action.middlewares || []).concat(
@@ -150,7 +145,7 @@ export type EntityRouterClassOptions<T = any, U = EntityRouterFactoryKind> = Ent
 
 export type EntityRouteBaseOptions = {
     /** Custom actions using current EntityRouter prefix/instance */
-    actions?: RouteAction[];
+    actions?: RouteActionConfig[];
 };
 
 export type EntityRouteOptions = {

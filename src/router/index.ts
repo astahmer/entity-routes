@@ -1,4 +1,4 @@
-export * from "./AbstractRouteAction";
+export * from "./actions";
 export * from "./bridge/index";
 export * from "./container";
 export * from "./EntityRouter";
