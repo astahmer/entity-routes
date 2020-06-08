@@ -12,7 +12,6 @@ export type ContextAdapter<QueryParams = any, State = ObjectLiteral> = {
     readonly params: Record<string, string>;
     readonly query: QueryParams;
     readonly state: State;
-    setState(key: string, value: any): void;
     status: number;
     responseBody: any;
 };

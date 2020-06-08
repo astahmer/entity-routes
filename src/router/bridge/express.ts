@@ -44,10 +44,6 @@ export const makeExpressContextAdapter = (req: Request, res: ResponseWithBody) =
     get state() {
         return (this as ECA).res.locals;
     },
-    setState(key: string, value: any) {
-        if (!this.state) this.state = {};
-        (this as ECA).state[key] = value;
-    },
     get responseBody() {
         return (this as ECA).res.body;
     },

@@ -46,10 +46,6 @@ export const makeKoaContextAdapter = (ctx: Context) => ({
     get state() {
         return (this as KCA).ctx.state;
     },
-    setState(key: string, value: any) {
-        if (!this.ctx.state) this.ctx.state = {};
-        (this as KCA).ctx.state[key] = value;
-    },
     get responseBody() {
         return (this as KCA).ctx.body;
     },
