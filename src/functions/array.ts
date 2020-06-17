@@ -1,5 +1,4 @@
-import { getRandomString } from "@/functions/primitives";
-import { get } from "@/functions/object";
+import { get, getSelf } from "@/functions/object";
 
 /** Split an array in chunk of given size */
 export const chunk = <T = any>(arr: T[], size: number): T[] =>
@@ -8,7 +7,7 @@ export const chunk = <T = any>(arr: T[], size: number): T[] =>
 export const flatMapOnProp = <T, U, V>(arr: T[], getArrayProp: (v: T) => U[], getProp: (el: U) => V) =>
     arr.reduce((acc, item) => acc.concat(...getArrayProp(item).map(getProp)), []);
 
-export const flatMap = <T, V>(arr: T[][], getProp: (subArray: T) => V): V[] =>
+export const flatMap = <T, V>(arr: T[][], getProp: (subArray: T) => V = getSelf as any): V[] =>
     arr.reduce<V[]>((acc, item) => acc.concat(item.map(getProp)), []);
 
 /** Return an array where original array gets duplicated & appended X times */

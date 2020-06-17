@@ -45,6 +45,7 @@ export const get = <T extends object>(item: T, path: string, defaultValue?: any)
     path.split(".").reduce((obj, key) => (obj ? obj[key as keyof typeof obj] : defaultValue), item);
 
 export const prop = <T extends object, K extends keyof T>(key: K) => (item: T) => item[key];
+export const getSelf = <T = any>(value: T) => value;
 
 export function deepMerge(...objects: object[]) {
     function deepMergeInner(target: object, source: object) {
