@@ -13,13 +13,12 @@ module.exports = {
         "^@/(.*)$": "<rootDir>/src/$1",
         "^@@/(.*)$": "<rootDir>/$1",
     },
-    setupFilesAfterEnv: ["jest-extended"],
     globals: {
         "ts-jest": {
             tsConfig: "<rootDir>/tests/tsconfig.json",
         },
     },
-    setupFilesAfterEnv: ["<rootDir>/tests/setup.ts"],
+    setupFilesAfterEnv: ["jest-extended", "<rootDir>/tests/setup.ts"],
     collectCoverageFrom: ["<rootDir>/src/**/*.ts"],
     coverageThreshold: {
         global: {
