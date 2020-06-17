@@ -48,15 +48,18 @@ export const prop = <T extends object, K extends keyof T>(key: K) => (item: T) =
 export const getSelf = <T = any>(value: T) => value;
 
 export function deepMerge(...objects: object[]) {
-    function deepMergeInner(target: object, source: object) {
+    function deepMergeInner(target: object, source: object, options: DeepMergeOptions) {
         Object.keys(source).forEach((key: string) => {
             const targetValue = (target as any)[key];
             const sourceValue = (source as any)[key];
 
             if (Array.isArray(targetValue) && Array.isArray(sourceValue)) {
-                (target as any)[key] = targetValue.concat(sourceValue);
+                const sourceValues = options.withUniqueArrayValues
+                    ? sourceValue.filter((value) => !targetValue.includes(value))
+                    : sourceValue;
+                (target as any)[key] = targetValue.concat(sourceValues);
             } else if (isObject(targetValue) && isObject(sourceValue)) {
-                (target as any)[key] = deepMergeInner(Object.assign({}, targetValue), sourceValue);
+                (target as any)[key] = deepMergeInner(Object.assign({}, targetValue), sourceValue, options);
             } else {
                 (target as any)[key] = sourceValue;
             }
@@ -66,14 +69,19 @@ export function deepMerge(...objects: object[]) {
     }
 
     const target = objects.shift();
+    const optionsObj = pickDefined((objects[objects.length - 1] || {}) as DeepMergeOptions, deepMergeOptionKeys);
+    const options = Object.keys(optionsObj).length ? objects.pop() : {};
     const mergeable = objects.filter(isObject);
 
     if (!mergeable.length) return target;
 
     let source: object;
     while ((source = mergeable.shift())) {
-        deepMergeInner(target, source);
+        deepMergeInner(target, source, options);
     }
 
     return target;
 }
+
+export type DeepMergeOptions = { withUniqueArrayValues?: boolean };
+export const deepMergeOptionKeys: Array<keyof DeepMergeOptions> = ["withUniqueArrayValues"];
