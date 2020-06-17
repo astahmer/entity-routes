@@ -51,6 +51,7 @@
         "express": "^4.17.1",
         "husky": "^4.2.5",
         "jest": "^25.4.0",
+        "jest-diff": "^26.0.1",
         "jest-extended": "^0.11.5",
         "koa": "^2.11.0",
         "koa-bodyparser": "^4.3.0",

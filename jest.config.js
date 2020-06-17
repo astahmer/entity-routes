@@ -19,7 +19,7 @@ module.exports = {
             tsConfig: "<rootDir>/tests/tsconfig.json",
         },
     },
-    // setupFilesAfterEnv: ["<rootDir>/tests/setup.ts"],
+    setupFilesAfterEnv: ["<rootDir>/tests/setup.ts"],
     collectCoverageFrom: ["<rootDir>/src/**/*.ts"],
     coverageThreshold: {
         global: {
