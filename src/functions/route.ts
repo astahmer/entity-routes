@@ -1,7 +1,9 @@
 import { Primitive } from "@/functions/primitives";
 
+export const formatRoutePath = (path: string) => (path[0] === "/" ? path.slice(1) : path);
+
 export const formatRouteName = (path: string, operation: string) =>
-    ((path[0] === "/" ? path.slice(1) : path) + "_" + operation).toLowerCase();
+    (formatRoutePath(path) + "_" + operation).toLowerCase();
 
 /**
  * Constistent way of parsing an array of queryString param
