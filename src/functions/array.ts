@@ -1,3 +1,4 @@
+import { getRandomString, PrimitiveValue } from "@/functions/primitives";
 import { get, getSelf } from "@/functions/object";
 
 /** Split an array in chunk of given size */
@@ -33,3 +34,19 @@ export function sortBy<T extends object, K extends keyof T>(arr: T[], key: K, di
         get(objA, key as string) - get(objB, key as string) > 0 ? (dir === "asc" ? -1 : 1) : dir === "asc" ? 1 : -1
     );
 }
+
+export function isEqualArrays(arr1: PrimitiveValue[], arr2: PrimitiveValue[]) {
+    if (arr1.length !== arr2.length) return false;
+
+    let i;
+    for (i = arr1.length; i--; ) {
+        if (!arr2.includes(arr1[i])) return false;
+    }
+    return true;
+}
+
+export const getUniqueValues = <T extends PrimitiveValue>(arr1: T[], arr2: T[]) =>
+    arr2.filter((value) => !arr1.includes(value));
+
+export const combineUniqueValues = <T extends PrimitiveValue>(arr1: T[], arr2: T[]) =>
+    arr1.concat(getUniqueValues(arr1, arr2));
