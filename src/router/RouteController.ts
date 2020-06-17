@@ -53,21 +53,12 @@ export class RouteController<Entity extends GenericEntity> {
             return { error: "Body can't be empty on create operation" };
         }
 
-        // Auto-join subresource parent on body values
-        if (
-            subresourceRelation &&
-            (subresourceRelation.relation.isOneToOne || subresourceRelation.relation.isManyToOne)
-        ) {
-            (values as any)[subresourceRelation.relation.inverseSidePropertyPath] = {
-                id: subresourceRelation.id,
-            };
-        }
-
         const insertResult = await this.denormalizer.saveItem({
             ctx: { operation, values },
             rootMetadata: this.metadata,
             routeOptions: { ...this.options, ...(options?.routeOptions || {}) },
             validatorOptions: options?.validatorOptions || {},
+            subresourceRelation,
         });
 
         if (isType<EntityErrorResponse>(insertResult, "hasValidationErrors" in insertResult)) {

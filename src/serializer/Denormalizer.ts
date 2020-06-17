@@ -5,6 +5,7 @@ import { GenericEntity, EntityRouteOptions } from "@/router/EntityRouter";
 import { Cleaner } from "@/serializer/Cleaner";
 import { ValidateItemOptions, EntityErrorResults, Validator } from "@/serializer/Validator";
 import { RequestContextMinimal } from "@/router/MiddlewareMaker";
+import { SubresourceRelation } from "@/router/SubresourceManager";
 
 @Service()
 export class Denormalizer {
@@ -22,6 +23,7 @@ export class Denormalizer {
         rootMetadata,
         validatorOptions,
         routeOptions,
+        subresourceRelation,
     }: SaveItemArgs<Entity>) {
         const { operation, values } = ctx;
         const repository = getRepository<Entity>(rootMetadata.target);
@@ -38,6 +40,14 @@ export class Denormalizer {
             return { hasValidationErrors: true, errors } as EntityErrorResponse;
         }
 
+        // Auto-join subresource parent on body values
+        if (
+            subresourceRelation &&
+            (subresourceRelation.relation.isOneToOne || subresourceRelation.relation.isManyToOne)
+        ) {
+            (item as any)[subresourceRelation.relation.propertyName] = { id: subresourceRelation.id };
+        }
+
         return repository.save(item);
     }
 }
@@ -47,10 +57,12 @@ export type EntityErrorResponse = { hasValidationErrors: true; errors: EntityErr
 export type SaveItemArgs<Entity extends GenericEntity = GenericEntity> = {
     /** Metadata from entity to save */
     rootMetadata: EntityMetadata;
-    /** Request context */
+    /** Minimal equest context (with only relevant parts) */
     ctx: RequestContextMinimal<Entity>;
     /** Used by class-validator & entity-validator */
     validatorOptions?: ValidateItemOptions;
     /** EntityRoute specific options */
     routeOptions?: EntityRouteOptions;
+    /** Subresource relation used to auto join saved entity with its parent */
+    subresourceRelation?: SubresourceRelation;
 };
