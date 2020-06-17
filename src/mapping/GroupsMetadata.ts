@@ -1,15 +1,16 @@
 import { EntityGroupsMetadata } from "./EntityGroupsMetadata";
 import {
     MetaKey,
-    OperationGroups,
-    ContextOperations,
-    GroupsOperationOrAll,
+    PropsByOperations,
+    PropsByContextByOperations,
     ALL_OPERATIONS,
-    RouteOperations,
+    GroupsDecoratorArg,
     RouteOperation,
     GROUPS_METAKEY,
+    GroupsOperation,
 } from "@/decorators/Groups";
 import { deepMerge } from "@/functions/object";
+import { getUniqueValues, combineUniqueValues } from "@/functions/array";
 
 export class GroupsMetadata {
     /** The key under which the Reflect metadata will be stored on the target entity */
@@ -21,34 +22,68 @@ export class GroupsMetadata {
     /** Every entity's props decorated with @Groups */
     readonly decoratedProps: string[] = [];
 
-    /** An object of Operations containing global props (exposed no matter which route context) */
-    readonly globals: OperationGroups = {};
+    /**
+     * An array of props always exposed no matter which operation or route context
+     * @example
+     * always = ["create", "read", "specificGroup", "otherCustomOperation"]
+     */
+    readonly always: RouteOperation[] = [];
 
-    /** An object with route specific OperationsGroups */
-    readonly routes: ContextOperations = {};
+    /**
+     * An object of Operation containing global props (exposed no matter which route context)
+     * @example
+     * globals = {
+     *     create: ["id", "name", "email", "startDate", "endDate"],
+     *     update: ["email", "endDate"],
+     *     details: ["id", "name", "startDate", "endDate"],
+     *     list: ["id", "name"],
+     * }
+     */
+    readonly globals: PropsByOperations = {};
+
+    /**
+     * An object of route contexts as keys & values of array of props always exposed no matter which operation for that context
+     * @example
+     * locals = {
+     *     user: ["id", "name", "email", "startDate", "endDate"],
+     *     article: ["name", "endDate"],
+     *     role: ["id", "startDate", "endDate"],
+     * }
+     */
+    readonly locals: Record<string, string[]> = {};
+
+    /**
+     * An object with route specific OperationsGroups
+     * @example
+     * routes = {
+     *     user: {
+     *         create: ["id", "name", "email", "startDate", "endDate"],
+     *         update: ["email", "endDate"],
+     *         details: ["id", "name", "startDate", "endDate"],
+     *         list: ["id", "name"],
+     *     },
+     *     article: {
+     *         details: ["id", "name"],
+     *         list: ["id", "email"],
+     *     },
+     * }
+     */
+    readonly routes: PropsByContextByOperations = {};
 
     /**
      * An object with every exposed props merged
      * (globals + specific + parents globals + specific) for each route context > Operations
      */
-    readonly exposedPropsByContexts: ContextOperations = {};
+    readonly exposedPropsByContexts: PropsByContextByOperations = {};
 
     constructor(metaKey: MetaKey, entityTarget: Function) {
         this.metaKey = metaKey;
         this.entityTarget = entityTarget;
     }
 
-    addPropToGlobalGroups(groups: GroupsOperationOrAll, propName: string) {
-        if (groups === "all") {
-            groups = ALL_OPERATIONS;
-        }
-
-        let i = 0;
-        for (i; i < groups.length; i++) {
-            if (!this.globals[groups[i]]) {
-                this.globals[groups[i]] = [];
-            }
-            this.globals[groups[i]].push(propName);
+    push(toArray: string[], propName: string) {
+        if (!toArray.includes(propName)) {
+            toArray.push(propName);
         }
 
         if (!this.decoratedProps.includes(propName)) {
@@ -56,12 +91,35 @@ export class GroupsMetadata {
         }
     }
 
-    addPropToRoutesGroups(groups: RouteOperations, propName: string) {
+    addPropToAlwaysGroups(propName: string) {
+        this.push(this.always, propName);
+    }
+
+    addPropToGlobalGroups(groups: GroupsOperation[], propName: string) {
+        let i = 0;
+        for (i; i < groups.length; i++) {
+            if (!this.globals[groups[i]]) {
+                this.globals[groups[i]] = [];
+            }
+            this.push(this.globals[groups[i]], propName);
+        }
+    }
+
+    addPropToRoutesGroups(groups: GroupsDecoratorArg, propName: string) {
         let route;
         for (route in groups) {
             let i = 0;
 
             if (groups[route] === "all") {
+                // Allowing any operation as long as it's in that route context
+                if (!this.locals[route]) {
+                    this.locals[route] = [];
+                }
+
+                this.push(this.locals[route], propName);
+                continue;
+            } else if (groups[route] === "basic") {
+                // Shortcut to [create, update, list, details]
                 groups[route] = ALL_OPERATIONS;
             }
 
@@ -77,28 +135,31 @@ export class GroupsMetadata {
                     this.routes[route][operation] = [];
                 }
 
-                this.routes[route][operation].push(propName);
+                this.push(this.routes[route][operation], propName);
             }
-        }
-
-        if (!this.decoratedProps.includes(propName)) {
-            this.decoratedProps.push(propName);
         }
     }
 
     /**
      * Merge globals groups with route specific groups
      * @example
-     * this.globals = ["details", "list", ...];
-     * this.routes = { user: ["create", "details", "delete"], category: ["create", "update"] };
-     * return ['details', 'list', 'create', 'delete'] // for route = 'user'
+     * this.always = ["id"]
+     * this.globals = { create: ["email"], details: ["role"] }
+     * this.locals = { user: ["name"] };
+     * this.routes = { user: { create: ["startDate", "endDate"], list: ["role"] }, category: { details: ["startDate"] } };
+     * // for route context = 'user'
+     * return {
+     *     create: ["id", "email", "name", "startDate", "endDate"],
+     *     details: ["id", "role", "name"], list: ["id", "name", "role"]
+     * }
      */
-    getOwnExposedProps(route: string): OperationGroups {
-        let groups;
-        if (this.globals && this.routes[route]) {
-            groups = deepMerge({}, this.globals, this.routes[route]);
-        } else {
-            groups = this.globals || this.routes[route];
+    getOwnExposedProps(route: string): PropsByOperations {
+        const basicGroups: PropsByOperations = { create: [], update: [], list: [], details: [] };
+        const groups = deepMerge(basicGroups, this.globals, this.routes[route], deepMergeOptions) as PropsByOperations;
+        for (let key in groups) {
+            groups[key].push(
+                ...getUniqueValues(groups[key], combineUniqueValues(this.always, this.locals[route] || []))
+            );
         }
 
         return groups;
@@ -111,14 +172,28 @@ export class GroupsMetadata {
         const inheritanceTree = getInheritanceTree(this.entityTarget);
 
         let props = getOwnExposedProps(this.entityTarget, tableName, this.metaKey);
+
         let i = 1; // Skip itself
-        let parentProps;
+        let parentProps: PropsByOperations, parentGroupsMeta: EntityGroupsMetadata, parentOperations: string[];
 
         for (i; i < inheritanceTree.length; i++) {
-            parentProps = getOwnExposedProps(inheritanceTree[i], tableName, this.metaKey);
+            parentGroupsMeta = Reflect.getOwnMetadata(this.metaKey, inheritanceTree[i]);
+            parentProps = parentGroupsMeta?.getOwnExposedProps(tableName);
 
             if (parentProps) {
-                props = deepMerge({}, props, parentProps);
+                props = deepMerge({}, props, parentProps, deepMergeOptions);
+                parentOperations = Object.keys(parentProps);
+
+                for (let key in props) {
+                    if (!parentOperations.includes(key)) {
+                        props[key].push(
+                            ...getUniqueValues(
+                                props[key],
+                                combineUniqueValues(parentGroupsMeta.always, parentGroupsMeta.locals[tableName] || [])
+                            )
+                        );
+                    }
+                }
             }
         }
 
@@ -132,6 +207,8 @@ export class GroupsMetadata {
     }
 }
 
+const deepMergeOptions = { withUniqueArrayValues: true };
+
 export type GroupsMetaByRoutes<G extends GroupsMetadata = GroupsMetadata> = Record<string, G>;
 
 /**
@@ -141,7 +218,7 @@ export function getOwnExposedProps(
     target: Function,
     tableName: string,
     metaKey: MetaKey = GROUPS_METAKEY
-): OperationGroups {
+): PropsByOperations {
     const groupsMeta: EntityGroupsMetadata = Reflect.getOwnMetadata(metaKey, target);
 
     return groupsMeta?.getOwnExposedProps(tableName);

@@ -10,14 +10,14 @@ import { PartialRecord } from "@/utils-types";
  * @param groups An object containing a list of every EntityRoute context
  * @param groups.route Contains an array of Operation in which the decorated property will be exposed
  */
-export function Groups(groups: RouteOperations): PropertyDecorator;
+export function Groups(groups: GroupsDecoratorArg): PropertyDecorator;
 
 /**
  * Expose decorated property for each operation listed (in any EntityContext, this list is global)
  *
  * @param operations An array containing a list of operation in which the decorated property will be exposed
  */
-export function Groups(operations: GroupsOperationOrAll): PropertyDecorator;
+export function Groups(operations: GroupsOperationOrShortcuts): PropertyDecorator;
 
 /**
  * Expose decorated computed property (method) for each operation for each listed EntityRoute context
@@ -26,10 +26,10 @@ export function Groups(operations: GroupsOperationOrAll): PropertyDecorator;
  * @param groups.route Contains an array of Operation in which the decorated property will be exposed
  * @param alias Override default generated name for this computed property in response
  */
-export function Groups(groups: GroupsOperationOrAll | RouteOperations, alias?: string): MethodDecorator;
+export function Groups(groups: GroupsOperationOrShortcuts | GroupsDecoratorArg, alias?: string): MethodDecorator;
 
 export function Groups(
-    groups: GroupsOperationOrAll | RouteOperations,
+    groups: GroupsOperationOrShortcuts | GroupsDecoratorArg,
     alias?: string
 ): PropertyDecorator | MethodDecorator {
     return registerGroupsDecorator<EntityGroupsMetadata>({
@@ -57,10 +57,15 @@ export function registerGroupsDecorator<G extends GroupsMetadata>({
             propName = formatGroupsMethodName(propName, alias);
         }
 
-        if (Array.isArray(groups)) {
+        if (typeof groups === "string") {
+            // Shortcuts
+            if (groups === "all") {
+                groupsMeta.addPropToAlwaysGroups(propName);
+            } else if (groups === "basic") {
+                groupsMeta.addPropToGlobalGroups(ALL_OPERATIONS, propName);
+            }
+        } else if (Array.isArray(groups)) {
             groupsMeta.addPropToGlobalGroups(groups, propName);
-        } else if (groups === "all") {
-            groupsMeta.addPropToGlobalGroups(ALL_OPERATIONS, propName);
         } else {
             groupsMeta.addPropToRoutesGroups(groups, propName);
         }
@@ -74,7 +79,7 @@ export type RegisterGroupsDecoratorArgs<G extends GroupsMetadata> = {
     /** Metadata class stored */
     metaClass: new (metaKey: MetaKey, entityOrMeta: EntityMetadata | Function) => G;
     /** Groups array or array by (route) context, or just "all" */
-    groups: GroupsOperationOrAll | RouteOperations;
+    groups: GroupsOperationOrShortcuts | GroupsDecoratorArg;
     /** Alias to be used rather than function name if @Groups is used as MethodDecorator */
     alias?: string;
 };
@@ -82,19 +87,18 @@ export type RegisterGroupsDecoratorArgs<G extends GroupsMetadata> = {
 export type RouteDefaultOperation = "create" | "list" | "details" | "update" | "delete";
 export type RouteOperation = RouteDefaultOperation | string;
 
-// TODO C|R|U|D | { "groupName": C|R|U|D}
 export type GroupsOperation = "create" | "list" | "details" | "update" | string;
-export type GroupsOperationOrAll = GroupsOperation[] | "all";
-export type RouteOperations = Record<string, GroupsOperationOrAll>;
+export type GroupsOperationOrShortcuts = GroupsOperation[] | "all" | "basic";
+export type GroupsDecoratorArg = Record<string, GroupsOperationOrShortcuts>;
 
 /** An object with Operation as keys and an array of entity props as values  */
-export type OperationGroups = PartialRecord<RouteOperation, string[]>;
+export type PropsByOperations = PartialRecord<RouteOperation, string[]>;
 
 /**
  * An object containing many routeContext (keys) associated to OperationsGroups (values)
  * A route context key is the tableName of the EntityRoute (/users => user, /pictures => picture).
  */
-export type ContextOperations = Record<string, OperationGroups>;
+export type PropsByContextByOperations = Record<string, PropsByOperations>;
 
 export const GROUPS_METAKEY = Symbol("groups");
 export const ALL_OPERATIONS: GroupsOperation[] = ["create", "list", "details", "update"];
