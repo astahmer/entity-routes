@@ -1,4 +1,4 @@
-import { isObject } from "@/functions/asserts";
+import { isObject, isDefined } from "@/functions/asserts";
 
 /** Sort object keys alphabetically */
 export const sortObjectByKeys = (obj: Record<any, any>) =>
@@ -40,6 +40,15 @@ export function fromEntries(iterable: Iterable<any>) {
 export function pick<T, K extends keyof T>(obj: T, paths: K[]): Pick<T, K> {
     return { ...paths.reduce((mem, key) => ({ ...mem, [key]: obj[key] }), {}) } as Pick<T, K>;
 }
+
+/** Creates an object composed of the picked object properties that satisfies the condition for each value */
+export function pickBy<T, K extends keyof T>(obj: T, paths: K[], fn: (value: any) => boolean): Partial<Pick<T, K>> {
+    return {
+        ...paths.reduce((mem, key) => ({ ...mem, ...(fn(obj[key]) ? { [key]: obj[key] } : {}) }), {}),
+    } as Pick<T, K>;
+}
+
+export const pickDefined = <T, K extends keyof T>(obj: T, paths: K[]) => pickBy(obj, paths, isDefined);
 
 export const get = <T extends object>(item: T, path: string, defaultValue?: any) =>
     path.split(".").reduce((obj, key) => (obj ? obj[key as keyof typeof obj] : defaultValue), item);
