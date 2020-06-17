@@ -77,8 +77,8 @@ export class RouteController<Entity extends GenericEntity> {
         }
 
         const responseOperation =
-            options?.responseOperation || (ctx.operation === "create" ? "details" : ctx.operation);
-        return this.getDetails({ ...ctx, operation: responseOperation, entityId: insertResult.id });
+            options?.responseOperation || (ctx.operation === "create" ? "details" : ctx.operation || "details");
+        return this.getDetails({ ctx: ctx.ctx, operation: responseOperation, entityId: insertResult.id });
     }
 
     public async update(ctx: RequestContext<Entity>, options?: CrudActionOptions) {
@@ -97,8 +97,8 @@ export class RouteController<Entity extends GenericEntity> {
         }
 
         const responseOperation =
-            options?.responseOperation || (ctx.operation === "update" ? "details" : ctx.operation);
-        return this.getDetails({ ...ctx, operation: responseOperation, entityId: result.id });
+            options?.responseOperation || (ctx.operation === "update" ? "details" : ctx.operation || "details");
+        return this.getDetails({ ctx: ctx.ctx, operation: responseOperation, entityId: result.id });
     }
 
     /** Returns an entity with every mapped props (from groups) for a given id */
