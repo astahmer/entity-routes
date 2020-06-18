@@ -16,6 +16,11 @@ export class EntityRouter<Entity extends GenericEntity> {
     // EntityRouter specifics
     private readonly repository: Repository<Entity>;
     private readonly options: EntityRouteConfig;
+    private _router: BridgeRouter;
+
+    get router() {
+        return this._router;
+    }
 
     constructor(
         public readonly entity: ObjectType<Entity>,
@@ -75,6 +80,7 @@ export class EntityRouter<Entity extends GenericEntity> {
             makeRouterFromActions<RouteActionConstructorData>(actions, { router }, data);
         }
 
+        this._router = router;
         return router;
     }
 
