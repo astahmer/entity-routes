@@ -1,9 +1,11 @@
-import { Groups, RouteController, RequestContext, Search } from "@/index";
-import { PrimaryGeneratedColumn, Entity, Column, getRepository, ManyToOne } from "typeorm";
-import { createTestConnection, closeTestConnection, makeTestCtx } from "@@/tests/testConnection";
-import { IsString, IsDate } from "class-validator";
+import { Groups, RouteController, Search, Subresource, getSubresourceRelation } from "@/index";
+import { PrimaryGeneratedColumn, Entity, Column, getRepository, ManyToOne, OneToMany } from "typeorm";
+import { createTestConnection, closeTestConnection } from "@@/tests/testConnection";
+import { IsString, IsDate, IsEmail } from "class-validator";
+import { Container } from "typedi";
+import { log } from "@/functions/utils";
 
-describe("RouteController", () => {
+describe("RouteController - simple", () => {
     class AbstractEntity {
         @Groups("all")
         @PrimaryGeneratedColumn()
@@ -42,6 +44,12 @@ describe("RouteController", () => {
     beforeEach(() => createTestConnection([Role, User]));
     afterEach(closeTestConnection);
 
+    afterAll(() => {
+        // since entities differ between tests suites, metadata cached on MappingManager must be cleared
+        Container.reset();
+        return closeTestConnection();
+    });
+
     describe("create", () => {
         it("inserts item", async () => {
             const repository = getRepository(User);
@@ -53,13 +61,8 @@ describe("RouteController", () => {
                 birthDate,
                 role: { identifier: "ADM", name: "Admin" },
             };
-            const requestContext: RequestContext<User> = {
-                ctx: makeTestCtx(),
-                isUpdateOrCreate: true,
-                values,
-            };
 
-            const result = await ctrl.create(requestContext);
+            const result = await ctrl.create({ values });
             expect(result).toEqual({
                 birthDate,
                 id: 1,
@@ -72,13 +75,7 @@ describe("RouteController", () => {
             const ctrl = new RouteController(repository);
 
             const values = {};
-            const requestContext: RequestContext<User> = {
-                ctx: makeTestCtx(),
-                isUpdateOrCreate: true,
-                values,
-            };
-
-            const result = await ctrl.create(requestContext);
+            const result = await ctrl.create({ values });
             expect(result).toEqual({ error: "Body can't be empty on create operation" });
         });
 
@@ -92,13 +89,8 @@ describe("RouteController", () => {
                 birthDate,
                 role: { identifier: "ADM", name: "Admin" },
             };
-            const requestContext: RequestContext<User> = {
-                ctx: makeTestCtx(),
-                isUpdateOrCreate: true,
-                values,
-            };
 
-            const result = await ctrl.create(requestContext, { validatorOptions: { noAutoGroups: true } });
+            const result = await ctrl.create({ values }, { validatorOptions: { noAutoGroups: true } });
             expect(result).toEqual({
                 hasValidationErrors: true,
                 errors: {
@@ -106,38 +98,20 @@ describe("RouteController", () => {
                 },
             });
         });
-
-        it("inserts item and/or join it to parent (XToOne)", async () => {
-            return; // TODO
-        });
-
-        it("inserts item and/or add it in parent collection (XToMany)", async () => {
-            return; // TODO
-        });
     });
 
     describe("update", () => {
         it("updates item", async () => {
             const roleRepository = getRepository(Role);
             const roleCtrl = new RouteController(roleRepository);
-            const modRole = await roleCtrl.create({
-                ctx: makeTestCtx(),
-                isUpdateOrCreate: true,
-                values: { identifier: "MOD", name: "Moderator" },
-            });
+            const modRole = await roleCtrl.create({ values: { identifier: "MOD", name: "Moderator" } });
 
             const userRepository = getRepository(User);
             const userCtrl = new RouteController(userRepository);
 
             const birthDate = new Date();
-            const createResult = await userCtrl.create({
-                ctx: makeTestCtx(),
-                isUpdateOrCreate: true,
-                values: { name: "Alex", birthDate },
-            });
+            const createResult = await userCtrl.create({ values: { name: "Alex", birthDate } });
             const updateResult = await userCtrl.update({
-                ctx: makeTestCtx(),
-                isUpdateOrCreate: true,
                 values: { id: (createResult as User).id, role: (modRole as Role).id as any },
             });
 
@@ -153,15 +127,9 @@ describe("RouteController", () => {
             const userCtrl = new RouteController(userRepository);
 
             const birthDate = new Date();
-            const createResult = await userCtrl.create({
-                ctx: makeTestCtx(),
-                isUpdateOrCreate: true,
-                values: { name: "Alex", birthDate },
-            });
+            const createResult = await userCtrl.create({ values: { name: "Alex", birthDate } });
             const updateResult = await userCtrl.update(
                 {
-                    ctx: makeTestCtx(),
-                    isUpdateOrCreate: true,
                     values: { id: (createResult as User).id, birthDate: "abc" as any },
                 },
                 { validatorOptions: { noAutoGroups: true } }
@@ -189,24 +157,18 @@ describe("RouteController", () => {
 
             // Running sequentially to keep expected id
             await ctrl.create({
-                ctx: makeTestCtx(),
-                isUpdateOrCreate: true,
                 values: { name: "Alex", birthDate: new Date(), role: { identifier: "ADM", name: "Admin" } },
             });
 
             await ctrl.create({
-                ctx: makeTestCtx(),
-                isUpdateOrCreate: true,
                 values: { name: "Andre", birthDate: new Date(), role: { identifier: "MOD", name: "Moderator" } },
             });
 
             await ctrl.create({
-                ctx: makeTestCtx(),
-                isUpdateOrCreate: true,
                 values: { name: "Max", birthDate: new Date(), role: { identifier: "MAN", name: "Manager" } },
             });
 
-            const result = await ctrl.getList({ ctx: makeTestCtx() });
+            const result = await ctrl.getList();
             expect(result).toEqual({
                 items: [
                     { id: 1, name: "Alex", role: { id: 1 } },
@@ -223,24 +185,18 @@ describe("RouteController", () => {
 
             // Running sequentially to keep expected id
             await ctrl.create({
-                ctx: makeTestCtx(),
-                isUpdateOrCreate: true,
                 values: { name: "Alex", birthDate: new Date(), role: { identifier: "ADM", name: "Admin" } },
             });
 
             await ctrl.create({
-                ctx: makeTestCtx(),
-                isUpdateOrCreate: true,
                 values: { name: "Andre", birthDate: new Date(), role: { identifier: "MOD", name: "Moderator" } },
             });
 
             await ctrl.create({
-                ctx: makeTestCtx(),
-                isUpdateOrCreate: true,
                 values: { name: "Max", birthDate: new Date(), role: { identifier: "MAN", name: "Manager" } },
             });
 
-            const result1 = await ctrl.getList({ ctx: makeTestCtx(), queryParams: { "name;contains": "x" } });
+            const result1 = await ctrl.getList({ queryParams: { "name;contains": "x" } });
             expect(result1).toEqual({
                 items: [
                     { id: 1, name: "Alex", role: { id: 1 } },
@@ -250,7 +206,6 @@ describe("RouteController", () => {
             });
 
             const result2 = await ctrl.getList({
-                ctx: makeTestCtx(),
                 queryParams: { "role.identifier;startsWith": "m" },
             });
             expect(result2).toEqual({
@@ -268,17 +223,11 @@ describe("RouteController", () => {
         const ctrl = new RouteController(repository);
 
         const birthDate = new Date();
-        const createResult = await ctrl.create({
-            ctx: makeTestCtx(),
-            isUpdateOrCreate: true,
+        const createResult = (await ctrl.create({
             values: { name: "Alex", birthDate },
-        });
+        })) as User;
 
-        const result = await ctrl.getDetails({
-            ctx: makeTestCtx(),
-            isUpdateOrCreate: false,
-            entityId: 1,
-        });
+        const result = await ctrl.getDetails({ entityId: createResult.id });
         expect(result).toEqual(createResult);
     });
 
@@ -287,29 +236,337 @@ describe("RouteController", () => {
             const repository = getRepository(User);
             const ctrl = new RouteController(repository);
 
-            const createResult = (await ctrl.create({
-                ctx: makeTestCtx(),
-                isUpdateOrCreate: true,
-                values: { name: "Alex", birthDate: new Date() },
-            })) as User;
+            const createResult = (await ctrl.create({ values: { name: "Alex", birthDate: new Date() } })) as User;
 
-            await ctrl.delete({ ctx: makeTestCtx(), entityId: createResult.id });
+            await ctrl.delete({ entityId: createResult.id });
 
-            expect(() =>
-                ctrl.getDetails({
-                    ctx: makeTestCtx(),
-                    isUpdateOrCreate: true,
-                    values: { name: "Alex", birthDate: new Date() },
-                })
-            ).rejects.toThrowError("Not found.");
+            expect(() => ctrl.getDetails({ entityId: createResult.id })).rejects.toThrowError("Not found.");
+        });
+    });
+});
+
+describe("RouteController - subresources", () => {
+    class AbstractEntity {
+        @Groups("all")
+        @PrimaryGeneratedColumn()
+        id: number;
+    }
+
+    @Entity()
+    class Role extends AbstractEntity {
+        @Groups({ role: "all" })
+        @Column()
+        title: string;
+
+        @Groups({ role: "all" })
+        @Column({ nullable: true })
+        startDate: Date;
+
+        @Groups(["roleTestDetails"])
+        @Column({ nullable: true })
+        endDate: Date;
+
+        @Groups({ role: ["details"] })
+        @Subresource(() => User)
+        @OneToMany(() => User, (user) => user.role)
+        mainRoleOfUsers: User[];
+    }
+
+    @Entity()
+    class User extends AbstractEntity {
+        @Groups({ user: "all" })
+        @Column()
+        name: string;
+
+        @Groups({ user: "all" })
+        @IsEmail()
+        @Column()
+        email: string;
+
+        @Groups({ user: ["create", "roleTestDetails"] })
+        @Subresource(() => Role)
+        @ManyToOne(() => Role, (role) => role.mainRoleOfUsers)
+        role: Role;
+
+        @Groups({ user: ["create", "articleTestDetails"] })
+        @Subresource(() => Article)
+        @OneToMany(() => Article, (article) => article.author)
+        articles: Article[];
+    }
+
+    @Entity()
+    class Article extends AbstractEntity {
+        @Groups({ article: "all" })
+        @Column()
+        title: string;
+
+        @Groups({ article: ["details", "list"] })
+        @ManyToOne(() => User, (user) => user.articles)
+        author: User;
+
+        @Subresource(() => Comment)
+        @OneToMany(() => Comment, (comment) => comment.article)
+        comments: Comment[];
+    }
+
+    @Entity()
+    class Comment extends AbstractEntity {
+        @Column()
+        message: string;
+
+        @ManyToOne(() => Article, (article) => article.comments)
+        article: User;
+    }
+
+    beforeEach(() => createTestConnection([Comment, Article, Role, User]));
+    afterEach(closeTestConnection);
+
+    describe("create", () => {
+        it("inserts new item and join it to parent (XToOne)", async () => {
+            const userRepository = getRepository(User);
+            const userCtrl = new RouteController(userRepository);
+            const userResult = (await userCtrl.create({ values: { name: "Alex", email: "alex@mail.com" } })) as User;
+
+            const roleRepository = getRepository(Role);
+            const roleCtrl = new RouteController(roleRepository);
+
+            const values = { title: "Admin" };
+            const subresourceRelation = getSubresourceRelation(User, getRepository(User).metadata, "role");
+            subresourceRelation.id = userResult.id;
+
+            const result = await roleCtrl.create({ values, subresourceRelation });
+            expect(result).toEqual({
+                id: 1,
+                title: values.title,
+                startDate: null,
+                mainRoleOfUsers: [{ id: userResult.id }],
+            });
         });
 
+        it("join existing item on parent (XToOne)", async () => {
+            const userRepository = getRepository(User);
+            const userCtrl = new RouteController(userRepository);
+            const userResult = (await userCtrl.create({ values: { name: "Alex", email: "alex@mail.com" } })) as User;
+
+            const roleRepository = getRepository(Role);
+            const roleCtrl = new RouteController(roleRepository);
+
+            const values = { title: "Admin" };
+            const roleResult = (await roleCtrl.create({ values })) as Role;
+
+            const subresourceRelation = getSubresourceRelation(User, getRepository(User).metadata, "role");
+            subresourceRelation.id = userResult.id;
+
+            // Role should be null for now
+            expect(
+                await userCtrl.getDetails({
+                    entityId: userResult.id,
+                    operation: "roleTestDetails",
+                })
+            ).toEqual({ id: 1, name: "Alex", email: "alex@mail.com", role: null });
+
+            const result = (await roleCtrl.create({ values: { id: roleResult.id }, subresourceRelation })) as Role;
+
+            // Role should have been joined to given user
+            expect(result).toEqual({
+                id: 1,
+                title: values.title,
+                startDate: null,
+                mainRoleOfUsers: [{ id: userResult.id }],
+            });
+
+            // User should have its role set
+            expect(
+                await userCtrl.getDetails({
+                    entityId: userResult.id,
+                    operation: "roleTestDetails",
+                })
+            ).toEqual({
+                id: 1,
+                name: "Alex",
+                email: "alex@mail.com",
+                role: { id: result.id, endDate: null, startDate: null, title: values.title },
+            });
+        });
+
+        it("inserts new item in parent collection (XToMany)", async () => {
+            const userRepository = getRepository(User);
+            const userCtrl = new RouteController(userRepository);
+            const userResult = (await userCtrl.create({ values: { name: "Alex", email: "alex@mail.com" } })) as User;
+
+            const articleRepository = getRepository(Article);
+            const articleCtrl = new RouteController(articleRepository);
+
+            const values = { title: "How to add new item in parent collection XToMany" };
+            const subresourceRelation = getSubresourceRelation(User, getRepository(User).metadata, "articles");
+            subresourceRelation.id = userResult.id;
+
+            const result = await articleCtrl.create({ values, subresourceRelation });
+            expect(result).toEqual({ id: 1, title: values.title, author: { id: userResult.id } });
+        });
+
+        it("add existing item in parent collection (XToMany)", async () => {
+            const userRepository = getRepository(User);
+            const userCtrl = new RouteController(userRepository);
+            const userResult = (await userCtrl.create({ values: { name: "Alex", email: "alex@mail.com" } })) as User;
+
+            const articleRepository = getRepository(Article);
+            const articleCtrl = new RouteController(articleRepository);
+
+            const values = { title: "How to add existing item in parent collection XToMany" };
+            const articleResult = (await articleCtrl.create({ values })) as Article;
+
+            const subresourceRelation = getSubresourceRelation(User, getRepository(User).metadata, "articles");
+            subresourceRelation.id = userResult.id;
+
+            // Articles should be an empty array for now
+            expect(
+                await userCtrl.getDetails({
+                    entityId: userResult.id,
+                    operation: "articleTestDetails",
+                })
+            ).toEqual({ id: 1, name: "Alex", email: "alex@mail.com", articles: [] });
+
+            const result = (await articleCtrl.create({
+                values: { id: articleResult.id },
+                subresourceRelation,
+            })) as Article;
+
+            // Article should have been joined on the given user
+            expect(result).toEqual({
+                id: 1,
+                title: values.title,
+                author: { id: userResult.id },
+            });
+
+            // Articles array should contain joined article
+            expect(
+                await userCtrl.getDetails({
+                    entityId: userResult.id,
+                    operation: "articleTestDetails",
+                })
+            ).toEqual({ id: 1, name: "Alex", email: "alex@mail.com", articles: [{ id: result.id }] });
+        });
+    });
+
+    // TODO Nested subresources
+    describe("getList", () => {
+        it("auto joins from parent subresource", async () => {
+            const userRepository = getRepository(User);
+            const userCtrl = new RouteController(userRepository);
+            const userResult = (await userCtrl.create({ values: { name: "Alex", email: "alex@mail.com" } })) as User;
+
+            const articleRepository = getRepository(Article);
+            const articleCtrl = new RouteController(articleRepository);
+
+            const values = { title: "Join collection on parent" };
+            const subresourceRelation = getSubresourceRelation(User, getRepository(User).metadata, "articles");
+            subresourceRelation.id = userResult.id;
+
+            await articleCtrl.create({ values, subresourceRelation });
+
+            const result = await articleCtrl.getList({ subresourceRelation });
+            expect(result).toEqual({
+                items: [{ id: 1, title: values.title, author: { id: userResult.id } }],
+                totalItems: 1,
+            });
+        });
+
+        it("auto add joins from multiple parent subresources", () => {
+            return; // TODO
+        });
+    });
+
+    describe("getDetails", () => {
+        it("auto joins from parent subresource", async () => {
+            const userRepository = getRepository(User);
+            const userCtrl = new RouteController(userRepository);
+            const userResult = (await userCtrl.create({ values: { name: "Alex", email: "alex@mail.com" } })) as User;
+
+            const roleRepository = getRepository(Role);
+            const roleCtrl = new RouteController(roleRepository);
+
+            const values = { title: "Join item on parent" };
+            const subresourceRelation = getSubresourceRelation(User, getRepository(User).metadata, "role");
+            subresourceRelation.id = userResult.id;
+
+            await roleCtrl.create({ values, subresourceRelation });
+
+            const result = await roleCtrl.getDetails({ subresourceRelation });
+            expect(result).toEqual({
+                id: 1,
+                title: values.title,
+                mainRoleOfUsers: [{ id: userResult.id }],
+                startDate: null,
+            });
+        });
+    });
+
+    describe("delete", () => {
         it("removes relation if used on a subresource (XToOne)", async () => {
-            //
+            const userRepository = getRepository(User);
+            const userCtrl = new RouteController(userRepository);
+            const userResult = (await userCtrl.create({ values: { name: "Alex", email: "alex@mail.com" } })) as User;
+
+            const roleRepository = getRepository(Role);
+            const roleCtrl = new RouteController(roleRepository);
+
+            const values = { title: "Join item on parent" };
+            const subresourceRelation = getSubresourceRelation(User, getRepository(User).metadata, "role");
+            subresourceRelation.id = userResult.id;
+
+            const createResult = (await roleCtrl.create({ values, subresourceRelation })) as Role;
+
+            // Role should have been joined on user
+            expect(createResult).toEqual({
+                id: 1,
+                title: values.title,
+                mainRoleOfUsers: [{ id: userResult.id }],
+                startDate: null,
+            });
+
+            await roleCtrl.delete({ entityId: createResult.id, subresourceRelation });
+
+            const result = await roleCtrl.getDetails({ entityId: createResult.id });
+            // Role should have been unset on this user
+            expect(result).toEqual({
+                id: 1,
+                mainRoleOfUsers: [],
+                startDate: null,
+                title: "Join item on parent",
+            });
         });
 
         it("removes relation if used on a subresource (XToMany)", async () => {
-            //
+            const userRepository = getRepository(User);
+            const userCtrl = new RouteController(userRepository);
+            const userResult = (await userCtrl.create({ values: { name: "Alex", email: "alex@mail.com" } })) as User;
+
+            const articleRepository = getRepository(Article);
+            const articleCtrl = new RouteController(articleRepository);
+
+            const values = { title: "Join item on parent" };
+            const subresourceRelation = getSubresourceRelation(User, getRepository(User).metadata, "articles");
+            subresourceRelation.id = userResult.id;
+
+            const createResult = (await articleCtrl.create({ values, subresourceRelation })) as Article;
+
+            // User should have been joined on article
+            expect(createResult).toEqual({
+                id: 1,
+                title: values.title,
+                author: { id: userResult.id },
+            });
+
+            await articleCtrl.delete({ entityId: createResult.id, subresourceRelation });
+
+            const result = await articleCtrl.getDetails({ entityId: createResult.id });
+            // User should have been unset on this article
+            expect(result).toEqual({
+                id: 1,
+                author: null,
+                title: "Join item on parent",
+            });
         });
     });
 });

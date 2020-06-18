@@ -209,7 +209,7 @@ describe("RelationManager", () => {
 
             const aliasHandler = new AliasHandler();
             const qb = repository.createQueryBuilder(metadata.tableName);
-            const subresourceRelation = getSubresourceRelation(User, getRepository(Image).metadata, "uploader");
+            const subresourceRelation = getSubresourceRelation(User, getRepository(Image).metadata, "uploader" as any);
 
             manager.joinSubresourceOnInverseSide(qb, metadata, aliasHandler, subresourceRelation);
 

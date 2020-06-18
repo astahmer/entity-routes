@@ -5,6 +5,8 @@ import { getEntityRouters } from "@/router/container";
 import { getRouteSubresourcesMetadata, RouteMetadata, GenericEntity } from "../router/EntityRouter";
 import { BridgeRouter } from "@/router/bridge/BridgeRouter";
 import { CRUD_ACTIONS } from "@/router/MiddlewareMaker";
+import { formatRoutePath } from "@/functions/route";
+import { ObjectOrCollectionKeys } from "@/utils-types";
 
 export class SubresourceManager<Entity extends GenericEntity> {
     private subresourcesMeta: RouteSubresourcesMeta<Entity>;
@@ -69,34 +71,26 @@ export class SubresourceManager<Entity extends GenericEntity> {
             const isSubresourceSingle =
                 subresourceRelation.relation.isOneToOne || subresourceRelation.relation.isManyToOne;
 
-            // Generates details endpoint at subresourcePath
-            if (isSubresourceSingle && subresourceProp.operations.includes("details")) {
-                subresourceProp.operations.forEach((operation) => {
-                    const requestContextMw = nestedEntityRoute.middlewareMaker.makeRequestContextMiddleware(
-                        operation,
-                        subresourceRelation
-                    );
-                    const responseMw = nestedEntityRoute.middlewareMaker.makeResponseMiddleware(operation);
-
-                    router.register({
-                        path: subresourcePath,
-                        methods: [CRUD_ACTIONS[operation].verb],
-                        middlewares: [requestContextMw, responseMw],
-                    });
-                });
-
-                continue;
-            }
-
-            // Generates endpoint at subresourcePath for each operation
+            // Generates endpoint for each operation
             subresourceProp.operations.forEach((operation) => {
+                // Single subresources should not be able to make a list endpoint
+                if (isSubresourceSingle && operation === "list") {
+                    return;
+                }
+
                 const requestContextMw = nestedEntityRoute.middlewareMaker.makeRequestContextMiddleware(
                     operation,
                     subresourceRelation
                 );
                 const responseMw = nestedEntityRoute.middlewareMaker.makeResponseMiddleware(operation);
 
-                const path = subresourcePath + CRUD_ACTIONS[operation].path;
+                // Single subresource operations should be directly on subresourcePath rather than adding a "/:id"
+                const path =
+                    subresourcePath +
+                    (isSubresourceSingle && singleSubresourceOperations.includes(operation)
+                        ? ""
+                        : CRUD_ACTIONS[operation].path);
+
                 router.register({
                     path,
                     methods: [CRUD_ACTIONS[operation].verb],
@@ -114,24 +108,27 @@ export class SubresourceManager<Entity extends GenericEntity> {
     /** Returns a (nested?) subresource base path (= without operation suffix)  */
     private getSubresourceBasePath(param: string, subresourceProp: SubresourceProperty<any>, parentPath?: string) {
         const parentDetailsPath = CRUD_ACTIONS.details.path.replace(":id", ":" + param);
-        return (parentPath || this.routeMetadata.path) + parentDetailsPath + "/" + subresourceProp.path;
+        return (
+            (parentPath || this.routeMetadata.path) + parentDetailsPath + "/" + formatRoutePath(subresourceProp.path)
+        );
     }
 }
 
-export function getSubresourceRelation(
-    parent: Function,
-    entityMetadata: EntityMetadata,
-    key: string
+export function getSubresourceRelation<E extends Function>(
+    parent: E,
+    parentEntityMetadata: EntityMetadata,
+    propertyName: ObjectOrCollectionKeys<E extends new (...args: any) => any ? InstanceType<E> : never>
 ): SubresourceRelation {
-    const parentDetailsParam = parent.name + "Id";
-    const relationMeta = entityMetadata.findRelationWithPropertyPath(key);
+    const parentDetailsParam = (parent as Function).name + "Id";
+    const relationMeta = parentEntityMetadata.findRelationWithPropertyPath(propertyName as string);
     return {
         param: parentDetailsParam,
-        propertyName: key,
+        propertyName: propertyName as string,
         relation: relationMeta,
     };
 }
 
+export const singleSubresourceOperations = ["details", "delete"];
 export type SubresourceOperation = "create" | "list" | "details" | "delete";
 export type SubresourceProperty<Entity extends GenericEntity> = {
     /** The route path for this action */

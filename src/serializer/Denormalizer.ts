@@ -42,10 +42,11 @@ export class Denormalizer {
 
         // Auto-join subresource parent on body values
         if (
-            subresourceRelation &&
-            (subresourceRelation.relation.isOneToOne || subresourceRelation.relation.isManyToOne)
+            subresourceRelation?.relation?.inverseRelation &&
+            (subresourceRelation.relation.inverseRelation.isOneToOne ||
+                subresourceRelation.relation.inverseRelation.isManyToOne)
         ) {
-            (item as any)[subresourceRelation.relation.propertyName] = { id: subresourceRelation.id };
+            (item as any)[subresourceRelation.relation.inverseRelation.propertyName] = { id: subresourceRelation.id };
         }
 
         return repository.save(item);

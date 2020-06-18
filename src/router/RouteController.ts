@@ -46,7 +46,10 @@ export class RouteController<Entity extends GenericEntity> {
         this.cachedFilters = fromEntries(this.filters.map((config) => [config.class.name, this.makeFilter(config)]));
     }
 
-    public async create(ctx: RequestContext<Entity>, options: CrudActionOptions = {}) {
+    public async create(
+        ctx: Pick<RequestContext<Entity>, "operation" | "values" | "subresourceRelation">,
+        options: CrudActionOptions = {}
+    ) {
         const { operation = "create", values, subresourceRelation } = ctx;
 
         if (!Object.keys(values).length) {
@@ -66,22 +69,29 @@ export class RouteController<Entity extends GenericEntity> {
         }
 
         if (
-            subresourceRelation &&
-            (subresourceRelation.relation.isOneToMany || subresourceRelation.relation.isManyToMany)
+            subresourceRelation?.relation?.inverseRelation &&
+            (subresourceRelation.relation.inverseRelation.isOneToMany ||
+                subresourceRelation.relation.inverseRelation.isManyToMany)
         ) {
             const qb = this.repository.createQueryBuilder(this.metadata.tableName);
             await qb
-                .relation(subresourceRelation.relation.target, subresourceRelation.relation.propertyName)
+                .relation(
+                    subresourceRelation.relation.inverseRelation.target,
+                    subresourceRelation.relation.inverseRelation.propertyName
+                )
                 .of(subresourceRelation.id)
                 .add(insertResult);
         }
 
         const responseOperation =
             options?.responseOperation || (ctx.operation === "create" ? "details" : ctx.operation || "details");
-        return this.getDetails({ ctx: ctx.ctx, operation: responseOperation, entityId: insertResult.id });
+        return this.getDetails({ operation: responseOperation, entityId: insertResult.id });
     }
 
-    public async update(ctx: RequestContext<Entity>, options?: CrudActionOptions) {
+    public async update(
+        ctx: Pick<RequestContext<Entity>, "operation" | "values" | "entityId">,
+        options?: CrudActionOptions
+    ) {
         const { operation = "update", values, entityId } = ctx;
 
         if (!values?.id) (values as Entity).id = entityId;
@@ -98,12 +108,12 @@ export class RouteController<Entity extends GenericEntity> {
 
         const responseOperation =
             options?.responseOperation || (ctx.operation === "update" ? "details" : ctx.operation || "details");
-        return this.getDetails({ ctx: ctx.ctx, operation: responseOperation, entityId: result.id });
+        return this.getDetails({ operation: responseOperation, entityId: result.id });
     }
 
     /** Returns an entity with every mapped props (from groups) for a given id */
-    public async getList(ctx: RequestContext<Entity>) {
-        const { operation = "list", queryParams, subresourceRelation } = ctx;
+    public async getList(ctx?: Pick<RequestContext<Entity>, "operation" | "queryParams" | "subresourceRelation">) {
+        const { operation = "list", queryParams = {}, subresourceRelation } = ctx || {};
 
         const qb = this.repository.createQueryBuilder(this.metadata.tableName);
 
@@ -131,7 +141,7 @@ export class RouteController<Entity extends GenericEntity> {
     }
 
     /** Returns an entity with every mapped props (from groups) for a given id */
-    public async getDetails(ctx: RequestContext<Entity>) {
+    public async getDetails(ctx: Pick<RequestContext<Entity>, "operation" | "entityId" | "subresourceRelation">) {
         const { operation = "details", entityId, subresourceRelation } = ctx;
 
         const qb = this.repository.createQueryBuilder(this.metadata.tableName);
@@ -151,7 +161,8 @@ export class RouteController<Entity extends GenericEntity> {
         );
     }
 
-    public async delete({ entityId, subresourceRelation }: RequestContext<Entity>) {
+    public async delete(ctx: Pick<RequestContext<Entity>, "entityId" | "subresourceRelation">) {
+        const { entityId, subresourceRelation } = ctx;
         // Remove relation if used on a subresource
         if (subresourceRelation) {
             const qb = this.repository.createQueryBuilder(this.metadata.tableName);
