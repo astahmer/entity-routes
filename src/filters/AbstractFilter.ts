@@ -1,8 +1,6 @@
 import { EntityMetadata, SelectQueryBuilder } from "typeorm";
 import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
-import Container from "typedi";
 
-import { Normalizer } from "@/serializer/Normalizer";
 import { AliasHandler } from "@/serializer/AliasHandler";
 import { isDefined } from "@/functions/asserts";
 import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
@@ -11,10 +9,6 @@ import { pick } from "@/functions/object";
 export abstract class AbstractFilter<FilterOptions extends DefaultFilterOptions = DefaultFilterOptions, T = string> {
     protected readonly config: AbstractFilterConfig<FilterOptions, T>;
     protected readonly entityMetadata: EntityMetadata;
-
-    protected get normalizer() {
-        return Container.get(Normalizer);
-    }
 
     constructor({ config, entityMetadata }: AbstractFilterConstructor) {
         this.config = config as AbstractFilterConfig<FilterOptions, T>;
