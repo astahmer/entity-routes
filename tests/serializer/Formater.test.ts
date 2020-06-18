@@ -146,9 +146,15 @@ describe("Formater", () => {
 
             const user = new User();
             user.id = 2;
+            user.name = "Alex";
             user.thing = thing;
 
-            expect(await formater.formatItem({ item: user, entityMetadata })).toEqual({ id: 2, thing: { id: 1 } });
+            expect(await formater.formatItem({ item: user, entityMetadata })).toEqual({
+                id: 2,
+                identifier: "2_Alex",
+                name: "Alex",
+                thing: { id: 1 },
+            });
         });
 
         it("return item if its class is not a registered entity", async () => {
