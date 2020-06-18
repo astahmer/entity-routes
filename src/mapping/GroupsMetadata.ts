@@ -8,6 +8,7 @@ import {
     RouteOperation,
     GROUPS_METAKEY,
     GroupsOperation,
+    getGroupsMetadata,
 } from "@/decorators/Groups";
 import { deepMerge } from "@/functions/object";
 import { getUniqueValues, combineUniqueValues } from "@/functions/array";
@@ -39,7 +40,7 @@ export class GroupsMetadata {
      *     list: ["id", "name"],
      * }
      */
-    readonly globals: PropsByOperations = {};
+    readonly globalOperations: PropsByOperations = {};
 
     /**
      * An object of route contexts as keys & values of array of props always exposed no matter which operation for that context
@@ -50,7 +51,7 @@ export class GroupsMetadata {
      *     role: ["id", "startDate", "endDate"],
      * }
      */
-    readonly locals: Record<string, string[]> = {};
+    readonly localAlways: Record<string, string[]> = {};
 
     /**
      * An object with route specific OperationsGroups
@@ -76,6 +77,8 @@ export class GroupsMetadata {
      */
     readonly exposedPropsByContexts: PropsByContextByOperations = {};
 
+    protected readonly deepMergeOptions = deepMergeOptions;
+
     constructor(metaKey: MetaKey, entityTarget: Function) {
         this.metaKey = metaKey;
         this.entityTarget = entityTarget;
@@ -98,10 +101,10 @@ export class GroupsMetadata {
     addPropToGlobalGroups(groups: GroupsOperation[], propName: string) {
         let i = 0;
         for (i; i < groups.length; i++) {
-            if (!this.globals[groups[i]]) {
-                this.globals[groups[i]] = [];
+            if (!this.globalOperations[groups[i]]) {
+                this.globalOperations[groups[i]] = [];
             }
-            this.push(this.globals[groups[i]], propName);
+            this.push(this.globalOperations[groups[i]], propName);
         }
     }
 
@@ -112,11 +115,11 @@ export class GroupsMetadata {
 
             if (groups[route] === "all") {
                 // Allowing any operation as long as it's in that route context
-                if (!this.locals[route]) {
-                    this.locals[route] = [];
+                if (!this.localAlways[route]) {
+                    this.localAlways[route] = [];
                 }
 
-                this.push(this.locals[route], propName);
+                this.push(this.localAlways[route], propName);
                 continue;
             } else if (groups[route] === "basic") {
                 // Shortcut to [create, update, list, details]
@@ -155,10 +158,15 @@ export class GroupsMetadata {
      */
     getOwnExposedProps(route: string): PropsByOperations {
         const basicGroups: PropsByOperations = { create: [], update: [], list: [], details: [] };
-        const groups = deepMerge(basicGroups, this.globals, this.routes[route], deepMergeOptions) as PropsByOperations;
+        const groups = deepMerge(
+            basicGroups,
+            this.globalOperations,
+            this.routes[route],
+            this.deepMergeOptions
+        ) as PropsByOperations;
         for (let key in groups) {
             groups[key].push(
-                ...getUniqueValues(groups[key], combineUniqueValues(this.always, this.locals[route] || []))
+                ...getUniqueValues(groups[key], combineUniqueValues(this.always, this.localAlways[route]))
             );
         }
 
@@ -174,26 +182,33 @@ export class GroupsMetadata {
         let props = getOwnExposedProps(this.entityTarget, tableName, this.metaKey);
 
         let i = 1; // Skip itself
-        let parentProps: PropsByOperations, parentGroupsMeta: EntityGroupsMetadata, parentOperations: string[];
+        let parentProps: PropsByOperations,
+            parentGroupsMeta: EntityGroupsMetadata,
+            parentOperations: string[],
+            parentAlwaysAndLocalsProps: string[];
 
         for (i; i < inheritanceTree.length; i++) {
-            parentGroupsMeta = Reflect.getOwnMetadata(this.metaKey, inheritanceTree[i]);
+            parentGroupsMeta = getGroupsMetadata(inheritanceTree[i], this.metaKey);
             parentProps = parentGroupsMeta?.getOwnExposedProps(tableName);
 
-            if (parentProps) {
-                props = deepMerge({}, props, parentProps, deepMergeOptions);
-                parentOperations = Object.keys(parentProps);
+            if (!parentProps) continue;
 
-                for (let key in props) {
-                    if (!parentOperations.includes(key)) {
-                        props[key].push(
-                            ...getUniqueValues(
-                                props[key],
-                                combineUniqueValues(parentGroupsMeta.always, parentGroupsMeta.locals[tableName] || [])
-                            )
-                        );
-                    }
+            props = deepMerge({}, props, parentProps, this.deepMergeOptions);
+            parentOperations = Object.keys(parentProps);
+
+            for (let key in props) {
+                if (parentOperations.includes(key)) continue;
+
+                parentAlwaysAndLocalsProps = combineUniqueValues(
+                    parentGroupsMeta.always,
+                    parentGroupsMeta.localAlways[tableName]
+                );
+                if (!parentGroupsMeta.exposedPropsByContexts[tableName]) {
+                    parentGroupsMeta.exposedPropsByContexts[tableName] = {};
                 }
+                parentGroupsMeta.exposedPropsByContexts[tableName][key] = parentAlwaysAndLocalsProps;
+
+                props[key].push(...getUniqueValues(props[key], parentAlwaysAndLocalsProps));
             }
         }
 
@@ -219,7 +234,7 @@ export function getOwnExposedProps(
     tableName: string,
     metaKey: MetaKey = GROUPS_METAKEY
 ): PropsByOperations {
-    const groupsMeta: EntityGroupsMetadata = Reflect.getOwnMetadata(metaKey, target);
+    const groupsMeta = getGroupsMetadata(target, metaKey);
 
     return groupsMeta?.getOwnExposedProps(tableName);
 }
@@ -228,7 +243,7 @@ export function getOwnExposedProps(
  * Get exposed props (from groups) for a given context (tableName)
  */
 export function getExposedProps(target: Function, tableName: string, metaKey: MetaKey = GROUPS_METAKEY) {
-    const groupsMeta: EntityGroupsMetadata = Reflect.getOwnMetadata(metaKey, target);
+    const groupsMeta = getGroupsMetadata(target, metaKey);
 
     return groupsMeta?.getExposedProps(tableName);
 }

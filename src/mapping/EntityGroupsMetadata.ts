@@ -1,7 +1,8 @@
 import { EntityMetadata, getRepository } from "typeorm";
 
-import { GroupsMetadata } from "./GroupsMetadata";
-import { RouteOperation, COMPUTED_PREFIX, MetaKey } from "@/decorators/Groups";
+import { GroupsMetadata, getInheritanceTree } from "./GroupsMetadata";
+import { RouteOperation, COMPUTED_PREFIX, MetaKey, getGroupsMetadata } from "@/decorators/Groups";
+import { combineUniqueValues } from "@/functions/array";
 
 export class EntityGroupsMetadata extends GroupsMetadata {
     /** EntityMetadata associated with the class */
@@ -57,7 +58,27 @@ export class EntityGroupsMetadata extends GroupsMetadata {
         let exposedProps = this.exposedPropsByContexts[routeContext.tableName];
 
         if (!exposedProps || !exposedProps[operation]) {
+            const isMissingOperation = exposedProps && !exposedProps[operation];
             exposedProps = this.getExposedProps(routeContext.tableName);
+
+            // Adding always & localAlways groups for that operation since its missing here (not used directly on that entity)
+            if (isMissingOperation) {
+                const inheritanceTree = getInheritanceTree(this.entityTarget);
+                const tableName = routeContext.tableName;
+
+                let i = 0;
+                let parentGroupsMeta: EntityGroupsMetadata;
+                for (i; i < inheritanceTree.length; i++) {
+                    parentGroupsMeta = getGroupsMetadata(inheritanceTree[i], this.metaKey);
+                    if (!parentGroupsMeta) continue;
+
+                    this.exposedPropsByContexts[tableName][operation] = combineUniqueValues(
+                        this.exposedPropsByContexts[tableName][operation],
+                        parentGroupsMeta.always,
+                        parentGroupsMeta.localAlways[routeContext.tableName]
+                    );
+                }
+            }
         }
 
         return exposedProps ? (exposedProps[operation] ? exposedProps[operation] : []) : [];

@@ -43,7 +43,7 @@ describe("GroupsMetadata", () => {
         }
 
         const metadata = getGroupsMetadata<GroupsMetadata>(User);
-        expect(metadata.globals["create"]).toEqual(["name"]);
+        expect(metadata.globalOperations["create"]).toEqual(["name"]);
     });
 
     it("can add prop to locals groups - exposed props no matter which operation in that context", () => {
@@ -53,7 +53,7 @@ describe("GroupsMetadata", () => {
         }
 
         const metadata = getGroupsMetadata<GroupsMetadata>(User);
-        expect(metadata.locals["user"]).toEqual(["name"]);
+        expect(metadata.localAlways["user"]).toEqual(["name"]);
     });
 
     it("can add prop to routes groups", () => {
@@ -155,6 +155,65 @@ describe("GroupsMetadata", () => {
             details: ["id", "dateCreated"],
             list: ["email", "id", "dateCreated"],
             update: ["name", "id"],
+        });
+    });
+
+    it("should return all exposed props with custom group on another context", () => {
+        class AbstractEntity {
+            @TestGroups("all")
+            id: number;
+
+            @TestGroups(["list", "details"])
+            dateCreated: Date;
+        }
+
+        class Contact extends AbstractEntity {
+            @TestGroups(["customGroup"])
+            firstName: string;
+
+            @TestGroups({ user: ["details"], contact: "all" })
+            lastName: string;
+        }
+
+        class User extends AbstractEntity {
+            @TestGroups(["create", "update"])
+            @TestGroups({ user: ["list"] })
+            name: string;
+
+            @TestGroups({ user: ["details"], contact: ["list"] })
+            email: string;
+
+            @TestGroups({ user: ["details", "customGroup"] })
+            contact: Contact;
+        }
+
+        expect(getExposedProps(User, "user")).toEqualMessy({
+            create: ["name", "id"],
+            update: ["name", "id"],
+            list: ["name", "dateCreated", "id"],
+            details: ["email", "contact", "dateCreated", "id"],
+            customGroup: ["contact", "id"],
+        });
+        expect(getExposedProps(User, "contact")).toEqualMessy({
+            create: ["name", "id"],
+            update: ["name", "id"],
+            list: ["email", "dateCreated", "id"],
+            details: ["dateCreated", "id"],
+        });
+
+        expect(getExposedProps(Contact, "user")).toEqualMessy({
+            create: ["id"],
+            update: ["id"],
+            list: ["dateCreated", "id"],
+            details: ["lastName", "dateCreated", "id"],
+            customGroup: ["firstName", "id"],
+        });
+        expect(getExposedProps(Contact, "contact")).toEqualMessy({
+            create: ["lastName", "id"],
+            update: ["lastName", "id"],
+            list: ["lastName", "dateCreated", "id"],
+            details: ["lastName", "dateCreated", "id"],
+            customGroup: ["firstName", "lastName", "id"],
         });
     });
 });
