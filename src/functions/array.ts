@@ -35,6 +35,7 @@ export function sortBy<T extends object, K extends keyof T>(arr: T[], key: K, di
     );
 }
 
+/** Compare arrays & return true if all members are included (order doesn't matter) */
 export function isEqualArrays(arr1: PrimitiveValue[], arr2: PrimitiveValue[]) {
     if (arr1.length !== arr2.length) return false;
 
@@ -45,8 +46,10 @@ export function isEqualArrays(arr1: PrimitiveValue[], arr2: PrimitiveValue[]) {
     return true;
 }
 
+/** Get values from the 2nd array that are not yet in the 1st  */
 export const getUniqueValues = <T extends PrimitiveValue>(arr1: T[], arr2: T[]) =>
     arr2.filter((value) => !arr1.includes(value));
 
-export const combineUniqueValues = <T extends PrimitiveValue>(arr1: T[], arr2: T[]) =>
-    arr1.concat(getUniqueValues(arr1, arr2));
+/** Combine one or more array into the first one while pushing only disctinct unique values */
+export const combineUniqueValues = <T extends PrimitiveValue>(arr1: T[] = [], ...arr2: T[][]) =>
+    arr2.reduce((acc, nextArr) => acc.concat(getUniqueValues(arr1, nextArr || [])), arr1);
