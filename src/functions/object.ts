@@ -41,6 +41,8 @@ export function pick<T, K extends keyof T>(obj: T, paths: K[]): Pick<T, K> {
     return { ...paths.reduce((mem, key) => ({ ...mem, [key]: obj[key] }), {}) } as Pick<T, K>;
 }
 
+export const pickF = <T, K extends keyof T>(paths: K[]) => (obj: T) => pick(obj, paths);
+
 /** Creates an object composed of the picked object properties that satisfies the condition for each value */
 export function pickBy<T, K extends keyof T>(obj: T, paths: K[], fn: (value: any) => boolean): Partial<Pick<T, K>> {
     return {
@@ -54,6 +56,9 @@ export const get = <T extends object>(item: T, path: string, defaultValue?: any)
     path.split(".").reduce((obj, key) => (obj ? obj[key as keyof typeof obj] : defaultValue), item);
 
 export const prop = <T extends object, K extends keyof T>(key: K) => (item: T) => item[key];
+export const propEntries = <T extends object, K extends keyof T>(keys: K[]) => (item: T) =>
+    keys.map((k) => [k, item[k]] as const);
+
 export const getSelf = <T = any>(value: T) => value;
 
 export function deepMerge(...objects: object[]) {

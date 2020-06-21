@@ -157,6 +157,8 @@ export class RelationManager {
         alias?: string
     ) {
         const dependsOnMeta = getDependsOnMetadata(entityMetadata.target as Function);
+        if (!Object.keys(dependsOnMeta).length) return;
+
         const computedProps = this.mappingManager
             .getComputedProps(rootMetadata, operation, entityMetadata)
             .map(getComputedPropMethodAndKey);
@@ -192,10 +194,9 @@ export class RelationManager {
         aliasHandler: AliasHandler,
         subresourceRelation: SubresourceRelation
     ) {
-        const alias = aliasHandler.generate(
-            entityMetadata.tableName,
-            subresourceRelation.relation.inverseSidePropertyPath
-        );
+        const { alias } = aliasHandler.getAliasForRelation(qb, subresourceRelation.relation.inverseRelation);
+        // TODO Fix multiple subresources chained
+        // alias = article_author_1, should be comment_article_author_1
 
         qb.innerJoin(
             entityMetadata.tableName + "." + subresourceRelation.relation.inverseSidePropertyPath,

@@ -1,7 +1,8 @@
-import { isType, isClass } from "@/functions/asserts";
+import { isType, isClass, isDev } from "@/functions/asserts";
 import { CType } from "@/utils-types";
 import { RouteVerb } from "@/router/MiddlewareMaker";
 import { EntityRouterFactoryOptions } from "@/router/EntityRouter";
+import { isEqualArrays } from "@/functions/array";
 
 export class BridgeRouter<T = any> {
     readonly instance: T;
@@ -16,8 +17,20 @@ export class BridgeRouter<T = any> {
 
     /** Create and register a route. */
     register(route: BridgeRouterRoute) {
+        if (this.routes.find((registered) => this.areSameRoutes(registered, route))) {
+            isDev() && console.warn("This route is already registed on that router", route);
+            return;
+        }
+
         this.routes.push(route);
         this.registerFn(this.instance, route);
+    }
+
+    private areSameRoutes(routeA: BridgeRouterRoute, routeB: BridgeRouterRoute) {
+        return (
+            routeA.name === routeB.name ||
+            (routeA.path === routeB.path && isEqualArrays(routeA.methods, routeB.methods))
+        );
     }
 }
 
@@ -36,3 +49,5 @@ export const getRouterFactory = <T = any>(config: EntityRouterFactoryOptions<T>)
         : isType<EntityRouterFactoryOptions<T, "fn">>(config, "routerFactoryFn" in config)
         ? config.routerFactoryFn
         : null;
+
+export const printBridgeRoute = (route: BridgeRouterRoute) => route.path + " : " + route.methods.join(",");

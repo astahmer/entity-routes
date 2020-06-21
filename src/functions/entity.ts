@@ -2,6 +2,8 @@ import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
 import { EntityMetadata } from "typeorm";
 import { getRouteMetadata } from "@/router/EntityRouter";
 import { getEntityRouters } from "@/router/container";
+import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
+import { formatRoutePath } from "@/functions/route";
 
 export const iriRegex = new RegExp(/\/api\/(\w+)\//g, "i");
 export function formatIriToId<B extends Boolean>(iri: string, asInt?: B): B extends true ? number : string;
@@ -30,8 +32,10 @@ export function idToIRI(entityMeta: EntityMetadata, id: string | number, options
     if (!routeMetadata || options?.useClassNameAsEntrypoint) {
         return `/api/${entityMeta.tableName}/${id}`;
     } else {
-        return `/api/${routeMetadata.path}/${id}`;
+        return `/api/${formatRoutePath(routeMetadata.path)}/${id}`;
     }
 }
+
+export const isRelationSingle = (relation: RelationMetadata) => relation.isOneToOne || relation.isManyToOne;
 
 export type IdToIRIOptions = { useClassNameAsEntrypoint: boolean };

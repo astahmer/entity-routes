@@ -140,7 +140,7 @@ export const makeComputedPropNameFromMethod = (computed: string) => {
         return lowerFirstLetter(computed.replace(regexResult[1], ""));
     }
 
-    throw new Error('A computed property method should start with either "get", "is", or "has".');
+    throw new Error('A computed property method should start with either "get", "is", or "has": ' + computed);
 };
 
 /**

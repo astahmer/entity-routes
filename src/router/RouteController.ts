@@ -1,4 +1,4 @@
-import { Repository, SelectQueryBuilder, getRepository } from "typeorm";
+import { Repository, SelectQueryBuilder } from "typeorm";
 import { Container } from "typedi";
 
 import { getRouteFiltersMeta, RouteFiltersMeta, GenericEntity, EntityRouteOptions } from "@/router/EntityRouter";
@@ -15,6 +15,8 @@ import { fromEntries } from "@/functions/object";
 import { RequestContext, CollectionResult } from "@/router/MiddlewareMaker";
 import { ValidateItemOptions } from "@/serializer/index";
 import { RouteOperation } from "@/decorators/index";
+import { last } from "@/functions/array";
+import { isRelationSingle } from "@/functions/entity";
 
 export class RouteController<Entity extends GenericEntity> {
     private filtersMeta: RouteFiltersMeta;
@@ -47,10 +49,11 @@ export class RouteController<Entity extends GenericEntity> {
     }
 
     public async create(
-        ctx: Pick<RequestContext<Entity>, "operation" | "values" | "subresourceRelation">,
+        ctx: Pick<RequestContext<Entity>, "operation" | "values" | "subresourceRelations">,
         options: CrudActionOptions = {}
     ) {
-        const { operation = "create", values, subresourceRelation } = ctx;
+        const { operation = "create", values, subresourceRelations } = ctx;
+        const subresourceRelation = last(subresourceRelations || []);
 
         if (!Object.keys(values).length) {
             return { error: "Body can't be empty on create operation" };
@@ -112,8 +115,8 @@ export class RouteController<Entity extends GenericEntity> {
     }
 
     /** Returns an entity with every mapped props (from groups) for a given id */
-    public async getList(ctx?: Pick<RequestContext<Entity>, "operation" | "queryParams" | "subresourceRelation">) {
-        const { operation = "list", queryParams = {}, subresourceRelation } = ctx || {};
+    public async getList(ctx?: Pick<RequestContext<Entity>, "operation" | "queryParams" | "subresourceRelations">) {
+        const { operation = "list", queryParams = {}, subresourceRelations } = ctx || {};
 
         const qb = this.repository.createQueryBuilder(this.metadata.tableName);
 
@@ -121,8 +124,17 @@ export class RouteController<Entity extends GenericEntity> {
         qb.take(100);
 
         const aliasHandler = new AliasHandler();
-        if (subresourceRelation) {
-            this.relationManager.joinSubresourceOnInverseSide(qb, this.metadata, aliasHandler, subresourceRelation);
+        if (subresourceRelations) {
+            subresourceRelations
+                .reverse()
+                .forEach((subresource) =>
+                    this.relationManager.joinSubresourceOnInverseSide(
+                        qb,
+                        !subresourceRelations ? this.metadata : subresource.relation.inverseEntityMetadata,
+                        aliasHandler,
+                        subresource
+                    )
+                );
         }
 
         if (this.filtersMeta) {
@@ -141,8 +153,9 @@ export class RouteController<Entity extends GenericEntity> {
     }
 
     /** Returns an entity with every mapped props (from groups) for a given id */
-    public async getDetails(ctx: Pick<RequestContext<Entity>, "operation" | "entityId" | "subresourceRelation">) {
-        const { operation = "details", entityId, subresourceRelation } = ctx;
+    public async getDetails(ctx: Pick<RequestContext<Entity>, "operation" | "entityId" | "subresourceRelations">) {
+        const { operation = "details", entityId, subresourceRelations } = ctx;
+        const subresourceRelation = last(subresourceRelations || []);
 
         const qb = this.repository.createQueryBuilder(this.metadata.tableName);
 
@@ -161,8 +174,9 @@ export class RouteController<Entity extends GenericEntity> {
         );
     }
 
-    public async delete(ctx: Pick<RequestContext<Entity>, "entityId" | "subresourceRelation">) {
-        const { entityId, subresourceRelation } = ctx;
+    public async delete(ctx: Pick<RequestContext<Entity>, "entityId" | "subresourceRelations">) {
+        const { entityId, subresourceRelations } = ctx;
+        const subresourceRelation = last(subresourceRelations || []);
         // Remove relation if used on a subresource
         if (subresourceRelation) {
             const qb = this.repository.createQueryBuilder(this.metadata.tableName);
@@ -171,11 +185,12 @@ export class RouteController<Entity extends GenericEntity> {
                 .relation(subresourceRelation.relation.target, subresourceRelation.relation.propertyName)
                 .of(subresourceRelation.id);
 
-            if (subresourceRelation.relation.isOneToOne || subresourceRelation.relation.isManyToOne) {
+            if (isRelationSingle(subresourceRelation.relation)) {
                 await query.set(null);
-            } else if (subresourceRelation.relation.isOneToMany || subresourceRelation.relation.isManyToMany) {
+            } else {
                 await query.remove(entityId);
             }
+
             return { affected: 1, raw: { insertId: entityId } };
         } else {
             return this.repository.delete(entityId);

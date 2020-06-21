@@ -33,16 +33,16 @@ export class MiddlewareMaker<Entity extends GenericEntity> {
 
     public makeRequestContextMiddleware(
         operation: RouteOperation,
-        subresourceRelation?: SubresourceRelation
+        subresourceRelations?: SubresourceRelation[]
     ): Middleware {
         return async (ctx, next) => {
-            if (subresourceRelation) {
-                subresourceRelation.id = parseInt(ctx.params[subresourceRelation.param]);
+            if (subresourceRelations?.length) {
+                subresourceRelations[0].id = parseInt(ctx.params[subresourceRelations[0].param]);
             }
 
             const requestContext: RequestContext<Entity> = {
                 ctx,
-                subresourceRelation,
+                subresourceRelations,
                 isUpdateOrCreate: ctx.requestBody && (ctx.method === "POST" || ctx.method === "PUT"),
             };
 
@@ -150,8 +150,9 @@ export type RequestContext<Entity extends GenericEntity = GenericEntity> = {
     ctx: ContextAdapter;
     /** Current route entity id */
     entityId?: string | number;
-    /** Subresource relation with parent, used to auto-join on this entity's relation inverse side */
-    subresourceRelation?: SubresourceRelation;
+
+    /** Parent subresource relations, used to auto-join on this entity's relation inverse side */
+    subresourceRelations?: SubresourceRelation[];
     /** Is update or create operation ? To check if there is a body sent */
     isUpdateOrCreate?: boolean;
     /** Request body values sent */

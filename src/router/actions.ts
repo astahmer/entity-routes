@@ -24,7 +24,7 @@ export function makeRouterFromActions<Data extends object = object, T = any>(
 
     actions.forEach((item) => {
         const { verb, path, middlewares, operation } = item;
-        const name = formatRouteName(path, operation);
+        const name = item.name || formatRouteName(path, operation);
         let customActionMw;
 
         if (isType<RouteActionClassOptions>(item, "class" in item)) {
@@ -66,6 +66,8 @@ export type BaseRouteAction = Omit<CrudAction, "method"> & {
     operation?: RouteOperation;
     /** List of middlewares to be called (in the same order as defined here) */
     middlewares?: Middleware[];
+    /** Optional route name */
+    name?: string;
 };
 
 export type RouteActionClassOptions = BaseRouteAction & {

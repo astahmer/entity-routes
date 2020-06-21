@@ -2,7 +2,7 @@ import { getRepository, ObjectType, Repository, ObjectLiteral } from "typeorm";
 
 import { RouteOperation } from "@/decorators/Groups";
 import { AbstractFilterConfig } from "@/filters/AbstractFilter";
-import { RouteSubresourcesMeta, SubresourceManager } from "@/router/SubresourceManager";
+import { RouteSubresourcesMeta, SubresourceMaker } from "@/router/SubresourceManager";
 import { BridgeRouter, getRouterFactory, BridgeRouterRegisterFn } from "@/router/bridge/BridgeRouter";
 import { formatRouteName } from "@/functions/route";
 import { RouteActionConstructorData, RouteActionConfig, makeRouterFromActions } from "@/router/actions";
@@ -11,7 +11,7 @@ import { CType } from "@/utils-types";
 
 export class EntityRouter<Entity extends GenericEntity> {
     public readonly middlewareMaker: MiddlewareMaker<Entity>;
-    public readonly subresourceManager: SubresourceManager<Entity>;
+    public readonly subresourceMaker: SubresourceMaker<Entity>;
 
     // EntityRouter specifics
     private readonly repository: Repository<Entity>;
@@ -32,7 +32,7 @@ export class EntityRouter<Entity extends GenericEntity> {
         this.options = { ...globalOptions, ...this.routeMetadata.options };
 
         // Managers/services
-        this.subresourceManager = new SubresourceManager<Entity>(this.repository, this.routeMetadata);
+        this.subresourceMaker = new SubresourceMaker<Entity>(this.repository, this.routeMetadata, this.options as any);
         this.middlewareMaker = new MiddlewareMaker<Entity>(this.repository, this.options);
     }
 
@@ -48,13 +48,14 @@ export class EntityRouter<Entity extends GenericEntity> {
             const operation = this.routeMetadata.operations[i];
             const verb = CRUD_ACTIONS[operation].verb;
             const path = (this.routeMetadata.path + CRUD_ACTIONS[operation].path).toLowerCase();
+            const name = formatRouteName(this.repository.metadata.tableName, operation);
 
             const requestContextMw = this.middlewareMaker.makeRequestContextMiddleware(operation);
             const responseMw = this.middlewareMaker.makeResponseMiddleware(operation);
 
             router.register({
                 path,
-                name: formatRouteName(path, operation),
+                name,
                 methods: [verb],
                 middlewares: [mwAdapter(requestContextMw), mwAdapter(responseMw)],
             });
@@ -64,14 +65,14 @@ export class EntityRouter<Entity extends GenericEntity> {
             const mappingMethod = this.middlewareMaker.makeRouteMappingMiddleware(operation);
             router.register({
                 path: path + "/mapping",
-                name: formatRouteName(path, operation) + "_mapping",
+                name: name + "_mapping",
                 methods: [verb],
                 middlewares: [mwAdapter(mappingMethod)],
             });
         }
 
         // Subresoures routes
-        this.subresourceManager.makeSubresourcesRoutes(router);
+        this.subresourceMaker.makeSubresourcesRoutes(router);
 
         // Custom actions routes
         if (this.options.actions) {
@@ -99,11 +100,11 @@ export class EntityRouter<Entity extends GenericEntity> {
 export const ROUTE_METAKEY = Symbol("route");
 export const getRouteMetadata = (entity: Function): RouteMetadata => Reflect.getOwnMetadata(ROUTE_METAKEY, entity);
 
-export const ROUTE_SUBRESOURCES = Symbol("route");
+export const ROUTE_SUBRESOURCES_METAKEY = Symbol("subresources");
 export const getRouteSubresourcesMetadata = <Entity extends GenericEntity>(
     entity: Function
 ): RouteSubresourcesMeta<Entity> =>
-    Reflect.getOwnMetadata(ROUTE_SUBRESOURCES, entity) || {
+    Reflect.getOwnMetadata(ROUTE_SUBRESOURCES_METAKEY, entity) || {
         parent: entity,
         properties: {},
     };
@@ -163,6 +164,8 @@ export type EntityRouteOptions = {
     shouldEntityWithOnlyIdBeFlattenedToIri?: boolean;
     /** Should set subresource IRI for prop decorated with @Subresource */
     shouldSetSubresourcesIriOnItem?: boolean;
+    /** Default level of subresources max depth path */
+    defaultSubresourceMaxDepthLvl?: number;
 };
 export type EntityRouteConfig = EntityRouteBaseOptions & EntityRouteOptions;
 

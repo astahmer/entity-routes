@@ -1,9 +1,12 @@
-import { Connection, createConnection } from "typeorm";
+import { Connection, createConnection, getConnection } from "typeorm";
 import { QueryParams, Context, deepMerge } from "@/index";
 
 let connection: Connection;
 
 export async function createTestConnection(entities: Function[]) {
+    try {
+        getConnection()?.isConnected && (await closeTestConnection());
+    } catch (error) {}
     connection = await createConnection({
         type: "sqljs",
         entities,

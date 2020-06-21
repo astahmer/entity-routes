@@ -334,7 +334,7 @@ describe("RouteController - subresources", () => {
             const subresourceRelation = getSubresourceRelation(User, getRepository(User).metadata, "role");
             subresourceRelation.id = userResult.id;
 
-            const result = await roleCtrl.create({ values, subresourceRelation });
+            const result = await roleCtrl.create({ values, subresourceRelations: [subresourceRelation] });
             expect(result).toEqual({
                 id: 1,
                 title: values.title,
@@ -365,7 +365,10 @@ describe("RouteController - subresources", () => {
                 })
             ).toEqual({ id: 1, name: "Alex", email: "alex@mail.com", role: null });
 
-            const result = (await roleCtrl.create({ values: { id: roleResult.id }, subresourceRelation })) as Role;
+            const result = (await roleCtrl.create({
+                values: { id: roleResult.id },
+                subresourceRelations: [subresourceRelation],
+            })) as Role;
 
             // Role should have been joined to given user
             expect(result).toEqual({
@@ -401,7 +404,7 @@ describe("RouteController - subresources", () => {
             const subresourceRelation = getSubresourceRelation(User, getRepository(User).metadata, "articles");
             subresourceRelation.id = userResult.id;
 
-            const result = await articleCtrl.create({ values, subresourceRelation });
+            const result = await articleCtrl.create({ values, subresourceRelations: [subresourceRelation] });
             expect(result).toEqual({ id: 1, title: values.title, author: { id: userResult.id } });
         });
 
@@ -429,7 +432,7 @@ describe("RouteController - subresources", () => {
 
             const result = (await articleCtrl.create({
                 values: { id: articleResult.id },
-                subresourceRelation,
+                subresourceRelations: [subresourceRelation],
             })) as Article;
 
             // Article should have been joined on the given user
@@ -463,9 +466,10 @@ describe("RouteController - subresources", () => {
             const subresourceRelation = getSubresourceRelation(User, getRepository(User).metadata, "articles");
             subresourceRelation.id = userResult.id;
 
-            await articleCtrl.create({ values, subresourceRelation });
+            const subresourceRelations = [subresourceRelation];
+            await articleCtrl.create({ values, subresourceRelations });
 
-            const result = await articleCtrl.getList({ subresourceRelation });
+            const result = await articleCtrl.getList({ subresourceRelations });
             expect(result).toEqual({
                 items: [{ id: 1, title: values.title, author: { id: userResult.id } }],
                 totalItems: 1,
@@ -490,9 +494,10 @@ describe("RouteController - subresources", () => {
             const subresourceRelation = getSubresourceRelation(User, getRepository(User).metadata, "role");
             subresourceRelation.id = userResult.id;
 
-            await roleCtrl.create({ values, subresourceRelation });
+            const subresourceRelations = [subresourceRelation];
+            await roleCtrl.create({ values, subresourceRelations });
 
-            const result = await roleCtrl.getDetails({ subresourceRelation });
+            const result = await roleCtrl.getDetails({ subresourceRelations });
             expect(result).toEqual({
                 id: 1,
                 title: values.title,
@@ -515,7 +520,10 @@ describe("RouteController - subresources", () => {
             const subresourceRelation = getSubresourceRelation(User, getRepository(User).metadata, "role");
             subresourceRelation.id = userResult.id;
 
-            const createResult = (await roleCtrl.create({ values, subresourceRelation })) as Role;
+            const createResult = (await roleCtrl.create({
+                values,
+                subresourceRelations: [subresourceRelation],
+            })) as Role;
 
             // Role should have been joined on user
             expect(createResult).toEqual({
@@ -525,7 +533,7 @@ describe("RouteController - subresources", () => {
                 startDate: null,
             });
 
-            await roleCtrl.delete({ entityId: createResult.id, subresourceRelation });
+            await roleCtrl.delete({ entityId: createResult.id, subresourceRelations: [subresourceRelation] });
 
             const result = await roleCtrl.getDetails({ entityId: createResult.id });
             // Role should have been unset on this user
@@ -549,7 +557,10 @@ describe("RouteController - subresources", () => {
             const subresourceRelation = getSubresourceRelation(User, getRepository(User).metadata, "articles");
             subresourceRelation.id = userResult.id;
 
-            const createResult = (await articleCtrl.create({ values, subresourceRelation })) as Article;
+            const createResult = (await articleCtrl.create({
+                values,
+                subresourceRelations: [subresourceRelation],
+            })) as Article;
 
             // User should have been joined on article
             expect(createResult).toEqual({
@@ -558,7 +569,7 @@ describe("RouteController - subresources", () => {
                 author: { id: userResult.id },
             });
 
-            await articleCtrl.delete({ entityId: createResult.id, subresourceRelation });
+            await articleCtrl.delete({ entityId: createResult.id, subresourceRelations: [subresourceRelation] });
 
             const result = await articleCtrl.getDetails({ entityId: createResult.id });
             // User should have been unset on this article

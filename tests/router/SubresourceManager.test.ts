@@ -1,8 +1,6 @@
 import {
-    Groups,
     Subresource,
-    EntityRoute,
-    SubresourceManager,
+    SubresourceMaker,
     getRouteMetadata,
     BridgeRouter,
     registerKoaRouteFromBridgeRoute,
@@ -10,27 +8,34 @@ import {
     EntityRouter,
     koaMwAdapter,
     prop,
-    flatMap,
+    printBridgeRoute,
+    ROUTE_SUBRESOURCES_METAKEY,
+    SubresourceOptions,
+    EntityRoute,
 } from "@/index";
 import { PrimaryGeneratedColumn, Entity, Column, ManyToOne, OneToMany, getRepository } from "typeorm";
 import { createTestConnection, closeTestConnection } from "@@/tests/testConnection";
 import * as Router from "koa-router";
+import { User, Manager, Article, Comment, Upvote } from "@@/tests/router/sample/entities";
 
 describe("SubresourceManager", () => {
+    const options = {
+        routerFactoryClass: Router,
+        routerRegisterFn: registerKoaRouteFromBridgeRoute,
+        middlewareAdapter: koaMwAdapter,
+    };
+    const defaultSubresourceOptions = { middlewareAdapter: koaMwAdapter, defaultSubresourceMaxDepthLvl: 2 };
+
     class AbstractEntity {
-        @Groups(["list", "details"])
         @PrimaryGeneratedColumn()
         id: number;
     }
 
-    it("makeSubresourcesRoutes", async () => {
+    it("makeSubresourcesRoutes - simple", async () => {
         @Entity()
         class Role extends AbstractEntity {
             @Column()
             title: string;
-
-            @Column()
-            startDate: Date;
         }
 
         @EntityRoute()
@@ -38,9 +43,6 @@ describe("SubresourceManager", () => {
         class User extends AbstractEntity {
             @Column()
             name: string;
-
-            @Column()
-            email: string;
 
             @ManyToOne(() => Role)
             role: Role;
@@ -65,25 +67,24 @@ describe("SubresourceManager", () => {
         const repository = getRepository(User);
         const routeMeta = getRouteMetadata(User);
 
-        const manager = new SubresourceManager(repository, routeMeta);
-        const options = {
-            routerFactoryClass: Router,
-            routerRegisterFn: registerKoaRouteFromBridgeRoute,
-            middlewareAdapter: koaMwAdapter,
-        };
+        const manager = new SubresourceMaker(repository, routeMeta, { middlewareAdapter: koaMwAdapter });
+
         const articleEntityRouter = new EntityRouter(Article, routeMeta, options);
         const entityRouters = getEntityRouters();
         entityRouters[Article.name] = articleEntityRouter;
 
         const router = new BridgeRouter(Router, registerKoaRouteFromBridgeRoute);
         manager.makeSubresourcesRoutes(router);
-        expect(router.routes.map(prop("path"))).toEqualMessy([
-            "/user/:UserId(\\d+)/articles",
-            "/user/:UserId(\\d+)/articles",
-            "/user/:UserId(\\d+)/articles/:id(\\d+)",
-            "/user/:UserId(\\d+)/articles/:id(\\d+)",
+
+        const paths = router.routes.map(printBridgeRoute);
+        const names = router.routes.map(prop("name"));
+
+        expect(paths).toEqualMessy([
+            "/user/:UserId(\\d+)/articles : post",
+            "/user/:UserId(\\d+)/articles : get",
+            "/user/:UserId(\\d+)/articles/:id(\\d+) : delete",
         ]);
-        expect(flatMap(router.routes.map(prop("methods")))).toEqualMessy(["post", "get", "get", "delete"]);
+        expect(names).toEqualMessy(["user_articles_create", "user_articles_list", "user_articles_delete"]);
 
         return closeTestConnection();
     });
@@ -93,9 +94,6 @@ describe("SubresourceManager", () => {
         class Role extends AbstractEntity {
             @Column()
             title: string;
-
-            @Column()
-            startDate: Date;
         }
 
         @EntityRoute()
@@ -103,9 +101,6 @@ describe("SubresourceManager", () => {
         class User extends AbstractEntity {
             @Column()
             name: string;
-
-            @Column()
-            email: string;
 
             @Subresource(() => Role, { path: "main_role", operations: ["create", "details", "list"] })
             @ManyToOne(() => Role)
@@ -117,134 +112,377 @@ describe("SubresourceManager", () => {
         const repository = getRepository(User);
         const routeMeta = getRouteMetadata(User);
 
-        const manager = new SubresourceManager(repository, routeMeta);
-        const options = {
-            routerFactoryClass: Router,
-            routerRegisterFn: registerKoaRouteFromBridgeRoute,
-            middlewareAdapter: koaMwAdapter,
-        };
-        const roleEntityRouter = new EntityRouter(Role, routeMeta, options);
+        const manager = new SubresourceMaker(repository, routeMeta, defaultSubresourceOptions);
+
         const entityRouters = getEntityRouters();
+        const roleEntityRouter = new EntityRouter(Role, routeMeta, options);
         entityRouters[Role.name] = roleEntityRouter;
 
         const router = new BridgeRouter(Router, registerKoaRouteFromBridgeRoute);
         manager.makeSubresourcesRoutes(router);
 
-        expect(router.routes.map(prop("path"))).toEqual([
-            "/user/:UserId(\\d+)/main_role",
-            "/user/:UserId(\\d+)/main_role",
-        ]);
-        expect(flatMap(router.routes.map(prop("methods")))).toEqualMessy(["post", "get"]);
+        const paths = router.routes.map(printBridgeRoute);
+        const names = router.routes.map(prop("name"));
+
+        expect(paths).toEqualMessy(["/user/:UserId(\\d+)/main_role : post", "/user/:UserId(\\d+)/main_role : get"]);
+        expect(names).toEqualMessy(["user_role_create", "user_role_details"]);
 
         return closeTestConnection();
     });
 
-    it("makeSubresourcesRoutes - handles default maxDepth", async () => {
-        @Entity()
-        class Role extends AbstractEntity {
-            @Column()
-            title: string;
-
-            @Column()
-            startDate: Date;
-        }
-
-        @EntityRoute()
-        @Entity()
-        class User extends AbstractEntity {
-            @Column()
-            name: string;
-
-            @Column()
-            email: string;
-
-            @ManyToOne(() => Role)
-            role: Role;
-
-            @Subresource(() => Article)
-            @OneToMany(() => Article, (article) => article.author)
-            articles: Article[];
-
-            @Subresource(() => Comment)
-            @OneToMany(() => Comment, (comment) => comment.writer)
-            comments: Comment[];
-        }
-
-        @EntityRoute()
-        @Entity()
-        class Article extends AbstractEntity {
-            @Column()
-            title: string;
-
-            @Subresource(() => User)
-            @ManyToOne(() => User, (user) => user.articles)
-            author: User;
-
-            @Subresource(() => Comment)
-            @OneToMany(() => Comment, (comment) => comment.article)
-            comments: Comment[];
-        }
-
-        @EntityRoute()
-        @Entity()
-        class Comment extends AbstractEntity {
-            @Column()
-            message: string;
-
-            @Subresource(() => Article)
-            @ManyToOne(() => Article, (article) => article.comments)
-            article: Article;
-
-            @Subresource(() => User)
-            @ManyToOne(() => User, (user) => user.comments)
-            writer: User;
-        }
-
-        await createTestConnection([Role, User, Article, Comment]);
-
-        const userRouteMeta = getRouteMetadata(User);
-        const articleRouteMeta = getRouteMetadata(Article);
-        const commentRouteMeta = getRouteMetadata(Comment);
-
-        const userRepo = getRepository(User);
-        const userManager = new SubresourceManager(userRepo, userRouteMeta);
-
-        const options = {
-            routerFactoryClass: Router,
-            routerRegisterFn: registerKoaRouteFromBridgeRoute,
-            middlewareAdapter: koaMwAdapter,
+    describe("recursive makeSubresourcesRoutes", () => {
+        const entities = [Manager, User, Article, Comment, Upvote];
+        const resetMetadata = () => {
+            entities.forEach((entity) => Reflect.deleteMetadata(ROUTE_SUBRESOURCES_METAKEY, entity));
         };
-        const articleEntityRouter = new EntityRouter(Article, articleRouteMeta, options);
-        const commentEntityRouter = new EntityRouter(Comment, commentRouteMeta, options);
 
-        const entityRouters = getEntityRouters();
-        entityRouters[Article.name] = articleEntityRouter;
-        entityRouters[Comment.name] = commentEntityRouter;
+        const registerSubresource = (
+            fromTarget: Function,
+            toTarget: Function,
+            prop: string,
+            options?: SubresourceOptions
+        ) => {
+            const noop = new Function();
+            noop.constructor = fromTarget;
+            Subresource(() => toTarget, options)(noop, prop);
+        };
+        const registerAllSubresources = () => {
+            registerSubresource(Manager, Article, "articles");
 
-        const router = new BridgeRouter(Router, registerKoaRouteFromBridgeRoute);
-        userManager.makeSubresourcesRoutes(router);
+            registerSubresource(User, Manager, "manager");
+            registerSubresource(User, Article, "articles");
+            registerSubresource(User, Comment, "comments");
 
-        const paths = router.routes.map(prop("path"));
-        expect(paths).toEqualMessy([
-            "/user/:UserId(\\d+)/articles",
-            "/user/:UserId(\\d+)/articles",
-            "/user/:UserId(\\d+)/articles/:id(\\d+)",
-            "/user/:UserId(\\d+)/articles/:id(\\d+)",
-            "/user/:UserId(\\d+)/articles/:ArticleId(\\d+)/comments",
-            "/user/:UserId(\\d+)/articles/:ArticleId(\\d+)/comments",
-            "/user/:UserId(\\d+)/articles/:ArticleId(\\d+)/comments/:id(\\d+)",
-            "/user/:UserId(\\d+)/articles/:ArticleId(\\d+)/comments/:id(\\d+)",
-            "/user/:UserId(\\d+)/comments",
-            "/user/:UserId(\\d+)/comments",
-            "/user/:UserId(\\d+)/comments/:id(\\d+)",
-            "/user/:UserId(\\d+)/comments/:id(\\d+)",
-            "/user/:UserId(\\d+)/comments/:CommentId(\\d+)/article",
-            "/user/:UserId(\\d+)/comments/:CommentId(\\d+)/article",
-            "/user/:UserId(\\d+)/comments/:CommentId(\\d+)/article",
-        ]);
+            registerSubresource(Article, User, "author");
+            registerSubresource(Article, Comment, "comments");
 
-        return closeTestConnection();
+            registerSubresource(Upvote, User, "upvoter");
+            registerSubresource(Upvote, Comment, "comment");
+
+            registerSubresource(Comment, Article, "article");
+            registerSubresource(Comment, User, "writer");
+            registerSubresource(Comment, Upvote, "upvotes");
+        };
+
+        beforeEach(resetMetadata);
+
+        it("generates all possibles subresources", async () => {
+            registerAllSubresources();
+            await createTestConnection(entities);
+
+            const entityRouters = getEntityRouters();
+
+            // Registering all EntityRouter
+            entities.forEach((entity) => {
+                entityRouters[entity.name] = new EntityRouter(entity, getRouteMetadata(entity), options);
+            });
+
+            const router = new BridgeRouter(Router, registerKoaRouteFromBridgeRoute);
+
+            const manager = new SubresourceMaker(getRepository(User), getRouteMetadata(User), {
+                ...defaultSubresourceOptions,
+                defaultSubresourceMaxDepthLvl: 99,
+            });
+            manager.makeSubresourcesRoutes(router);
+
+            const paths = router.routes.map(printBridgeRoute);
+            const names = router.routes.map(prop("name"));
+
+            expect(paths).toEqualMessy([
+                "/user/:UserId(\\d+)/manager : post",
+                "/user/:UserId(\\d+)/manager : get",
+                "/user/:UserId(\\d+)/manager : delete",
+                "/user/:UserId(\\d+)/manager/articles : get",
+                "/user/:UserId(\\d+)/manager/articles/comments : get",
+                "/user/:UserId(\\d+)/manager/articles/comments/upvotes : get",
+                "/user/:UserId(\\d+)/articles : post",
+                "/user/:UserId(\\d+)/articles : get",
+                "/user/:UserId(\\d+)/articles/:id(\\d+) : delete",
+                "/user/:UserId(\\d+)/articles/comments : get",
+                "/user/:UserId(\\d+)/articles/comments/upvotes : get",
+                "/user/:UserId(\\d+)/comments : post",
+                "/user/:UserId(\\d+)/comments : get",
+                "/user/:UserId(\\d+)/comments/:id(\\d+) : delete",
+                "/user/:UserId(\\d+)/comments/upvotes : get",
+            ]);
+
+            expect(names).toEqualMessy([
+                "user_manager_create",
+                "user_manager_details",
+                "user_manager_delete",
+                "user_manager_articles_list",
+                "user_manager_articles_comments_list",
+                "user_manager_articles_comments_upvotes_list",
+                "user_articles_create",
+                "user_articles_list",
+                "user_articles_delete",
+                "user_articles_comments_list",
+                "user_articles_comments_upvotes_list",
+                "user_comments_create",
+                "user_comments_list",
+                "user_comments_delete",
+                "user_comments_upvotes_list",
+            ]);
+
+            return closeTestConnection();
+        });
+
+        it("generates nested subsources until max depth is reached - as EntityRouter option", async () => {
+            registerAllSubresources();
+            await createTestConnection(entities);
+
+            const entityRouters = getEntityRouters();
+            const mergedOptions = { ...options, ...defaultSubresourceOptions };
+
+            entities.forEach((entity) => {
+                entityRouters[entity.name] = new EntityRouter(entity, getRouteMetadata(entity), mergedOptions);
+            });
+
+            const router = new BridgeRouter(Router, registerKoaRouteFromBridgeRoute);
+
+            const manager = new SubresourceMaker(
+                getRepository(User),
+                getRouteMetadata(User),
+                defaultSubresourceOptions
+            );
+            manager.makeSubresourcesRoutes(router);
+
+            const paths = router.routes.map(printBridgeRoute);
+            const names = router.routes.map(prop("name"));
+
+            expect(paths).toEqualMessy([
+                "/user/:UserId(\\d+)/manager : post",
+                "/user/:UserId(\\d+)/manager : get",
+                "/user/:UserId(\\d+)/manager : delete",
+                "/user/:UserId(\\d+)/manager/articles : get",
+                "/user/:UserId(\\d+)/articles : post",
+                "/user/:UserId(\\d+)/articles : get",
+                "/user/:UserId(\\d+)/articles/:id(\\d+) : delete",
+                "/user/:UserId(\\d+)/articles/comments : get",
+                "/user/:UserId(\\d+)/comments : post",
+                "/user/:UserId(\\d+)/comments : get",
+                "/user/:UserId(\\d+)/comments/:id(\\d+) : delete",
+                "/user/:UserId(\\d+)/comments/upvotes : get",
+            ]);
+
+            expect(names).toEqualMessy([
+                "user_manager_create",
+                "user_manager_details",
+                "user_manager_delete",
+                "user_manager_articles_list",
+                "user_articles_create",
+                "user_articles_list",
+                "user_articles_delete",
+                "user_articles_comments_list",
+                "user_comments_create",
+                "user_comments_list",
+                "user_comments_delete",
+                "user_comments_upvotes_list",
+            ]);
+
+            return closeTestConnection();
+        });
+
+        it("generates nested subsources until max depth is reached - as Subresource option", async () => {
+            registerSubresource(Manager, Article, "articles", { maxDepth: 1 });
+
+            registerSubresource(User, Manager, "manager", { maxDepth: 3 });
+            registerSubresource(User, Article, "articles", { maxDepth: 5 });
+            registerSubresource(User, Comment, "comments");
+
+            registerSubresource(Article, User, "author", { maxDepth: 1 });
+            registerSubresource(Article, Comment, "comments");
+
+            registerSubresource(Upvote, User, "upvoter", { maxDepth: 1 });
+            registerSubresource(Upvote, Comment, "comment");
+
+            registerSubresource(Comment, Article, "article", { maxDepth: 2 });
+            registerSubresource(Comment, User, "writer");
+            registerSubresource(Comment, Upvote, "upvotes", { maxDepth: 3 });
+
+            await createTestConnection(entities);
+
+            const entityRouters = getEntityRouters();
+
+            entities.forEach((entity) => {
+                entityRouters[entity.name] = new EntityRouter(entity, getRouteMetadata(entity), options);
+            });
+
+            const router = new BridgeRouter(Router, registerKoaRouteFromBridgeRoute);
+
+            const manager = new SubresourceMaker(
+                getRepository(User),
+                getRouteMetadata(User),
+                defaultSubresourceOptions
+            );
+            manager.makeSubresourcesRoutes(router);
+
+            const paths = router.routes.map(printBridgeRoute);
+            const names = router.routes.map(prop("name"));
+
+            expect(paths).toEqualMessy([
+                "/user/:UserId(\\d+)/manager : post",
+                "/user/:UserId(\\d+)/manager : get",
+                "/user/:UserId(\\d+)/manager : delete",
+                "/user/:UserId(\\d+)/articles : post",
+                "/user/:UserId(\\d+)/articles : get",
+                "/user/:UserId(\\d+)/articles/:id(\\d+) : delete",
+                "/user/:UserId(\\d+)/articles/comments : get",
+                "/user/:UserId(\\d+)/articles/comments/upvotes : get",
+                "/user/:UserId(\\d+)/comments : post",
+                "/user/:UserId(\\d+)/comments : get",
+                "/user/:UserId(\\d+)/comments/:id(\\d+) : delete",
+                "/user/:UserId(\\d+)/comments/upvotes : get",
+            ]);
+
+            expect(names).toEqualMessy([
+                "user_manager_create",
+                "user_manager_details",
+                "user_manager_delete",
+                "user_articles_create",
+                "user_articles_list",
+                "user_articles_delete",
+                "user_articles_comments_list",
+                "user_articles_comments_upvotes_list",
+                "user_comments_create",
+                "user_comments_list",
+                "user_comments_delete",
+                "user_comments_upvotes_list",
+            ]);
+
+            return closeTestConnection();
+        });
+
+        it("generates nested subsources for those that allow it (canBeNested)", async () => {
+            registerSubresource(Manager, Article, "articles", { canBeNested: false });
+
+            registerSubresource(User, Manager, "manager", { canBeNested: true });
+            registerSubresource(User, Article, "articles");
+            registerSubresource(User, Comment, "comments", { canBeNested: false });
+
+            registerSubresource(Article, User, "author", { canBeNested: false });
+            registerSubresource(Article, Comment, "comments", { canBeNested: false });
+
+            registerSubresource(Upvote, User, "upvoter", { canBeNested: false });
+            registerSubresource(Upvote, Comment, "comment", { canBeNested: false });
+
+            registerSubresource(Comment, Article, "article", { canBeNested: false });
+            registerSubresource(Comment, User, "writer", { canBeNested: false });
+            registerSubresource(Comment, Upvote, "upvotes", { canBeNested: false });
+
+            await createTestConnection(entities);
+
+            const entityRouters = getEntityRouters();
+
+            entities.forEach((entity) => {
+                entityRouters[entity.name] = new EntityRouter(entity, getRouteMetadata(entity), options);
+            });
+
+            const router = new BridgeRouter(Router, registerKoaRouteFromBridgeRoute);
+
+            const manager = new SubresourceMaker(
+                getRepository(User),
+                getRouteMetadata(User),
+                defaultSubresourceOptions
+            );
+            manager.makeSubresourcesRoutes(router);
+
+            const paths = router.routes.map(printBridgeRoute);
+            const names = router.routes.map(prop("name"));
+
+            expect(paths).toEqualMessy([
+                "/user/:UserId(\\d+)/manager : post",
+                "/user/:UserId(\\d+)/manager : get",
+                "/user/:UserId(\\d+)/manager : delete",
+                "/user/:UserId(\\d+)/articles : post",
+                "/user/:UserId(\\d+)/articles : get",
+                "/user/:UserId(\\d+)/articles/:id(\\d+) : delete",
+                "/user/:UserId(\\d+)/comments : post",
+                "/user/:UserId(\\d+)/comments : get",
+                "/user/:UserId(\\d+)/comments/:id(\\d+) : delete",
+            ]);
+
+            expect(names).toEqualMessy([
+                "user_manager_create",
+                "user_manager_details",
+                "user_manager_delete",
+                "user_articles_create",
+                "user_articles_list",
+                "user_articles_delete",
+                "user_comments_create",
+                "user_comments_list",
+                "user_comments_delete",
+            ]);
+
+            return closeTestConnection();
+        });
+
+        it("generates nested subsources for those that allow it (canHaveNested)", async () => {
+            registerSubresource(Manager, Article, "articles", { canHaveNested: false });
+
+            registerSubresource(User, Manager, "manager", { canHaveNested: true });
+            registerSubresource(User, Article, "articles", { canHaveNested: false });
+            registerSubresource(User, Comment, "comments");
+
+            registerSubresource(Article, User, "author", { canHaveNested: false });
+            registerSubresource(Article, Comment, "comments");
+
+            registerSubresource(Upvote, User, "upvoter", { canHaveNested: false });
+            registerSubresource(Upvote, Comment, "comment");
+
+            registerSubresource(Comment, Article, "article", { canHaveNested: false });
+            registerSubresource(Comment, User, "writer");
+            registerSubresource(Comment, Upvote, "upvotes", { canHaveNested: true });
+
+            await createTestConnection(entities);
+
+            const entityRouters = getEntityRouters();
+
+            entities.forEach((entity) => {
+                entityRouters[entity.name] = new EntityRouter(entity, getRouteMetadata(entity), options);
+            });
+
+            const router = new BridgeRouter(Router, registerKoaRouteFromBridgeRoute);
+
+            const manager = new SubresourceMaker(
+                getRepository(User),
+                getRouteMetadata(User),
+                defaultSubresourceOptions
+            );
+            manager.makeSubresourcesRoutes(router);
+
+            const paths = router.routes.map(printBridgeRoute);
+            const names = router.routes.map(prop("name"));
+
+            expect(paths).toEqualMessy([
+                "/user/:UserId(\\d+)/manager : post",
+                "/user/:UserId(\\d+)/manager : get",
+                "/user/:UserId(\\d+)/manager : delete",
+                "/user/:UserId(\\d+)/manager/articles : get",
+                "/user/:UserId(\\d+)/articles : post",
+                "/user/:UserId(\\d+)/articles : get",
+                "/user/:UserId(\\d+)/articles/:id(\\d+) : delete",
+                "/user/:UserId(\\d+)/comments : post",
+                "/user/:UserId(\\d+)/comments : get",
+                "/user/:UserId(\\d+)/comments/:id(\\d+) : delete",
+                "/user/:UserId(\\d+)/comments/upvotes : get",
+            ]);
+
+            expect(names).toEqualMessy([
+                "user_manager_create",
+                "user_manager_details",
+                "user_manager_delete",
+                "user_manager_articles_list",
+                "user_articles_create",
+                "user_articles_list",
+                "user_articles_delete",
+                "user_comments_create",
+                "user_comments_list",
+                "user_comments_delete",
+                "user_comments_upvotes_list",
+            ]);
+
+            return closeTestConnection();
+        });
     });
-
-    // TODO it("makeSubresourcesRoutes - handles custom maxDepths", async () => {
 });

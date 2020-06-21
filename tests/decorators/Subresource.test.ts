@@ -18,6 +18,9 @@ describe("@Subresource", () => {
 
         @Subresource(() => Comment, { path: "messages", operations: ["create", "list"], maxDepth: 1 })
         comments: Comment[];
+
+        @Subresource(() => User)
+        managers: User[];
     }
 
     it("can retrieve metadata with getRouteSubresourcesMetadata", () => {
@@ -30,6 +33,8 @@ describe("@Subresource", () => {
                 operations: ["create", "list", "details", "delete"],
                 entityTarget: Article,
                 maxDepth: undefined,
+                canBeNested: true,
+                canHaveNested: true,
             },
             // Custom options
             comments: {
@@ -37,6 +42,17 @@ describe("@Subresource", () => {
                 operations: ["create", "list"],
                 entityTarget: Comment,
                 maxDepth: 1,
+                canBeNested: true,
+                canHaveNested: true,
+            },
+            // Custom options
+            managers: {
+                path: "managers",
+                operations: ["create", "list", "details", "delete"],
+                entityTarget: User,
+                maxDepth: undefined,
+                canBeNested: true,
+                canHaveNested: true,
             },
         });
     });

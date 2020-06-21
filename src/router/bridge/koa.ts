@@ -1,6 +1,6 @@
 import * as Router from "koa-router";
 import { Middleware, Context, Next } from "koa";
-import { BridgeRouterRoute } from "@/router/bridge/BridgeRouter";
+import { BridgeRouterRoute, printBridgeRoute } from "@/router/bridge/BridgeRouter";
 import { MakeEntityRouters, makeEntityRouters } from "@/router/maker";
 import { EntityRouteOptions } from "@/router/EntityRouter";
 import { ContextAdapter } from "@/router/bridge/ContextAdapter";
@@ -68,7 +68,7 @@ export const getAppRoutes = (arr: Middleware[]) => {
             methods: item.methods,
             path: item.path,
             name: item.name,
-            desc: item.methods.join(",") + " : " + item.path,
+            desc: printBridgeRoute(item as any),
         });
         const router: Router = (midw as any).router;
         return router?.stack.length && router.stack.map(formatRoute);

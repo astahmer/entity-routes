@@ -1,36 +1,30 @@
-import { getRouteSubresourcesMetadata, ROUTE_SUBRESOURCES } from "@/router/EntityRouter";
-import { RouteSubresourcesMeta, SubresourceOperation } from "@/router/SubresourceManager";
+import { getRouteSubresourcesMetadata, ROUTE_SUBRESOURCES_METAKEY } from "@/router/EntityRouter";
+import { RouteSubresourcesMeta, SubresourceProperty, SubresourceOperation } from "@/router/SubresourceManager";
 import { EntityReference } from "@/utils-types";
 
 export function Subresource(
     entityTarget: Promise<EntityReference> | EntityReference,
-    options?: SubresourceOptions
+    options: SubresourceOptions = {}
 ): PropertyDecorator {
     return (target: Object, propName: string) => {
         // Wrap it in a promise to avoid circular-dependency problems where entityTarget would be undefined
         Promise.resolve(entityTarget).then((entityType) => {
             const subresourcesMeta: RouteSubresourcesMeta<any> = getRouteSubresourcesMetadata(target.constructor);
-
-            // Merge default options with decorator parameter
-            options = {
-                operations: ["create", "list", "details", "delete"],
-                ...options,
-            };
-
+            const operations = options.operations || defaultOperations;
             subresourcesMeta.properties[propName] = {
                 path: options.path || propName,
-                operations: options.operations,
+                operations,
                 entityTarget: entityType(),
                 maxDepth: options.maxDepth,
+                canBeNested: options.canBeNested ?? true,
+                canHaveNested: options.canHaveNested ?? true,
             };
 
-            Reflect.defineMetadata(ROUTE_SUBRESOURCES, subresourcesMeta, target.constructor);
+            Reflect.defineMetadata(ROUTE_SUBRESOURCES_METAKEY, subresourcesMeta, target.constructor);
         });
     };
 }
 
-export type SubresourceOptions = {
-    path?: string;
-    operations?: SubresourceOperation[];
-    maxDepth?: number;
-};
+const defaultOperations: SubresourceOperation[] = ["create", "list", "details", "delete"];
+
+export type SubresourceOptions = Partial<Omit<SubresourceProperty, "entityTarget">>;
