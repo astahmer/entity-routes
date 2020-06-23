@@ -171,18 +171,16 @@ describe("SubresourceManager", () => {
             await createTestConnection(entities);
 
             const entityRouters = getEntityRouters();
+            const mergedOptions = { ...options, defaultSubresourceMaxDepthLvl: 99 };
 
             // Registering all EntityRouter
             entities.forEach((entity) => {
-                entityRouters[entity.name] = new EntityRouter(entity, getRouteMetadata(entity), options);
+                entityRouters[entity.name] = new EntityRouter(entity, getRouteMetadata(entity), mergedOptions);
             });
 
             const router = new BridgeRouter(Router, registerKoaRouteFromBridgeRoute);
 
-            const manager = new SubresourceMaker(getRepository(User), getRouteMetadata(User), {
-                ...defaultSubresourceOptions,
-                defaultSubresourceMaxDepthLvl: 99,
-            });
+            const manager = new SubresourceMaker(getRepository(User), getRouteMetadata(User), mergedOptions);
             manager.makeSubresourcesRoutes(router);
 
             const paths = router.routes.map(printBridgeRoute);
@@ -324,6 +322,7 @@ describe("SubresourceManager", () => {
                 "/user/:UserId(\\d+)/manager : post",
                 "/user/:UserId(\\d+)/manager : get",
                 "/user/:UserId(\\d+)/manager : delete",
+                "/user/:UserId(\\d+)/manager/articles : get",
                 "/user/:UserId(\\d+)/articles : post",
                 "/user/:UserId(\\d+)/articles : get",
                 "/user/:UserId(\\d+)/articles/:id(\\d+) : delete",
@@ -339,6 +338,7 @@ describe("SubresourceManager", () => {
                 "user_manager_create",
                 "user_manager_details",
                 "user_manager_delete",
+                "user_manager_articles_list",
                 "user_articles_create",
                 "user_articles_list",
                 "user_articles_delete",

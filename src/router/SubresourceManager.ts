@@ -22,7 +22,7 @@ export class SubresourceMaker<Entity extends GenericEntity> {
     constructor(
         private repository: Repository<Entity>,
         private routeMetadata: RouteMetadata,
-        private options: SubresourceMakerOptions = { middlewareAdapter: undefined }
+        private options: SubresourceMakerOptions
     ) {
         this.subresourcesMeta = getRouteSubresourcesMetadata(repository.metadata.target as Function);
     }
@@ -64,9 +64,11 @@ export class SubresourceMaker<Entity extends GenericEntity> {
             const currentDepth = 1 + (parents ? parents.entities.length : 0);
 
             // Checks for every max depth of every subresources including this one
-            const currentMaxDepth = subresourceProp.maxDepth || this.options.defaultSubresourceMaxDepthLvl;
+            const currentMaxDepth = subresourceProp.maxDepth || this.options.defaultSubresourceMaxDepthLvl || 2;
             const maxDepths = (parents?.maxDepths || []).concat(currentMaxDepth);
-            const hasReachedMaxDepth = maxDepths.some((maxDepth) => currentDepth > maxDepth);
+            const hasReachedMaxDepth = maxDepths
+                .map((maxDepth, depth) => maxDepth + depth)
+                .some((maxDepth) => currentDepth > maxDepth);
 
             if (hasReachedMaxDepth) continue;
 
