@@ -5,12 +5,12 @@ import * as Router from "koa-router";
 import { createTestConnection, closeTestConnection } from "@@/tests/testConnection";
 import * as bodyParser from "koa-bodyparser";
 import { RouteVerb, flatMapOnProp } from "@/index";
-import { registerKoaRouteFromBridgeRoute, makeKoaEntityRouters, getAppRoutes } from "@/router/bridge/koa";
-import { User, Article, Comment } from "@@/tests/router/bridge/sample/entities";
+import { registerKoaRouteFromBridgeRoute, makeKoaEntityRouters } from "@/router/bridge/koa";
 import { testRouteConfigs, testRoute, TestRequestConfig } from "@@/tests/router/bridge/sample/requests";
+import { User, Article, Comment, Upvote, expectedRouteNames } from "@@/tests/router/bridge/sample/entities";
 
 describe("koa BridgeRouter adapter", () => {
-    const entities = [User, Article, Comment];
+    const entities = [User, Article, Comment, Upvote];
 
     it("registerKoaRouteFromBridgeRouter", () => {
         const koaRouter = new Router();
@@ -43,59 +43,7 @@ describe("koa BridgeRouter adapter", () => {
                 (route) => route.name
             )
         );
-        expect(routeNames).toEqualMessy([
-            "user_create",
-            "user_create_mapping",
-            "user_details",
-            "user_details_mapping",
-            "user_list",
-            "user_list_mapping",
-            "user_articles_create",
-            "user_articles_list",
-            "user_articles_delete",
-            "user_articles_comments_list",
-            "article_details",
-            "article_details_mapping",
-            "article_comments_create",
-            "article_comments_list",
-            "article_comments_delete",
-        ]);
-
-        return closeTestConnection();
-    });
-
-    it("registers routes on koa server", async () => {
-        const connection = await createTestConnection(entities);
-
-        const bridgeRouters = await makeKoaEntityRouters({ connection, entities });
-        const app = new Koa();
-
-        // Register all routes on koa server
-        bridgeRouters.forEach((router) => app.use(router.instance.routes()));
-
-        const appRoutes = getAppRoutes(app.middleware);
-        const routeNames = flatMapOnProp(
-            appRoutes,
-            (route) => route,
-            (route) => route.name
-        );
-        expect(routeNames).toEqualMessy([
-            "user_create",
-            "user_create_mapping",
-            "user_details",
-            "user_details_mapping",
-            "user_list",
-            "user_list_mapping",
-            "user_articles_create",
-            "user_articles_list",
-            "user_articles_delete",
-            "user_articles_comments_list",
-            "article_details",
-            "article_details_mapping",
-            "article_comments_create",
-            "article_comments_list",
-            "article_comments_delete",
-        ]);
+        expect(routeNames).toEqualMessy(expectedRouteNames);
 
         return closeTestConnection();
     });

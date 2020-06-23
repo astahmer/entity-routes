@@ -62,17 +62,39 @@ export const testRouteConfigs: TestRequestConfig[] = [
         },
     },
     {
-        it: "should lists user articles",
+        it: "should create a new article for user 1",
+        url: "/user/1/articles",
+        method: "post",
+        data: { title: "First article" },
+        result: {
+            "@context": { operation: "create", entity: "article", errors: null },
+            id: 1,
+            comments: "/api/article/1/comments",
+        },
+    },
+    {
+        it: "should lists user 1 articles",
         url: "/user/1/articles",
         method: "get",
         result: {
             "@context": {
                 entity: "article",
                 operation: "list",
-                retrievedItems: 0,
-                totalItems: 0,
+                retrievedItems: 1,
+                totalItems: 1,
             },
-            items: [],
+            items: ["/api/article/1"],
+        },
+    },
+    {
+        it: "should create a new comment for article 1",
+        url: "/article/1/comments",
+        method: "post",
+        data: { message: "First comment" },
+        result: {
+            "@context": { operation: "create", entity: "comment", errors: null },
+            id: 1,
+            upvotes: "/api/comment/1/upvotes",
         },
     },
     {
@@ -83,10 +105,34 @@ export const testRouteConfigs: TestRequestConfig[] = [
             "@context": {
                 entity: "comment",
                 operation: "list",
-                retrievedItems: 0,
-                totalItems: 0,
+                retrievedItems: 1,
+                totalItems: 1,
             },
-            items: [],
+            items: ["/api/comment/1"],
+        },
+    },
+    {
+        it: "should create a new upvote for comment 1",
+        url: "/comment/1/upvotes",
+        method: "post",
+        data: {},
+        result: {
+            "@context": { operation: "create", entity: "upvote", errors: null },
+            id: 1,
+        },
+    },
+    {
+        it: "should lists upvotes of user comments",
+        url: "/user/1/articles/comments/upvotes",
+        method: "get",
+        result: {
+            "@context": {
+                entity: "upvote",
+                operation: "list",
+                retrievedItems: 1,
+                totalItems: 1,
+            },
+            items: ["/api/upvote/1"],
         },
     },
 ];

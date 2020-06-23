@@ -4,13 +4,13 @@ import { createTestConnection, closeTestConnection } from "@@/tests/testConnecti
 import { Router } from "express";
 import * as express from "express";
 import * as bodyParser from "body-parser";
-import { User, Article } from "@@/tests/router/bridge/sample/entities";
 import { RouteVerb, flatMapOnProp } from "@/index";
 import { registerExpressRouteFromBridgeRoute, makeExpressEntityRouters, printBridgeRoute } from "@/router/bridge/index";
 import { testRouteConfigs, TestRequestConfig, testRoute } from "@@/tests/router/bridge/sample/requests";
+import { User, Article, Comment, Upvote, expectedRouteDesc } from "@@/tests/router/bridge/sample/entities";
 
 describe("Express BridgeRouter adapter", () => {
-    const entities = [User, Article];
+    const entities = [User, Article, Comment, Upvote];
 
     it("registerExpressRouteFromBridgeRouter", () => {
         const router = Router();
@@ -49,17 +49,7 @@ describe("Express BridgeRouter adapter", () => {
             (route) => printBridgeRoute(route)
         );
 
-        expect(routeDescs).toEqual([
-            "/user : post",
-            "/user/mapping : post",
-            "/user/:id(\\d+) : get",
-            "/user/:id(\\d+)/mapping : get",
-            "/user : get",
-            "/user/mapping : get",
-            "/user/:UserId(\\d+)/articles : post",
-            "/user/:UserId(\\d+)/articles : get",
-            "/user/:UserId(\\d+)/articles/:id(\\d+) : delete",
-        ]);
+        expect(routeDescs).toEqual(expectedRouteDesc);
 
         return closeTestConnection();
     });
