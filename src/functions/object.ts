@@ -1,4 +1,5 @@
-import { isObject, isDefined } from "@/functions/asserts";
+import { isObject, isDefined, isDate } from "@/functions/asserts";
+import { ObjectLiteral } from "@/utils-types";
 
 /** Sort object keys alphabetically */
 export const sortObjectByKeys = (obj: Record<any, any>) =>
@@ -99,3 +100,30 @@ export function deepMerge(...objects: object[]) {
 
 export type DeepMergeOptions = { withUniqueArrayValues?: boolean };
 export const deepMergeOptionKeys: Array<keyof DeepMergeOptions> = ["withUniqueArrayValues"];
+
+// Adapted from https://github.com/IndigoUnited/js-deep-sort-object/blob/master/index.js
+function defaultSortFn(a: string, b: string) {
+    return a.localeCompare(b);
+}
+export type ComparatorFn = (a: string, b: string) => number;
+
+export function deepSort<T>(src: T, comparator: ComparatorFn = defaultSortFn): T {
+    function deepSortInner(src: ObjectLiteral, comparator: ComparatorFn): ObjectLiteral | ObjectLiteral[] {
+        if (Array.isArray(src)) {
+            return src.map((item) => deepSort(item, comparator));
+        }
+
+        if (isObject(src) && !isDate(src)) {
+            const out: ObjectLiteral = {};
+            Object.keys(src)
+                .sort(comparator)
+                .forEach((key) => (out[key as keyof typeof out] = deepSort(src[key as keyof typeof src], comparator)));
+
+            return out;
+        }
+
+        return src;
+    }
+
+    return deepSortInner(src, comparator) as T;
+}
