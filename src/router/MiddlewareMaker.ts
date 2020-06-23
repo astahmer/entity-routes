@@ -5,7 +5,7 @@ import { RouteOperation } from "@/decorators/Groups";
 import { GenericEntity, EntityRouteOptions } from "@/router/EntityRouter";
 import { EntityErrorResponse } from "@/serializer/Denormalizer";
 import { SubresourceRelation } from "@/router/SubresourceManager";
-import { isType, isDev } from "@/functions/asserts";
+import { isType, isDev, isObject } from "@/functions/asserts";
 import { MappingManager } from "@/mapping/MappingManager";
 import { EntityErrorResults } from "@/serializer/Validator";
 import { RouteController } from "@/router/RouteController";
@@ -88,7 +88,9 @@ export class MiddlewareMaker<Entity extends GenericEntity> {
                 } else if ("error" in result) {
                     response["@context"].error = result.error;
                     ctx.status = 400;
-                } else if (isType<CollectionResult<Entity>>(result, operation === "list")) {
+                }
+
+                if (isType<CollectionResult<Entity>>(result, operation === "list")) {
                     response["@context"].retrievedItems = result.items.length;
                     response["@context"].totalItems = result.totalItems;
                     response.items = result.items;
