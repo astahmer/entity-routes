@@ -1,7 +1,7 @@
 import { EntityMetadata } from "typeorm";
 import Container, { Service } from "typedi";
 
-import { isType, isObject, isPrimitive } from "@/functions/asserts";
+import { isType, isObject, isPrimitive, isDate } from "@/functions/asserts";
 import { Primitive } from "@/functions/primitives";
 import { formatIriToId } from "@/functions/entity";
 import { GenericEntity, EntityRouteOptions } from "@/router/EntityRouter";
@@ -61,7 +61,7 @@ export class Cleaner {
                 } else {
                     clone[key] = prop;
                 }
-            } else if (isType<Date>(prop, (prop as any) instanceof Date)) {
+            } else if (isDate(prop)) {
                 clone[key] = prop;
             } else if (isType<Partial<Entity>>(prop, isObject(prop))) {
                 nestedMapping = this.mappingManager.getNestedMappingAt(currentPath.concat(key), mapping);

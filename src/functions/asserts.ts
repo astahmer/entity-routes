@@ -1,6 +1,6 @@
 import { Primitive } from "@/functions/primitives";
 import { WhereType } from "@/filters/AbstractFilter";
-import { CType } from "@/utils-types";
+import { CType, ObjectLiteral } from "@/utils-types";
 import { GenericEntity } from "@/router/index";
 
 export const isTestEnv = () => process.env.NODE_ENV === "test";
@@ -25,3 +25,7 @@ export const isWhereType = (property: string): property is WhereType => ["and", 
 export const isClassRegex = /^\s*class\s+/;
 export const isClass = <T>(value: any): value is CType<T> =>
     typeof value === "function" && isClassRegex.test(value?.toString?.());
+
+export const isDate = (value: any): value is Date => isType<Date>(value, value instanceof Date);
+export const isObjectLiteral = <T>(value: any): value is T extends unknown ? ObjectLiteral : T =>
+    isObject(value) && !isDate(value);
