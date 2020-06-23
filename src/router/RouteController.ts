@@ -121,7 +121,10 @@ export class RouteController<Entity extends GenericEntity> {
     }
 
     /** Returns an entity with every mapped props (from groups) for a given id */
-    public async getList(ctx?: Pick<RequestContext<Entity>, "operation" | "queryParams" | "subresourceRelations">) {
+    public async getList(
+        ctx?: Pick<RequestContext<Entity>, "operation" | "queryParams" | "subresourceRelations">,
+        options?: NormalizerOptions
+    ) {
         const { operation = "list", queryParams = {}, subresourceRelations } = ctx || {};
 
         const qb = this.repository.createQueryBuilder(this.metadata.tableName);
@@ -131,29 +134,26 @@ export class RouteController<Entity extends GenericEntity> {
 
         const aliasHandler = new AliasHandler();
         if (subresourceRelations) {
-            subresourceRelations
-                .reverse()
-                .forEach((subresource) =>
-                    this.relationManager.joinSubresourceOnInverseSide(
-                        qb,
-                        !subresourceRelations ? this.metadata : subresource.relation.inverseEntityMetadata,
-                        aliasHandler,
-                        subresource
-                    )
+            let prevAlias: string;
+            subresourceRelations.reverse().forEach((subresource) => {
+                prevAlias = this.relationManager.joinSubresourceOnInverseSide(
+                    qb,
+                    this.metadata,
+                    aliasHandler,
+                    subresource,
+                    prevAlias
                 );
+            });
         }
 
         if (this.filtersMeta) {
             this.applyFilters(queryParams, qb, aliasHandler);
         }
 
-        const collectionResult = await this.normalizer.getCollection(
-            this.metadata,
-            qb,
-            aliasHandler,
-            operation,
-            this.options
-        );
+        const collectionResult = await this.normalizer.getCollection(this.metadata, qb, aliasHandler, operation, {
+            ...this.options,
+            ...options,
+        });
 
         return { items: collectionResult[0], totalItems: collectionResult[1] } as CollectionResult<Entity>;
     }

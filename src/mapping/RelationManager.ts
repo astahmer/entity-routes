@@ -192,18 +192,19 @@ export class RelationManager {
         qb: SelectQueryBuilder<Entity>,
         entityMetadata: EntityMetadata,
         aliasHandler: AliasHandler,
-        subresourceRelation: SubresourceRelation
+        subresourceRelation: SubresourceRelation,
+        prevAlias?: string
     ) {
         const { alias } = aliasHandler.getAliasForRelation(qb, subresourceRelation.relation.inverseRelation);
-        // TODO Fix multiple subresources chained
-        // alias = article_author_1, should be comment_article_author_1
 
         qb.innerJoin(
-            entityMetadata.tableName + "." + subresourceRelation.relation.inverseSidePropertyPath,
+            (prevAlias || entityMetadata.tableName) + "." + subresourceRelation.relation.inverseSidePropertyPath,
             alias,
             alias + ".id = :parentId",
             { parentId: subresourceRelation.id }
         );
+
+        return alias;
     }
 
     /**
