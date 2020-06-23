@@ -55,7 +55,7 @@ export class RouteController<Entity extends GenericEntity> {
         const { operation = "create", values, subresourceRelations } = ctx;
         const subresourceRelation = last(subresourceRelations || []);
 
-        if (!Object.keys(values).length) {
+        if (!subresourceRelation && !Object.keys(values).length) {
             return { error: "Body can't be empty on create operation" };
         }
 
