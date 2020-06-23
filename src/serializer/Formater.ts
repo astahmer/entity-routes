@@ -4,13 +4,13 @@ import Container, { Service } from "typedi";
 import { ALIAS_PREFIX, COMPUTED_PREFIX, RouteOperation } from "@/decorators/Groups";
 
 import { EntityRouteOptions, GenericEntity, getRouteSubresourcesMetadata } from "@/router/EntityRouter";
-import { sortObjectByKeys } from "@/functions/object";
 import { lowerFirstLetter } from "@/functions/primitives";
 
-import { isType, isEntity, isPrimitive } from "@/functions/asserts";
+import { isEntity, isPrimitive } from "@/functions/asserts";
 import { MappingManager } from "@/mapping/MappingManager";
 import { RequestContext } from "@/router/MiddlewareMaker";
-import { idToIRI } from "@/functions/index";
+import { idToIRI, isDev, deepSort } from "@/functions/index";
+import { isDate } from "class-validator";
 
 @Service()
 /** Format entity properly for a route response */
@@ -19,14 +19,29 @@ export class Formater {
         return Container.get(MappingManager);
     }
 
-    /** Return a clone of this request body values with only mapped props */
-    public formatItem<Entity extends GenericEntity = GenericEntity>({
+    /** Return a clone with computed props set & with only serializable props */
+    public async formatItem<Entity extends GenericEntity = GenericEntity>({
         item,
         operation,
         entityMetadata,
         options = {},
     }: FormaterArgs<Entity>) {
-        return this.recursiveFormatItem<Entity>(item, {}, operation, entityMetadata, options);
+        // Store computed props promises
+        const promises: Promise<any>[] = [];
+
+        const clone = this.recursiveFormatItem<Entity>({
+            item,
+            clone: null,
+            operation,
+            rootMetadata: entityMetadata,
+            promises,
+            options,
+        });
+
+        // Wait for computed props to be all set
+        await Promise.all(promises);
+
+        return deepSort(clone);
     }
 
     /**
@@ -37,64 +52,100 @@ export class Formater {
      * - Add computed props to this item
      * - Sort item's property keys
      * */
-    private async recursiveFormatItem<Entity extends GenericEntity>(
-        item: Entity,
-        clone: any,
-        operation: RouteOperation,
-        rootMetadata: EntityMetadata,
-        options: FormaterOptions = {}
-    ): Promise<Entity> {
-        let key: string, prop, entityMetadata;
+    private recursiveFormatItem<Entity extends GenericEntity>({
+        item,
+        clone,
+        operation,
+        rootMetadata,
+        promises,
+        options = {},
+    }: FormatItemArgs<Entity>): Entity {
+        let key: string, prop, entityMetadata: EntityMetadata;
         try {
-            const repository = getRepository(item.constructor.name);
-            entityMetadata = repository.metadata;
+            entityMetadata = getRepository(item.constructor.name).metadata;
         } catch (error) {
             return item;
         }
 
+        const computedProps = this.mappingManager.getComputedProps(rootMetadata, operation, entityMetadata);
+        const shouldFlatten =
+            options.shouldEntityWithOnlyIdBeFlattenedToIri &&
+            isEntity(item) &&
+            Object.keys(item).length === 1 &&
+            !computedProps.length &&
+            (options.shouldOnlyFlattenNested ? clone : true);
+
+        if (shouldFlatten) return idToIRI(entityMetadata, item.id) as any;
+
+        // If clone is null that means we are at item's root
+        if (!clone) clone = {};
+
+        // Wrap setComputedProps in promise and keep looping through items rather than wait for it to complete
+        // = make parallel calls rather than sequentials
+        const makePromise = (nestedItem: Entity, nestedClone: any, entityMetadata: EntityMetadata): Promise<void> =>
+            new Promise(async (resolve) => {
+                try {
+                    await this.setComputedPropsOnItem(rootMetadata, nestedItem, nestedClone, operation, entityMetadata);
+                    resolve();
+                } catch (error) {
+                    isDev && console.error(error);
+                    resolve();
+                }
+            });
+
         for (key in item) {
             prop = item[key as keyof Entity];
             if (Array.isArray(prop) && !this.mappingManager.isPropSimple(entityMetadata, key)) {
-                const propArray = prop.map((nestedItem: Entity) =>
-                    this.recursiveFormatItem(
-                        nestedItem,
-                        clone[key as keyof typeof clone] || {},
-                        operation,
-                        rootMetadata,
-                        options
-                    )
-                );
-                clone[key] = (await Promise.all(propArray)) as any;
-            } else if (isType<GenericEntity>(prop, isEntity(prop))) {
-                clone[key] = await this.recursiveFormatItem(
-                    prop,
-                    clone[key as keyof typeof clone] || {},
+                const propArray: Entity[] = [];
+                let i = 0;
+                let nestedClone;
+                for (i; i < prop.length; i++) {
+                    nestedClone = {};
+                    try {
+                        promises.push(
+                            makePromise(prop[i], nestedClone, getRepository(prop[i].constructor.name).metadata)
+                        );
+                    } catch (error) {}
+                    propArray.push(
+                        this.recursiveFormatItem({
+                            item: prop[i],
+                            clone: nestedClone,
+                            operation,
+                            rootMetadata,
+                            promises,
+                            options,
+                        })
+                    );
+                }
+
+                clone[key] = propArray;
+            } else if (isEntity(prop)) {
+                try {
+                    promises.push(makePromise(item, clone, getRepository(item.constructor.name).metadata));
+                } catch (error) {}
+
+                clone[key] = this.recursiveFormatItem({
+                    item: prop,
+                    clone: {},
                     operation,
                     rootMetadata,
-                    options
-                );
-            } else if (
-                isPrimitive(prop) ||
-                (prop as any) instanceof Date ||
-                this.mappingManager.isPropSimple(entityMetadata, key)
-            ) {
+                    promises,
+                    options,
+                });
+            } else if (isPrimitive(prop) || isDate(prop) || this.mappingManager.isPropSimple(entityMetadata, key)) {
                 clone[key] = prop;
             }
 
             // TODO Remove properties selected by DependsOn ? options in Route>App ? default = true
         }
 
-        if (options.shouldEntityWithOnlyIdBeFlattenedToIri && isEntity(item) && Object.keys(item).length === 1) {
-            return idToIRI(entityMetadata, item.id) as any;
-        } else {
-            // TODO wrap setComputedProps in promise and keep looping through items rather than wait for it to complete
-            // = go for parallel calls rather than sequentials
-            await this.setComputedPropsOnItem(rootMetadata, item, clone, operation, entityMetadata);
-            if (options.shouldSetSubresourcesIriOnItem) {
-                this.setSubresourcesIriOnItem(clone, entityMetadata);
-            }
-            return sortObjectByKeys(clone);
+        if (options.shouldSetSubresourcesIriOnItem) {
+            this.setSubresourcesIriOnItem(clone, entityMetadata);
         }
+
+        promises.push(makePromise(item, clone, getRepository(item.constructor.name).metadata));
+
+        return clone;
     }
 
     private async setComputedPropsOnItem<Entity extends GenericEntity>(
@@ -107,10 +158,10 @@ export class Formater {
         const computedProps = this.mappingManager
             .getComputedProps(rootMetadata, operation, entityMetadata)
             .map((computed) => getComputedPropMethodAndKey(computed));
-        const propsPromises = await Promise.all(
-            computedProps.map((computed) => (item[computed.computedPropMethod as keyof Entity] as any)())
+        const results = await Promise.all(
+            computedProps.map((computed) => item[computed.computedPropMethod as keyof Entity]())
         );
-        propsPromises.forEach((result, i) => (clone[computedProps[i].propKey as keyof Entity] = result));
+        results.forEach((result, i) => (clone[computedProps[i].propKey as keyof Entity] = result));
     }
 
     /** For each item's subresources, add their corresponding IRIs to this item */
@@ -125,6 +176,15 @@ export class Formater {
         }
     }
 }
+
+export type FormatItemArgs<Entity> = {
+    item: Entity;
+    clone: any;
+    operation: RouteOperation;
+    rootMetadata: EntityMetadata;
+    promises: Promise<any>[];
+    options?: FormaterOptions;
+};
 
 export const computedPropRegex = /^(get|is|has).+/;
 
@@ -158,8 +218,10 @@ export const getComputedPropMethodAndKey = (computed: string) => {
 export type FormaterOptions = Pick<
     EntityRouteOptions,
     "shouldEntityWithOnlyIdBeFlattenedToIri" | "shouldSetSubresourcesIriOnItem"
->;
-export type FormaterArgs<Entity extends GenericEntity = GenericEntity> = Pick<RequestContext<Entity>, "operation"> & {
+> & { shouldOnlyFlattenNested?: boolean };
+export type FormaterArgs<Entity extends GenericEntity = GenericEntity> = Required<
+    Pick<RequestContext<Entity>, "operation">
+> & {
     item: Entity;
     entityMetadata: EntityMetadata;
     options?: FormaterOptions;
