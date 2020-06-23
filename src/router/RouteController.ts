@@ -4,7 +4,7 @@ import { Container } from "typedi";
 import { getRouteFiltersMeta, RouteFiltersMeta, GenericEntity, EntityRouteOptions } from "@/router/EntityRouter";
 import { AbstractFilter, AbstractFilterConfig, QueryParams } from "@/filters/AbstractFilter";
 import { EntityErrorResponse, Denormalizer } from "@/serializer/Denormalizer";
-import { Normalizer } from "@/serializer/Normalizer";
+import { Normalizer, NormalizerOptions } from "@/serializer/Normalizer";
 import { AliasHandler } from "@/serializer/AliasHandler";
 
 // TODO (global) Use object as fn arguments rather than chaining them
@@ -88,7 +88,10 @@ export class RouteController<Entity extends GenericEntity> {
 
         const responseOperation =
             options?.responseOperation || (ctx.operation === "create" ? "details" : ctx.operation || "details");
-        return this.getDetails({ operation: responseOperation, entityId: insertResult.id });
+        return this.getDetails(
+            { operation: responseOperation, entityId: insertResult.id },
+            { shouldOnlyFlattenNested: true }
+        );
     }
 
     public async update(
@@ -111,7 +114,10 @@ export class RouteController<Entity extends GenericEntity> {
 
         const responseOperation =
             options?.responseOperation || (ctx.operation === "update" ? "details" : ctx.operation || "details");
-        return this.getDetails({ operation: responseOperation, entityId: result.id });
+        return this.getDetails(
+            { operation: responseOperation, entityId: result.id },
+            { shouldOnlyFlattenNested: true }
+        );
     }
 
     /** Returns an entity with every mapped props (from groups) for a given id */
@@ -153,7 +159,10 @@ export class RouteController<Entity extends GenericEntity> {
     }
 
     /** Returns an entity with every mapped props (from groups) for a given id */
-    public async getDetails(ctx: Pick<RequestContext<Entity>, "operation" | "entityId" | "subresourceRelations">) {
+    public async getDetails(
+        ctx: Pick<RequestContext<Entity>, "operation" | "entityId" | "subresourceRelations">,
+        options?: NormalizerOptions
+    ) {
         const { operation = "details", entityId, subresourceRelations } = ctx;
         const subresourceRelation = last(subresourceRelations || []);
 
@@ -164,14 +173,10 @@ export class RouteController<Entity extends GenericEntity> {
             this.relationManager.joinSubresourceOnInverseSide(qb, this.metadata, aliasHandler, subresourceRelation);
         }
 
-        return await this.normalizer.getItem<Entity>(
-            this.metadata,
-            qb,
-            aliasHandler,
-            entityId,
-            operation,
-            this.options
-        );
+        return await this.normalizer.getItem<Entity>(this.metadata, qb, aliasHandler, entityId, operation, {
+            ...this.options,
+            ...options,
+        });
     }
 
     public async delete(ctx: Pick<RequestContext<Entity>, "entityId" | "subresourceRelations">) {
