@@ -3,7 +3,7 @@ import Container, { Service } from "typedi";
 
 import { MappingManager } from "@/mapping/MappingManager";
 import { AliasHandler } from "@/serializer/AliasHandler";
-import { Formater } from "@/serializer/Formater";
+import { Formater, FormaterOptions } from "@/serializer/Formater";
 import { EntityRouteOptions, GenericEntity } from "@/router/EntityRouter";
 import { RelationManager } from "@/mapping/RelationManager";
 import { RequestContext } from "@/router/MiddlewareMaker";
@@ -29,7 +29,7 @@ export class Normalizer {
         qb: SelectQueryBuilder<Entity>,
         aliasHandler: AliasHandler,
         operation: RequestContext["operation"] = "list",
-        options: EntityRouteOptions = {}
+        options: NormalizerOptions = {}
     ): Promise<[Entity[], number]> {
         const selectProps = this.mappingManager.getSelectProps(entityMetadata, operation, entityMetadata, true);
 
@@ -70,7 +70,7 @@ export class Normalizer {
         aliasHandler: AliasHandler,
         entityId: RequestContext["entityId"],
         operation: RequestContext["operation"] = "details",
-        options: EntityRouteOptions = {}
+        options: NormalizerOptions = {}
     ) {
         const selectProps = this.mappingManager.getSelectProps(entityMetadata, operation, entityMetadata, true);
 
@@ -112,7 +112,4 @@ export class Normalizer {
     }
 }
 
-export type NormalizerOptions = Pick<
-    EntityRouteOptions,
-    "shouldMaxDepthReturnRelationPropsId" | "shouldEntityWithOnlyIdBeFlattenedToIri" | "shouldSetSubresourcesIriOnItem"
->;
+export type NormalizerOptions = Pick<EntityRouteOptions, "shouldMaxDepthReturnRelationPropsId"> & FormaterOptions;
