@@ -196,6 +196,11 @@ export class RelationManager {
         prevAlias?: string
     ) {
         const relation = subresourceRelation.relation;
+        if (!relation.inverseRelation) {
+            throw new Error(
+                `Subresources require an inverseRelation to be set, missing for ${relation.entityMetadata.tableName}.${relation.propertyName}`
+            );
+        }
 
         const property = (prevAlias || entityMetadata.tableName) + "." + relation.inverseSidePropertyPath;
         const alias = aliasHandler.getAliasForRelation(qb, relation.inverseRelation).alias;

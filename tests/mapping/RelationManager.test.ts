@@ -11,7 +11,6 @@ import {
 import { Groups, AliasHandler, RelationManager, DependsOn, Subresource, getSubresourceRelation } from "@/index";
 import { createTestConnection, closeTestConnection } from "@@/tests/testConnection";
 import { Container } from "typedi";
-import { log } from "@/functions/utils";
 
 describe("RelationManager", () => {
     class AbstractEntity {
@@ -59,6 +58,7 @@ describe("RelationManager", () => {
             @Column()
             name: string;
 
+            @Subresource(() => Role)
             @Groups({ user: ["details"] })
             @ManyToOne(() => Role)
             role: Role;
@@ -215,6 +215,19 @@ describe("RelationManager", () => {
 
             expect(qb.expressionMap.joinAttributes.map((join) => join.alias.name)).toEqual(["user_uploadedImages_1"]);
         });
+
+        it("can NOT join subresource when inverse side is missing", () => {
+            const repository = getRepository(User);
+            const metadata = repository.metadata;
+
+            const aliasHandler = new AliasHandler();
+            const qb = repository.createQueryBuilder(metadata.tableName);
+            const subresourceRelation = getSubresourceRelation(User, metadata, "role");
+
+            expect(() => manager.joinSubresourceOnInverseSide(qb, metadata, aliasHandler, subresourceRelation)).toThrow(
+                "Subresources require an inverseRelation to be set, missing for user.role"
+            );
+        });
     });
 
     describe("max depth cases", () => {
@@ -224,13 +237,9 @@ describe("RelationManager", () => {
             @Column()
             title: string;
 
-            // @ManyToOne(() => User, (user) => user.uploadedPictures)
             @Groups(["list"])
             @ManyToOne(() => User)
             uploader: () => User; // wrap it to avoid ReferenceError: Cannot access 'User' before initialization
-
-            // @OneToMany(() => User, (user) => user.avatar)
-            // usedByUsers: User[];
         }
         @Entity()
         class User extends AbstractEntity {
@@ -238,13 +247,9 @@ describe("RelationManager", () => {
             @Column()
             name: string;
 
-            // @ManyToOne(() => Image, (image) => image.usedByUsers)
             @Groups(["list"])
             @ManyToOne(() => Image)
             avatar: Image;
-
-            // @OneToMany(() => Image, (image) => image.uploader)
-            // uploadedPictures: Image[];
         }
 
         beforeAll(() => createTestConnection([Image, User]));
