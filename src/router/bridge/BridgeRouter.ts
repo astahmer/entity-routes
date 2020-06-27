@@ -18,7 +18,7 @@ export class BridgeRouter<T = any> {
     /** Create and register a route. */
     register(route: BridgeRouterRoute) {
         if (this.routes.find((registered) => this.areSameRoutes(registered, route))) {
-            isDev() && console.warn("This route is already registed on that router", route);
+            isDev() && console.warn("This route is already registered on that router", route);
             return;
         }
 
