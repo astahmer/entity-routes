@@ -53,7 +53,7 @@ export class RouteController<Entity extends GenericEntity> {
         options: CrudActionOptions = {}
     ) {
         const { operation = "create", values, subresourceRelations } = ctx;
-        const subresourceRelation = last(subresourceRelations || []);
+        const subresourceRelation = last(subresourceRelations || []); // Should only contain 1 item at most
 
         if (!subresourceRelation && !Object.keys(values).length) {
             return { error: "Body can't be empty on create operation" };
@@ -82,8 +82,8 @@ export class RouteController<Entity extends GenericEntity> {
                     subresourceRelation.relation.inverseRelation.target,
                     subresourceRelation.relation.inverseRelation.propertyName
                 )
-                .of(subresourceRelation.id)
-                .add(insertResult);
+                .of(insertResult.id)
+                .add(subresourceRelation.id);
         }
 
         const responseOperation =
@@ -164,13 +164,21 @@ export class RouteController<Entity extends GenericEntity> {
         options?: NormalizerOptions
     ) {
         const { operation = "details", entityId, subresourceRelations } = ctx;
-        const subresourceRelation = last(subresourceRelations || []);
 
         const qb = this.repository.createQueryBuilder(this.metadata.tableName);
 
         const aliasHandler = new AliasHandler();
-        if (subresourceRelation) {
-            this.relationManager.joinSubresourceOnInverseSide(qb, this.metadata, aliasHandler, subresourceRelation);
+        if (subresourceRelations) {
+            let prevAlias: string;
+            subresourceRelations.reverse().forEach((subresource) => {
+                prevAlias = this.relationManager.joinSubresourceOnInverseSide(
+                    qb,
+                    this.metadata,
+                    aliasHandler,
+                    subresource,
+                    prevAlias
+                );
+            });
         }
 
         return await this.normalizer.getItem<Entity>(this.metadata, qb, aliasHandler, entityId, operation, {

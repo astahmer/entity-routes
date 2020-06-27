@@ -195,14 +195,15 @@ export class RelationManager {
         subresourceRelation: SubresourceRelation,
         prevAlias?: string
     ) {
-        const { alias } = aliasHandler.getAliasForRelation(qb, subresourceRelation.relation.inverseRelation);
+        const relation = subresourceRelation.relation;
 
-        qb.innerJoin(
-            (prevAlias || entityMetadata.tableName) + "." + subresourceRelation.relation.inverseSidePropertyPath,
-            alias,
-            alias + ".id = :parentId",
-            { parentId: subresourceRelation.id }
-        );
+        const property = (prevAlias || entityMetadata.tableName) + "." + relation.inverseSidePropertyPath;
+        const alias = aliasHandler.getAliasForRelation(qb, relation.inverseRelation).alias;
+
+        const param = subresourceRelation.param && { parentId: subresourceRelation.id };
+        const condition = subresourceRelation.param && alias + ".id = :parentId";
+
+        qb.innerJoin(property, alias, condition, param);
 
         return alias;
     }

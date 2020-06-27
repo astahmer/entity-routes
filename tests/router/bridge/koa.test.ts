@@ -7,10 +7,10 @@ import * as bodyParser from "koa-bodyparser";
 import { RouteVerb, flatMapOnProp } from "@/index";
 import { registerKoaRouteFromBridgeRoute, makeKoaEntityRouters } from "@/router/bridge/koa";
 import { testRouteConfigs, testRoute, TestRequestConfig } from "@@/tests/router/bridge/sample/requests";
-import { User, Article, Comment, Upvote, expectedRouteNames } from "@@/tests/router/bridge/sample/entities";
+import { getTestEntities, expectedRouteNames } from "@@/tests/router/bridge/sample/entities";
 
 describe("koa BridgeRouter adapter", () => {
-    const entities = [User, Article, Comment, Upvote];
+    const entities = getTestEntities();
 
     it("registerKoaRouteFromBridgeRouter", () => {
         const koaRouter = new Router();
@@ -60,7 +60,8 @@ describe("koa BridgeRouter adapter", () => {
             return closeTestConnection();
         });
 
-        const makeTest = (config: TestRequestConfig) => it(config.it, () => testRoute(client, config));
+        const makeTest = (config: TestRequestConfig) =>
+            (config.only ? it.only : config.skip ? it.skip : it)(config.it, () => testRoute(client, config));
         testRouteConfigs.forEach(makeTest);
     });
 });

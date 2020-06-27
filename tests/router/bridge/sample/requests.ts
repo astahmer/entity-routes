@@ -1,6 +1,6 @@
 import { AxiosInstance, AxiosRequestConfig } from "axios";
 
-export type TestRequestConfig = AxiosRequestConfig & { it: string; result?: any };
+export type TestRequestConfig = AxiosRequestConfig & { it: string; result?: any; only?: boolean; skip?: boolean };
 export async function testRoute(client: AxiosInstance, config: TestRequestConfig) {
     const result = await client.request(config);
     expect(result.data).toEqualMessy(config.result);
@@ -25,11 +25,12 @@ export const testRouteConfigs: TestRequestConfig[] = [
         it: "should create new user",
         url: "/user",
         method: "post",
-        data: { name: "Alex" },
+        data: { id: 123, name: "Alex" },
         result: {
             "@context": { operation: "create", entity: "user", errors: null },
-            articles: "/api/user/1/articles",
-            id: 1,
+            articles: "/api/user/123/articles",
+            mainRole: "/api/user/123/mainRole",
+            id: 123,
             name: "Alex",
         },
     },
@@ -58,23 +59,24 @@ export const testRouteConfigs: TestRequestConfig[] = [
                 retrievedItems: 1,
                 totalItems: 1,
             },
-            items: [{ articles: "/api/user/1/articles", id: 1, name: "Alex" }],
+            items: [{ articles: "/api/user/123/articles", mainRole: "/api/user/123/mainRole", id: 123, name: "Alex" }],
         },
     },
     {
-        it: "should create a new article for user 1",
-        url: "/user/1/articles",
+        it: "should create a new article for user 123",
+        url: "/user/123/articles",
         method: "post",
-        data: { title: "First article" },
+        data: { id: 111, title: "First article" },
         result: {
             "@context": { operation: "create", entity: "article", errors: null },
-            id: 1,
-            comments: "/api/article/1/comments",
+            id: 111,
+            author: "/api/article/111/author",
+            comments: "/api/article/111/comments",
         },
     },
     {
-        it: "should lists user 1 articles",
-        url: "/user/1/articles",
+        it: "should lists user 123 articles",
+        url: "/user/123/articles",
         method: "get",
         result: {
             "@context": {
@@ -83,23 +85,23 @@ export const testRouteConfigs: TestRequestConfig[] = [
                 retrievedItems: 1,
                 totalItems: 1,
             },
-            items: ["/api/article/1"],
+            items: ["/api/article/111"],
         },
     },
     {
-        it: "should create a new comment for article 1",
-        url: "/article/1/comments",
+        it: "should create a new comment for article 111",
+        url: "/article/111/comments",
         method: "post",
-        data: { message: "First comment" },
+        data: { id: 222, message: "First comment" },
         result: {
             "@context": { operation: "create", entity: "comment", errors: null },
-            id: 1,
-            upvotes: "/api/comment/1/upvotes",
+            id: 222,
+            upvotes: "/api/comment/222/upvotes",
         },
     },
     {
         it: "should lists comments of user articles",
-        url: "/user/1/articles/comments",
+        url: "/user/123/articles/comments",
         method: "get",
         result: {
             "@context": {
@@ -108,22 +110,22 @@ export const testRouteConfigs: TestRequestConfig[] = [
                 retrievedItems: 1,
                 totalItems: 1,
             },
-            items: ["/api/comment/1"],
+            items: ["/api/comment/222"],
         },
     },
     {
-        it: "should create a new upvote for comment 1",
-        url: "/comment/1/upvotes",
+        it: "should create a new upvote for comment 222",
+        url: "/comment/222/upvotes",
         method: "post",
-        data: {},
+        data: { id: 333 },
         result: {
             "@context": { operation: "create", entity: "upvote", errors: null },
-            id: 1,
+            id: 333,
         },
     },
     {
         it: "should lists upvotes of user comments",
-        url: "/user/1/articles/comments/upvotes",
+        url: "/user/123/articles/comments/upvotes",
         method: "get",
         result: {
             "@context": {
@@ -132,7 +134,77 @@ export const testRouteConfigs: TestRequestConfig[] = [
                 retrievedItems: 1,
                 totalItems: 1,
             },
-            items: ["/api/upvote/1"],
+            items: ["/api/upvote/333"],
+        },
+    },
+    {
+        it: "should create new mainRole for user 123",
+        url: "/user/123/mainRole",
+        method: "post",
+        data: { id: 456, label: "Admin" },
+        result: {
+            "@context": { operation: "create", entity: "role", errors: null },
+            id: 456,
+            label: "Admin",
+            logo: "/api/role/456/logo",
+        },
+    },
+    {
+        it: "should retrieve mainRole of user 123",
+        url: "/user/123/mainRole",
+        method: "get",
+        result: {
+            "@context": { operation: "details", entity: "role" },
+            id: 456,
+            label: "Admin",
+            logo: "/api/role/456/logo",
+        },
+    },
+    {
+        it: "should create new logo for role 456",
+        url: "/role/456/logo",
+        method: "post",
+        data: { id: 789, url: "http://abc.def/image.jpg" },
+        result: {
+            "@context": { operation: "create", entity: "image", errors: null },
+            id: 789,
+            upvotes: "/api/image/789/upvotes",
+            url: "http://abc.def/image.jpg",
+        },
+    },
+    {
+        it: "should retrieve logo of mainRole of user 123",
+        url: "/user/123/mainRole/logo",
+        method: "get",
+        result: {
+            "@context": { operation: "details", entity: "image" },
+            id: 789,
+            upvotes: "/api/image/789/upvotes",
+            url: "http://abc.def/image.jpg",
+        },
+    },
+    {
+        it: "should create a new upvote for image 789",
+        url: "/image/789/upvotes",
+        method: "post",
+        data: { id: 444 },
+        result: {
+            "@context": { operation: "create", entity: "upvote", errors: null },
+            id: 444,
+        },
+    },
+    {
+        it: "should list upvotes of user's role.image",
+        url: "/user/123/mainRole/logo/upvotes",
+        method: "get",
+        result: {
+            "@context": {
+                entity: "upvote",
+                operation: "list",
+                retrievedItems: 1,
+                totalItems: 1,
+            },
+            items: ["/api/upvote/444"],
         },
     },
 ];

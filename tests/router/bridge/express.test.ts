@@ -7,10 +7,10 @@ import * as bodyParser from "body-parser";
 import { RouteVerb, flatMapOnProp } from "@/index";
 import { registerExpressRouteFromBridgeRoute, makeExpressEntityRouters, printBridgeRoute } from "@/router/bridge/index";
 import { testRouteConfigs, TestRequestConfig, testRoute } from "@@/tests/router/bridge/sample/requests";
-import { User, Article, Comment, Upvote, expectedRouteDesc } from "@@/tests/router/bridge/sample/entities";
+import { getTestEntities, expectedRouteDesc } from "@@/tests/router/bridge/sample/entities";
 
 describe("Express BridgeRouter adapter", () => {
-    const entities = [User, Article, Comment, Upvote];
+    const entities = getTestEntities();
 
     it("registerExpressRouteFromBridgeRouter", () => {
         const router = Router();
