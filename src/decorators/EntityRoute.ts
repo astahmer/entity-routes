@@ -4,9 +4,9 @@ import { RouteDefaultOperation } from "@/decorators/Groups";
 /**
  * @example
  *
- * [at]PaginationFilter([], { all: true })
- * [at]SearchFilter(["id", { name: "startsWith" }])
- * [at]EntityRoute("/users", ["create", "list", "details", "update", "delete"], {
+ * [at]Pagination({ all: true })
+ * [at]Search(["id", [name: "startsWith"]])
+ * [at]EntityRoute({ path: "/users", operations: ["create", "list", "delete"] }, {
  *     actions: [
  *         {
  *             verb: "get",

@@ -6,20 +6,20 @@ import { isType } from "@/index";
 
 /**
  * SearchFilter PropertyDecorator
- * @example [at]SearchFilter(StrategyType.EXISTS)
+ * @example [at]Search(StrategyType.EXISTS)
  */
 export function Search(strategy?: StrategyType): PropertyDecorator;
 
 /**
  * SearchFilter ClassDecorator
- * @example [at]SearchFilter({ all: true })
+ * @example [at]Search({ all: true })
  */
 export function Search(options?: SearchFilterOptions): ClassDecorator;
 
 /**
  * SearchFilter ClassDecorator
  * @example
- * [at]SearchFilter(["id", "banks.id", ["banks.coverPicture", "EXISTS"]], {
+ * [at]Search(["id", "banks.id", ["banks.coverPicture", "EXISTS"]], {
  *      defaultWhereStrategy: "STARTS_WITH"
  * })
  */
