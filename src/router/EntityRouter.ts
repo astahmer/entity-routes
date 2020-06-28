@@ -14,6 +14,7 @@ import {
 } from "@/router/actions";
 import { MiddlewareMaker, CRUD_ACTIONS } from "@/router/MiddlewareMaker";
 import { CType } from "@/utils-types";
+import { CreateUpdateOptions } from "@/router/RouteController";
 
 export class EntityRouter<Entity extends GenericEntity> {
     public readonly middlewareMaker: MiddlewareMaker<Entity>;
@@ -188,6 +189,8 @@ export type EntityRouteOptions = {
     shouldSetSubresourcesIriOnItem?: boolean;
     /** Default level of subresources max depth path */
     defaultSubresourceMaxDepthLvl?: number;
+    /** Default CreateUpdateOptions */
+    defaultCreateUpdateOptions?: CreateUpdateOptions;
 };
 export type EntityRouteConfig = EntityRouteBaseOptions & EntityRouteOptions;
 

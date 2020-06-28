@@ -1,11 +1,12 @@
 import { getRepository, EntityMetadata } from "typeorm";
 import { Container, Service } from "typedi";
 
-import { GenericEntity, EntityRouteOptions } from "@/router/EntityRouter";
+import { GenericEntity } from "@/router/EntityRouter";
 import { Cleaner } from "@/serializer/Cleaner";
 import { ValidateItemOptions, EntityErrorResults, Validator } from "@/serializer/Validator";
 import { RequestContextMinimal } from "@/router/MiddlewareMaker";
 import { SubresourceRelation } from "@/router/SubresourceManager";
+import { EntityMapperMakeOptions } from "@/mapping/index";
 
 @Service()
 export class Denormalizer {
@@ -22,12 +23,12 @@ export class Denormalizer {
         ctx,
         rootMetadata,
         validatorOptions,
-        routeOptions,
+        mapperMakeOptions,
         subresourceRelation,
     }: SaveItemArgs<Entity>) {
         const { operation, values } = ctx;
         const repository = getRepository<Entity>(rootMetadata.target);
-        const cleanedItem = this.cleaner.cleanItem({ rootMetadata, operation, values, options: routeOptions });
+        const cleanedItem = this.cleaner.cleanItem({ rootMetadata, operation, values, options: mapperMakeOptions });
         const item = repository.create(cleanedItem);
 
         // Allow partially updating an entity
@@ -62,8 +63,8 @@ export type SaveItemArgs<Entity extends GenericEntity = GenericEntity> = {
     ctx: RequestContextMinimal<Entity>;
     /** Used by class-validator & entity-validator */
     validatorOptions?: ValidateItemOptions;
-    /** EntityRoute specific options */
-    routeOptions?: EntityRouteOptions;
+    /** EntityMapper make options */
+    mapperMakeOptions?: EntityMapperMakeOptions;
     /** Subresource relation used to auto join saved entity with its parent */
     subresourceRelation?: SubresourceRelation;
 };

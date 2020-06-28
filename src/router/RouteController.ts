@@ -3,7 +3,7 @@ import { Container } from "typedi";
 
 import { getRouteFiltersMeta, RouteFiltersMeta, GenericEntity, EntityRouteOptions } from "@/router/EntityRouter";
 import { AbstractFilter, AbstractFilterConfig, QueryParams } from "@/filters/AbstractFilter";
-import { EntityErrorResponse, Denormalizer } from "@/serializer/Denormalizer";
+import { EntityErrorResponse, Denormalizer, SaveItemArgs } from "@/serializer/Denormalizer";
 import { Normalizer, NormalizerOptions } from "@/serializer/Normalizer";
 import { AliasHandler } from "@/serializer/AliasHandler";
 
@@ -13,7 +13,7 @@ import { isType } from "@/functions/asserts";
 import { RelationManager } from "@/mapping/RelationManager";
 import { fromEntries } from "@/functions/object";
 import { RequestContext, CollectionResult } from "@/router/MiddlewareMaker";
-import { ValidateItemOptions } from "@/serializer/index";
+import { Formater, FormaterOptions } from "@/serializer/index";
 import { RouteOperation } from "@/decorators/index";
 import { last } from "@/functions/array";
 import { isRelationSingle } from "@/functions/entity";
@@ -33,6 +33,10 @@ export class RouteController<Entity extends GenericEntity> {
         return Container.get(RelationManager);
     }
 
+    get formater() {
+        return Container.get(Formater);
+    }
+
     get metadata() {
         return this.repository.metadata;
     }
@@ -50,25 +54,26 @@ export class RouteController<Entity extends GenericEntity> {
 
     public async create(
         ctx: Pick<RequestContext<Entity>, "operation" | "values" | "subresourceRelations">,
-        options: CrudActionOptions = {}
+        innerOptions: CreateUpdateOptions = {}
     ) {
         const { operation = "create", values, subresourceRelations } = ctx;
         const subresourceRelation = last(subresourceRelations || []); // Should only contain 1 item at most
+        const options = { ...this.options.defaultCreateUpdateOptions, ...(innerOptions || {}) };
 
         if (!subresourceRelation && !Object.keys(values).length) {
             return { error: "Body can't be empty on create operation" };
         }
 
-        const insertResult = await this.denormalizer.saveItem({
+        const result = await this.denormalizer.saveItem({
             ctx: { operation, values },
             rootMetadata: this.metadata,
-            routeOptions: { ...this.options, ...(options?.routeOptions || {}) },
+            mapperMakeOptions: { ...this.options, ...(options?.mapperMakeOptions || {}) },
             validatorOptions: options?.validatorOptions || {},
             subresourceRelation,
         });
 
-        if (isType<EntityErrorResponse>(insertResult, "hasValidationErrors" in insertResult)) {
-            return insertResult;
+        if (isType<EntityErrorResponse>(result, "hasValidationErrors" in result)) {
+            return result;
         }
 
         if (
@@ -82,34 +87,59 @@ export class RouteController<Entity extends GenericEntity> {
                     subresourceRelation.relation.inverseRelation.target,
                     subresourceRelation.relation.inverseRelation.propertyName
                 )
-                .of(insertResult.id)
+                .of(result.id)
                 .add(subresourceRelation.id);
+        }
+
+        if (!options?.shouldAutoReload) {
+            const item = options?.shouldFormatResult
+                ? await this.formater.formatItem({
+                      item: result,
+                      operation,
+                      entityMetadata: this.metadata,
+                      options: options.formaterOptions,
+                  })
+                : result;
+            return item;
         }
 
         const responseOperation =
             options?.responseOperation || (ctx.operation === "create" ? "details" : ctx.operation || "details");
         return this.getDetails(
-            { operation: responseOperation, entityId: insertResult.id },
+            { operation: responseOperation, entityId: result.id },
             { shouldOnlyFlattenNested: true }
         );
     }
 
     public async update(
         ctx: Pick<RequestContext<Entity>, "operation" | "values" | "entityId">,
-        options?: CrudActionOptions
+        innerOptions?: CreateUpdateOptions
     ) {
         const { operation = "update", values, entityId } = ctx;
+        const options = { ...this.options.defaultCreateUpdateOptions, ...(innerOptions || {}) };
 
         if (!values?.id) (values as Entity).id = entityId;
         const result = await this.denormalizer.saveItem({
             ctx: { operation, values },
             rootMetadata: this.metadata,
-            routeOptions: { ...this.options, ...(options?.routeOptions || {}) },
+            mapperMakeOptions: { ...this.options, ...(options?.mapperMakeOptions || {}) },
             validatorOptions: options?.validatorOptions || {},
         });
 
         if (isType<EntityErrorResponse>(result, "hasValidationErrors" in result)) {
             return result;
+        }
+
+        if (!options?.shouldAutoReload) {
+            const item = options?.shouldFormatResult
+                ? await this.formater.formatItem({
+                      item: result,
+                      operation,
+                      entityMetadata: this.metadata,
+                      options: options.formaterOptions,
+                  })
+                : result;
+            return item;
         }
 
         const responseOperation =
@@ -226,8 +256,9 @@ export class RouteController<Entity extends GenericEntity> {
     }
 }
 
-export type CrudActionOptions = {
-    routeOptions?: EntityRouteOptions;
-    validatorOptions?: ValidateItemOptions;
+export type CreateUpdateOptions = Pick<SaveItemArgs<any>, "validatorOptions" | "mapperMakeOptions"> & {
     responseOperation?: RouteOperation;
+    shouldAutoReload?: boolean;
+    shouldFormatResult?: boolean;
+    formaterOptions?: FormaterOptions;
 };

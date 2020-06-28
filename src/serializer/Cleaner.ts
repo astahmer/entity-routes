@@ -4,8 +4,8 @@ import Container, { Service } from "typedi";
 import { isType, isObject, isPrimitive, isDate } from "@/functions/asserts";
 import { Primitive } from "@/functions/primitives";
 import { formatIriToId } from "@/functions/entity";
-import { GenericEntity, EntityRouteOptions } from "@/router/EntityRouter";
-import { MappingManager, MappingItem, ENTITY_META_SYMBOL } from "@/mapping/MappingManager";
+import { GenericEntity } from "@/router/EntityRouter";
+import { MappingManager, MappingItem, ENTITY_META_SYMBOL, EntityMapperMakeOptions } from "@/mapping/MappingManager";
 import { SaveItemArgs } from "@/serializer/Denormalizer";
 import { RequestContext } from "@/router/MiddlewareMaker";
 
@@ -104,5 +104,5 @@ export type CleanerArgs<Entity extends GenericEntity = GenericEntity> = Pick<
 > &
     Pick<SaveItemArgs, "rootMetadata"> & {
         rootMetadata: EntityMetadata;
-        options?: EntityRouteOptions;
+        options?: EntityMapperMakeOptions;
     };

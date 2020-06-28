@@ -1,9 +1,20 @@
-import { Groups, RouteController, Search, Subresource, getSubresourceRelation } from "@/index";
-import { PrimaryGeneratedColumn, Entity, Column, getRepository, ManyToOne, OneToMany } from "typeorm";
+import {
+    Groups,
+    RouteController,
+    Search,
+    Subresource,
+    getSubresourceRelation,
+    EntityRouteOptions,
+    ObjectLiteral,
+    ObjectLiteralType,
+} from "@/index";
+import { PrimaryGeneratedColumn, Entity, Column, getRepository, ManyToOne, OneToMany, ObjectType } from "typeorm";
 import { createTestConnection, closeTestConnection } from "@@/tests/testConnection";
 import { IsString, IsDate, IsEmail } from "class-validator";
 import { Container } from "typedi";
 import { log } from "@/functions/utils";
+
+const routeOptions: EntityRouteOptions = { defaultCreateUpdateOptions: { shouldAutoReload: true } };
 
 describe("RouteController - simple", () => {
     class AbstractEntity {
@@ -62,6 +73,50 @@ describe("RouteController - simple", () => {
                 role: { identifier: "ADM", name: "Admin" },
             };
 
+            const result = (await ctrl.create({ values })) as User;
+            expect(result.constructor).toBe(User);
+            expect(result.role.constructor).toBe(Role);
+            expect(result).toEqual({
+                name: "Alex",
+                birthDate,
+                role: { identifier: "ADM", name: "Admin", id: 1 },
+                id: 1,
+            });
+        });
+
+        it("inserts item & format result", async () => {
+            const repository = getRepository(User);
+            const ctrl = new RouteController(repository, { defaultCreateUpdateOptions: { shouldFormatResult: true } });
+
+            const birthDate = new Date();
+            const values = {
+                name: "Alex",
+                birthDate,
+                role: { identifier: "ADM", name: "Admin" },
+            };
+
+            const result = (await ctrl.create({ values })) as User; // actually is just ObjectLiteral with structure of User
+            expect(result.constructor).toBe(Object);
+            expect(result.role.constructor).toBe(Object);
+            expect(result).toEqual({
+                birthDate,
+                id: 1,
+                name: "Alex",
+                role: { id: 1, identifier: "ADM", name: "Admin" },
+            });
+        });
+
+        it("inserts item & auto reload it using getDetails", async () => {
+            const repository = getRepository(User);
+            const ctrl = new RouteController(repository, routeOptions);
+
+            const birthDate = new Date();
+            const values = {
+                name: "Alex",
+                birthDate,
+                role: { identifier: "ADM", name: "Admin" },
+            };
+
             const result = await ctrl.create({ values });
             expect(result).toEqual({
                 birthDate,
@@ -72,7 +127,7 @@ describe("RouteController - simple", () => {
 
         it("returns error when body is empty", async () => {
             const repository = getRepository(User);
-            const ctrl = new RouteController(repository);
+            const ctrl = new RouteController(repository, routeOptions);
 
             const values = {};
             const result = await ctrl.create({ values });
@@ -81,7 +136,7 @@ describe("RouteController - simple", () => {
 
         it("returns validation errors when sending invalid values", async () => {
             const repository = getRepository(User);
-            const ctrl = new RouteController(repository);
+            const ctrl = new RouteController(repository, routeOptions);
 
             const birthDate = new Date();
             const values = {
@@ -103,11 +158,49 @@ describe("RouteController - simple", () => {
     describe("update", () => {
         it("updates item", async () => {
             const roleRepository = getRepository(Role);
-            const roleCtrl = new RouteController(roleRepository);
+            const roleCtrl = new RouteController(roleRepository, routeOptions);
             const modRole = await roleCtrl.create({ values: { identifier: "MOD", name: "Moderator" } });
 
             const userRepository = getRepository(User);
             const userCtrl = new RouteController(userRepository);
+
+            const birthDate = new Date();
+            const createResult = await userCtrl.create({ values: { name: "Alex", birthDate } });
+            const updateResult = (await userCtrl.update({
+                values: { id: (createResult as User).id, role: (modRole as Role).id as any },
+            })) as User;
+
+            expect(updateResult.constructor).toBe(User);
+            expect(updateResult).toEqual({ id: 1, role: 1 });
+        });
+
+        it("updates item & format result", async () => {
+            const roleRepository = getRepository(Role);
+            const roleCtrl = new RouteController(roleRepository, routeOptions);
+            const modRole = await roleCtrl.create({ values: { identifier: "MOD", name: "Moderator" } });
+
+            const userRepository = getRepository(User);
+            const userCtrl = new RouteController(userRepository, {
+                defaultCreateUpdateOptions: { shouldFormatResult: true },
+            });
+
+            const birthDate = new Date();
+            const createResult = await userCtrl.create({ values: { name: "Alex", birthDate } });
+            const updateResult = (await userCtrl.update({
+                values: { id: (createResult as User).id, role: (modRole as Role).id as any },
+            })) as User; // actually is just ObjectLiteral with structure of User
+
+            expect(updateResult.constructor).toBe(Object);
+            expect(updateResult).toEqual({ id: 1, role: 1 });
+        });
+
+        it("updates item & auto reload it using getDetails", async () => {
+            const roleRepository = getRepository(Role);
+            const roleCtrl = new RouteController(roleRepository, routeOptions);
+            const modRole = await roleCtrl.create({ values: { identifier: "MOD", name: "Moderator" } });
+
+            const userRepository = getRepository(User);
+            const userCtrl = new RouteController(userRepository, routeOptions);
 
             const birthDate = new Date();
             const createResult = await userCtrl.create({ values: { name: "Alex", birthDate } });
@@ -124,7 +217,7 @@ describe("RouteController - simple", () => {
 
         it("returns validation errors when sending invalid values", async () => {
             const userRepository = getRepository(User);
-            const userCtrl = new RouteController(userRepository);
+            const userCtrl = new RouteController(userRepository, routeOptions);
 
             const birthDate = new Date();
             const createResult = await userCtrl.create({ values: { name: "Alex", birthDate } });
@@ -153,7 +246,7 @@ describe("RouteController - simple", () => {
     describe("getList", () => {
         it("returns collection", async () => {
             const repository = getRepository(User);
-            const ctrl = new RouteController(repository);
+            const ctrl = new RouteController(repository, routeOptions);
 
             // Running sequentially to keep expected id
             await ctrl.create({
@@ -181,7 +274,7 @@ describe("RouteController - simple", () => {
 
         it("returns collection filtered by queryParams", async () => {
             const repository = getRepository(User);
-            const ctrl = new RouteController(repository);
+            const ctrl = new RouteController(repository, routeOptions);
 
             // Running sequentially to keep expected id
             await ctrl.create({
@@ -220,7 +313,7 @@ describe("RouteController - simple", () => {
 
     it("getDetails", async () => {
         const repository = getRepository(User);
-        const ctrl = new RouteController(repository);
+        const ctrl = new RouteController(repository, routeOptions);
 
         const birthDate = new Date();
         const createResult = (await ctrl.create({
@@ -234,7 +327,7 @@ describe("RouteController - simple", () => {
     describe("delete", () => {
         it("removes entity", async () => {
             const repository = getRepository(User);
-            const ctrl = new RouteController(repository);
+            const ctrl = new RouteController(repository, routeOptions);
 
             const createResult = (await ctrl.create({ values: { name: "Alex", birthDate: new Date() } })) as User;
 
@@ -324,11 +417,11 @@ describe("RouteController - subresources", () => {
     describe("create", () => {
         it("inserts new item and join it to parent (XToOne)", async () => {
             const userRepository = getRepository(User);
-            const userCtrl = new RouteController(userRepository);
+            const userCtrl = new RouteController(userRepository, routeOptions);
             const userResult = (await userCtrl.create({ values: { name: "Alex", email: "alex@mail.com" } })) as User;
 
             const roleRepository = getRepository(Role);
-            const roleCtrl = new RouteController(roleRepository);
+            const roleCtrl = new RouteController(roleRepository, routeOptions);
 
             const values = { title: "Admin" };
             const subresourceRelation = getSubresourceRelation(User, getRepository(User).metadata, "role");
@@ -345,11 +438,11 @@ describe("RouteController - subresources", () => {
 
         it("join existing item on parent (XToOne)", async () => {
             const userRepository = getRepository(User);
-            const userCtrl = new RouteController(userRepository);
+            const userCtrl = new RouteController(userRepository, routeOptions);
             const userResult = (await userCtrl.create({ values: { name: "Alex", email: "alex@mail.com" } })) as User;
 
             const roleRepository = getRepository(Role);
-            const roleCtrl = new RouteController(roleRepository);
+            const roleCtrl = new RouteController(roleRepository, routeOptions);
 
             const values = { title: "Admin" };
             const roleResult = (await roleCtrl.create({ values })) as Role;
@@ -394,11 +487,11 @@ describe("RouteController - subresources", () => {
 
         it("inserts new item in parent collection (XToMany)", async () => {
             const userRepository = getRepository(User);
-            const userCtrl = new RouteController(userRepository);
+            const userCtrl = new RouteController(userRepository, routeOptions);
             const userResult = (await userCtrl.create({ values: { name: "Alex", email: "alex@mail.com" } })) as User;
 
             const articleRepository = getRepository(Article);
-            const articleCtrl = new RouteController(articleRepository);
+            const articleCtrl = new RouteController(articleRepository, routeOptions);
 
             const values = { title: "How to add new item in parent collection XToMany" };
             const subresourceRelation = getSubresourceRelation(User, getRepository(User).metadata, "articles");
@@ -410,11 +503,11 @@ describe("RouteController - subresources", () => {
 
         it("add existing item in parent collection (XToMany)", async () => {
             const userRepository = getRepository(User);
-            const userCtrl = new RouteController(userRepository);
+            const userCtrl = new RouteController(userRepository, routeOptions);
             const userResult = (await userCtrl.create({ values: { name: "Alex", email: "alex@mail.com" } })) as User;
 
             const articleRepository = getRepository(Article);
-            const articleCtrl = new RouteController(articleRepository);
+            const articleCtrl = new RouteController(articleRepository, routeOptions);
 
             const values = { title: "How to add existing item in parent collection XToMany" };
             const articleResult = (await articleCtrl.create({ values })) as Article;
@@ -456,11 +549,11 @@ describe("RouteController - subresources", () => {
     describe("getList", () => {
         it("auto joins from parent subresource", async () => {
             const userRepository = getRepository(User);
-            const userCtrl = new RouteController(userRepository);
+            const userCtrl = new RouteController(userRepository, routeOptions);
             const userResult = (await userCtrl.create({ values: { name: "Alex", email: "alex@mail.com" } })) as User;
 
             const articleRepository = getRepository(Article);
-            const articleCtrl = new RouteController(articleRepository);
+            const articleCtrl = new RouteController(articleRepository, routeOptions);
 
             const values = { title: "Join collection on parent" };
             const subresourceRelation = getSubresourceRelation(User, getRepository(User).metadata, "articles");
@@ -484,11 +577,11 @@ describe("RouteController - subresources", () => {
     describe("getDetails", () => {
         it("auto joins from parent subresource", async () => {
             const userRepository = getRepository(User);
-            const userCtrl = new RouteController(userRepository);
+            const userCtrl = new RouteController(userRepository, routeOptions);
             const userResult = (await userCtrl.create({ values: { name: "Alex", email: "alex@mail.com" } })) as User;
 
             const roleRepository = getRepository(Role);
-            const roleCtrl = new RouteController(roleRepository);
+            const roleCtrl = new RouteController(roleRepository, routeOptions);
 
             const values = { title: "Join item on parent" };
             const subresourceRelation = getSubresourceRelation(User, getRepository(User).metadata, "role");
@@ -510,11 +603,11 @@ describe("RouteController - subresources", () => {
     describe("delete", () => {
         it("removes relation if used on a subresource (XToOne)", async () => {
             const userRepository = getRepository(User);
-            const userCtrl = new RouteController(userRepository);
+            const userCtrl = new RouteController(userRepository, routeOptions);
             const userResult = (await userCtrl.create({ values: { name: "Alex", email: "alex@mail.com" } })) as User;
 
             const roleRepository = getRepository(Role);
-            const roleCtrl = new RouteController(roleRepository);
+            const roleCtrl = new RouteController(roleRepository, routeOptions);
 
             const values = { title: "Join item on parent" };
             const subresourceRelation = getSubresourceRelation(User, getRepository(User).metadata, "role");
@@ -547,11 +640,11 @@ describe("RouteController - subresources", () => {
 
         it("removes relation if used on a subresource (XToMany)", async () => {
             const userRepository = getRepository(User);
-            const userCtrl = new RouteController(userRepository);
+            const userCtrl = new RouteController(userRepository, routeOptions);
             const userResult = (await userCtrl.create({ values: { name: "Alex", email: "alex@mail.com" } })) as User;
 
             const articleRepository = getRepository(Article);
-            const articleCtrl = new RouteController(articleRepository);
+            const articleCtrl = new RouteController(articleRepository, routeOptions);
 
             const values = { title: "Join item on parent" };
             const subresourceRelation = getSubresourceRelation(User, getRepository(User).metadata, "articles");
