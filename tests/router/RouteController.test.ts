@@ -1,18 +1,17 @@
+import { Groups, RouteController, Search, Subresource, getSubresourceRelation, EntityRouteOptions } from "@/index";
 import {
-    Groups,
-    RouteController,
-    Search,
-    Subresource,
-    getSubresourceRelation,
-    EntityRouteOptions,
-    ObjectLiteral,
-    ObjectLiteralType,
-} from "@/index";
-import { PrimaryGeneratedColumn, Entity, Column, getRepository, ManyToOne, OneToMany, ObjectType } from "typeorm";
+    PrimaryGeneratedColumn,
+    Entity,
+    Column,
+    getRepository,
+    ManyToOne,
+    OneToMany,
+    DeleteDateColumn,
+    UpdateResult,
+} from "typeorm";
 import { createTestConnection, closeTestConnection } from "@@/tests/testConnection";
 import { IsString, IsDate, IsEmail } from "class-validator";
 import { Container } from "typedi";
-import { log } from "@/functions/utils";
 
 const routeOptions: EntityRouteOptions = { defaultCreateUpdateOptions: { shouldAutoReload: true } };
 
@@ -21,6 +20,9 @@ describe("RouteController - simple", () => {
         @Groups("all")
         @PrimaryGeneratedColumn()
         id: number;
+
+        @DeleteDateColumn()
+        deletedAt: Date;
     }
 
     @Entity()
@@ -69,6 +71,7 @@ describe("RouteController - simple", () => {
             const birthDate = new Date();
             const values = {
                 name: "Alex",
+                deletedAt: null as Date,
                 birthDate,
                 role: { identifier: "ADM", name: "Admin" },
             };
@@ -79,7 +82,8 @@ describe("RouteController - simple", () => {
             expect(result).toEqual({
                 name: "Alex",
                 birthDate,
-                role: { identifier: "ADM", name: "Admin", id: 1 },
+                deletedAt: null,
+                role: { deletedAt: null, identifier: "ADM", name: "Admin", id: 1 },
                 id: 1,
             });
         });
@@ -100,9 +104,10 @@ describe("RouteController - simple", () => {
             expect(result.role.constructor).toBe(Object);
             expect(result).toEqual({
                 birthDate,
+                deletedAt: null,
                 id: 1,
                 name: "Alex",
-                role: { id: 1, identifier: "ADM", name: "Admin" },
+                role: { deletedAt: null, id: 1, identifier: "ADM", name: "Admin" },
             });
         });
 
@@ -171,7 +176,7 @@ describe("RouteController - simple", () => {
             })) as User;
 
             expect(updateResult.constructor).toBe(User);
-            expect(updateResult).toEqual({ id: 1, role: 1 });
+            expect(updateResult).toEqual({ deletedAt: null, id: 1, role: 1 });
         });
 
         it("updates item & format result", async () => {
@@ -191,7 +196,7 @@ describe("RouteController - simple", () => {
             })) as User; // actually is just ObjectLiteral with structure of User
 
             expect(updateResult.constructor).toBe(Object);
-            expect(updateResult).toEqual({ id: 1, role: 1 });
+            expect(updateResult).toEqual({ deletedAt: null, id: 1, role: 1 });
         });
 
         it("updates item & auto reload it using getDetails", async () => {
@@ -309,19 +314,61 @@ describe("RouteController - simple", () => {
                 totalItems: 2,
             });
         });
+
+        it("returns collection including softDeleted entities", async () => {
+            const repository = getRepository(User);
+            const ctrl = new RouteController(repository, { ...routeOptions, allowSoftDelete: true });
+
+            const birthDate = new Date();
+            const createResult = (await ctrl.create({
+                values: { name: "Alex", birthDate },
+            })) as User;
+
+            await ctrl.delete({ entityId: createResult.id }, true);
+
+            // Even thought entity should still exist, it will not be found untill its restored
+            const emptyList = await ctrl.getList();
+            expect(emptyList.totalItems).toEqual(0);
+
+            // Unless we specify that we want softDeleted entities too
+            const listWithDeleted = await ctrl.getList({}, { withDeleted: true });
+            expect(listWithDeleted.totalItems).toEqual(1);
+            expect(listWithDeleted.items[0].id).toEqual(createResult.id);
+        });
     });
 
-    it("getDetails", async () => {
-        const repository = getRepository(User);
-        const ctrl = new RouteController(repository, routeOptions);
+    describe("getDetails", () => {
+        it("retrieve item with given id", async () => {
+            const repository = getRepository(User);
+            const ctrl = new RouteController(repository, routeOptions);
 
-        const birthDate = new Date();
-        const createResult = (await ctrl.create({
-            values: { name: "Alex", birthDate },
-        })) as User;
+            const birthDate = new Date();
+            const createResult = (await ctrl.create({
+                values: { name: "Alex", birthDate },
+            })) as User;
 
-        const result = await ctrl.getDetails({ entityId: createResult.id });
-        expect(result).toEqual(createResult);
+            const result = await ctrl.getDetails({ entityId: createResult.id });
+            expect(result).toEqual(createResult);
+        });
+
+        it("retrieve item with given id even if softDeleted", async () => {
+            const repository = getRepository(User);
+            const ctrl = new RouteController(repository, { ...routeOptions, allowSoftDelete: true });
+
+            const birthDate = new Date();
+            const createResult = (await ctrl.create({
+                values: { name: "Alex", birthDate },
+            })) as User;
+
+            await ctrl.delete({ entityId: createResult.id }, true);
+
+            // Even thought entity should still exist, it will not be found untill its restored
+            expect(() => ctrl.getDetails({ entityId: createResult.id })).rejects.toThrow();
+
+            // Unless we specify that we want softDeleted entities too
+            const result = await ctrl.getDetails({ entityId: createResult.id }, { withDeleted: true });
+            expect(result).toEqual(createResult);
+        });
     });
 
     describe("delete", () => {
@@ -335,6 +382,52 @@ describe("RouteController - simple", () => {
 
             expect(() => ctrl.getDetails({ entityId: createResult.id })).rejects.toThrowError("Not found.");
         });
+
+        it("soft delete entity", async () => {
+            const repository = getRepository(User);
+            const ctrl = new RouteController(repository, { ...routeOptions, allowSoftDelete: true });
+
+            const createResult = (await ctrl.create({ values: { name: "Alex", birthDate: new Date() } })) as User;
+
+            const deleteResult = await ctrl.delete({ entityId: createResult.id }, true);
+            // if softDeleting, result is UpdateResult and not DeleteResult
+            expect(deleteResult.constructor).toBe(UpdateResult);
+
+            const getDetailsResult = () => ctrl.getDetails({ entityId: createResult.id });
+
+            // Even thought entity should still exist, it will not be found untill its restored
+            expect(getDetailsResult).rejects.toThrow();
+        });
+
+        it("soft delete entity - using queryParam", async () => {
+            const repository = getRepository(User);
+            const ctrl = new RouteController(repository, { ...routeOptions, allowSoftDelete: true });
+
+            const createResult = (await ctrl.create({ values: { name: "Alex", birthDate: new Date() } })) as User;
+
+            const queryParams = { softDelete: "true" };
+            const deleteResult = await ctrl.delete({ entityId: createResult.id, queryParams });
+            // if softDeleting, result is UpdateResult and not DeleteResult
+            expect(deleteResult.constructor).toBe(UpdateResult);
+
+            const getDetailsResult = () => ctrl.getDetails({ entityId: createResult.id });
+
+            // Even thought entity should still exist, it will not be found untill its restored
+            expect(getDetailsResult).rejects.toThrow();
+        });
+    });
+
+    it("restore soft deleted entity", async () => {
+        const repository = getRepository(User);
+        const ctrl = new RouteController(repository, { ...routeOptions, allowSoftDelete: true });
+
+        const createResult = (await ctrl.create({ values: { name: "Alex", birthDate: new Date() } })) as User;
+
+        await ctrl.delete({ entityId: createResult.id }, true);
+
+        // Since it was soft deleted only its deletedAt property should have been set/unset
+        await ctrl.restore({ entityId: createResult.id });
+        expect(await ctrl.getDetails({ entityId: createResult.id })).toEqual(createResult);
     });
 });
 

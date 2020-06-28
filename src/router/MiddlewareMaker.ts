@@ -5,14 +5,14 @@ import { RouteOperation } from "@/decorators/Groups";
 import { GenericEntity, EntityRouteOptions } from "@/router/EntityRouter";
 import { EntityErrorResponse } from "@/serializer/Denormalizer";
 import { SubresourceRelation } from "@/router/SubresourceManager";
-import { isType, isDev, isObject } from "@/functions/asserts";
+import { isType, isDev } from "@/functions/asserts";
 import { MappingManager } from "@/mapping/MappingManager";
 import { EntityErrorResults } from "@/serializer/Validator";
 import { RouteController } from "@/router/RouteController";
 import { QueryParams } from "@/filters/index";
 import { ContextAdapter, Middleware } from "@/router/bridge/ContextAdapter";
 import { parseStringAsBoolean } from "@/functions/primitives";
-import { DeepPartial } from "@/utils-types";
+import { DeepPartial, FunctionKeys } from "@/utils-types";
 
 export class MiddlewareMaker<Entity extends GenericEntity> {
     get mappingManager() {
@@ -42,13 +42,14 @@ export class MiddlewareMaker<Entity extends GenericEntity> {
 
             const requestContext: RequestContext<Entity> = {
                 ctx,
-                subresourceRelations,
+                operation,
                 isUpdateOrCreate: ctx.requestBody && (ctx.method === "POST" || ctx.method === "PUT"),
+                queryParams: ctx.query || {},
+                subresourceRelations,
             };
 
             if (ctx.params.id) requestContext.entityId = parseInt(ctx.params.id);
             if (requestContext.isUpdateOrCreate) requestContext.values = ctx.requestBody;
-            if (operation === "list") requestContext.queryParams = ctx.query || {};
 
             // Create query runner to retrieve requestContext in subscribers
             const queryRunner = this.connection.createQueryRunner();
@@ -135,6 +136,7 @@ export const CRUD_ACTIONS: CrudActions = {
     details: { path: "/:id(\\d+)", verb: "get", method: "getDetails" },
     update: { path: "/:id(\\d+)", verb: "put", method: "update" },
     delete: { path: "/:id(\\d+)", verb: "delete", method: "delete" },
+    restore: { path: "/:id(\\d+)/restore", verb: "put", method: "restore" },
 };
 
 export type CrudAction = {
@@ -142,8 +144,8 @@ export type CrudAction = {
     path: string;
     /** HTTP verb for this action */
     verb: RouteVerb;
-    /** EntityRoute method's name associated to this action or just a function */
-    method?: "create" | "getList" | "getDetails" | "update" | "delete";
+    /** RouteController method's name associated to this action */
+    method?: FunctionKeys<RouteController<any>>;
 };
 
 /** EntityRoute request context wrapping Koa's Context */

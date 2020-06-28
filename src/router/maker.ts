@@ -55,6 +55,7 @@ export const defaultEntityRouteOptions: EntityRouteOptions = {
     shouldEntityWithOnlyIdBeFlattenedToIri: true,
     shouldSetSubresourcesIriOnItem: true,
     defaultSubresourceMaxDepthLvl: 2,
+    allowSoftDelete: false,
     defaultCreateUpdateOptions: { shouldAutoReload: true, shouldFormatResult: true },
 };
 

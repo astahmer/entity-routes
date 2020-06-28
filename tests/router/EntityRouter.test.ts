@@ -1,4 +1,4 @@
-import { PrimaryGeneratedColumn, Column, Entity } from "typeorm";
+import { PrimaryGeneratedColumn, Column, Entity, DeleteDateColumn } from "typeorm";
 import { EntityRoute, makeKoaEntityRouters, flatMapOnProp, ObjectLiteral } from "@/index";
 import { createTestConnection, closeTestConnection } from "@@/tests/testConnection";
 import { Context } from "koa";
@@ -71,6 +71,35 @@ describe("EntityRouter", () => {
             "user_list_mapping",
             "retrieve_admin",
         ]);
+        closeTestConnection();
+    });
+
+    it("generates restore route when softDeletion is allowed", async () => {
+        @EntityRoute({ operations: ["delete"] }, { allowSoftDelete: true })
+        @Entity()
+        class User {
+            @PrimaryGeneratedColumn()
+            id: string;
+
+            @DeleteDateColumn()
+            deletedAt: Date;
+
+            @Column()
+            username: string;
+        }
+
+        const entities = [User];
+        const connection = await createTestConnection(entities);
+        const bridgeRouters = await makeKoaEntityRouters({ connection, entities });
+        const koaRouters = bridgeRouters.map((bridge) => bridge.instance);
+
+        const routeNames = flatMapOnProp(
+            koaRouters,
+            (router) => router.stack,
+            (route) => route.name
+        );
+        expect(routeNames).toEqual(["user_delete", "user_restore"]);
+
         closeTestConnection();
     });
 

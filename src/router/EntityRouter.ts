@@ -49,6 +49,11 @@ export class EntityRouter<Entity extends GenericEntity> {
         const router = new BridgeRouter<T>(routerFactory, this.globalOptions.routerRegisterFn);
         const mwAdapter = this.globalOptions.middlewareAdapter;
 
+        // Add restore route for soft deletion
+        if (this.options.allowSoftDelete && this.routeMetadata.operations.includes("delete")) {
+            this.routeMetadata.operations.push("restore");
+        }
+
         // CRUD routes
         let i = 0;
         for (i; i < this.routeMetadata.operations.length; i++) {
@@ -72,7 +77,10 @@ export class EntityRouter<Entity extends GenericEntity> {
                 ],
             });
 
-            if (operation === "delete") continue;
+            // No need for a mapping route on delete/restore operation
+            if (operationsWithoutMapping.includes(operation)) {
+                continue;
+            }
 
             const mappingMethod = this.middlewareMaker.makeRouteMappingMiddleware(operation);
             router.register({
@@ -112,6 +120,8 @@ export class EntityRouter<Entity extends GenericEntity> {
         };
     }
 }
+
+export const operationsWithoutMapping = ["delete", "restore"];
 
 export const ROUTE_METAKEY = Symbol("route");
 export const getRouteMetadata = (entity: Function): RouteMetadata => Reflect.getOwnMetadata(ROUTE_METAKEY, entity);
@@ -191,6 +201,10 @@ export type EntityRouteOptions = {
     defaultSubresourceMaxDepthLvl?: number;
     /** Default CreateUpdateOptions */
     defaultCreateUpdateOptions?: CreateUpdateOptions;
+    /** Allow soft deletion using TypeORM @DeleteDateColumn */
+    allowSoftDelete?: boolean;
+    /** When true, list/details will also select softDeleted entities */
+    withDeleted?: boolean;
 };
 export type EntityRouteConfig = EntityRouteBaseOptions & EntityRouteOptions;
 

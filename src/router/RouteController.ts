@@ -17,6 +17,7 @@ import { Formater, FormaterOptions } from "@/serializer/index";
 import { RouteOperation } from "@/decorators/index";
 import { last } from "@/functions/array";
 import { isRelationSingle } from "@/functions/entity";
+import { parseStringAsBoolean } from "@/functions/index";
 
 export class RouteController<Entity extends GenericEntity> {
     private filtersMeta: RouteFiltersMeta;
@@ -153,11 +154,13 @@ export class RouteController<Entity extends GenericEntity> {
     /** Returns an entity with every mapped props (from groups) for a given id */
     public async getList(
         ctx?: Pick<RequestContext<Entity>, "operation" | "queryParams" | "subresourceRelations">,
-        options?: NormalizerOptions
+        options?: ListDetailsOptions
     ) {
         const { operation = "list", queryParams = {}, subresourceRelations } = ctx || {};
 
         const qb = this.repository.createQueryBuilder(this.metadata.tableName);
+
+        if (options?.withDeleted) qb.withDeleted();
 
         // Apply a max item to retrieve
         qb.take(100);
@@ -191,11 +194,13 @@ export class RouteController<Entity extends GenericEntity> {
     /** Returns an entity with every mapped props (from groups) for a given id */
     public async getDetails(
         ctx: Pick<RequestContext<Entity>, "operation" | "entityId" | "subresourceRelations">,
-        options?: NormalizerOptions
+        options?: ListDetailsOptions
     ) {
         const { operation = "details", entityId, subresourceRelations } = ctx;
 
         const qb = this.repository.createQueryBuilder(this.metadata.tableName);
+
+        if (options?.withDeleted) qb.withDeleted();
 
         const aliasHandler = new AliasHandler();
         if (subresourceRelations) {
@@ -217,8 +222,11 @@ export class RouteController<Entity extends GenericEntity> {
         });
     }
 
-    public async delete(ctx: Pick<RequestContext<Entity>, "entityId" | "subresourceRelations">) {
-        const { entityId, subresourceRelations } = ctx;
+    public async delete(
+        ctx: Pick<RequestContext<Entity>, "entityId" | "queryParams" | "subresourceRelations">,
+        softDelete?: boolean
+    ) {
+        const { entityId, subresourceRelations, queryParams } = ctx;
         const subresourceRelation = last(subresourceRelations || []);
         // Remove relation if used on a subresource
         if (subresourceRelation) {
@@ -235,8 +243,19 @@ export class RouteController<Entity extends GenericEntity> {
             }
 
             return { affected: 1, raw: { insertId: entityId } };
-        } else {
-            return this.repository.delete(entityId);
+        }
+
+        if (this.options.allowSoftDelete && (softDelete || parseStringAsBoolean(queryParams?.softDelete as string))) {
+            return this.repository.softDelete(entityId);
+        }
+
+        return this.repository.delete(entityId);
+    }
+
+    public async restore(ctx: Pick<RequestContext<Entity>, "entityId">) {
+        const { entityId } = ctx;
+        if (this.options.allowSoftDelete) {
+            return this.repository.restore(entityId);
         }
     }
 
@@ -262,3 +281,5 @@ export type CreateUpdateOptions = Pick<SaveItemArgs<any>, "validatorOptions" | "
     shouldFormatResult?: boolean;
     formaterOptions?: FormaterOptions;
 };
+
+export type ListDetailsOptions = Pick<EntityRouteOptions, "withDeleted"> & NormalizerOptions;
