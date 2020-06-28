@@ -1,13 +1,12 @@
-import axios, { AxiosInstance } from "axios";
-import { AddressInfo, Server } from "net";
-import * as Koa from "koa";
+import { AxiosInstance } from "axios";
+import { Server } from "net";
 import * as Router from "koa-router";
 import { createTestConnection, closeTestConnection } from "@@/tests/testConnection";
-import * as bodyParser from "koa-bodyparser";
 import { RouteVerb, flatMapOnProp } from "@/index";
 import { registerKoaRouteFromBridgeRoute, makeKoaEntityRouters } from "@/router/bridge/koa";
 import { testRouteConfigs, testRoute, TestRequestConfig } from "@@/tests/router/bridge/sample/requests";
 import { getTestEntities, expectedRouteNames } from "@@/tests/router/bridge/sample/entities";
+import { setupKoaApp } from "@@/tests/router/bridge/koaSetup";
 
 describe("koa BridgeRouter adapter", () => {
     const entities = getTestEntities();
@@ -51,7 +50,7 @@ describe("koa BridgeRouter adapter", () => {
     describe("integrates properly with koa server", () => {
         let server: Server, client: AxiosInstance;
         beforeAll(async () => {
-            const result = await setupApp(entities);
+            const result = await setupKoaApp(entities);
             server = result.server;
             client = result.client;
         });
@@ -65,19 +64,3 @@ describe("koa BridgeRouter adapter", () => {
         testRouteConfigs.forEach(makeTest);
     });
 });
-
-async function setupApp(entities: Function[]) {
-    const connection = await createTestConnection(entities);
-
-    const bridgeRouters = await makeKoaEntityRouters({ connection, entities });
-    const app = new Koa();
-    app.use(bodyParser());
-
-    // Register all routes on koa server
-    bridgeRouters.forEach((router) => app.use(router.instance.routes()));
-
-    const server = app.listen(); // random port
-    const baseURL = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
-    const client = axios.create({ baseURL });
-    return { server, client };
-}

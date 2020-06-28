@@ -1,13 +1,12 @@
-import axios, { AxiosInstance } from "axios";
-import { AddressInfo, Server } from "net";
+import { AxiosInstance } from "axios";
+import { Server } from "net";
 import { createTestConnection, closeTestConnection } from "@@/tests/testConnection";
 import { Router } from "express";
-import * as express from "express";
-import * as bodyParser from "body-parser";
 import { RouteVerb, flatMapOnProp } from "@/index";
 import { registerExpressRouteFromBridgeRoute, makeExpressEntityRouters, printBridgeRoute } from "@/router/bridge/index";
 import { testRouteConfigs, TestRequestConfig, testRoute } from "@@/tests/router/bridge/sample/requests";
 import { getTestEntities, expectedRouteDesc } from "@@/tests/router/bridge/sample/entities";
+import { setupExpressApp } from "@@/tests/router/bridge/expressSetup";
 
 describe("Express BridgeRouter adapter", () => {
     const entities = getTestEntities();
@@ -57,7 +56,7 @@ describe("Express BridgeRouter adapter", () => {
     describe("integrates properly with Express server", () => {
         let server: Server, client: AxiosInstance;
         beforeAll(async () => {
-            const result = await setupApp(entities);
+            const result = await setupExpressApp(entities);
             server = result.server;
             client = result.client;
         });
@@ -79,20 +78,3 @@ describe("Express BridgeRouter adapter", () => {
         testRouteConfigs.forEach(makeTest);
     });
 });
-
-async function setupApp(entities: Function[]) {
-    const connection = await createTestConnection(entities);
-
-    const bridgeRouters = await makeExpressEntityRouters({ connection, entities });
-    const app = express();
-    app.use(bodyParser.json());
-    app.use(bodyParser.urlencoded({ extended: true }));
-
-    // Register all routes on Express server
-    bridgeRouters.forEach((router) => app.use(router.instance));
-
-    const server = app.listen(); // random port
-    const baseURL = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
-    const client = axios.create({ baseURL });
-    return { server, client };
-}

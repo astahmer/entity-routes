@@ -1,4 +1,4 @@
-import { EntityRouteOptions, ROUTE_METAKEY } from "@/router/EntityRouter";
+import { ROUTE_METAKEY, EntityRouteConfig } from "@/router/EntityRouter";
 import { RouteDefaultOperation } from "@/decorators/Groups";
 
 /**
@@ -25,7 +25,7 @@ import { RouteDefaultOperation } from "@/decorators/Groups";
  */
 export function EntityRoute(
     args: EntityRouteArgs = { operations: [] },
-    options: EntityRouteOptions = {}
+    options: EntityRouteConfig = {}
 ): ClassDecorator {
     return (target: Function) => {
         Reflect.defineMetadata(
@@ -36,4 +36,4 @@ export function EntityRoute(
     };
 }
 
-export type EntityRouteArgs = { path?: string; operations: RouteDefaultOperation[] };
+export type EntityRouteArgs = { path?: string; operations?: RouteDefaultOperation[] };

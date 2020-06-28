@@ -43,7 +43,7 @@ export function makeRouterFromActions<Data extends object = object, T = any>(
     return router;
 }
 
-export type RouteActionConstructorArgs = { middlewares: Middleware[] };
+export type RouteActionConstructorArgs = { middlewares: Function[] };
 export type RouteActionConstructorData = { routeMetadata: RouteMetadata; entityMetadata: EntityMetadata };
 
 export interface IRouteAction {
@@ -65,7 +65,7 @@ export type BaseRouteAction = Omit<CrudAction, "method"> & {
     /** Custom operation for that action */
     operation?: RouteOperation;
     /** List of middlewares to be called (in the same order as defined here) */
-    middlewares?: Middleware[];
+    middlewares?: Function[];
     /** Optional route name */
     name?: string;
 };

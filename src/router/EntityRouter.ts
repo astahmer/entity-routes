@@ -5,7 +5,13 @@ import { AbstractFilterConfig } from "@/filters/AbstractFilter";
 import { RouteSubresourcesMeta, SubresourceMaker } from "@/router/SubresourceManager";
 import { BridgeRouter, getRouterFactory, BridgeRouterRegisterFn } from "@/router/bridge/BridgeRouter";
 import { formatRouteName } from "@/functions/route";
-import { RouteActionConstructorData, RouteActionConfig, makeRouterFromActions } from "@/router/actions";
+import {
+    RouteActionConstructorData,
+    RouteActionConfig,
+    makeRouterFromActions,
+    RouteActionFunctionOptions,
+    RouteActionClassOptions,
+} from "@/router/actions";
 import { MiddlewareMaker, CRUD_ACTIONS } from "@/router/MiddlewareMaker";
 import { CType } from "@/utils-types";
 
@@ -57,7 +63,12 @@ export class EntityRouter<Entity extends GenericEntity> {
                 path,
                 name,
                 methods: [verb],
-                middlewares: [mwAdapter(requestContextMw), mwAdapter(responseMw)],
+                middlewares: [
+                    ...(this.options.beforeCtxMiddlewares || []),
+                    mwAdapter(requestContextMw),
+                    ...(this.options.afterCtxMiddlewares || []),
+                    mwAdapter(responseMw),
+                ],
             });
 
             if (operation === "delete") continue;
@@ -76,7 +87,9 @@ export class EntityRouter<Entity extends GenericEntity> {
 
         // Custom actions routes
         if (this.options.actions) {
-            const actions: RouteActionConfig[] = this.options.actions.map(this.addRequestContextMwToAction.bind(this));
+            const actions: EntityRouteActionConfig[] = this.options.actions.map(
+                this.addRequestContextMwToAction.bind(this)
+            );
             const data = { entityMetadata: this.repository.metadata, routeMetadata: this.routeMetadata };
             makeRouterFromActions<RouteActionConstructorData>(actions, { router }, data);
         }
@@ -85,14 +98,16 @@ export class EntityRouter<Entity extends GenericEntity> {
         return router;
     }
 
-    private addRequestContextMwToAction(action: RouteActionConfig): RouteActionConfig {
+    private addRequestContextMwToAction(action: EntityRouteActionConfig): RouteActionConfig {
         return {
             ...action,
-            middlewares: (action.middlewares || []).concat(
+            middlewares: [
+                ...(action.beforeCtxMiddlewares || []),
                 this.globalOptions.middlewareAdapter(
                     this.middlewareMaker.makeRequestContextMiddleware(action.operation)
-                )
-            ),
+                ),
+                ...(action.afterCtxMiddlewares || []),
+            ],
         };
     }
 }
@@ -148,9 +163,16 @@ export type EntityRouterClassOptions<T = any, U = EntityRouterFactoryKind> = Ent
     middlewareAdapter: (mw: Function) => (...args: any) => any;
 };
 
+export type EntityRouteActionConfig = Omit<RouteActionConfig, "middlewares"> &
+    Pick<EntityRouteBaseOptions, "beforeCtxMiddlewares" | "afterCtxMiddlewares"> &
+    (RouteActionClassOptions | RouteActionFunctionOptions);
 export type EntityRouteBaseOptions = {
     /** Custom actions using current EntityRouter prefix/instance */
-    actions?: RouteActionConfig[];
+    actions?: EntityRouteActionConfig[];
+    /** Middlewares to be pushed before requestContext middleware */
+    beforeCtxMiddlewares?: Function[];
+    /** Middlewares to be pushed after requestContext middleware */
+    afterCtxMiddlewares?: Function[];
 };
 
 export type EntityRouteOptions = {
