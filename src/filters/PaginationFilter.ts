@@ -9,7 +9,7 @@ import {
     QueryParams,
     QueryParamValue,
 } from "./AbstractFilter";
-import { AliasHandler } from "@/serializer";
+import { AliasHandler } from "@/mapping/AliasHandler";
 import { RelationManager } from "@/mapping/RelationManager";
 import { OrderByOptions } from "@/decorators/Pagination";
 

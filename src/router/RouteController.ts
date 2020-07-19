@@ -5,7 +5,7 @@ import { getRouteFiltersMeta, RouteFiltersMeta, GenericEntity, EntityRouteOption
 import { AbstractFilter, AbstractFilterConfig, QueryParams } from "@/filters/AbstractFilter";
 import { EntityErrorResponse, Denormalizer, SaveItemArgs } from "@/serializer/Denormalizer";
 import { Normalizer, NormalizerOptions } from "@/serializer/Normalizer";
-import { AliasHandler } from "@/serializer/AliasHandler";
+import { AliasHandler } from "@/mapping/AliasHandler";
 
 // TODO (global) Use object as fn arguments rather than chaining them
 // TODO Hooks (before/afterPersist (create+update), before/afterValidate, before/afterLoad (list+details ?), beforeAfter/remove)
