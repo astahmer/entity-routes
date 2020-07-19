@@ -1,10 +1,10 @@
 import { Container } from "typedi";
-import { Groups, Denormalizer, setEntityValidatorsDefaultOption } from "@/index";
+import { Groups, Persistor, setEntityValidatorsDefaultOption } from "@/index";
 import { PrimaryGeneratedColumn, Entity, Column, ManyToOne, getRepository } from "typeorm";
 import { createTestConnection, closeTestConnection } from "@@/tests/testConnection";
 import { IsString, IsEmail } from "class-validator";
 
-describe("Denormalizer", () => {
+describe("Persistor", () => {
     class AbstractEntity {
         @Groups(["list", "details"])
         @PrimaryGeneratedColumn()
@@ -40,7 +40,7 @@ describe("Denormalizer", () => {
         role: Role;
     }
 
-    const denormalizer = Container.get(Denormalizer);
+    const persistor = Container.get(Persistor);
 
     it("saveItem - inserts new item", async () => {
         await createTestConnection([User, Role]);
@@ -58,7 +58,7 @@ describe("Denormalizer", () => {
 
         values.role = role;
 
-        const result = await denormalizer.saveItem({ ctx: { operation: "create", values }, rootMetadata });
+        const result = await persistor.saveItem({ ctx: { operation: "create", values }, rootMetadata });
         expect(result).toEqual({
             name: "Alex",
             email: "alex@mail.com",
@@ -87,7 +87,7 @@ describe("Denormalizer", () => {
 
         values.role = role;
 
-        const result = await denormalizer.saveItem({ ctx: { operation: "create", values }, rootMetadata });
+        const result = await persistor.saveItem({ ctx: { operation: "create", values }, rootMetadata });
 
         expect(result).toEqual({
             hasValidationErrors: true,

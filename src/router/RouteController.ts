@@ -3,8 +3,8 @@ import { Container } from "typedi";
 
 import { getRouteFiltersMeta, RouteFiltersMeta, GenericEntity, EntityRouteOptions } from "@/router/EntityRouter";
 import { AbstractFilter, AbstractFilterConfig, QueryParams } from "@/filters/AbstractFilter";
-import { EntityErrorResponse, Denormalizer, SaveItemArgs } from "@/serializer/Denormalizer";
-import { Normalizer, NormalizerOptions } from "@/serializer/Normalizer";
+import { EntityErrorResponse, Persistor, SaveItemArgs } from "@/database/Persistor";
+import { Reader, ReaderOptions } from "@/database/Reader";
 import { AliasHandler } from "@/mapping/AliasHandler";
 
 // TODO (global) Use object as fn arguments rather than chaining them
@@ -23,11 +23,11 @@ export class RouteController<Entity extends GenericEntity> {
     private filtersMeta: RouteFiltersMeta;
 
     get normalizer() {
-        return Container.get(Normalizer);
+        return Container.get(Reader);
     }
 
-    get denormalizer() {
-        return Container.get(Denormalizer);
+    get persistor() {
+        return Container.get(Persistor);
     }
 
     get relationManager() {
@@ -65,7 +65,7 @@ export class RouteController<Entity extends GenericEntity> {
             return { error: "Body can't be empty on create operation" };
         }
 
-        const result = await this.denormalizer.saveItem({
+        const result = await this.persistor.saveItem({
             ctx: { operation, values },
             rootMetadata: this.metadata,
             mapperMakeOptions: { ...this.options, ...(options?.mapperMakeOptions || {}) },
@@ -120,7 +120,7 @@ export class RouteController<Entity extends GenericEntity> {
         const options = { ...this.options.defaultCreateUpdateOptions, ...(innerOptions || {}) };
 
         if (!values?.id) (values as Entity).id = entityId;
-        const result = await this.denormalizer.saveItem({
+        const result = await this.persistor.saveItem({
             ctx: { operation, values },
             rootMetadata: this.metadata,
             mapperMakeOptions: { ...this.options, ...(options?.mapperMakeOptions || {}) },
@@ -282,4 +282,4 @@ export type CreateUpdateOptions = Pick<SaveItemArgs<any>, "validatorOptions" | "
     formaterOptions?: FormaterOptions;
 };
 
-export type ListDetailsOptions = Pick<EntityRouteOptions, "withDeleted"> & NormalizerOptions;
+export type ListDetailsOptions = Pick<EntityRouteOptions, "withDeleted"> & ReaderOptions;

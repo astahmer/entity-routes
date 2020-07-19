@@ -9,7 +9,7 @@ import { SubresourceRelation } from "@/router/SubresourceManager";
 import { EntityMapperMakeOptions } from "@/mapping/index";
 
 @Service()
-export class Denormalizer {
+export class Persistor {
     get cleaner() {
         return Container.get(Cleaner);
     }

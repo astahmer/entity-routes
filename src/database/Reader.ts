@@ -10,7 +10,7 @@ import { RequestContext } from "@/router/MiddlewareMaker";
 
 // TODO 2 args & 3rd should be object
 @Service()
-export class Normalizer {
+export class Reader {
     get mappingManager() {
         return Container.get(MappingManager);
     }
@@ -29,7 +29,7 @@ export class Normalizer {
         qb: SelectQueryBuilder<Entity>,
         aliasHandler: AliasHandler,
         operation: RequestContext["operation"] = "list",
-        options: NormalizerOptions = {}
+        options: ReaderOptions = {}
     ): Promise<[Entity[], number]> {
         const selectProps = this.mappingManager.getSelectProps(entityMetadata, operation, entityMetadata, true);
 
@@ -70,7 +70,7 @@ export class Normalizer {
         aliasHandler: AliasHandler,
         entityId: RequestContext["entityId"],
         operation: RequestContext["operation"] = "details",
-        options: NormalizerOptions = {}
+        options: ReaderOptions = {}
     ) {
         const selectProps = this.mappingManager.getSelectProps(entityMetadata, operation, entityMetadata, true);
 
@@ -112,4 +112,4 @@ export class Normalizer {
     }
 }
 
-export type NormalizerOptions = Pick<EntityRouteOptions, "shouldMaxDepthReturnRelationPropsId"> & FormaterOptions;
+export type ReaderOptions = Pick<EntityRouteOptions, "shouldMaxDepthReturnRelationPropsId"> & FormaterOptions;

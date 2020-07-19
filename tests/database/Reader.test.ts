@@ -1,12 +1,12 @@
 import { Container } from "typedi";
-import { Normalizer, Groups, AliasHandler, Denormalizer } from "@/index";
+import { Reader, Persistor, Groups, AliasHandler } from "@/index";
 import { PrimaryGeneratedColumn, Entity, Column, ManyToOne, getRepository } from "typeorm";
 import { createTestConnection, closeTestConnection } from "@@/tests/testConnection";
 import { IsEmail } from "class-validator";
 
-describe("Normalizer", () => {
-    const normalizer = Container.get(Normalizer);
-    const denormalizer = Container.get(Denormalizer);
+describe("Reader", () => {
+    const reader = Container.get(Reader);
+    const persistor = Container.get(Persistor);
 
     it("getCollection", async () => {
         class AbstractEntity {
@@ -49,7 +49,7 @@ describe("Normalizer", () => {
         const qb = repository.createQueryBuilder(repository.metadata.tableName);
         const aliasHandler = new AliasHandler();
 
-        expect(await normalizer.getCollection(rootMetadata, qb, aliasHandler)).toEqual([[], 0]);
+        expect(await reader.getCollection(rootMetadata, qb, aliasHandler)).toEqual([[], 0]);
 
         const user = new User();
         user.name = "Alex";
@@ -62,15 +62,15 @@ describe("Normalizer", () => {
         user.role = role;
 
         const roleMetadata = getRepository(Role).metadata;
-        const roleResult = (await denormalizer.saveItem({
+        const roleResult = (await persistor.saveItem({
             ctx: { operation: "create", values: role as any },
             rootMetadata: roleMetadata,
         })) as Role;
 
         user.role = roleResult.id;
-        await denormalizer.saveItem({ ctx: { operation: "create", values: user as any }, rootMetadata });
+        await persistor.saveItem({ ctx: { operation: "create", values: user as any }, rootMetadata });
 
-        expect(await normalizer.getCollection(rootMetadata, qb, aliasHandler)).toEqual([
+        expect(await reader.getCollection(rootMetadata, qb, aliasHandler)).toEqual([
             [
                 {
                     name: "Alex",
@@ -126,7 +126,7 @@ describe("Normalizer", () => {
         const qb = repository.createQueryBuilder(repository.metadata.tableName);
         const aliasHandler = new AliasHandler();
 
-        expect(() => normalizer.getItem(rootMetadata, qb, aliasHandler, 1)).rejects.toThrow();
+        expect(() => reader.getItem(rootMetadata, qb, aliasHandler, 1)).rejects.toThrow();
 
         const user = new User();
         user.name = "Alex";
@@ -139,15 +139,15 @@ describe("Normalizer", () => {
         user.role = role;
 
         const roleMetadata = getRepository(Role).metadata;
-        const roleResult = (await denormalizer.saveItem({
+        const roleResult = (await persistor.saveItem({
             ctx: { operation: "create", values: role as any },
             rootMetadata: roleMetadata,
         })) as Role;
 
         user.role = roleResult.id;
-        await denormalizer.saveItem({ ctx: { operation: "create", values: user as any }, rootMetadata });
+        await persistor.saveItem({ ctx: { operation: "create", values: user as any }, rootMetadata });
 
-        expect(await normalizer.getItem(rootMetadata, qb, aliasHandler, 1)).toEqual({
+        expect(await reader.getItem(rootMetadata, qb, aliasHandler, 1)).toEqual({
             email: "alex@mail.com",
             id: 1,
             name: "Alex",

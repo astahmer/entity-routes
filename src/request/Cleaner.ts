@@ -6,7 +6,7 @@ import { Primitive } from "@/functions/primitives";
 import { formatIriToId } from "@/functions/entity";
 import { GenericEntity } from "@/router/EntityRouter";
 import { MappingManager, MappingItem, ENTITY_META_SYMBOL, EntityMapperMakeOptions } from "@/mapping/MappingManager";
-import { SaveItemArgs } from "@/serializer/Denormalizer";
+import { SaveItemArgs } from "@/database/Persistor";
 import { RequestContext } from "@/router/MiddlewareMaker";
 
 @Service()

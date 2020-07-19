@@ -3,7 +3,7 @@ import { Container } from "typedi";
 
 import { RouteOperation } from "@/decorators/Groups";
 import { GenericEntity, EntityRouteOptions } from "@/router/EntityRouter";
-import { EntityErrorResponse } from "@/serializer/Denormalizer";
+import { EntityErrorResponse } from "@/database/Persistor";
 import { SubresourceRelation } from "@/router/SubresourceManager";
 import { isType, isDev } from "@/functions/asserts";
 import { MappingManager } from "@/mapping/MappingManager";
