@@ -3,7 +3,7 @@ import Container, { Service } from "typedi";
 
 import { MappingManager } from "@/mapping/MappingManager";
 import { AliasHandler } from "@/mapping/AliasHandler";
-import { Formater, FormaterOptions } from "@/serializer/Formater";
+import { Formater, FormaterOptions } from "@/response/Formater";
 import { EntityRouteOptions, GenericEntity } from "@/router/EntityRouter";
 import { RelationManager } from "@/mapping/RelationManager";
 import { RequestContext } from "@/router/MiddlewareMaker";

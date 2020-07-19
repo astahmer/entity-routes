@@ -13,7 +13,7 @@ import { isType } from "@/functions/asserts";
 import { RelationManager } from "@/mapping/RelationManager";
 import { fromEntries } from "@/functions/object";
 import { RequestContext, CollectionResult } from "@/router/MiddlewareMaker";
-import { Formater, FormaterOptions } from "@/serializer/index";
+import { Formater, FormaterOptions } from "@/response/Formater";
 import { RouteOperation } from "@/decorators/index";
 import { last } from "@/functions/array";
 import { isRelationSingle } from "@/functions/entity";
