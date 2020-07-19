@@ -2,7 +2,7 @@ import { getRepository, EntityMetadata } from "typeorm";
 import { Container, Service } from "typedi";
 
 import { GenericEntity } from "@/router/EntityRouter";
-import { Cleaner } from "@/serializer/Cleaner";
+import { Cleaner } from "@/request/Cleaner";
 import { ValidateItemOptions, EntityErrorResults, Validator } from "@/serializer/Validator";
 import { RequestContextMinimal } from "@/router/MiddlewareMaker";
 import { SubresourceRelation } from "@/router/SubresourceManager";
