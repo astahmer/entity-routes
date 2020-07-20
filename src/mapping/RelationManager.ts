@@ -2,7 +2,7 @@ import { SelectQueryBuilder, EntityMetadata } from "typeorm";
 import { Container } from "typedi/Container";
 
 import { getComputedPropMethodAndKey } from "@/response/Formater";
-import { AliasHandler } from "@/mapping/AliasHandler";
+import { AliasHandler } from "@/database/AliasHandler";
 import { RouteOperation } from "@/decorators/Groups";
 import { EntityRouteOptions, GenericEntity } from "@/router/EntityRouter";
 import { getDependsOnMetadata } from "@/decorators/DependsOn";

@@ -1,7 +1,7 @@
 import { EntityMetadata, SelectQueryBuilder } from "typeorm";
 import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
 
-import { AliasHandler } from "@/mapping/AliasHandler";
+import { AliasHandler } from "@/database/AliasHandler";
 import { isDefined } from "@/functions/asserts";
 import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
 import { pick } from "@/functions/object";

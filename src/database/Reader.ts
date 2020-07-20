@@ -2,7 +2,7 @@ import { EntityMetadata, SelectQueryBuilder } from "typeorm";
 import Container, { Service } from "typedi";
 
 import { MappingManager } from "@/mapping/MappingManager";
-import { AliasHandler } from "@/mapping/AliasHandler";
+import { AliasHandler } from "@/database/AliasHandler";
 import { Formater, FormaterOptions } from "@/response/Formater";
 import { EntityRouteOptions, GenericEntity } from "@/router/EntityRouter";
 import { RelationManager } from "@/mapping/RelationManager";

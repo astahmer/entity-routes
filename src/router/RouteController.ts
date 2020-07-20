@@ -5,7 +5,7 @@ import { getRouteFiltersMeta, RouteFiltersMeta, GenericEntity, EntityRouteOption
 import { AbstractFilter, AbstractFilterConfig, QueryParams } from "@/filters/AbstractFilter";
 import { EntityErrorResponse, Persistor, SaveItemArgs } from "@/database/Persistor";
 import { Reader, ReaderOptions } from "@/database/Reader";
-import { AliasHandler } from "@/mapping/AliasHandler";
+import { AliasHandler } from "@/database/AliasHandler";
 
 // TODO (global) Use object as fn arguments rather than chaining them
 // TODO Hooks (before/afterPersist (create+update), before/afterValidate, before/afterLoad (list+details ?), beforeAfter/remove)
