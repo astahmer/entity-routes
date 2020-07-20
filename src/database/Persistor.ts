@@ -3,7 +3,7 @@ import { Container, Service } from "typedi";
 
 import { GenericEntity } from "@/router/EntityRouter";
 import { Cleaner } from "@/request/Cleaner";
-import { ValidateItemOptions, EntityErrorResults, Validator } from "@/serializer/Validator";
+import { ValidateItemOptions, EntityErrorResults, Validator } from "@/request/Validator";
 import { RequestContextMinimal } from "@/router/MiddlewareMaker";
 import { SubresourceRelation } from "@/router/SubresourceManager";
 import { EntityMapperMakeOptions } from "@/mapping/index";

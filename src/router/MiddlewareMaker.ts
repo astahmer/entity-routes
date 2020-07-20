@@ -7,7 +7,7 @@ import { EntityErrorResponse } from "@/database/Persistor";
 import { SubresourceRelation } from "@/router/SubresourceManager";
 import { isType, isDev } from "@/functions/asserts";
 import { MappingManager } from "@/mapping/MappingManager";
-import { EntityErrorResults } from "@/serializer/Validator";
+import { EntityErrorResults } from "@/request/Validator";
 import { RouteController } from "@/router/RouteController";
 import { QueryParams } from "@/filters/index";
 import { ContextAdapter, Middleware } from "@/router/bridge/ContextAdapter";
