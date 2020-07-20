@@ -10,7 +10,7 @@ import { AliasHandler } from "@/database/AliasHandler";
 // TODO (global) Use object as fn arguments rather than chaining them
 // TODO Hooks (before/afterPersist (create+update), before/afterValidate, before/afterLoad (list+details ?), beforeAfter/remove)
 import { isType } from "@/functions/asserts";
-import { RelationManager } from "@/mapping/RelationManager";
+import { RelationManager } from "@/database/RelationManager";
 import { fromEntries } from "@/functions/object";
 import { RequestContext, CollectionResult } from "@/router/MiddlewareMaker";
 import { Formater, FormaterOptions } from "@/response/Formater";

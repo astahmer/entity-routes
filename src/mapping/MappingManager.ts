@@ -6,7 +6,7 @@ import { RouteOperation, GROUPS_METAKEY } from "@/decorators/Groups";
 import { EntityRouteOptions } from "@/router/EntityRouter";
 import { GroupsMetadata, GroupsMetaByRoutes } from "@/mapping/GroupsMetadata";
 import { EntityGroupsMetadata } from "@/mapping/EntityGroupsMetadata";
-import { RelationManager } from "@/mapping/RelationManager";
+import { RelationManager } from "@/database/RelationManager";
 import { pluck } from "@/functions/array";
 import { get } from "@/functions/object";
 import { ObjectLiteral } from "@/utils-types";

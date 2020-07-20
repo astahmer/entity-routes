@@ -15,7 +15,7 @@ import {
 import { isDefined, isWhereType } from "@/functions/asserts";
 import { setNestedKey, sortObjectByKeys, get } from "@/functions/object";
 import { formatIriToId, isIriValidForProperty } from "@/functions/entity";
-import { RelationManager } from "@/mapping/RelationManager";
+import { RelationManager } from "@/database/RelationManager";
 import { StrategyType, WhereManager } from "@/filters/WhereManager";
 import { sortBy } from "@/functions/array";
 import { ObjectLiteral } from "@/utils-types";

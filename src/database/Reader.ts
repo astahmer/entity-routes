@@ -5,7 +5,7 @@ import { MappingManager } from "@/mapping/MappingManager";
 import { AliasHandler } from "@/database/AliasHandler";
 import { Formater, FormaterOptions } from "@/response/Formater";
 import { EntityRouteOptions, GenericEntity } from "@/router/EntityRouter";
-import { RelationManager } from "@/mapping/RelationManager";
+import { RelationManager } from "@/database/RelationManager";
 import { RequestContext } from "@/router/MiddlewareMaker";
 
 // TODO 2 args & 3rd should be object

@@ -10,7 +10,7 @@ import {
     QueryParamValue,
 } from "./AbstractFilter";
 import { AliasHandler } from "@/database/AliasHandler";
-import { RelationManager } from "@/mapping/RelationManager";
+import { RelationManager } from "@/database/RelationManager";
 import { OrderByOptions } from "@/decorators/Pagination";
 
 export class PaginationFilter extends AbstractFilter<PaginationFilterOptions> {
