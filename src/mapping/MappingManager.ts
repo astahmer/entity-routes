@@ -9,6 +9,7 @@ import { EntityGroupsMetadata } from "@/mapping/EntityGroupsMetadata";
 import { RelationManager } from "@/mapping/RelationManager";
 import { pluck } from "@/functions/array";
 import { get } from "@/functions/object";
+import { ObjectLiteral } from "@/utils-types";
 
 @Service()
 export class MappingManager {
@@ -23,7 +24,7 @@ export class MappingManager {
         rootMetadata: EntityMetadata,
         operation: RouteOperation,
         options: EntityMapperMakeOptions = {}
-    ): MappingItem | Record<string, any> {
+    ): MappingItem | ObjectLiteral {
         const mapping = this.getMappingFor(
             rootMetadata,
             {},
@@ -208,11 +209,11 @@ export class MappingManager {
                     const relation = mapping[ENTITY_META_SYMBOL].findRelationWithPropertyPath(propName);
                     acc[propName] = "@id" + (relation.relationType.endsWith("to-many") ? "[]" : "");
                     return acc;
-                }, {} as Record<string, any>);
+                }, {} as ObjectLiteral);
                 acc[relationName] = { ...primitives, ...relations };
             }
             return acc;
-        }, {} as Record<string, any>);
+        }, {} as ObjectLiteral);
 
         return { ...primitives, ...relations };
     }

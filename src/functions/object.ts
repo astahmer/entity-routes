@@ -13,7 +13,7 @@ export const getObjectOnlyKey = (obj: object) => Object.keys(obj)[0];
 export const getUnixTimestampFromDate = (date: Date) => Math.round(+date / 1000);
 
 /** Set value of nested object key path */
-export const setNestedKey = (obj: Record<string, any>, path: string | string[], value: any): Record<string, any> => {
+export const setNestedKey = (obj: ObjectLiteral, path: string | string[], value: any): ObjectLiteral => {
     path = Array.isArray(path) ? path : path.split(".");
     if (path.length === 1) {
         obj[path[0]] = value;

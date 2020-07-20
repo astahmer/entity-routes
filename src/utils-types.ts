@@ -3,7 +3,7 @@ import { ObjectType } from "typeorm";
 import { GenericEntity } from "./router/EntityRouter";
 import { PrimitiveValue } from "@/functions/index";
 
-export type ObjectLiteral = Record<string, any>; // TODO use everywhere instead of record ?
+export type ObjectLiteral = Record<string, any>;
 export type PartialRecord<K extends keyof any, T> = Partial<Record<K, T>>;
 export type Props<T extends GenericEntity> = NonFunctionKeys<T>;
 export type Decorator = (target: Object | Function, propName?: string) => void;

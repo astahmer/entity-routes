@@ -18,6 +18,7 @@ import { formatIriToId, isIriValidForProperty } from "@/functions/entity";
 import { RelationManager } from "@/mapping/RelationManager";
 import { StrategyType, WhereManager } from "@/filters/WhereManager";
 import { sortBy } from "@/functions/array";
+import { ObjectLiteral } from "@/utils-types";
 
 /** Add a/multiple where clause on any (deep?) properties of the decorated entity  */
 export class SearchFilter extends AbstractFilter<SearchFilterOptions, StrategyType> {
@@ -213,7 +214,7 @@ export class SearchFilter extends AbstractFilter<SearchFilterOptions, StrategyTy
     }: ApplyNestedConditionFiltersArgs) {
         let nested: FilterParam | NestedConditionsFilters;
         const recursiveBrowseFilter = (
-            object: Record<string, any>,
+            object: ObjectLiteral,
             whereExp: WhereExpression,
             whereType: WhereType = "and"
         ) => {
@@ -364,7 +365,7 @@ export type FilterParam = {
     comparison: COMPARISON_OPERATOR;
 };
 
-export type NestedConditionsFilters = Record<string, any>;
+export type NestedConditionsFilters = ObjectLiteral;
 
 export type ApplyFilterParamArgs = Omit<AbstractFilterApplyArgs, "queryParams"> & {
     filter: FilterParam;

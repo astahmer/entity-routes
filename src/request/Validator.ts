@@ -6,6 +6,7 @@ import { Container, Service } from "typedi";
 import { isType, isObjectLiteral } from "@/functions/asserts";
 import { GenericEntity } from "@/router/EntityRouter";
 import { RequestContextMinimal } from "@/router/MiddlewareMaker";
+import { ObjectLiteral } from "@/utils-types";
 
 @Service()
 export class Validator {
@@ -102,7 +103,7 @@ export class Validator {
         // Parallel async validation on item.props
         const promises: Promise<void>[] = [];
         for (key in item) {
-            prop = (item as Record<string, any>)[key];
+            prop = (item as ObjectLiteral)[key];
 
             if (Array.isArray(prop)) {
                 let i = 0;
