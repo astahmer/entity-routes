@@ -78,13 +78,13 @@ export class MiddlewareMaker<Entity extends GenericEntity> {
                     entity: this.metadata.tableName,
                 },
             };
-            if (requestContext.isUpdateOrCreate) response["@context"].errors = null;
+            if (requestContext.isUpdateOrCreate) response["@context"].validationErrors = null;
 
             try {
                 const result = await this.controller[method]({ operation, ...requestContext });
 
                 if (isType<EntityErrorResponse>(result, "hasValidationErrors" in result)) {
-                    response["@context"].errors = result.errors;
+                    response["@context"].validationErrors = result.errors;
                     ctx.status = 400;
                 } else if ("error" in result) {
                     response["@context"].error = result.error;
@@ -189,7 +189,7 @@ export type RouteResponse = {
         /** Number of items retrieved for this request */
         retrievedItems?: number;
         /** Entity validation errors */
-        errors?: EntityErrorResults;
+        validationErrors?: EntityErrorResults;
         /** Global response error */
         error?: string;
     };

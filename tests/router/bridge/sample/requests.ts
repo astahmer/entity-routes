@@ -27,7 +27,7 @@ export const testRouteConfigs: TestRequestConfig[] = [
         method: "post",
         data: { id: 123, name: "Alex" },
         result: {
-            "@context": { operation: "create", entity: "user", errors: null },
+            "@context": { operation: "create", entity: "user", validationErrors: null },
             articles: "/api/user/123/articles",
             mainRole: "/api/user/123/mainRole",
             id: 123,
@@ -68,7 +68,7 @@ export const testRouteConfigs: TestRequestConfig[] = [
         method: "post",
         data: { id: 111, title: "First article" },
         result: {
-            "@context": { operation: "create", entity: "article", errors: null },
+            "@context": { operation: "create", entity: "article", validationErrors: null },
             id: 111,
             author: "/api/article/111/author",
             comments: "/api/article/111/comments",
@@ -94,7 +94,7 @@ export const testRouteConfigs: TestRequestConfig[] = [
         method: "post",
         data: { id: 222, message: "First comment" },
         result: {
-            "@context": { operation: "create", entity: "comment", errors: null },
+            "@context": { operation: "create", entity: "comment", validationErrors: null },
             id: 222,
             upvotes: "/api/comment/222/upvotes",
         },
@@ -119,7 +119,7 @@ export const testRouteConfigs: TestRequestConfig[] = [
         method: "post",
         data: { id: 333 },
         result: {
-            "@context": { operation: "create", entity: "upvote", errors: null },
+            "@context": { operation: "create", entity: "upvote", validationErrors: null },
             id: 333,
         },
     },
@@ -143,7 +143,7 @@ export const testRouteConfigs: TestRequestConfig[] = [
         method: "post",
         data: { id: 456, label: "Admin" },
         result: {
-            "@context": { operation: "create", entity: "role", errors: null },
+            "@context": { operation: "create", entity: "role", validationErrors: null },
             id: 456,
             label: "Admin",
             logo: "/api/role/456/logo",
@@ -166,7 +166,7 @@ export const testRouteConfigs: TestRequestConfig[] = [
         method: "post",
         data: { id: 789, url: "http://abc.def/image.jpg" },
         result: {
-            "@context": { operation: "create", entity: "image", errors: null },
+            "@context": { operation: "create", entity: "image", validationErrors: null },
             id: 789,
             upvotes: "/api/image/789/upvotes",
             url: "http://abc.def/image.jpg",
@@ -189,7 +189,7 @@ export const testRouteConfigs: TestRequestConfig[] = [
         method: "post",
         data: { id: 444 },
         result: {
-            "@context": { operation: "create", entity: "upvote", errors: null },
+            "@context": { operation: "create", entity: "upvote", validationErrors: null },
             id: 444,
         },
     },
