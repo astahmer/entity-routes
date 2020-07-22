@@ -2,7 +2,7 @@ import { isType, isClass, isDev } from "@/functions/asserts";
 import { CType } from "@/utils-types";
 import { RouteVerb } from "@/router/MiddlewareMaker";
 import { EntityRouterFactoryOptions } from "@/router/EntityRouter";
-import { isEqualArrays } from "@/functions/array";
+import { areSameRoutes } from "@/functions/route";
 
 export class BridgeRouter<T = any> {
     readonly instance: T;
@@ -17,20 +17,13 @@ export class BridgeRouter<T = any> {
 
     /** Create and register a route. */
     register(route: BridgeRouterRoute) {
-        if (this.routes.find((registered) => this.areSameRoutes(registered, route))) {
+        if (this.routes.find((registered) => areSameRoutes(registered, route))) {
             isDev() && console.warn("This route is already registered on that router", route);
             return;
         }
 
         this.routes.push(route);
         this.registerFn(this.instance, route);
-    }
-
-    private areSameRoutes(routeA: BridgeRouterRoute, routeB: BridgeRouterRoute) {
-        return (
-            routeA.name === routeB.name ||
-            (routeA.path === routeB.path && isEqualArrays(routeA.methods, routeB.methods))
-        );
     }
 }
 
