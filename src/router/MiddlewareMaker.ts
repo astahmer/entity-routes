@@ -12,7 +12,7 @@ import { RouteController } from "@/router/RouteController";
 import { QueryParams } from "@/filters/index";
 import { ContextAdapter, Middleware } from "@/router/bridge/ContextAdapter";
 import { parseStringAsBoolean } from "@/functions/primitives";
-import { DeepPartial, FunctionKeys } from "@/utils-types";
+import { DeepPartial, FunctionKeys, Unpacked } from "@/utils-types";
 
 export class MiddlewareMaker<Entity extends GenericEntity> {
     get mappingManager() {
@@ -40,7 +40,9 @@ export class MiddlewareMaker<Entity extends GenericEntity> {
                 subresourceRelations[0].id = parseInt(ctx.params[subresourceRelations[0].param]);
             }
 
+            const { requestId } = ctx.state;
             const requestContext: RequestContext<Entity> = {
+                requestId,
                 ctx,
                 operation,
                 isUpdateOrCreate: ctx.requestBody && (ctx.method === "POST" || ctx.method === "PUT"),
@@ -58,7 +60,9 @@ export class MiddlewareMaker<Entity extends GenericEntity> {
             ctx.state.requestContext = requestContext;
             ctx.state.queryRunner = queryRunner;
 
+            await this.options.hooks?.beforeHandle?.(ctx as any);
             await next();
+            await this.options.hooks?.afterHandle?.(ctx as any);
 
             if (!ctx.state.queryRunner.isReleased) {
                 ctx.state.queryRunner.release();
@@ -67,9 +71,9 @@ export class MiddlewareMaker<Entity extends GenericEntity> {
     }
 
     /** Returns the response method on a given operation for this entity */
-    public makeResponseMiddleware(operation: RouteOperation): Middleware {
+    public makeResponseMiddleware(operation: string): Middleware {
         return async (ctx) => {
-            const { requestContext = {} as RequestContext<Entity> } = ctx.state as RequestState<Entity>;
+            const { requestContext = {} as RequestContext<Entity>, requestId } = ctx.state as RequestState<Entity>;
 
             const method = CRUD_ACTIONS[operation].method;
             let response: RouteResponse = {
@@ -80,8 +84,9 @@ export class MiddlewareMaker<Entity extends GenericEntity> {
             };
             if (requestContext.isUpdateOrCreate) response["@context"].validationErrors = null;
 
+            let result;
             try {
-                const result = await this.controller[method]({ operation, ...requestContext });
+                result = await this.controller[method]({ requestId, operation, ...requestContext });
 
                 if (isType<EntityErrorResponse>(result, "hasValidationErrors" in result)) {
                     response["@context"].validationErrors = result.errors;
@@ -106,8 +111,12 @@ export class MiddlewareMaker<Entity extends GenericEntity> {
                 ctx.status = 400;
             }
 
+            await this.options.hooks?.beforeRespond?.({ ctx: ctx as any, response, result });
+
             ctx.status = 200;
             ctx.responseBody = response;
+
+            await this.options.hooks?.afterRespond?.({ ctx: ctx as any, response, result });
         };
     }
 
@@ -149,12 +158,17 @@ export type CrudAction = {
 };
 
 /** EntityRoute request context wrapping Koa's Context */
-export type RequestContext<Entity extends GenericEntity = GenericEntity> = {
+export type RequestContext<
+    Entity extends GenericEntity = GenericEntity,
+    QP = QueryParams,
+    State = Record<string, any>
+> = {
+    /** Current request id */
+    requestId?: string;
     /** Request context adapter */
-    ctx: ContextAdapter;
+    ctx?: ContextAdapter<QP, State>;
     /** Current route entity id */
     entityId?: string | number;
-
     /** Parent subresource relations, used to auto-join on this entity's relation inverse side */
     subresourceRelations?: SubresourceRelation[];
     /** Is update or create operation ? To check if there is a body sent */
@@ -162,18 +176,18 @@ export type RequestContext<Entity extends GenericEntity = GenericEntity> = {
     /** Request body values sent */
     values?: DeepPartial<Entity>;
     /** Request query params */
-    queryParams?: QueryParams;
+    queryParams?: QP;
     /** Custom operation for a custom action */
     operation?: RouteOperation;
 };
 export type RequestContextMinimal<Entity extends GenericEntity = GenericEntity> = Pick<
     RequestContext<Entity>,
-    "operation" | "values"
-> &
-    Partial<Omit<RequestContext<Entity>, "operation" | "values">>;
+    "requestId" | "operation" | "values"
+>;
 
 /** Custom state to pass to Koa's Context */
 export type RequestState<Entity extends GenericEntity = GenericEntity> = {
+    requestId: string;
     requestContext: RequestContext<Entity>;
     queryRunner: QueryRunner;
 };
@@ -206,3 +220,5 @@ export type CollectionResult<Entity extends GenericEntity> = {
     items: Entity[];
     totalItems: number;
 };
+
+export type RouteControllerResult = Unpacked<ReturnType<RouteController<GenericEntity>[CrudAction["method"]]>>;

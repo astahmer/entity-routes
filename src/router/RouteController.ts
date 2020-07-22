@@ -1,4 +1,4 @@
-import { Repository, SelectQueryBuilder } from "typeorm";
+import { Repository, SelectQueryBuilder, DeleteResult } from "typeorm";
 import { Container } from "typedi";
 
 import { getRouteFiltersMeta, RouteFiltersMeta, GenericEntity, EntityRouteOptions } from "@/router/EntityRouter";
@@ -22,7 +22,7 @@ import { parseStringAsBoolean } from "@/functions/index";
 export class RouteController<Entity extends GenericEntity> {
     private filtersMeta: RouteFiltersMeta;
 
-    get normalizer() {
+    get reader() {
         return Container.get(Reader);
     }
 
@@ -54,10 +54,10 @@ export class RouteController<Entity extends GenericEntity> {
     }
 
     public async create(
-        ctx: Pick<RequestContext<Entity>, "operation" | "values" | "subresourceRelations">,
+        requestContext: Pick<RequestContext<Entity>, "requestId" | "operation" | "values" | "subresourceRelations">,
         innerOptions: CreateUpdateOptions = {}
     ) {
-        const { operation = "create", values, subresourceRelations } = ctx;
+        const { operation = "create", values, subresourceRelations } = requestContext;
         const subresourceRelation = last(subresourceRelations || []); // Should only contain 1 item at most
         const options = { ...this.options.defaultCreateUpdateOptions, ...(innerOptions || {}) };
 
@@ -105,7 +105,8 @@ export class RouteController<Entity extends GenericEntity> {
         }
 
         const responseOperation =
-            options?.responseOperation || (ctx.operation === "create" ? "details" : ctx.operation || "details");
+            options?.responseOperation ||
+            (requestContext.operation === "create" ? "details" : requestContext.operation || "details");
         return this.getDetails(
             { operation: responseOperation, entityId: result.id },
             { shouldOnlyFlattenNested: true }
@@ -113,10 +114,10 @@ export class RouteController<Entity extends GenericEntity> {
     }
 
     public async update(
-        ctx: Pick<RequestContext<Entity>, "operation" | "values" | "entityId">,
+        requestContext: Pick<RequestContext<Entity>, "requestId" | "operation" | "values" | "entityId">,
         innerOptions?: CreateUpdateOptions
     ) {
-        const { operation = "update", values, entityId } = ctx;
+        const { operation = "update", values, entityId } = requestContext;
         const options = { ...this.options.defaultCreateUpdateOptions, ...(innerOptions || {}) };
 
         if (!values?.id) (values as Entity).id = entityId;
@@ -144,7 +145,8 @@ export class RouteController<Entity extends GenericEntity> {
         }
 
         const responseOperation =
-            options?.responseOperation || (ctx.operation === "update" ? "details" : ctx.operation || "details");
+            options?.responseOperation ||
+            (requestContext.operation === "update" ? "details" : requestContext.operation || "details");
         return this.getDetails(
             { operation: responseOperation, entityId: result.id },
             { shouldOnlyFlattenNested: true }
@@ -153,14 +155,17 @@ export class RouteController<Entity extends GenericEntity> {
 
     /** Returns an entity with every mapped props (from groups) for a given id */
     public async getList(
-        ctx?: Pick<RequestContext<Entity>, "operation" | "queryParams" | "subresourceRelations">,
-        options?: ListDetailsOptions
+        requestContext?: Pick<
+            RequestContext<Entity>,
+            "requestId" | "operation" | "queryParams" | "subresourceRelations"
+        >,
+        innerOptions?: ListDetailsOptions
     ) {
-        const { operation = "list", queryParams = {}, subresourceRelations } = ctx || {};
+        const { operation = "list", queryParams = {}, subresourceRelations } = requestContext || {};
 
         const qb = this.repository.createQueryBuilder(this.metadata.tableName);
 
-        if (options?.withDeleted) qb.withDeleted();
+        if (innerOptions?.withDeleted) qb.withDeleted();
 
         // Apply a max item to retrieve
         qb.take(100);
@@ -183,24 +188,22 @@ export class RouteController<Entity extends GenericEntity> {
             this.applyFilters(queryParams, qb, aliasHandler);
         }
 
-        const collectionResult = await this.normalizer.getCollection(this.metadata, qb, aliasHandler, operation, {
-            ...this.options,
-            ...options,
-        });
+        const options = { ...this.options, ...innerOptions };
+        const collectionResult = await this.reader.getCollection(this.metadata, qb, aliasHandler, operation, options);
 
         return { items: collectionResult[0], totalItems: collectionResult[1] } as CollectionResult<Entity>;
     }
 
     /** Returns an entity with every mapped props (from groups) for a given id */
     public async getDetails(
-        ctx: Pick<RequestContext<Entity>, "operation" | "entityId" | "subresourceRelations">,
-        options?: ListDetailsOptions
+        ctx: Pick<RequestContext<Entity>, "requestId" | "operation" | "entityId" | "subresourceRelations">,
+        innerOptions?: ListDetailsOptions
     ) {
-        const { operation = "details", entityId, subresourceRelations } = ctx;
+        const { requestId, operation = "details", entityId, subresourceRelations } = ctx;
 
         const qb = this.repository.createQueryBuilder(this.metadata.tableName);
 
-        if (options?.withDeleted) qb.withDeleted();
+        if (innerOptions?.withDeleted) qb.withDeleted();
 
         const aliasHandler = new AliasHandler();
         if (subresourceRelations) {
@@ -216,10 +219,12 @@ export class RouteController<Entity extends GenericEntity> {
             });
         }
 
-        return await this.normalizer.getItem<Entity>(this.metadata, qb, aliasHandler, entityId, operation, {
-            ...this.options,
-            ...options,
-        });
+        const options = { ...this.options, ...innerOptions };
+        await this.options.hooks?.beforeRead?.({ requestId, options });
+        const result = await this.reader.getItem<Entity>(this.metadata, qb, aliasHandler, entityId, operation, options);
+        await this.options.hooks?.afterRead?.({ requestId, result });
+
+        return result;
     }
 
     public async delete(
@@ -228,6 +233,10 @@ export class RouteController<Entity extends GenericEntity> {
     ) {
         const { entityId, subresourceRelations, queryParams } = ctx;
         const subresourceRelation = last(subresourceRelations || []);
+
+        await this.options.hooks?.beforeRemove?.({ entityId, subresourceRelation });
+
+        let result;
         // Remove relation if used on a subresource
         if (subresourceRelation) {
             const qb = this.repository.createQueryBuilder(this.metadata.tableName);
@@ -242,14 +251,19 @@ export class RouteController<Entity extends GenericEntity> {
                 await query.remove(entityId);
             }
 
-            return { affected: 1, raw: { insertId: entityId } };
+            result = { affected: 1, raw: { insertId: entityId } } as DeleteResult;
         }
 
-        if (this.options.allowSoftDelete && (softDelete || parseStringAsBoolean(queryParams?.softDelete as string))) {
-            return this.repository.softDelete(entityId);
+        // TODO SoftDelete for Subresources (=relation softDelete) ?
+        const shouldSoftDelete =
+            this.options.allowSoftDelete && (softDelete || parseStringAsBoolean(queryParams?.softDelete as string));
+        if (!result) {
+            result = await this.repository[shouldSoftDelete ? "softDelete" : "delete"](entityId);
         }
 
-        return this.repository.delete(entityId);
+        await this.options.hooks?.afterRemove?.({ entityId, subresourceRelation, result });
+
+        return result;
     }
 
     public async restore(ctx: Pick<RequestContext<Entity>, "entityId">) {

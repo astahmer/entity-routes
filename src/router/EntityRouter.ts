@@ -15,6 +15,8 @@ import {
 import { MiddlewareMaker, CRUD_ACTIONS } from "@/router/MiddlewareMaker";
 import { CType } from "@/utils-types";
 import { CreateUpdateOptions } from "@/router/RouteController";
+import { HookSchema } from "@/request/hooks";
+import { addCtxToStoreMw } from "@/request/store";
 
 export class EntityRouter<Entity extends GenericEntity> {
     public readonly middlewareMaker: MiddlewareMaker<Entity>;
@@ -70,6 +72,7 @@ export class EntityRouter<Entity extends GenericEntity> {
                 name,
                 methods: [verb],
                 middlewares: [
+                    mwAdapter(addCtxToStoreMw),
                     ...(this.options.beforeCtxMiddlewares || []),
                     mwAdapter(requestContextMw),
                     ...(this.options.afterCtxMiddlewares || []),
@@ -108,13 +111,13 @@ export class EntityRouter<Entity extends GenericEntity> {
     }
 
     private addRequestContextMwToAction(action: EntityRouteActionConfig): RouteActionConfig {
+        const mwAdapter = this.globalOptions.middlewareAdapter;
         return {
             ...action,
             middlewares: [
+                mwAdapter(addCtxToStoreMw),
                 ...(action.beforeCtxMiddlewares || []),
-                this.globalOptions.middlewareAdapter(
-                    this.middlewareMaker.makeRequestContextMiddleware(action.operation)
-                ),
+                mwAdapter(this.middlewareMaker.makeRequestContextMiddleware(action.operation)),
                 ...(action.afterCtxMiddlewares || []),
             ],
         };
@@ -139,7 +142,10 @@ export const ROUTE_FILTERS_METAKEY = Symbol("filters");
 export const getRouteFiltersMeta = (entity: Function): RouteFiltersMeta =>
     Reflect.getOwnMetadata(ROUTE_FILTERS_METAKEY, entity);
 
-export type GenericEntity = ObjectLiteral & { id: string | number };
+export interface GenericEntity {
+    [k: string]: any;
+    id: string | number;
+}
 
 export type RouteMetadata = {
     /** The path prefix for every action of this route */
@@ -205,6 +211,8 @@ export type EntityRouteOptions = {
     allowSoftDelete?: boolean;
     /** When true, list/details will also select softDeleted entities */
     withDeleted?: boolean;
+    /** Hook schema of custom functions to be run at specific operations in a request processing */
+    hooks?: HookSchema;
 };
 export type EntityRouteConfig = EntityRouteBaseOptions & EntityRouteOptions;
 

@@ -15,6 +15,7 @@ import { ObjectOrCollectionKeys } from "@/utils-types";
 import { prop } from "@/functions/object";
 import { last } from "@/functions/array";
 import { isRelationSingle } from "@/functions/entity";
+import { addCtxToStoreMw } from "@/request/store";
 
 export class SubresourceMaker<Entity extends GenericEntity> {
     private subresourcesMeta: RouteSubresourcesMeta<Entity>;
@@ -120,7 +121,7 @@ export class SubresourceMaker<Entity extends GenericEntity> {
                     path,
                     name,
                     methods: [CRUD_ACTIONS[operation].verb],
-                    middlewares: [requestContextMw, responseMw].map(this.mwAdapter),
+                    middlewares: [addCtxToStoreMw, requestContextMw, responseMw].map(this.mwAdapter),
                 });
             });
 

@@ -1,0 +1,99 @@
+import { DeleteResult } from "typeorm";
+
+import { ContextWithState, RequestContextWithState } from "@/request/store";
+import { ValidateItemOptions, EntityErrorResults } from "@/request/Validator";
+import { CleanerArgs } from "@/request/Cleaner";
+import { DeepPartial } from "@/utils-types";
+
+import { GenericEntity } from "../router/EntityRouter";
+import { RouteResponse, RouteControllerResult, RequestContext } from "../router/MiddlewareMaker";
+import { ListDetailsOptions } from "../router/RouteController";
+import { SubresourceRelation } from "../router/SubresourceManager";
+
+// TODO Add hooks test
+/** Possible hooks are [before/after][Handle/?:(Clean/Validate/Persist)/?:(Read)/Respond] */
+export type HookSchema = Partial<{
+    /**
+     * Called right after the requestContext has been set by the appropriate middleware &
+     * right before the request is handled by the response middleware
+     */
+    beforeHandle: HookFnOnHandle;
+    // Called after the request has been handled
+    afterHandle: HookFnOnHandle;
+
+    // Called right before the response status & body are set
+    beforeRespond: HookFnOnRespond;
+    // Called right after the response status & body are set
+    afterRespond: HookFnOnRespond;
+
+    // Called right before clean an entity from database
+    beforeClean: HookFnBeforeClean;
+    // Called right after clean an entity from database
+    afterClean: HookFnAfterClean;
+
+    // Called right before the validation of the request body
+    beforeValidate: HookFnBeforeValidate;
+    // Called right after the validation of the request body
+    afterValidate: HookFnAfterValidate;
+
+    // Called right before persisting payload from the request body
+    beforePersist: HookFnBeforePersist;
+    // Called right after persisting payload from the request body
+    afterPersist: HookFnAfterPersist;
+
+    // Called right before reading an item or a collection from database
+    beforeRead: HookFnBeforeRead;
+    // Called right after reading an item or a collection from database
+    afterRead: HookFnAfterRead;
+
+    // Called right before removing (or softDelete entity/unlink subresource) an entity from database
+    beforeRemove: HookFnBeforeRemove;
+    // Called right after removing (or softDelete entity/unlink subresource) an entity from database
+    afterRemove: HookFnAfterRemove;
+}>;
+
+export type HookReturn = Promise<any> | void;
+export type HookFn<Args = any> = (args: Args) => HookReturn;
+
+export type HookFnOnHandle = HookFn<ContextWithState>;
+
+export interface WithContextAdapterKey {
+    ctx: ContextWithState;
+}
+export type WithRequestId = Pick<RequestContext, "requestId">;
+
+// Respond
+export interface HookFnOnRespondArgs extends WithContextAdapterKey {
+    result: RouteControllerResult;
+    response: RouteResponse;
+}
+export type HookFnOnRespond = HookFn<HookFnOnRespondArgs>;
+
+// Clean
+export type HookFnOnCleanerOptions = WithRequestId & CleanerArgs;
+export type HookFnBeforeClean = (options: HookFnOnCleanerOptions) => HookReturn;
+export type HookFnAfterClean = (options: HookFnOnCleanerOptions, result: DeepPartial<GenericEntity>) => HookReturn;
+
+// Validate
+export type HookFnOnValidateOptions = ValidateItemOptions & { context: RequestContextWithState };
+export type HookFnBeforeValidate = (options: HookFnOnValidateOptions) => HookReturn;
+export type HookFnAfterValidate = (options: HookFnOnValidateOptions, errors: EntityErrorResults) => HookReturn;
+
+// Persist
+export type HookFnOnBeforePersistArgs = WithRequestId & { item: GenericEntity };
+export type HookFnBeforePersist = HookFn<HookFnOnBeforePersistArgs>;
+export type HookFnOnAfterPersistArgs = WithRequestId & { result: GenericEntity };
+export type HookFnAfterPersist = HookFn<HookFnOnAfterPersistArgs>;
+
+// Read
+export type HookFnOnBeforeReadArgs = WithRequestId & { options: ListDetailsOptions };
+export type HookFnBeforeRead = HookFn<HookFnOnBeforeReadArgs>;
+export type HookFnOnAfterReadArgs = WithRequestId & { result: GenericEntity };
+export type HookFnAfterRead = HookFn<HookFnOnAfterReadArgs>;
+
+// Remove
+export type HookFnOnBeforeRemoveArgs = WithRequestId &
+    Pick<RequestContext, "entityId"> & { subresourceRelation: SubresourceRelation };
+export type HookFnBeforeRemove = HookFn<HookFnOnBeforeRemoveArgs>;
+export type HookFnOnAfterRemoveArgs = HookFnOnBeforeRemoveArgs & { result: DeleteResult };
+export type HookFnAfterRemove = HookFn<HookFnOnAfterRemoveArgs>;

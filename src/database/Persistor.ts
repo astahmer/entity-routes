@@ -1,7 +1,7 @@
 import { getRepository, EntityMetadata } from "typeorm";
 import { Container, Service } from "typedi";
 
-import { GenericEntity } from "@/router/EntityRouter";
+import { GenericEntity, EntityRouteOptions } from "@/router/EntityRouter";
 import { Cleaner } from "@/request/Cleaner";
 import { ValidateItemOptions, EntityErrorResults, Validator } from "@/request/Validator";
 import { RequestContextMinimal } from "@/router/MiddlewareMaker";
@@ -25,17 +25,27 @@ export class Persistor {
         validatorOptions,
         mapperMakeOptions,
         subresourceRelation,
+        hooks,
     }: SaveItemArgs<Entity>) {
-        const { operation, values } = ctx;
+        const { requestId, operation, values } = ctx;
         const repository = getRepository<Entity>(rootMetadata.target);
-        const cleanedItem = this.cleaner.cleanItem({ rootMetadata, operation, values, options: mapperMakeOptions });
+        // TODO Add options to bypass clean/validate steps
+
+        const cleanOptions = { rootMetadata, operation, values, options: mapperMakeOptions };
+        await hooks?.beforeClean?.(cleanOptions);
+        const cleanedItem = this.cleaner.cleanItem(cleanOptions);
+        await hooks?.afterClean?.(cleanOptions, cleanedItem);
+
         const item = repository.create(cleanedItem);
 
         // Allow partially updating an entity
         const defaultValidatorOptions: Partial<ValidateItemOptions> =
             operation === "update" ? { skipMissingProperties: true } : {};
         const validationOptions = { ...defaultValidatorOptions, ...validatorOptions, context: ctx };
+
+        await hooks?.beforeValidate?.(validationOptions as any);
         const errors = await this.validator.validateItem(rootMetadata, item, validationOptions);
+        await hooks?.afterValidate?.(validationOptions as any, errors);
 
         if (Object.keys(errors).length) {
             return { hasValidationErrors: true, errors } as EntityErrorResponse;
@@ -50,7 +60,11 @@ export class Persistor {
             (item as any)[subresourceRelation.relation.inverseRelation.propertyName] = { id: subresourceRelation.id };
         }
 
-        return repository.save(item);
+        await hooks?.beforePersist?.({ requestId, item });
+        const result = await repository.save(item);
+        await hooks?.afterPersist?.({ requestId, result });
+
+        return result;
     }
 }
 
@@ -59,7 +73,7 @@ export type EntityErrorResponse = { hasValidationErrors: true; errors: EntityErr
 export type SaveItemArgs<Entity extends GenericEntity = GenericEntity> = {
     /** Metadata from entity to save */
     rootMetadata: EntityMetadata;
-    /** Minimal equest context (with only relevant parts) */
+    /** Minimal request context (with only relevant parts) */
     ctx: RequestContextMinimal<Entity>;
     /** Used by class-validator & entity-validator */
     validatorOptions?: ValidateItemOptions;
@@ -67,4 +81,4 @@ export type SaveItemArgs<Entity extends GenericEntity = GenericEntity> = {
     mapperMakeOptions?: EntityMapperMakeOptions;
     /** Subresource relation used to auto join saved entity with its parent */
     subresourceRelation?: SubresourceRelation;
-};
+} & Pick<EntityRouteOptions, "hooks">;
