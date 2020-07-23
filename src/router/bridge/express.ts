@@ -22,38 +22,39 @@ export async function makeExpressEntityRouters(
     });
 }
 
-type ResponseWithBody = Response & { body: any };
-export type ExpressContextAdapter = ContextAdapter & { req: Request; res: ResponseWithBody };
+export type ExpressContextAdapter = ContextAdapter & { req: Request; res: Response };
 type ECA = ExpressContextAdapter;
 
-export const makeExpressContextAdapter = (req: Request, res: ResponseWithBody) => ({
-    req,
-    res,
-    get method() {
-        return (this as ECA).req.method;
-    },
-    get requestBody() {
-        return (this as ECA).req.body;
-    },
-    get params() {
-        return (this as ECA).req.params;
-    },
-    get query() {
-        return (this as ECA).req.query;
-    },
-    get state() {
-        return (this as ECA).res.locals;
-    },
-    get responseBody() {
-        return (this as ECA).res.body;
-    },
-    set responseBody(value: any) {
-        (this as ECA).res.send(value).end();
-    },
-    get status() {
-        return (this as ECA).res.statusCode;
-    },
-    set status(value) {
-        (this as ECA).res.status(value);
-    },
-});
+export const makeExpressContextAdapter = (req: Request, res: Response) =>
+    ({
+        req,
+        res,
+        get method() {
+            return (this as ECA).req.method;
+        },
+        get requestBody() {
+            return (this as ECA).req.body;
+        },
+        get params() {
+            return (this as ECA).req.params;
+        },
+        get query() {
+            return (this as ECA).req.query;
+        },
+        get state() {
+            return (this as ECA).res.locals;
+        },
+        get responseBody() {
+            return (this as ECA).res.locals.responseBody;
+        },
+        set responseBody(value: any) {
+            (this as ECA).res.locals.responseBody = value;
+            (this as ECA).res.send(value).end();
+        },
+        get status() {
+            return (this as ECA).res.statusCode;
+        },
+        set status(value) {
+            (this as ECA).res.status(value);
+        },
+    } as ExpressContextAdapter);
