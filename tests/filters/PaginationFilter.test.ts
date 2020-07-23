@@ -190,7 +190,7 @@ describe("OrderBy", () => {
     it("append .id to relations propPath", async () => {
         @Entity()
         class User extends AbstractEntity {
-            @OrderBy("desc", "non")
+            @OrderBy("desc")
             @Column()
             firstName: string;
 
