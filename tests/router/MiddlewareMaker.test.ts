@@ -31,7 +31,7 @@ describe("MiddlewareMaker", () => {
         const mw = manager.makeRequestContextMiddleware("list");
         const ctx = makeTestCtx<RequestState<User>>({ query: { id: "123" } });
         const nextSpy = jest.fn();
-        const req = mw(ctx as any, nextSpy);
+        const req = mw(ctx, nextSpy);
 
         expect(ctx.state.queryRunner.connection).toBe(connection);
         expect(ctx.state.requestContext.queryParams).toEqual({ id: "123" });
@@ -50,7 +50,7 @@ describe("MiddlewareMaker", () => {
         const ctx = makeTestCtx<RequestState<User>>({ query: { id: "123" } });
         const noop = async () => {};
 
-        await mw(ctx as any, noop);
+        await mw(ctx, noop);
 
         expect(ctx.status).toEqual(200);
         expect(ctx.responseBody).toEqual({
@@ -72,7 +72,7 @@ describe("MiddlewareMaker", () => {
         const ctx = makeTestCtx<RequestState<User>>();
         const noop = async () => {};
 
-        await mw(ctx as any, noop);
+        await mw(ctx, noop);
 
         expect(ctx.status).toEqual(200); // which means there was no error
         expect(ctx.responseBody).toMatchObject({

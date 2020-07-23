@@ -15,7 +15,6 @@ import { ObjectOrCollectionKeys } from "@/utils-types";
 import { prop } from "@/functions/object";
 import { last } from "@/functions/array";
 import { isRelationSingle } from "@/functions/entity";
-import { addCtxToStoreMw } from "@/request/store";
 
 export class SubresourceMaker<Entity extends GenericEntity> {
     private subresourcesMeta: RouteSubresourcesMeta<Entity>;
@@ -110,6 +109,7 @@ export class SubresourceMaker<Entity extends GenericEntity> {
                     relations
                 );
                 const responseMw = nestedEntityRoute.middlewareMaker.makeResponseMiddleware(operation);
+                const endResponseMw = nestedEntityRoute.middlewareMaker.makeEndResponseMiddleware();
 
                 const path = !parents
                     ? this.getSubresourcePathForOperation({ basePath, operation, isSingle })
@@ -121,7 +121,7 @@ export class SubresourceMaker<Entity extends GenericEntity> {
                     path,
                     name,
                     methods: [CRUD_ACTIONS[operation].verb],
-                    middlewares: [addCtxToStoreMw, requestContextMw, responseMw].map(this.mwAdapter),
+                    middlewares: [requestContextMw, responseMw, endResponseMw].map(this.mwAdapter),
                 });
             });
 

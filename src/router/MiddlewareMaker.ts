@@ -13,6 +13,7 @@ import { QueryParams } from "@/filters/index";
 import { ContextAdapter, Middleware } from "@/router/bridge/ContextAdapter";
 import { parseStringAsBoolean } from "@/functions/primitives";
 import { DeepPartial, FunctionKeys, Unpacked } from "@/utils-types";
+import { ContextWithState, addRequestContext, removeRequestContext } from "@/request";
 
 export class MiddlewareMaker<Entity extends GenericEntity> {
     get mappingManager() {
@@ -36,6 +37,8 @@ export class MiddlewareMaker<Entity extends GenericEntity> {
         subresourceRelations?: SubresourceRelation[]
     ): Middleware {
         return async (ctx, next) => {
+            addRequestContext(ctx as ContextWithState);
+
             if (subresourceRelations?.length) {
                 subresourceRelations[0].id = parseInt(ctx.params[subresourceRelations[0].param]);
             }
@@ -60,19 +63,15 @@ export class MiddlewareMaker<Entity extends GenericEntity> {
             ctx.state.requestContext = requestContext;
             ctx.state.queryRunner = queryRunner;
 
-            await this.options.hooks?.beforeHandle?.(ctx as any);
-            await next();
-            await this.options.hooks?.afterHandle?.(ctx as any);
+            await this.options.hooks?.beforeHandle?.(ctx as ContextWithState);
 
-            if (!ctx.state.queryRunner.isReleased) {
-                ctx.state.queryRunner.release();
-            }
+            return next();
         };
     }
 
     /** Returns the response method on a given operation for this entity */
     public makeResponseMiddleware(operation: string): Middleware {
-        return async (ctx) => {
+        return async (ctx, next) => {
             const { requestContext = {} as RequestContext<Entity>, requestId } = ctx.state as RequestState<Entity>;
 
             const method = CRUD_ACTIONS[operation].method;
@@ -111,12 +110,25 @@ export class MiddlewareMaker<Entity extends GenericEntity> {
                 ctx.status = 400;
             }
 
-            await this.options.hooks?.beforeRespond?.({ ctx: ctx as any, response, result });
+            await this.options.hooks?.beforeRespond?.({ ctx: ctx as ContextWithState, response, result });
 
             ctx.status = 200;
             ctx.responseBody = response;
 
-            await this.options.hooks?.afterRespond?.({ ctx: ctx as any, response, result });
+            await this.options.hooks?.afterRespond?.({ ctx: ctx as ContextWithState, response, result });
+            next();
+        };
+    }
+
+    public makeEndResponseMiddleware(): Middleware {
+        return async (ctx) => {
+            if (!ctx.state.queryRunner.isReleased) {
+                await ctx.state.queryRunner.release();
+            }
+
+            await this.options.hooks?.afterHandle?.(ctx as ContextWithState);
+
+            removeRequestContext(ctx.state.requestId);
         };
     }
 

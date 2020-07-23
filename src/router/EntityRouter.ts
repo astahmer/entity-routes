@@ -1,4 +1,4 @@
-import { getRepository, ObjectType, Repository, ObjectLiteral } from "typeorm";
+import { getRepository, ObjectType, Repository } from "typeorm";
 
 import { RouteOperation } from "@/decorators/Groups";
 import { AbstractFilterConfig } from "@/filters/AbstractFilter";
@@ -16,7 +16,6 @@ import { MiddlewareMaker, CRUD_ACTIONS } from "@/router/MiddlewareMaker";
 import { CType } from "@/utils-types";
 import { CreateUpdateOptions } from "@/router/RouteController";
 import { HookSchema } from "@/request/hooks";
-import { addCtxToStoreMw } from "@/request/store";
 
 export class EntityRouter<Entity extends GenericEntity> {
     public readonly middlewareMaker: MiddlewareMaker<Entity>;
@@ -66,17 +65,18 @@ export class EntityRouter<Entity extends GenericEntity> {
 
             const requestContextMw = this.middlewareMaker.makeRequestContextMiddleware(operation);
             const responseMw = this.middlewareMaker.makeResponseMiddleware(operation);
+            const endResponseMw = this.middlewareMaker.makeEndResponseMiddleware();
 
             router.register({
                 path,
                 name,
                 methods: [verb],
                 middlewares: [
-                    mwAdapter(addCtxToStoreMw),
                     ...(this.options.beforeCtxMiddlewares || []),
                     mwAdapter(requestContextMw),
                     ...(this.options.afterCtxMiddlewares || []),
                     mwAdapter(responseMw),
+                    mwAdapter(endResponseMw),
                 ],
             });
 
@@ -115,7 +115,6 @@ export class EntityRouter<Entity extends GenericEntity> {
         return {
             ...action,
             middlewares: [
-                mwAdapter(addCtxToStoreMw),
                 ...(action.beforeCtxMiddlewares || []),
                 mwAdapter(this.middlewareMaker.makeRequestContextMiddleware(action.operation)),
                 ...(action.afterCtxMiddlewares || []),
