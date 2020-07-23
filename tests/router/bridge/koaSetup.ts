@@ -3,13 +3,12 @@ import { AddressInfo } from "net";
 import * as Koa from "koa";
 import * as bodyParser from "koa-bodyparser";
 import { createTestConnection } from "@@/tests/testConnection";
-import { makeKoaEntityRouters, getAppRoutes } from "@/index";
-import { log } from "@/functions/utils";
+import { makeKoaEntityRouters, EntityRouteOptions } from "@/index";
 
-export async function setupKoaApp(entities: Function[]) {
+export async function setupKoaApp(entities: Function[], options?: EntityRouteOptions) {
     const connection = await createTestConnection(entities);
 
-    const bridgeRouters = await makeKoaEntityRouters({ connection, entities });
+    const bridgeRouters = await makeKoaEntityRouters({ connection, entities, options });
     const app = new Koa();
     app.use(bodyParser());
 

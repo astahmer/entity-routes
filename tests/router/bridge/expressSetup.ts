@@ -3,12 +3,12 @@ import { AddressInfo } from "net";
 import * as express from "express";
 import * as bodyParser from "body-parser";
 import { createTestConnection } from "@@/tests/testConnection";
-import { makeExpressEntityRouters } from "@/index";
+import { makeExpressEntityRouters, EntityRouteOptions } from "@/index";
 
-export async function setupExpressApp(entities: Function[]) {
+export async function setupExpressApp(entities: Function[], options?: EntityRouteOptions) {
     const connection = await createTestConnection(entities);
 
-    const bridgeRouters = await makeExpressEntityRouters({ connection, entities });
+    const bridgeRouters = await makeExpressEntityRouters({ connection, entities, options });
     const app = express();
     app.use(bodyParser.json());
     app.use(bodyParser.urlencoded({ extended: true }));
