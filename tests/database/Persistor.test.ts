@@ -99,4 +99,21 @@ describe("Persistor", () => {
 
         return closeTestConnection();
     });
+
+    it("saveItem - throw on empty item", async () => {
+        await createTestConnection([User, Role]);
+
+        const repository = getRepository(Role);
+        const rootMetadata = repository.metadata;
+
+        const values = new Role();
+        values.title = "Admin";
+        values.startDate = new Date();
+
+        // Will throw cause no "create" groups are set on Role.title/startDate on Role.create context
+        // Which will make values an empty object
+        expect(() => persistor.saveItem({ ctx: { operation: "create", values }, rootMetadata })).rejects.toThrow();
+
+        return closeTestConnection();
+    });
 });

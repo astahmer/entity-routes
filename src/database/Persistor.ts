@@ -47,6 +47,12 @@ export class Persistor {
         const errors = await this.validator.validateItem(rootMetadata, item, validationOptions);
         await hooks?.afterValidate?.(validationOptions as any, errors);
 
+        if (!Object.keys(item).length) {
+            throw new Error(
+                `Item can't be saved since it's empty, check your @Groups on <${rootMetadata.name}> with <${operation}> operation`
+            );
+        }
+
         if (Object.keys(errors).length) {
             return { hasValidationErrors: true, errors } as EntityErrorResponse;
         }
