@@ -72,6 +72,7 @@ export class RouteController<Entity extends GenericEntity> {
             mapperMakeOptions: { ...this.options, ...(options?.mapperMakeOptions || {}) },
             validatorOptions: options?.validatorOptions || {},
             subresourceRelation,
+            hooks: this.options.hooks,
         });
 
         if (isType<EntityErrorResponse>(result, "hasValidationErrors" in result)) {
@@ -127,6 +128,7 @@ export class RouteController<Entity extends GenericEntity> {
             rootMetadata: this.metadata,
             mapperMakeOptions: { ...this.options, ...(options?.mapperMakeOptions || {}) },
             validatorOptions: options?.validatorOptions || {},
+            hooks: this.options.hooks,
         });
 
         if (isType<EntityErrorResponse>(result, "hasValidationErrors" in result)) {
@@ -162,7 +164,7 @@ export class RouteController<Entity extends GenericEntity> {
         >,
         innerOptions?: ListDetailsOptions
     ) {
-        const { operation = "list", queryParams = {}, subresourceRelations } = requestContext || {};
+        const { requestId, operation = "list", queryParams = {}, subresourceRelations } = requestContext || {};
 
         const qb = this.repository.createQueryBuilder(this.metadata.tableName);
 
@@ -190,7 +192,9 @@ export class RouteController<Entity extends GenericEntity> {
         }
 
         const options = { ...this.options, ...innerOptions };
+        await this.options.hooks?.beforeRead?.({ requestId, options });
         const collectionResult = await this.reader.getCollection(this.metadata, qb, aliasHandler, operation, options);
+        await this.options.hooks?.afterRead?.({ requestId, result: collectionResult[0] });
 
         return { items: collectionResult[0], totalItems: collectionResult[1] } as CollectionResult<Entity>;
     }

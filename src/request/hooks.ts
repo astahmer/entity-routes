@@ -88,7 +88,7 @@ export type HookFnAfterPersist = HookFn<HookFnOnAfterPersistArgs>;
 // Read
 export type HookFnOnBeforeReadArgs = WithRequestId & { options: ListDetailsOptions };
 export type HookFnBeforeRead = HookFn<HookFnOnBeforeReadArgs>;
-export type HookFnOnAfterReadArgs = WithRequestId & { result: GenericEntity };
+export type HookFnOnAfterReadArgs = WithRequestId & { result: GenericEntity | GenericEntity[] };
 export type HookFnAfterRead = HookFn<HookFnOnAfterReadArgs>;
 
 // Remove
