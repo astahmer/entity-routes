@@ -25,7 +25,7 @@ export const setNestedKey = (obj: ObjectLiteral, path: string | string[], value:
     return setNestedKey(obj[path[0]], path.slice(1), value);
 };
 
-export function fromEntries(iterable: Iterable<any>) {
+export function fromEntries<T = ObjectLiteral>(iterable: Iterable<any>): T {
     return [...iterable].reduce((obj, [key, val]) => {
         obj[key] = val;
         return obj;

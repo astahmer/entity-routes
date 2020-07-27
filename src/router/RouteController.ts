@@ -11,7 +11,6 @@ import { AliasHandler } from "@/database/AliasHandler";
 // TODO Hooks (before/afterPersist (create+update), before/afterValidate, before/afterLoad (list+details ?), beforeAfter/remove)
 import { isType } from "@/functions/asserts";
 import { RelationManager } from "@/database/RelationManager";
-import { fromEntries } from "@/functions/object";
 import { RequestContext, CollectionResult } from "@/router/MiddlewareMaker";
 import { Formater, FormaterOptions } from "@/response/Formater";
 import { RouteOperation } from "@/decorators/index";
@@ -50,7 +49,9 @@ export class RouteController<Entity extends GenericEntity> {
 
     constructor(private repository: Repository<Entity>, private options: EntityRouteOptions = {}) {
         this.filtersMeta = getRouteFiltersMeta(repository.metadata.target as Function);
-        this.cachedFilters = fromEntries(this.filters.map((config) => [config.class.name, this.makeFilter(config)]));
+        this.cachedFilters = Object.fromEntries(
+            this.filters.map((config) => [config.class.name, this.makeFilter(config)])
+        );
     }
 
     public async create(
