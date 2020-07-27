@@ -1,4 +1,4 @@
-import { RouteDefaultOperation, ALL_OPERATIONS, HookSchema, EntityRouteOptions, hookNames } from "@/index";
+import { RouteDefaultOperation, ALL_OPERATIONS, HookSchema, EntityRouteOptions, hookNames, fromEntries } from "@/index";
 import { AxiosRequestConfig } from "axios";
 import { closeTestConnection } from "@@/tests/testConnection";
 
@@ -18,7 +18,7 @@ export const resetHooksCalled = () => (hooksCalled = getDefaultHooksCalled());
 
 const pushHook = (operation: RouteDefaultOperation) => (name: string) => () => hooksCalled[operation].push(name);
 const defaultOperations = ALL_OPERATIONS.concat("delete") as RouteDefaultOperation[];
-const pushTo = Object.fromEntries(defaultOperations.map((ope) => [ope, pushHook(ope)]));
+const pushTo = fromEntries(defaultOperations.map((ope) => [ope, pushHook(ope)]));
 
 type TestHookConfigResult = Array<keyof HookSchema>;
 export type TestHookConfig = AxiosRequestConfig & {
@@ -117,7 +117,7 @@ export const testHooksConfigs: TestHookConfig[] = [
 ];
 
 export const makeTestFn = (setupFn: Function, entities: Function[]) => async (config: TestHookConfig) => {
-    const hooks = Object.fromEntries(hookNames.map((key) => [key, pushTo[config.operation](key)]));
+    const hooks = fromEntries(hookNames.map((key) => [key, pushTo[config.operation](key)]));
     const { server, client } = await setupFn(entities, { ...config.routeOptions, hooks });
 
     try {
