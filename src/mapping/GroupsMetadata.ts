@@ -3,7 +3,7 @@ import {
     MetaKey,
     PropsByOperations,
     PropsByContextByOperations,
-    ALL_OPERATIONS,
+    GROUPS_OPERATIONS,
     GroupsDecoratorArg,
     RouteOperation,
     GROUPS_METAKEY,
@@ -123,7 +123,7 @@ export class GroupsMetadata {
                 continue;
             } else if (groups[route] === "basic") {
                 // Shortcut to [create, update, list, details]
-                groups[route] = ALL_OPERATIONS;
+                groups[route] = GROUPS_OPERATIONS;
             }
 
             let operation: RouteOperation;

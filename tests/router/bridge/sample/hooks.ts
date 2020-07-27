@@ -1,4 +1,11 @@
-import { RouteDefaultOperation, ALL_OPERATIONS, HookSchema, EntityRouteOptions, hookNames, fromEntries } from "@/index";
+import {
+    RouteDefaultOperation,
+    HookSchema,
+    EntityRouteOptions,
+    hookNames,
+    fromEntries,
+    CRUD_OPERATIONS,
+} from "@/index";
 import { AxiosRequestConfig } from "axios";
 import { closeTestConnection } from "@@/tests/testConnection";
 
@@ -17,8 +24,7 @@ const getDefaultHooksCalled = () =>
 export const resetHooksCalled = () => (hooksCalled = getDefaultHooksCalled());
 
 const pushHook = (operation: RouteDefaultOperation) => (name: string) => () => hooksCalled[operation].push(name);
-const defaultOperations = ALL_OPERATIONS.concat("delete") as RouteDefaultOperation[];
-const pushTo = fromEntries(defaultOperations.map((ope) => [ope, pushHook(ope)]));
+const pushTo = fromEntries(CRUD_OPERATIONS.map((ope) => [ope, pushHook(ope)]));
 
 type TestHookConfigResult = Array<keyof HookSchema>;
 export type TestHookConfig = AxiosRequestConfig & {

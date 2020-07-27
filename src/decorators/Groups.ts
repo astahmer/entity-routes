@@ -62,7 +62,7 @@ export function registerGroupsDecorator<G extends GroupsMetadata>({
             if (groups === "all") {
                 groupsMeta.addPropToAlwaysGroups(propName);
             } else if (groups === "basic") {
-                groupsMeta.addPropToGlobalGroups(ALL_OPERATIONS, propName);
+                groupsMeta.addPropToGlobalGroups(GROUPS_OPERATIONS, propName);
             }
         } else if (Array.isArray(groups)) {
             groupsMeta.addPropToGlobalGroups(groups, propName);
@@ -84,6 +84,7 @@ export type RegisterGroupsDecoratorArgs<G extends GroupsMetadata> = {
     alias?: string;
 };
 
+export const CRUD_OPERATIONS: RouteDefaultOperation[] = ["create", "list", "details", "update", "delete"];
 export type RouteDefaultOperation = "create" | "list" | "details" | "update" | "delete";
 export type RouteOperation = RouteDefaultOperation | string;
 
@@ -101,7 +102,7 @@ export type PropsByOperations = PartialRecord<RouteOperation, string[]>;
 export type PropsByContextByOperations = Record<string, PropsByOperations>;
 
 export const GROUPS_METAKEY = Symbol("groups");
-export const ALL_OPERATIONS: GroupsOperation[] = ["create", "list", "details", "update"];
+export const GROUPS_OPERATIONS: GroupsOperation[] = ["create", "list", "details", "update"];
 export const COMPUTED_PREFIX = "_COMPUTED_";
 export const ALIAS_PREFIX = "_ALIAS_";
 
