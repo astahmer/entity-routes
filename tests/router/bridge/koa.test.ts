@@ -7,6 +7,7 @@ import { registerKoaRouteFromBridgeRoute, makeKoaEntityRouters } from "@/router/
 import { testRouteConfigs, testRoute, TestRequestConfig } from "@@/tests/router/bridge/sample/requests";
 import { getTestEntities, expectedRouteNames } from "@@/tests/router/bridge/sample/entities";
 import { setupKoaApp } from "@@/tests/router/bridge/koaSetup";
+import { resetHooksCalled, testHooksConfigs, makeTestFn } from "./sample/hooks";
 
 describe("koa BridgeRouter adapter", () => {
     const entities = getTestEntities();
@@ -60,7 +61,26 @@ describe("koa BridgeRouter adapter", () => {
         });
 
         const makeTest = (config: TestRequestConfig) =>
-            (config.only ? it.only : config.skip ? it.skip : it)(config.it, () => testRoute(client, config));
+            (config.only ? it.only : config.skip ? it.skip : it)(config.it, async () => {
+                try {
+                    await testRoute(client, config);
+                } catch (error) {
+                    console.error(error.message);
+                }
+            });
         testRouteConfigs.forEach(makeTest);
+    });
+
+    describe("invokes hooks in the right order", () => {
+        beforeEach(resetHooksCalled);
+
+        const makeTest = makeTestFn(setupKoaApp, entities);
+
+        testHooksConfigs.forEach((config) =>
+            (config.only ? it.only : config.skip ? it.skip : it)(
+                `should list all <${config.operation}> hooks ${config.itSuffix || ""}`,
+                () => makeTest(config)
+            )
+        );
     });
 });

@@ -7,6 +7,7 @@ import { registerExpressRouteFromBridgeRoute, makeExpressEntityRouters, printBri
 import { testRouteConfigs, TestRequestConfig, testRoute } from "@@/tests/router/bridge/sample/requests";
 import { getTestEntities, expectedRouteDesc } from "@@/tests/router/bridge/sample/entities";
 import { setupExpressApp } from "@@/tests/router/bridge/expressSetup";
+import { resetHooksCalled, makeTestFn, testHooksConfigs } from "./sample/hooks";
 
 describe("Express BridgeRouter adapter", () => {
     const entities = getTestEntities();
@@ -66,7 +67,7 @@ describe("Express BridgeRouter adapter", () => {
         });
 
         const makeTest = (config: TestRequestConfig) => {
-            it(config.it, async () => {
+            (config.only ? it.only : config.skip ? it.skip : it)(config.it, async () => {
                 try {
                     await testRoute(client, config);
                 } catch (error) {
@@ -76,5 +77,18 @@ describe("Express BridgeRouter adapter", () => {
         };
 
         testRouteConfigs.forEach(makeTest);
+    });
+
+    describe("invokes hooks in the right order", () => {
+        beforeEach(resetHooksCalled);
+
+        const makeTest = makeTestFn(setupExpressApp, entities);
+
+        testHooksConfigs.forEach((config) =>
+            (config.only ? it.only : config.skip ? it.skip : it)(
+                `should list all <${config.operation}> hooks ${config.itSuffix || ""}`,
+                () => makeTest(config)
+            )
+        );
     });
 });

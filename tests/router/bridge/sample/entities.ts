@@ -40,7 +40,7 @@ class Role extends AbstractEntity {
     mainRoleOfUsers: () => User;
 }
 
-@EntityRoute({ operations: ["create", "details", "list"] })
+@EntityRoute({ operations: ["create", "update", "details", "list", "delete"] })
 @Entity()
 class User extends AbstractEntity {
     @Groups("all")
@@ -101,10 +101,13 @@ class Upvote extends AbstractEntity {
 export const expectedRouteNames = [
     "user_create",
     "user_create_mapping",
+    "user_update",
+    "user_update_mapping",
     "user_details",
     "user_details_mapping",
     "user_list",
     "user_list_mapping",
+    "user_delete",
     "user_articles_create",
     "user_articles_list",
     "user_articles_delete",
@@ -141,10 +144,13 @@ export const expectedRouteNames = [
 export const expectedRouteDesc = [
     "/user : post",
     "/user/mapping : post",
+    "/user/:id(\\d+) : put",
+    "/user/:id(\\d+)/mapping : put",
     "/user/:id(\\d+) : get",
     "/user/:id(\\d+)/mapping : get",
     "/user : get",
     "/user/mapping : get",
+    "/user/:id(\\d+) : delete",
     "/user/:UserId(\\d+)/articles : post",
     "/user/:UserId(\\d+)/articles : get",
     "/user/:UserId(\\d+)/articles/:id(\\d+) : delete",
