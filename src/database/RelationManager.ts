@@ -30,14 +30,14 @@ export class RelationManager {
      * @param currentProp current propPath part used, needed to find column or relation meta
      * @param prevAlias previous alias used to joins on current entity props
      */
-    public makeJoinsFromPropPath(
-        qb: SelectQueryBuilder<any>,
-        entityMetadata: EntityMetadata,
-        propPath: string,
-        currentProp: string,
-        aliasHandler: AliasHandler,
-        prevAlias?: string
-    ): { entityAlias: string; propName: string; columnMeta: ColumnMetadata } {
+    public makeJoinsFromPropPath({
+        qb,
+        entityMetadata,
+        propPath,
+        currentProp,
+        aliasHandler,
+        prevAlias,
+    }: MakeJoinsFromPropPathArgs): { entityAlias: string; propName: string; columnMeta: ColumnMetadata } {
         const column = entityMetadata.findColumnWithPropertyName(currentProp);
         const relation = column ? column.relationMetadata : entityMetadata.findRelationWithPropertyPath(currentProp);
 
@@ -64,14 +64,14 @@ export class RelationManager {
             const splitPath = propPath.split(".");
             const nextPropPath = splitPath.slice(1).join(".");
 
-            return this.makeJoinsFromPropPath(
+            return this.makeJoinsFromPropPath({
                 qb,
-                relation.inverseEntityMetadata,
-                nextPropPath,
-                splitPath[1],
+                entityMetadata: relation.inverseEntityMetadata,
+                propPath: nextPropPath,
+                currentProp: splitPath[1],
                 aliasHandler,
-                alias
-            );
+                prevAlias: alias,
+            });
         }
     }
 
@@ -84,16 +84,16 @@ export class RelationManager {
      * @param currentPath dot delimited path to keep track of the nesting max depth
      * @param prevProp used to left join further
      */
-    public joinAndSelectExposedProps(
-        rootMetadata: EntityMetadata,
-        operation: RouteOperation,
-        qb: SelectQueryBuilder<any>,
-        entityMetadata: EntityMetadata,
-        currentPath: string,
-        prevProp: string,
-        options: JoinAndSelectExposedPropsOptions,
-        aliasHandler: AliasHandler
-    ) {
+    public joinAndSelectExposedProps({
+        rootMetadata,
+        operation,
+        qb,
+        entityMetadata,
+        currentPath,
+        prevProp,
+        options,
+        aliasHandler,
+    }: JoinAndSelectExposedPropsArgs) {
         if (prevProp && prevProp !== entityMetadata.tableName) {
             const selectProps = this.mappingManager.getSelectProps(
                 rootMetadata,
@@ -109,12 +109,12 @@ export class RelationManager {
         const relationProps = this.mappingManager.getRelationPropsMetas(rootMetadata, operation, entityMetadata);
 
         relationProps.forEach((relation) => {
-            const circularProp = this.isRelationPropCircular(
-                newPath + "." + relation.inverseEntityMetadata.tableName,
-                relation.inverseEntityMetadata,
+            const circularProp = this.isRelationPropCircular({
+                currentPath: newPath + "." + relation.inverseEntityMetadata.tableName,
+                entityMetadata: relation.inverseEntityMetadata,
                 relation,
-                options
-            );
+                options,
+            });
 
             const { isJoinAlreadyMade, alias } = aliasHandler.getAliasForRelation(qb, relation);
             const joinProp = prevProp + "." + relation.propertyName;
@@ -122,24 +122,24 @@ export class RelationManager {
             if (!circularProp) {
                 !isJoinAlreadyMade && qb.leftJoin(joinProp, alias);
 
-                this.joinAndSelectExposedProps(
+                this.joinAndSelectExposedProps({
                     rootMetadata,
                     operation,
                     qb,
-                    relation.inverseEntityMetadata,
-                    newPath,
-                    alias,
+                    entityMetadata: relation.inverseEntityMetadata,
+                    currentPath: newPath,
+                    prevProp: alias,
                     options,
-                    aliasHandler
-                );
-                this.joinAndSelectPropsThatComputedPropsDependsOn(
+                    aliasHandler,
+                });
+                this.joinAndSelectPropsThatComputedPropsDependsOn({
                     rootMetadata,
                     operation,
                     qb,
-                    relation.inverseEntityMetadata,
+                    entityMetadata: relation.inverseEntityMetadata,
                     aliasHandler,
-                    alias
-                );
+                    alias,
+                });
             } else if (options.shouldMaxDepthReturnRelationPropsId) {
                 !isJoinAlreadyMade && qb.leftJoin(joinProp, alias);
                 qb.addSelect(alias + ".id");
@@ -148,31 +148,32 @@ export class RelationManager {
     }
 
     /** Join and select any props marked as needed for each computed prop (with @DependsOn) in order to be able to retrieve them later */
-    public joinAndSelectPropsThatComputedPropsDependsOn(
-        rootMetadata: EntityMetadata,
-        operation: RouteOperation,
-        qb: SelectQueryBuilder<any>,
-        entityMetadata: EntityMetadata,
-        aliasHandler: AliasHandler,
-        alias?: string
-    ) {
+    public joinAndSelectPropsThatComputedPropsDependsOn({
+        rootMetadata,
+        operation,
+        qb,
+        entityMetadata,
+        aliasHandler,
+        alias,
+    }: JoinAndSelectPropsThatComputedPropsDependsOnArgs) {
         const dependsOnMeta = getDependsOnMetadata(entityMetadata.target as Function);
         if (!Object.keys(dependsOnMeta).length) return;
 
         const computedProps = this.mappingManager
             .getComputedProps(rootMetadata, operation, entityMetadata)
             .map(getComputedPropMethodAndKey);
+
         computedProps.forEach((computed) => {
             if (dependsOnMeta[computed.computedPropMethod]) {
                 dependsOnMeta[computed.computedPropMethod].forEach((propPath) => {
                     const props = propPath.split(".");
-                    const { entityAlias, propName } = this.makeJoinsFromPropPath(
+                    const { entityAlias, propName } = this.makeJoinsFromPropPath({
                         qb,
                         entityMetadata,
                         propPath,
-                        props[0],
-                        aliasHandler
-                    );
+                        currentProp: props[0],
+                        aliasHandler,
+                    });
 
                     const selectProp = (alias || entityAlias) + "." + propName;
                     const isAlreadySelected = qb.expressionMap.selects.find(
@@ -188,13 +189,13 @@ export class RelationManager {
     }
 
     /** Joins a subresource on its inverse side property */
-    public joinSubresourceOnInverseSide<Entity extends GenericEntity>(
-        qb: SelectQueryBuilder<Entity>,
-        entityMetadata: EntityMetadata,
-        aliasHandler: AliasHandler,
-        subresourceRelation: SubresourceRelation,
-        prevAlias?: string
-    ) {
+    public joinSubresourceOnInverseSide<Entity extends GenericEntity>({
+        qb,
+        entityMetadata,
+        aliasHandler,
+        subresourceRelation,
+        prevAlias,
+    }: JoinSubresourceOnInverseSideArgs<Entity>) {
         const relation = subresourceRelation.relation;
         if (!relation.inverseRelation) {
             throw new Error(
@@ -221,12 +222,7 @@ export class RelationManager {
      * @param entityMetadata
      * @param relation
      */
-    public isRelationPropCircular(
-        currentPath: string,
-        entityMetadata: EntityMetadata,
-        relation: RelationMetadata,
-        options: IsRelationPropCircularOptions = {}
-    ) {
+    public isRelationPropCircular({ currentPath, entityMetadata, relation, options = {} }: IsRelationPropCircularArgs) {
         const currentDepthLvl = currentPath.split(entityMetadata.tableName).length - 1;
         if (currentDepthLvl < 2) return;
 
@@ -258,6 +254,52 @@ export class RelationManager {
         return this.maxDepthMetas[entityMetadata.tableName];
     }
 }
+
+export type RelationManagerBaseArgs<Entity extends GenericEntity = GenericEntity> = {
+    qb: SelectQueryBuilder<Entity>;
+    entityMetadata: EntityMetadata;
+    aliasHandler: AliasHandler;
+};
+
+export type MakeJoinsFromPropPathArgs<Entity extends GenericEntity = GenericEntity> = RelationManagerBaseArgs<
+    Entity
+> & {
+    propPath: string;
+    currentProp: string;
+    prevAlias?: string;
+};
+
+export type JoinAndSelectExposedPropsArgs<Entity extends GenericEntity = GenericEntity> = RelationManagerBaseArgs<
+    Entity
+> & {
+    rootMetadata: EntityMetadata;
+    operation: RouteOperation;
+    currentPath: string;
+    prevProp: string;
+    options: JoinAndSelectExposedPropsOptions;
+};
+
+export type JoinAndSelectPropsThatComputedPropsDependsOnArgs<
+    Entity extends GenericEntity = GenericEntity
+> = RelationManagerBaseArgs<Entity> & {
+    rootMetadata: EntityMetadata;
+    operation: RouteOperation;
+    alias?: string;
+};
+
+export type JoinSubresourceOnInverseSideArgs<Entity extends GenericEntity = GenericEntity> = RelationManagerBaseArgs<
+    Entity
+> & {
+    subresourceRelation: SubresourceRelation;
+    prevAlias?: string;
+};
+
+export type IsRelationPropCircularArgs = {
+    currentPath: string;
+    entityMetadata: EntityMetadata;
+    relation: RelationMetadata;
+    options?: IsRelationPropCircularOptions;
+};
 
 export type JoinAndSelectExposedPropsOptions = Pick<EntityRouteOptions, "shouldMaxDepthReturnRelationPropsId"> &
     IsRelationPropCircularOptions;

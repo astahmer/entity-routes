@@ -151,12 +151,12 @@ export class MappingManager {
         };
 
         for (let i = 0; i < relationProps.length; i++) {
-            const circularProp = this.relationManager.isRelationPropCircular(
-                currentTableNamePath,
-                relationProps[i].entityMetadata,
-                relationProps[i],
-                options
-            );
+            const circularProp = this.relationManager.isRelationPropCircular({
+                currentPath: currentTableNamePath,
+                entityMetadata: relationProps[i].entityMetadata,
+                relation: relationProps[i],
+                options,
+            });
             if (circularProp) {
                 continue;
             }

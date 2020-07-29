@@ -100,13 +100,13 @@ export class PaginationFilter extends AbstractFilter<PaginationFilterOptions> {
             if (props.length === 1) {
                 qb.addOrderBy(this.entityMetadata.tableName + "." + props, direction);
             } else {
-                const { entityAlias, propName } = this.relationManager.makeJoinsFromPropPath(
+                const { entityAlias, propName } = this.relationManager.makeJoinsFromPropPath({
                     qb,
-                    this.entityMetadata,
+                    entityMetadata: this.entityMetadata,
                     propPath,
-                    props[0],
-                    aliasHandler
-                );
+                    currentProp: props[0],
+                    aliasHandler,
+                });
 
                 qb.addOrderBy(entityAlias + "." + propName, direction);
             }

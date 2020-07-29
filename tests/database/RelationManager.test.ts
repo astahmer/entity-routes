@@ -97,13 +97,13 @@ describe("RelationManager", () => {
 
             const propPath = "role.category.picture.url";
             const props = propPath.split(".");
-            const { entityAlias, propName, columnMeta } = manager.makeJoinsFromPropPath(
+            const { entityAlias, propName, columnMeta } = manager.makeJoinsFromPropPath({
                 qb,
-                metadata,
+                entityMetadata: metadata,
                 propPath,
-                props[0],
-                aliasHandler
-            );
+                currentProp: props[0],
+                aliasHandler,
+            });
 
             // should have joined every prop leading to last section of prop path
             expect(qb.expressionMap.joinAttributes.map((join) => join.alias.name)).toEqual([
@@ -126,13 +126,13 @@ describe("RelationManager", () => {
 
             const propPath = "role.category.c.d";
             const props = propPath.split(".");
-            const { entityAlias, propName, columnMeta } = manager.makeJoinsFromPropPath(
+            const { entityAlias, propName, columnMeta } = manager.makeJoinsFromPropPath({
                 qb,
-                metadata,
+                entityMetadata: metadata,
                 propPath,
-                props[0],
-                aliasHandler
-            );
+                currentProp: props[0],
+                aliasHandler,
+            });
 
             // should have joined props untill reaching an unknown prop
             expect(qb.expressionMap.joinAttributes.map((join) => join.alias.name)).toEqual([
@@ -150,16 +150,16 @@ describe("RelationManager", () => {
             const metadata = repository.metadata;
             const qb = repository.createQueryBuilder(metadata.tableName);
 
-            manager.joinAndSelectExposedProps(
-                metadata,
-                "details",
+            manager.joinAndSelectExposedProps({
+                rootMetadata: metadata,
+                operation: "details",
                 qb,
-                metadata,
-                "",
-                metadata.tableName,
-                {},
-                aliasHandler
-            );
+                entityMetadata: metadata,
+                currentPath: "",
+                prevProp: metadata.tableName,
+                options: {},
+                aliasHandler,
+            });
 
             // should have joined & selected every props that are exposed
             // on User entity (rootMetadata) & User context (metadata) for operation "details"
@@ -188,7 +188,13 @@ describe("RelationManager", () => {
             const metadata = repository.metadata;
             const qb = repository.createQueryBuilder(metadata.tableName);
 
-            manager.joinAndSelectPropsThatComputedPropsDependsOn(metadata, "list", qb, metadata, aliasHandler);
+            manager.joinAndSelectPropsThatComputedPropsDependsOn({
+                rootMetadata: metadata,
+                operation: "list",
+                qb,
+                entityMetadata: metadata,
+                aliasHandler,
+            });
 
             // should have joined & selected every props from @DependsOn of getIdentifier computed prop
             expect(qb.expressionMap.joinAttributes.map((join) => join.alias.name)).toEqual([
@@ -211,7 +217,7 @@ describe("RelationManager", () => {
             const qb = repository.createQueryBuilder(metadata.tableName);
             const subresourceRelation = getSubresourceRelation(User, getRepository(Image).metadata, "uploader" as any);
 
-            manager.joinSubresourceOnInverseSide(qb, metadata, aliasHandler, subresourceRelation);
+            manager.joinSubresourceOnInverseSide({ qb, entityMetadata: metadata, aliasHandler, subresourceRelation });
 
             expect(qb.expressionMap.joinAttributes.map((join) => join.alias.name)).toEqual(["user_uploadedImages_1"]);
         });
@@ -224,9 +230,14 @@ describe("RelationManager", () => {
             const qb = repository.createQueryBuilder(metadata.tableName);
             const subresourceRelation = getSubresourceRelation(User, metadata, "role");
 
-            expect(() => manager.joinSubresourceOnInverseSide(qb, metadata, aliasHandler, subresourceRelation)).toThrow(
-                "Subresources require an inverseRelation to be set, missing for user.role"
-            );
+            expect(() =>
+                manager.joinSubresourceOnInverseSide({
+                    qb,
+                    entityMetadata: metadata,
+                    aliasHandler,
+                    subresourceRelation,
+                })
+            ).toThrow("Subresources require an inverseRelation to be set, missing for user.role");
         });
     });
 
@@ -263,12 +274,12 @@ describe("RelationManager", () => {
             const options = { isMaxDepthEnabledByDefault: true, defaultMaxDepthLvl: 2 };
 
             expect(
-                manager.isRelationPropCircular(
-                    "user.image",
-                    imageMetadata,
-                    userMetadata.findRelationWithPropertyPath("avatar"),
-                    options
-                )
+                manager.isRelationPropCircular({
+                    currentPath: "user.image",
+                    entityMetadata: imageMetadata,
+                    relation: userMetadata.findRelationWithPropertyPath("avatar"),
+                    options,
+                })
             ).toEqual(undefined);
         });
 
@@ -277,30 +288,30 @@ describe("RelationManager", () => {
             const imageMetadata = getRepository(Image).metadata;
             const options = { isMaxDepthEnabledByDefault: true, defaultMaxDepthLvl: 2 };
 
-            const circularOnUploader = manager.isRelationPropCircular(
-                "user.image.user",
-                userMetadata,
-                imageMetadata.findRelationWithPropertyPath("uploader"),
-                options
-            );
+            const circularOnUploader = manager.isRelationPropCircular({
+                currentPath: "user.image.user",
+                entityMetadata: userMetadata,
+                relation: imageMetadata.findRelationWithPropertyPath("uploader"),
+                options,
+            });
             expect(circularOnUploader.prop).toEqual("uploader");
             expect(circularOnUploader.depth).toEqual(2);
 
-            const circularOnAvatar = manager.isRelationPropCircular(
-                "user.image.user.image",
-                imageMetadata,
-                userMetadata.findRelationWithPropertyPath("avatar"),
-                options
-            );
+            const circularOnAvatar = manager.isRelationPropCircular({
+                currentPath: "user.image.user.image",
+                entityMetadata: imageMetadata,
+                relation: userMetadata.findRelationWithPropertyPath("avatar"),
+                options,
+            });
             expect(circularOnAvatar.prop).toEqual("avatar");
             expect(circularOnAvatar.depth).toEqual(2);
 
-            const circularOnUploaderDeeper = manager.isRelationPropCircular(
-                "user.image.user.image.user",
-                userMetadata,
-                imageMetadata.findRelationWithPropertyPath("uploader"),
-                options
-            );
+            const circularOnUploaderDeeper = manager.isRelationPropCircular({
+                currentPath: "user.image.user.image.user",
+                entityMetadata: userMetadata,
+                relation: imageMetadata.findRelationWithPropertyPath("uploader"),
+                options,
+            });
             expect(circularOnUploaderDeeper.prop).toEqual("uploader");
             expect(circularOnUploaderDeeper.depth).toEqual(3);
         });
@@ -312,16 +323,20 @@ describe("RelationManager", () => {
             const qb = repository.createQueryBuilder(metadata.tableName);
             const aliasHandler = new AliasHandler();
 
-            manager.joinAndSelectExposedProps(
-                metadata,
-                "list",
+            manager.joinAndSelectExposedProps({
+                rootMetadata: metadata,
+                operation: "list",
                 qb,
-                metadata,
-                "",
-                metadata.tableName,
-                { isMaxDepthEnabledByDefault: true, defaultMaxDepthLvl: 3, shouldMaxDepthReturnRelationPropsId: true },
-                aliasHandler
-            );
+                entityMetadata: metadata,
+                currentPath: "",
+                prevProp: metadata.tableName,
+                options: {
+                    isMaxDepthEnabledByDefault: true,
+                    defaultMaxDepthLvl: 3,
+                    shouldMaxDepthReturnRelationPropsId: true,
+                },
+                aliasHandler,
+            });
 
             expect(qb.expressionMap.joinAttributes.map((join) => join.alias.name)).toEqual([
                 "user_avatar_1",

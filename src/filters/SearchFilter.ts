@@ -192,13 +192,13 @@ export class SearchFilter extends AbstractFilter<SearchFilterOptions, StrategyTy
                 column,
             });
         } else {
-            const { entityAlias, propName, columnMeta: column } = this.relationManager.makeJoinsFromPropPath(
+            const { entityAlias, propName, columnMeta: column } = this.relationManager.makeJoinsFromPropPath({
                 qb,
-                this.entityMetadata,
+                entityMetadata: this.entityMetadata,
                 propPath,
-                props[0],
-                aliasHandler
-            );
+                currentProp: props[0],
+                aliasHandler,
+            });
 
             if (!column) return;
             this.whereManager.addWhereByStrategy({ whereExp, entityAlias, filter, propName, column });
