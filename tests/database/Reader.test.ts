@@ -49,7 +49,7 @@ describe("Reader", () => {
         const qb = repository.createQueryBuilder(repository.metadata.tableName);
         const aliasHandler = new AliasHandler();
 
-        expect(await reader.getCollection(rootMetadata, qb, aliasHandler)).toEqual([[], 0]);
+        expect(await reader.getCollection({ entityMetadata: rootMetadata, qb, aliasHandler })).toEqual([[], 0]);
 
         const user = new User();
         user.name = "Alex";
@@ -70,7 +70,7 @@ describe("Reader", () => {
         user.role = roleResult.id;
         await persistor.saveItem({ ctx: { operation: "create", values: user as any }, rootMetadata });
 
-        expect(await reader.getCollection(rootMetadata, qb, aliasHandler)).toEqual([
+        expect(await reader.getCollection({ entityMetadata: rootMetadata, qb, aliasHandler })).toEqual([
             [
                 {
                     name: "Alex",
@@ -126,7 +126,7 @@ describe("Reader", () => {
         const qb = repository.createQueryBuilder(repository.metadata.tableName);
         const aliasHandler = new AliasHandler();
 
-        expect(() => reader.getItem(rootMetadata, qb, aliasHandler, 1)).rejects.toThrow();
+        expect(() => reader.getItem({ entityMetadata: rootMetadata, qb, aliasHandler, entityId: 1 })).rejects.toThrow();
 
         const user = new User();
         user.name = "Alex";
@@ -147,11 +147,11 @@ describe("Reader", () => {
         user.role = roleResult.id;
         await persistor.saveItem({ ctx: { operation: "create", values: user as any }, rootMetadata });
 
-        expect(await reader.getItem(rootMetadata, qb, aliasHandler, 1)).toEqual({
+        expect(await reader.getItem({ entityMetadata: rootMetadata, qb, aliasHandler, entityId: 1 })).toEqual({
             email: "alex@mail.com",
             id: 1,
             name: "Alex",
-            role: { id: 1 },
+            role: { id: 1, startDate: role.startDate, title: role.title },
         });
 
         return closeTestConnection();

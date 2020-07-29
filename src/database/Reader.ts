@@ -8,7 +8,6 @@ import { EntityRouteOptions, GenericEntity } from "@/router/EntityRouter";
 import { RelationManager } from "@/database/RelationManager";
 import { RequestContext } from "@/router/MiddlewareMaker";
 
-// TODO 2 args & 3rd should be object
 @Service()
 export class Reader {
     get mappingManager() {
@@ -24,54 +23,56 @@ export class Reader {
     }
 
     /** Retrieve collection of entities with only exposed props (from groups) */
-    public async getCollection<Entity extends GenericEntity>(
-        entityMetadata: EntityMetadata,
-        qb: SelectQueryBuilder<Entity>,
-        aliasHandler: AliasHandler,
-        operation: RequestContext["operation"] = "list",
-        options: ReaderOptions = {}
-    ): Promise<[Entity[], number]> {
+    public async getCollection<Entity extends GenericEntity>({
+        entityMetadata,
+        qb,
+        aliasHandler,
+        operation = "list",
+        options = {},
+    }: GetCollectionArgs): Promise<[Entity[], number]> {
         const selectProps = this.mappingManager.getSelectProps(entityMetadata, operation, entityMetadata, true);
 
         qb.select(selectProps);
 
-        this.relationManager.joinAndSelectExposedProps(
-            entityMetadata,
+        this.relationManager.joinAndSelectExposedProps({
+            rootMetadata: entityMetadata,
             operation,
             qb,
             entityMetadata,
-            "",
-            entityMetadata.tableName,
+            currentPath: "",
+            prevProp: entityMetadata.tableName,
             options,
-            aliasHandler
-        );
-        this.relationManager.joinAndSelectPropsThatComputedPropsDependsOn(
-            entityMetadata,
+            aliasHandler,
+        });
+        this.relationManager.joinAndSelectPropsThatComputedPropsDependsOn({
+            rootMetadata: entityMetadata,
             operation,
             qb,
             entityMetadata,
-            aliasHandler
-        );
+            aliasHandler,
+        });
 
         const results = await qb.getManyAndCount();
+        const ref = { results }; // Pass an object with results key editable with afterRead hook if needed
+
         const items = await Promise.all(
-            results[0].map(
+            ref.results[0].map(
                 (item) => this.formater.formatItem({ item, operation, entityMetadata, options }) as Promise<Entity>
             )
         );
 
-        return [items, results[1]];
+        return [items, ref.results[1]];
     }
 
     /** Retrieve a specific entity with only exposed props (from groups) */
-    public async getItem<Entity extends GenericEntity>(
-        entityMetadata: EntityMetadata,
-        qb: SelectQueryBuilder<Entity>,
-        aliasHandler: AliasHandler,
-        entityId: RequestContext["entityId"],
-        operation: RequestContext["operation"] = "details",
-        options: ReaderOptions = {}
-    ) {
+    public async getItem<Entity extends GenericEntity>({
+        entityMetadata,
+        qb,
+        aliasHandler,
+        entityId,
+        operation = "list",
+        options = {},
+    }: GetItemArgs<Entity>) {
         const selectProps = this.mappingManager.getSelectProps(entityMetadata, operation, entityMetadata, true);
 
         qb.select(selectProps);
@@ -81,35 +82,50 @@ export class Reader {
             qb.where(entityMetadata.tableName + ".id = :id", { id: entityId });
         }
 
-        this.relationManager.joinAndSelectExposedProps(
-            entityMetadata,
+        this.relationManager.joinAndSelectExposedProps({
+            rootMetadata: entityMetadata,
             operation,
             qb,
             entityMetadata,
-            "",
-            entityMetadata.tableName,
+            currentPath: "",
+            prevProp: entityMetadata.tableName,
             options,
-            aliasHandler
-        );
-        this.relationManager.joinAndSelectPropsThatComputedPropsDependsOn(
-            entityMetadata,
+            aliasHandler,
+        });
+        this.relationManager.joinAndSelectPropsThatComputedPropsDependsOn({
+            rootMetadata: entityMetadata,
             operation,
             qb,
             entityMetadata,
-            aliasHandler
-        );
+            aliasHandler,
+        });
 
+        // TODO use getRawOne + marshal-ts instead of typeorm class-transformer ?
+        // or make a JIT (de)serializer from mapping on "context.operation" ?
         const result = await qb.getOne();
+        const ref = { result }; // Pass an object with result key editable with afterRead hook if needed
 
         // Item doesn't exist
-        if (!result) {
+        if (!ref.result) {
             throw new Error("Not found.");
         }
 
-        const item = await this.formater.formatItem({ item: result, operation, entityMetadata, options });
+        const item = await this.formater.formatItem({ item: ref.result, operation, entityMetadata, options });
 
         return item;
     }
 }
 
 export type ReaderOptions = Pick<EntityRouteOptions, "shouldMaxDepthReturnRelationPropsId"> & FormaterOptions;
+
+export type GetCollectionArgs<Entity extends GenericEntity = GenericEntity> = {
+    entityMetadata: EntityMetadata;
+    qb: SelectQueryBuilder<Entity>;
+    aliasHandler: AliasHandler;
+    operation?: RequestContext<Entity>["operation"];
+    options?: ReaderOptions;
+    requestId?: RequestContext<Entity>["requestId"];
+} & Pick<EntityRouteOptions, "hooks">;
+export type GetItemArgs<Entity extends GenericEntity = GenericEntity> = GetCollectionArgs<Entity> & {
+    entityId: RequestContext<Entity>["entityId"];
+};
