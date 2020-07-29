@@ -21,10 +21,11 @@ if (module.hot) {
 export async function makeEntityRouters<T = any>({ connection, entities, options }: MakeEntityRouters<T>) {
     options = { ...defaultEntityRouteOptions, ...options };
 
-    // Handle HMR by resetting connections array
-    if (connectionManager) connectionManager.connections.splice(0, connectionManager.connections.length);
     // Init with existing connections
     connectionManager = getConnectionManager();
+    // Handle HMR by resetting connections array
+    if (connectionManager) connectionManager.connections.splice(0, connectionManager.connections.length);
+
     connectionManager.connections.push(connection);
 
     // Fix class-validator shitty default behavior with groups
