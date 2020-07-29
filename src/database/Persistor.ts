@@ -32,9 +32,9 @@ export class Persistor {
         // TODO Add options to bypass clean/validate steps
 
         const cleanOptions = { rootMetadata, operation, values, options: mapperMakeOptions };
-        await hooks?.beforeClean?.(cleanOptions);
+        await hooks?.beforeClean?.({ requestId, options: cleanOptions });
         const cleanedItem = this.cleaner.cleanItem(cleanOptions);
-        await hooks?.afterClean?.(cleanOptions, cleanedItem);
+        await hooks?.afterClean?.({ requestId, options: cleanOptions, result: cleanedItem });
 
         const item = repository.create(cleanedItem);
 
@@ -43,9 +43,10 @@ export class Persistor {
             operation === "update" ? { skipMissingProperties: true } : {};
         const validationOptions = { ...defaultValidatorOptions, ...validatorOptions, context: ctx };
 
-        await hooks?.beforeValidate?.(validationOptions as any);
+        await hooks?.beforeValidate?.({ requestId, options: validationOptions, item });
         const errors = await this.validator.validateItem(rootMetadata, item, validationOptions);
-        await hooks?.afterValidate?.(validationOptions as any, errors);
+        const ref = { errors }; // Pass an object with errors key editable with afterValidate hook if needed
+        await hooks?.afterValidate?.({ requestId, options: validationOptions, item, ref });
 
         if (!Object.keys(item).length) {
             throw new Error(
@@ -53,8 +54,8 @@ export class Persistor {
             );
         }
 
-        if (Object.keys(errors).length) {
-            return { hasValidationErrors: true, errors } as EntityErrorResponse;
+        if (Object.keys(ref.errors).length) {
+            return { hasValidationErrors: true, errors: ref.errors } as EntityErrorResponse;
         }
 
         // Auto-join subresource parent on body values

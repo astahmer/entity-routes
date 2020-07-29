@@ -132,16 +132,13 @@ describe("EntityRouter", () => {
         const entities = [User];
         const { server, client } = await setupKoaApp(entities);
 
-        try {
-            await client.get("/user");
-            expect(state[0]).toBeUndefined();
-            expect(state[1]).toHaveProperty("ctx");
-            expect(count).toEqual(1);
-        } catch (error) {
-            throw error;
-        } finally {
-            server.close();
-            closeTestConnection();
-        }
+        await client.get("/user");
+
+        expect(state[0]).toBeUndefined();
+        expect(state[1]).toHaveProperty("ctx");
+        expect(count).toEqual(1);
+
+        server.close();
+        return closeTestConnection();
     });
 });

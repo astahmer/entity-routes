@@ -7,8 +7,6 @@ import { EntityErrorResponse, Persistor, SaveItemArgs } from "@/database/Persist
 import { Reader, ReaderOptions } from "@/database/Reader";
 import { AliasHandler } from "@/database/AliasHandler";
 
-// TODO (global) Use object as fn arguments rather than chaining them
-// TODO Hooks (before/afterPersist (create+update), before/afterValidate, before/afterLoad (list+details ?), beforeAfter/remove)
 import { isType } from "@/functions/asserts";
 import { RelationManager } from "@/database/RelationManager";
 import { fromEntries } from "@/functions/object";
@@ -93,7 +91,9 @@ export class RouteController<Entity extends GenericEntity> {
                 .add(subresourceRelation.id);
         }
 
+        // TODO beforeReload hook ?
         if (!options?.shouldAutoReload) {
+            // TODO beforeFormat ?
             const item = options?.shouldFormatResult
                 ? await this.formater.formatItem({
                       item: result,
@@ -176,13 +176,13 @@ export class RouteController<Entity extends GenericEntity> {
         if (subresourceRelations) {
             let prevAlias: string;
             subresourceRelations.reverse().forEach((subresource) => {
-                prevAlias = this.relationManager.joinSubresourceOnInverseSide(
+                prevAlias = this.relationManager.joinSubresourceOnInverseSide({
                     qb,
-                    this.metadata,
+                    entityMetadata: this.metadata,
                     aliasHandler,
-                    subresource,
-                    prevAlias
-                );
+                    subresourceRelation: subresource,
+                    prevAlias,
+                });
             });
         }
 
@@ -191,9 +191,15 @@ export class RouteController<Entity extends GenericEntity> {
         }
 
         const options = { ...this.options, ...innerOptions };
-        await this.options.hooks?.beforeRead?.({ requestId, options });
-        const collectionResult = await this.reader.getCollection(this.metadata, qb, aliasHandler, operation, options);
-        await this.options.hooks?.afterRead?.({ requestId, result: collectionResult[0] });
+        const collectionResult = await this.reader.getCollection({
+            entityMetadata: this.metadata,
+            qb,
+            aliasHandler,
+            operation,
+            options,
+            hooks: this.options.hooks,
+            requestId,
+        });
 
         return { items: collectionResult[0], totalItems: collectionResult[1] } as CollectionResult<Entity>;
     }
@@ -213,20 +219,27 @@ export class RouteController<Entity extends GenericEntity> {
         if (subresourceRelations) {
             let prevAlias: string;
             subresourceRelations.reverse().forEach((subresource) => {
-                prevAlias = this.relationManager.joinSubresourceOnInverseSide(
+                prevAlias = this.relationManager.joinSubresourceOnInverseSide({
                     qb,
-                    this.metadata,
+                    entityMetadata: this.metadata,
                     aliasHandler,
-                    subresource,
-                    prevAlias
-                );
+                    subresourceRelation: subresource,
+                    prevAlias,
+                });
             });
         }
 
         const options = { ...this.options, ...innerOptions };
-        await this.options.hooks?.beforeRead?.({ requestId, options });
-        const result = await this.reader.getItem<Entity>(this.metadata, qb, aliasHandler, entityId, operation, options);
-        await this.options.hooks?.afterRead?.({ requestId, result });
+        const result = await this.reader.getItem<Entity>({
+            entityMetadata: this.metadata,
+            qb,
+            aliasHandler,
+            entityId,
+            operation,
+            options,
+            hooks: this.options.hooks,
+            requestId,
+        });
 
         return result;
     }

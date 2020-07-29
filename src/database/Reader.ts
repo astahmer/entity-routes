@@ -29,6 +29,8 @@ export class Reader {
         aliasHandler,
         operation = "list",
         options = {},
+        hooks,
+        requestId,
     }: GetCollectionArgs): Promise<[Entity[], number]> {
         const selectProps = this.mappingManager.getSelectProps(entityMetadata, operation, entityMetadata, true);
 
@@ -52,8 +54,10 @@ export class Reader {
             aliasHandler,
         });
 
+        await hooks?.beforeRead?.({ requestId, options });
         const results = await qb.getManyAndCount();
         const ref = { results }; // Pass an object with results key editable with afterRead hook if needed
+        await hooks?.afterRead?.({ requestId, ref });
 
         const items = await Promise.all(
             ref.results[0].map(
@@ -72,6 +76,8 @@ export class Reader {
         entityId,
         operation = "list",
         options = {},
+        hooks,
+        requestId,
     }: GetItemArgs<Entity>) {
         const selectProps = this.mappingManager.getSelectProps(entityMetadata, operation, entityMetadata, true);
 
@@ -102,8 +108,10 @@ export class Reader {
 
         // TODO use getRawOne + marshal-ts instead of typeorm class-transformer ?
         // or make a JIT (de)serializer from mapping on "context.operation" ?
+        await hooks?.beforeRead?.({ requestId, options });
         const result = await qb.getOne();
         const ref = { result }; // Pass an object with result key editable with afterRead hook if needed
+        await hooks?.afterRead?.({ requestId, ref });
 
         // Item doesn't exist
         if (!ref.result) {

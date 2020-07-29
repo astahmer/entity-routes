@@ -10,8 +10,23 @@ import { RouteResponse, RouteControllerResult, RequestContext } from "../router/
 import { ListDetailsOptions } from "../router/RouteController";
 import { SubresourceRelation } from "../router/SubresourceManager";
 
-// TODO Add hooks test
-/** Possible hooks are [before/after][Handle/?:(Clean/Validate/Persist)/?:(Read)/Respond] */
+export const hookNames = [
+    "beforeHandle",
+    "afterHandle",
+    "beforeRespond",
+    "afterRespond",
+    "beforeClean",
+    "afterClean",
+    "beforeValidate",
+    "afterValidate",
+    "beforePersist",
+    "afterPersist",
+    "beforeRead",
+    "afterRead",
+    "beforeRemove",
+    "afterRemove",
+];
+/** Possible hooks are [before/after][Handle/?:(Clean/Validate/Persist)/?:(Read/Format)/Respond] */
 export type HookSchema = Partial<{
     /**
      * Called right after the requestContext has been set by the appropriate middleware &
@@ -26,9 +41,9 @@ export type HookSchema = Partial<{
     // Called right after the response status & body are set
     afterRespond: HookFnOnRespond;
 
-    // Called right before clean an entity from database
+    // Called right before cleaning an entity from database
     beforeClean: HookFnBeforeClean;
-    // Called right after clean an entity from database
+    // Called right after cleaning an entity from database
     afterClean: HookFnAfterClean;
 
     // Called right before the validation of the request body
@@ -52,7 +67,7 @@ export type HookSchema = Partial<{
     afterRemove: HookFnAfterRemove;
 }>;
 
-export type HookReturn = Promise<any> | void;
+export type HookReturn = any;
 export type HookFn<Args = any> = (args: Args) => HookReturn;
 
 export type HookFnOnHandle = HookFn<ContextWithState>;
@@ -70,14 +85,20 @@ export interface HookFnOnRespondArgs extends WithContextAdapterKey {
 export type HookFnOnRespond = HookFn<HookFnOnRespondArgs>;
 
 // Clean
-export type HookFnOnCleanerOptions = WithRequestId & CleanerArgs;
-export type HookFnBeforeClean = (options: HookFnOnCleanerOptions) => HookReturn;
-export type HookFnAfterClean = (options: HookFnOnCleanerOptions, result: DeepPartial<GenericEntity>) => HookReturn;
+export type HookFnBeforeCleanArgs = WithRequestId & { options: CleanerArgs };
+export type HookFnBeforeClean = HookFn<HookFnBeforeCleanArgs>;
+export type HookFnAfterCleanArgs = HookFnBeforeCleanArgs & { result: DeepPartial<GenericEntity> };
+export type HookFnAfterClean = HookFn<HookFnAfterCleanArgs>;
 
 // Validate
 export type HookFnOnValidateOptions = ValidateItemOptions & { context: RequestContextWithState };
-export type HookFnBeforeValidate = (options: HookFnOnValidateOptions) => HookReturn;
-export type HookFnAfterValidate = (options: HookFnOnValidateOptions, errors: EntityErrorResults) => HookReturn;
+export type HookFnBeforeValidateArgs = WithRequestId & {
+    options: HookFnOnValidateOptions;
+    item: DeepPartial<GenericEntity>;
+};
+export type HookFnBeforeValidate = HookFn<HookFnBeforeValidateArgs>;
+export type HookFnAfterValidateArgs = HookFnBeforeValidateArgs & { ref: { errors: EntityErrorResults } };
+export type HookFnAfterValidate = HookFn<HookFnAfterValidateArgs>;
 
 // Persist
 export type HookFnOnBeforePersistArgs = WithRequestId & { item: GenericEntity };
@@ -88,7 +109,8 @@ export type HookFnAfterPersist = HookFn<HookFnOnAfterPersistArgs>;
 // Read
 export type HookFnOnBeforeReadArgs = WithRequestId & { options: ListDetailsOptions };
 export type HookFnBeforeRead = HookFn<HookFnOnBeforeReadArgs>;
-export type HookFnOnAfterReadArgs = WithRequestId & { result: GenericEntity | GenericEntity[] };
+export type HookFnAfterReadResultRef = { ref: { result?: GenericEntity; results?: [GenericEntity[], number] } };
+export type HookFnOnAfterReadArgs = WithRequestId & HookFnAfterReadResultRef;
 export type HookFnAfterRead = HookFn<HookFnOnAfterReadArgs>;
 
 // Remove

@@ -110,12 +110,13 @@ export class MiddlewareMaker<Entity extends GenericEntity> {
                 ctx.status = 400;
             }
 
-            await this.options.hooks?.beforeRespond?.({ ctx: ctx as ContextWithState, response, result });
+            const ref = { ctx: ctx as ContextWithState, response, result };
+            await this.options.hooks?.beforeRespond?.(ref);
 
             ctx.status = 200;
-            ctx.responseBody = response;
+            ctx.responseBody = ref.response;
 
-            await this.options.hooks?.afterRespond?.({ ctx: ctx as ContextWithState, response, result });
+            await this.options.hooks?.afterRespond?.(ref);
             next();
         };
     }
