@@ -50,6 +50,29 @@ module.exports = (env) => {
                     test: /.tsx?$/,
                     exclude: ["/node_modules", "/tests"],
                     use: [
+                        {
+                            loader: "babel-loader",
+                            options: {
+                                presets: [
+                                    [
+                                        "@babel/preset-env",
+                                        {
+                                            targets: {
+                                                node: "current",
+                                            },
+                                        },
+                                    ],
+                                ],
+                                plugins: [
+                                    [
+                                        "@babel/plugin-proposal-optional-chaining",
+                                        {
+                                            loose: false,
+                                        },
+                                    ],
+                                ],
+                            },
+                        },
                         loader("ts", {
                             transpileOnly: withHMR,
                             getCustomTransformers: (program) => {
