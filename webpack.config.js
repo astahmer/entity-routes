@@ -19,18 +19,18 @@ const pollInterval = 500;
 module.exports = (env) => {
     const mode = env.prod ? "production" : "development";
     const isDev = mode === "development";
-    const withHMR = isDev && env.hmr;
+    const withHMR = env.hmr;
 
     return {
         mode,
         entry: withHMR ? [`webpack/hot/poll?${pollInterval}`, pkg.source] : { index: pkg.source },
-        watch: isDev,
+        watch: withHMR,
         watchOptions: {
             aggregateTimeout: 1000,
             poll: pollInterval,
         },
         target: "node",
-        devtool: withHMR ? "inline-cheap-module-source-map" : "source-map",
+        devtool: isDev ? "inline-cheap-module-source-map" : "source-map",
         externals: [
             nodeExternals({
                 whitelist: [`webpack/hot/poll?${pollInterval}`, "@astahmer/class-validator"],

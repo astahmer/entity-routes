@@ -18,9 +18,9 @@
         "tsc": "tsc",
         "commit": "git-cz",
         "prettier": "prettier --write \"./{src,tests}/**/*.ts\"",
-        "dev": "webpack --env.dev",
-        "hmr": "webpack --env.hmr",
+        "dev": "webpack --env.hmr",
         "build": "webpack --env.prod",
+        "watch": "webpack --env.prod --env.hmr",
         "start": "node -r ts-node/register dist/index",
         "release": "standard-version"
     },
