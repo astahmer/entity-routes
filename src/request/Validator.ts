@@ -3,7 +3,7 @@ import { EntityMetadata } from "typeorm";
 import { EntityValidatorFunctionOptions, EntityValidator } from "@astahmer/entity-validator";
 import { Container, Service } from "typedi";
 
-import { isType, isObjectLiteral } from "@/functions/asserts";
+import { isType, isObjectLiteral, isDev } from "@/functions/asserts";
 import { GenericEntity } from "@/router/EntityRouter";
 import { RequestContextMinimal } from "@/router/MiddlewareMaker";
 import { ObjectLiteral } from "@/utils-types";
@@ -89,8 +89,8 @@ export class Validator {
                     resolve();
                 } catch (error) {
                     const defaultMsg = `Validator error at path ${path}`;
-                    console.error(defaultMsg);
-                    console.error(error);
+                    isDev() && console.error(defaultMsg);
+                    isDev() && console.error(error);
                     errorResults[path] = [
                         { currentPath: path, property: key, constraints: { unknown: error.message || defaultMsg } },
                     ];

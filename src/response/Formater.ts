@@ -88,7 +88,7 @@ export class Formater {
                     await this.setComputedPropsOnItem(rootMetadata, nestedItem, nestedClone, operation, entityMetadata);
                     resolve();
                 } catch (error) {
-                    isDev && console.error(error);
+                    isDev() && console.error(error);
                     resolve();
                 }
             });

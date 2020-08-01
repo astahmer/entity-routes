@@ -106,7 +106,7 @@ export class MiddlewareMaker<Entity extends GenericEntity> {
                 }
             } catch (error) {
                 response["@context"].error = isDev() ? error.message : "Bad request";
-                console.error(error);
+                isDev() && console.error(error);
                 ctx.status = 400;
             }
 
