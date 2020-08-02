@@ -22,10 +22,10 @@
         "build": "webpack --env.prod",
         "watch": "webpack --env.prod --env.hmr",
         "start": "node -r ts-node/register dist/index",
-        "release": "npm test && standard-version",
+        "release": "standard-version",
         "prepare": "npm run build",
         "prepublishOnly": "npm test",
-        "tags": "npm test && git push && git push --tags"
+        "tags": "git push && git push --tags"
     },
     "config": {
         "commitizen": {
@@ -78,6 +78,10 @@
         "webpack-cli": "^3.3.12",
         "webpack-loader-helper": "^1.0.0",
         "webpack-node-externals": "^1.7.2"
+    },
+    "peerDependencies": {
+        "express": "^4.17.1",
+        "koa": "^2.13.0"
     },
     "keywords": [
         "entity",
