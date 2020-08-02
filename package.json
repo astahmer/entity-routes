@@ -1,6 +1,6 @@
 {
     "name": "@astahmer/entity-routes",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "description": "Design your API around your entities in minutes",
     "source": "src/index.ts",
     "main": "dist/index.js",
@@ -22,7 +22,10 @@
         "build": "webpack --env.prod",
         "watch": "webpack --env.prod --env.hmr",
         "start": "node -r ts-node/register dist/index",
-        "release": "standard-version"
+        "release": "npm test && standard-version",
+        "prepare": "npm run build",
+        "prepublishOnly": "npm test",
+        "tags": "npm test && git push && git push --tags"
     },
     "config": {
         "commitizen": {
