@@ -12,15 +12,16 @@ import {
     ROUTE_SUBRESOURCES_METAKEY,
     SubresourceOptions,
     EntityRoute,
+    EntityRouterFactoryOptions,
+    koaRouterFactory,
 } from "@/index";
 import { PrimaryGeneratedColumn, Entity, Column, ManyToOne, OneToMany, getRepository } from "typeorm";
 import { createTestConnection, closeTestConnection } from "@@/tests/testConnection";
-import * as Router from "koa-router";
 import { User, Manager, Article, Comment, Upvote } from "@@/tests/router/sample/entities";
 
 describe("SubresourceManager", () => {
-    const options = {
-        routerFactoryClass: Router,
+    const options: EntityRouterFactoryOptions = {
+        routerFactoryFn: koaRouterFactory,
         routerRegisterFn: registerKoaRouteFromBridgeRoute,
         middlewareAdapter: koaMwAdapter,
     };
@@ -73,7 +74,7 @@ describe("SubresourceManager", () => {
         const entityRouters = getEntityRouters();
         entityRouters[Article.name] = articleEntityRouter;
 
-        const router = new BridgeRouter(Router, registerKoaRouteFromBridgeRoute);
+        const router = new BridgeRouter(koaRouterFactory, registerKoaRouteFromBridgeRoute);
         manager.makeSubresourcesRoutes(router);
 
         const paths = router.routes.map(printBridgeRoute);
@@ -118,7 +119,7 @@ describe("SubresourceManager", () => {
         const roleEntityRouter = new EntityRouter(Role, routeMeta, options);
         entityRouters[Role.name] = roleEntityRouter;
 
-        const router = new BridgeRouter(Router, registerKoaRouteFromBridgeRoute);
+        const router = new BridgeRouter(koaRouterFactory, registerKoaRouteFromBridgeRoute);
         manager.makeSubresourcesRoutes(router);
 
         const paths = router.routes.map(printBridgeRoute);
@@ -178,7 +179,7 @@ describe("SubresourceManager", () => {
                 entityRouters[entity.name] = new EntityRouter(entity, getRouteMetadata(entity), mergedOptions);
             });
 
-            const router = new BridgeRouter(Router, registerKoaRouteFromBridgeRoute);
+            const router = new BridgeRouter(koaRouterFactory, registerKoaRouteFromBridgeRoute);
 
             const manager = new SubresourceMaker(getRepository(User), getRouteMetadata(User), mergedOptions);
             manager.makeSubresourcesRoutes(router);
@@ -236,7 +237,7 @@ describe("SubresourceManager", () => {
                 entityRouters[entity.name] = new EntityRouter(entity, getRouteMetadata(entity), mergedOptions);
             });
 
-            const router = new BridgeRouter(Router, registerKoaRouteFromBridgeRoute);
+            const router = new BridgeRouter(koaRouterFactory, registerKoaRouteFromBridgeRoute);
 
             const manager = new SubresourceMaker(
                 getRepository(User),
@@ -306,7 +307,7 @@ describe("SubresourceManager", () => {
                 entityRouters[entity.name] = new EntityRouter(entity, getRouteMetadata(entity), options);
             });
 
-            const router = new BridgeRouter(Router, registerKoaRouteFromBridgeRoute);
+            const router = new BridgeRouter(koaRouterFactory, registerKoaRouteFromBridgeRoute);
 
             const manager = new SubresourceMaker(
                 getRepository(User),
@@ -378,7 +379,7 @@ describe("SubresourceManager", () => {
                 entityRouters[entity.name] = new EntityRouter(entity, getRouteMetadata(entity), options);
             });
 
-            const router = new BridgeRouter(Router, registerKoaRouteFromBridgeRoute);
+            const router = new BridgeRouter(koaRouterFactory, registerKoaRouteFromBridgeRoute);
 
             const manager = new SubresourceMaker(
                 getRepository(User),
@@ -442,7 +443,7 @@ describe("SubresourceManager", () => {
                 entityRouters[entity.name] = new EntityRouter(entity, getRouteMetadata(entity), options);
             });
 
-            const router = new BridgeRouter(Router, registerKoaRouteFromBridgeRoute);
+            const router = new BridgeRouter(koaRouterFactory, registerKoaRouteFromBridgeRoute);
 
             const manager = new SubresourceMaker(
                 getRepository(User),

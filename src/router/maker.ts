@@ -6,9 +6,10 @@ import {
     getRouteMetadata,
     EntityRouter,
     GenericEntity,
-    EntityRouterClassOptions,
+    EntityRouterFactoryOptions,
 } from "@/router/EntityRouter";
 import { setEntityRouter } from "@/router/container";
+import { AnyFunction } from "@/utils-types";
 
 let connectionManager: ConnectionManager;
 
@@ -18,7 +19,11 @@ if (module.hot) {
 }
 
 /** Make an EntityRouter out of each given entities and assign them a global options object (overridable with @EntityRoute) */
-export async function makeEntityRouters<T = any>({ connection, entities, options }: MakeEntityRouters<T>) {
+export async function makeEntityRouters<T extends AnyFunction = any>({
+    connection,
+    entities,
+    options,
+}: MakeEntityRouters<T>) {
     options = { ...defaultEntityRouteOptions, ...options };
 
     // Init with existing connections
@@ -45,7 +50,7 @@ export async function makeEntityRouters<T = any>({ connection, entities, options
     }, []);
 
     // Make bridge router for each of them
-    const bridgeRouters = entityRouters.map((entityRoute) => entityRoute.makeRouter<T>());
+    const bridgeRouters = entityRouters.map((entityRoute) => entityRoute.makeRouter<ReturnType<T>>());
     return bridgeRouters;
 }
 
@@ -60,10 +65,10 @@ export const defaultEntityRouteOptions: EntityRouteOptions = {
     defaultCreateUpdateOptions: { shouldAutoReload: true, shouldFormatResult: true },
 };
 
-export type MakeEntityRouters<T = any> = {
+export type MakeEntityRouters<T extends AnyFunction = any> = {
     connection: Connection;
     entities: ObjectType<GenericEntity>[];
-    options: EntityRouterClassOptions<T> & EntityRouteOptions;
+    options: EntityRouterFactoryOptions<T> & EntityRouteOptions;
 };
 
 /** Set "always" validator option to true when no groups are passed to validation decorators */

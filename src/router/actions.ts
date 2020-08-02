@@ -2,22 +2,23 @@ import { EntityMetadata } from "typeorm";
 
 import { RouteOperation } from "@/decorators/Groups";
 import { RouteMetadata, EntityRouterFactoryOptions } from "@/router/EntityRouter";
-import { BridgeRouter, getRouterFactory } from "@/router/bridge/BridgeRouter";
+import { BridgeRouter } from "@/router/bridge/BridgeRouter";
 import { CrudAction } from "@/router/MiddlewareMaker";
 import { formatRouteName } from "@/functions/route";
 import { isType } from "@/functions/asserts";
+import { AnyFunction } from "@/utils-types";
 
-export function makeRouterFromActions<Data extends object = object, T = any>(
+export function makeRouterFromActions<Data extends object = object, T extends AnyFunction = any>(
     actions: RouteActionConfig[],
     config: RouteActionRouterConfig<T>,
     data?: Data
 ) {
     const router =
-        "router" in config ? config.router : new BridgeRouter(getRouterFactory(config), config.routerRegisterFn as any);
+        "router" in config ? config.router : new BridgeRouter(config.routerFactoryFn, config.routerRegisterFn as any);
 
     if (!config) {
         throw new Error(
-            "You have to provide a router class/fn factory in the [routerFactoryClass|routerFactoryFn] keys or an existing router with the [router] key"
+            "You have to provide a router fn factory in the <routerFactoryFn> key or an existing router with the <router> key"
         );
     }
 
@@ -58,7 +59,9 @@ export type RouteActionRouterConfigWithInstance<T = any> = {
     /** Existing router to pass on which custom actions routes will be registered */
     router: BridgeRouter<T>;
 };
-export type RouteActionRouterConfig<T = any> = RouteActionRouterConfigWithInstance<T> | EntityRouterFactoryOptions<T>;
+export type RouteActionRouterConfig<T extends AnyFunction = any> =
+    | RouteActionRouterConfigWithInstance<T>
+    | EntityRouterFactoryOptions<T>;
 
 export type BaseRouteAction = Omit<CrudAction, "method"> & {
     /** Custom operation for that action */

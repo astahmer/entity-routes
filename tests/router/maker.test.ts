@@ -9,6 +9,7 @@ import {
     registerKoaRouteFromBridgeRoute,
     getEntityRouters,
     koaMwAdapter,
+    koaRouterFactory,
 } from "@/index";
 
 describe("maker", () => {
@@ -82,7 +83,7 @@ describe("maker", () => {
                 connection: getConnection(),
                 entities,
                 options: {
-                    routerFactoryClass: Router,
+                    routerFactoryFn: koaRouterFactory,
                     routerRegisterFn: registerKoaRouteFromBridgeRoute,
                     middlewareAdapter: koaMwAdapter,
                 },
@@ -98,7 +99,7 @@ describe("maker", () => {
                 connection: getConnection(),
                 entities,
                 options: {
-                    routerFactoryClass: Router,
+                    routerFactoryFn: koaRouterFactory,
                     routerRegisterFn: registerKoaRouteFromBridgeRoute,
                     middlewareAdapter: koaMwAdapter,
                 },

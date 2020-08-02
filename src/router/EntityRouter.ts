@@ -3,7 +3,7 @@ import { getRepository, ObjectType, Repository } from "typeorm";
 import { RouteOperation } from "@/decorators/Groups";
 import { AbstractFilterConfig } from "@/filters/AbstractFilter";
 import { RouteSubresourcesMeta, SubresourceMaker } from "@/router/SubresourceManager";
-import { BridgeRouter, getRouterFactory, BridgeRouterRegisterFn } from "@/router/bridge/BridgeRouter";
+import { BridgeRouter, BridgeRouterRegisterFn } from "@/router/bridge/BridgeRouter";
 import { formatRouteName } from "@/functions/route";
 import {
     RouteActionConstructorData,
@@ -13,7 +13,7 @@ import {
     RouteActionClassOptions,
 } from "@/router/actions";
 import { MiddlewareMaker, CRUD_ACTIONS } from "@/router/MiddlewareMaker";
-import { CType } from "@/utils-types";
+import { CType, AnyFunction } from "@/utils-types";
 import { CreateUpdateOptions } from "@/router/RouteController";
 import { HookSchema } from "@/request/hooks";
 
@@ -46,7 +46,7 @@ export class EntityRouter<Entity extends GenericEntity> {
 
     /** Make a Router for each given operations (and their associated mapping route) for this entity and its subresources and return it */
     public makeRouter<T = any>() {
-        const routerFactory = getRouterFactory(this.globalOptions);
+        const routerFactory = this.globalOptions.routerFactoryFn;
         const router = new BridgeRouter<T>(routerFactory, this.globalOptions.routerRegisterFn);
         const mwAdapter = this.globalOptions.middlewareAdapter;
 
@@ -157,26 +157,13 @@ export type RouteMetadata = {
 
 export type RouteFiltersMeta = Record<string, AbstractFilterConfig>;
 
-export type EntityRouterFactoryKind = "class" | "fn";
-export type EntityRouterFactoryOptions<T, Kind = EntityRouterFactoryKind> = Kind extends "class"
-    ? {
-          /** Router class reference */
-          routerFactoryClass: CType<T>;
-          /** Router adapter function that makes the link between BridgeRouter register & actual router class route registering functions */
-          routerRegisterFn: BridgeRouterRegisterFn<T>;
-      }
-    : T extends (...args: any) => any
-    ? {
-          /** Router factory function */
-          routerFactoryFn: T;
-          /** Router adapter function that makes the link between BridgeRouter register & actual router class route registering functions */
-          routerRegisterFn: BridgeRouterRegisterFn<ReturnType<T>>;
-      }
-    : never;
-
-export type EntityRouterClassOptions<T = any, U = EntityRouterFactoryKind> = EntityRouterFactoryOptions<T, U> & {
+export type EntityRouterFactoryOptions<T extends AnyFunction = any> = {
+    /** Router factory function */
+    routerFactoryFn: T;
+    /** Router adapter function that makes the link between BridgeRouter register & actual router class route registering functions */
+    routerRegisterFn: BridgeRouterRegisterFn<ReturnType<T>>;
     /** MiddlewareAdapter to make generated middlewares framework-agnostic */
-    middlewareAdapter: (mw: Function) => (...args: any) => any;
+    middlewareAdapter: (mw: Function) => AnyFunction;
 };
 
 export type EntityRouteActionConfig = Omit<RouteActionConfig, "middlewares"> &
@@ -215,4 +202,4 @@ export type EntityRouteOptions = {
 };
 export type EntityRouteConfig = EntityRouteBaseOptions & EntityRouteOptions;
 
-export type EntityRouterOptions<T = any> = EntityRouterClassOptions<T> & EntityRouteConfig;
+export type EntityRouterOptions = EntityRouterFactoryOptions & EntityRouteConfig;

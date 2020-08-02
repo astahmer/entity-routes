@@ -13,16 +13,18 @@ export function registerKoaRouteFromBridgeRoute(instance: Router, route: BridgeR
 export async function makeKoaEntityRouters(
     args: Omit<MakeEntityRouters, "options"> & { options?: EntityRouteOptions }
 ) {
-    return makeEntityRouters({
+    return makeEntityRouters<typeof koaRouterFactory>({
         ...args,
         options: {
             ...args.options,
-            routerFactoryClass: Router,
+            routerFactoryFn: koaRouterFactory,
             routerRegisterFn: registerKoaRouteFromBridgeRoute,
             middlewareAdapter: koaMwAdapter,
         },
     });
 }
+
+export const koaRouterFactory = () => new Router();
 
 export type KoaContextAdapter = ContextAdapter<QueryParams> & { ctx: Context };
 type KCA = KoaContextAdapter;

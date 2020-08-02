@@ -1,12 +1,18 @@
-import * as Router from "koa-router";
 import { Context } from "koa";
-import { BridgeRouter, registerKoaRouteFromBridgeRoute, makeRouterFromActions, IRouteAction } from "@/index";
+import {
+    BridgeRouter,
+    registerKoaRouteFromBridgeRoute,
+    makeRouterFromActions,
+    IRouteAction,
+    koaRouterFactory,
+    koaMwAdapter,
+} from "@/index";
 
 const noop = () => {};
 
 describe("BridgeRouter", () => {
     it("can register route", () => {
-        const router = new BridgeRouter(Router, registerKoaRouteFromBridgeRoute);
+        const router = new BridgeRouter(koaRouterFactory, registerKoaRouteFromBridgeRoute);
         router.register({ name: "home", path: "/home", methods: ["get", "post"], middlewares: [noop] });
 
         expect(router.routes.length).toEqual(1);
@@ -37,15 +43,19 @@ describe("BridgeRouter", () => {
                     middlewares: [noop],
                 },
             ],
-            { routerFactoryClass: Router, routerRegisterFn: registerKoaRouteFromBridgeRoute }
+            {
+                routerFactoryFn: koaRouterFactory,
+                routerRegisterFn: registerKoaRouteFromBridgeRoute,
+                middlewareAdapter: koaMwAdapter,
+            }
         );
 
         expect(router.routes.map((r) => r.name)).toEqual(["home_list", "register_create"]);
     });
 
     it("makeRouterFromActions (using existing BridgeRouter)", () => {
-        const router = new BridgeRouter(Router, registerKoaRouteFromBridgeRoute);
-        makeRouterFromActions(
+        const router = new BridgeRouter(koaRouterFactory, registerKoaRouteFromBridgeRoute);
+        makeRouterFromActions<any>(
             [
                 {
                     path: "home",

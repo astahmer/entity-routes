@@ -8,6 +8,7 @@ export type PartialRecord<K extends keyof any, T> = Partial<Record<K, T>>;
 export type Props<T extends GenericEntity> = NonFunctionKeys<T>;
 export type Decorator = (target: Object | Function, propName?: string) => void;
 export type CType<T = any> = new (...args: any[]) => T;
+export type AnyFunction<T = any> = (...args: any[]) => T;
 export type SubType<Base, Condition> = Pick<Base, AllowedNames<Base, Condition>>;
 
 // From official doc

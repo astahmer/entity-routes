@@ -1,18 +1,14 @@
-import { isType, isClass, isDev } from "@/functions/asserts";
-import { CType } from "@/utils-types";
+import { isDev } from "@/functions/asserts";
+import { AnyFunction } from "@/utils-types";
 import { RouteVerb } from "@/router/MiddlewareMaker";
-import { EntityRouterFactoryOptions } from "@/router/EntityRouter";
 import { areSameRoutes } from "@/functions/route";
 
 export class BridgeRouter<T = any> {
     readonly instance: T;
     readonly routes: BridgeRouterRoute[] = [];
 
-    constructor(
-        public readonly factory: BridgeRouterFactory<T>,
-        private readonly registerFn: BridgeRouterRegisterFn<T>
-    ) {
-        this.instance = isClass(factory) ? new factory() : factory();
+    constructor(public readonly factory: AnyFunction<T>, private readonly registerFn: BridgeRouterRegisterFn<T>) {
+        this.instance = factory();
     }
 
     /** Create and register a route. */
@@ -33,14 +29,6 @@ export type BridgeRouterRoute<Mw = Function> = {
     methods: RouteVerb[];
     middlewares: Mw[];
 };
-export type BridgeRouterFactory<T> = CType<T> | ((...args: any) => T);
 export type BridgeRouterRegisterFn<T = any> = (instance: T, route: BridgeRouterRoute) => any;
-
-export const getRouterFactory = <T = any>(config: EntityRouterFactoryOptions<T>) =>
-    isType<EntityRouterFactoryOptions<T, "class">>(config, "routerFactoryClass" in config)
-        ? config.routerFactoryClass
-        : isType<EntityRouterFactoryOptions<T, "fn">>(config, "routerFactoryFn" in config)
-        ? config.routerFactoryFn
-        : null;
 
 export const printBridgeRoute = (route: BridgeRouterRoute) => route.path + " : " + route.methods.join(",");
