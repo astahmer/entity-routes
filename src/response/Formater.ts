@@ -75,6 +75,8 @@ export class Formater {
             !computedProps.length &&
             (options.shouldOnlyFlattenNested ? clone : true);
 
+        // Can only flatten self if it has 1 key (id) & no computed props exposed
+        // Also check that we are in a nested prop rather than root if shouldOnlyFlattenNested is true
         if (shouldFlatten) return idToIRI(entityMetadata, item.id) as any;
 
         // If clone is null that means we are at item's root
