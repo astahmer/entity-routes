@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.3](https://github.com/astahmer/entity-routes/compare/v0.1.2...v0.1.3) (2020-08-02)
+
+
+### Bug Fixes
+
+* **package:** deps & scripts ([1ea499f](https://github.com/astahmer/entity-routes/commit/1ea499f7ed7ac8bfda3e53b5f4cb7d38d9b7ba66))
+
 ### [0.1.2](https://github.com/astahmer/entity-routes/compare/v0.1.1...v0.1.2) (2020-08-02)
 
 ### 0.1.1 (2020-08-02)
