@@ -1,6 +1,6 @@
 {
     "name": "@astahmer/entity-routes",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "description": "Design your API around your entities in minutes",
     "source": "src/index.ts",
     "main": "dist/index.js",
