@@ -13,7 +13,7 @@ _No boilerplate controllers. No code generation. No bullshit._
 -   [:bullettrain_side: Quick start](#bullettrain_side-quick-start)
     -   [Using Koa](#using-koa)
     -   [Using Express/Next/Nuxt](#using-expressnextnuxt)
--   [:balloon: Bonus points](#balloon-bonus-points)
+-   [:balloon: Benefits](#balloon-bonus-points)
 -   [:question: What/why ?](#question-whatwhy-)
 -   [License](#license)
 
@@ -188,7 +188,7 @@ export async function setupExpressApp(connection: Connection) {
 
 That's it. There is no final step. Your routes are ready.
 
-## :balloon: Bonus points
+## :balloon: Benefits
 
 -   0 config required
 -   Compatible with Express, Koa, Next, Nuxt and any other middleware-based framework using adapters
