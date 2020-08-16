@@ -6,9 +6,11 @@ import { DocAlert } from "@/components/DocAlert.tsx";
 
 ## Generic Entity
 
-The only constraint to use @EntityRoute is to have an `id` property always exposed on all your entities used by EntityRoute.
+<DocAlert status="info">
+    To use @EntityRoute you must have an `id` property always exposed on all your entities used by EntityRoute.
+</DocAlert>
 
-```typescript
+```typescript title="Every entity must implement this interface"
 interface GenericEntity {
     [k: string]: any;
     id: string | number;

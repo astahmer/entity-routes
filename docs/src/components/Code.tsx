@@ -7,17 +7,27 @@ import Highlight, { defaultProps } from "prism-react-renderer";
 export type CodeProps = {
     className: string;
     children: ReactNode;
-    title?: string;
-    collapsable?: boolean;
+    metastring?: string;
     preProps?: BoxProps;
 };
-export function Code({ title, collapsable, ...props }: CodeProps) {
+
+export type CodePropsMetaString = {
+    title?: string;
+    collapsable?: boolean;
+    left?: boolean;
+};
+
+export function Code({ metastring, ...props }: CodeProps) {
     const [isOpen, setIsOpened] = useState(true);
     const toggle = () => setIsOpened(!isOpen);
+
+    const metas = extractMeta<CodePropsMetaString>(metastring || "");
+    const { title, left, collapsable } = metas;
 
     return (
         <Box position="relative">
             <DokzCode
+                {...metas}
                 {...props}
                 isOpen={isOpen}
                 preProps={{ paddingTop: collapsable && "30px", paddingBottom: title && "25px" }}
@@ -28,7 +38,7 @@ export function Code({ title, collapsable, ...props }: CodeProps) {
                     opacity={0.6}
                     fontSize="0.7em"
                     position="absolute"
-                    right="10px"
+                    {...{ [isOpen && left ? "left" : "right"]: "10px" }}
                     bottom="8px"
                 >
                     {title}
@@ -115,3 +125,66 @@ export const DokzCode = ({ children, className, isOpen, preProps, ...rest }) => 
         </Box>
     );
 };
+
+export function extractMeta<T = Record<string, string>>(string: string): Partial<T> {
+    const metas = {} as Partial<T>;
+    const current = { key: "", value: "" };
+    let isProcessingKey = true;
+    let isProcessingValue = false;
+
+    // ="Every entity should extend this interface" chiasse="abc" pisse oui="abc"
+    const setNewMetaKey = () => {
+        metas[current.key] = "";
+        isProcessingKey = false;
+    };
+
+    const startValue = () => (isProcessingValue = true);
+
+    const endValue = () => {
+        metas[current.key] = current.value;
+        isProcessingValue = false;
+    };
+
+    const setMetaValue = () => {
+        metas[current.key] = current.value || true; // Key without value will be interpreted as true
+        current.key = "";
+        current.value = "";
+    };
+
+    const addCharacter = (char, objKey) => (current[objKey] += char);
+
+    for (let i = 0; i < string.length; i++) {
+        switch (string[i]) {
+            case "=":
+                setNewMetaKey();
+                break;
+
+            case '"':
+                isProcessingValue ? endValue() : startValue();
+                break;
+
+            case " ":
+                if (isProcessingValue) addCharacter(string[i], "value");
+                else setMetaValue();
+                break;
+
+            default:
+                // If not processing key or value (last value was a quote or equal character)
+                if (!isProcessingKey && !isProcessingValue) {
+                    isProcessingKey = true;
+                    current.key = "";
+                }
+
+                if (isProcessingKey) addCharacter(string[i], "key");
+                else if (isProcessingValue) {
+                    addCharacter(string[i], "value");
+                }
+                break;
+        }
+    }
+
+    // If ending on a key char (key without value) or a quoteChar (value with multiple words)
+    ((current.key && isProcessingKey) || isProcessingValue) && setMetaValue();
+
+    return metas;
+}
