@@ -1,0 +1,160 @@
+---
+title: Quick start
+---
+
+import { Collapsable } from "@/components/Collapsable.tsx";
+import { DataTable } from "@/components/DataTable.tsx";
+
+## Make your entities
+
+You're just going to have to create your TypeORM entities just like you always did.
+Then there are 2 @ decorators that are specific to entity-routes :
+
+-   **@EntityRoute** which is a class decorator, must be placed at the top of it so that your entities can be exposed through an EntityRouter.
+-   **@Groups** which is a property decorator, must be placed at the top of every properties you want to expose through your routes, more details on it later
+
+Here is a simple example.
+
+```typescript
+export class AbstractEntity {
+    @Groups("all")
+    @PrimaryGeneratedColumn()
+    id: number;
+}
+
+@EntityRoute({ path: "/users", operations: ["create", "update", "details", "list", "delete"] })
+@Entity()
+export class User extends AbstractEntity {
+    @Groups("basic")
+    @Column()
+    name: string;
+
+    @Subresource(() => Article)
+    @OneToMany(() => Article, (article) => article.author)
+    articles: Article[];
+}
+
+@EntityRoute()
+@Entity()
+export class Article extends AbstractEntity {
+    @Groups("basic")
+    @Column()
+    title: string;
+
+    @Groups("basic")
+    @Column()
+    content: string;
+
+    @Groups("basic")
+    @ManyToOne(() => User, (user) => user.articles)
+    author: User;
+}
+```
+
+It will automatically generate those routes :
+
+<DataTable
+    columns={["Verb", "Path", "Name"]}
+    rows={[
+        ["POST", "/users", "user_create"],
+        ["POST", "/users/mapping", "user_mapping_create"],
+    ]}
+/>
+
+<Collapsable collapse={{startingHeight:200}}>
+
+| Verb   | Path                                  | Name                 |
+| ------ | ------------------------------------- | -------------------- |
+| POST   | /users                                | user_create          |
+| POST   | /users/mapping                        | user_create_mapping  |
+| PUT    | /users/:id(\d+)                       | user_update          |
+| PUT    | /users/:id(\d+)/mapping               | user_update_mapping  |
+| GET    | /users/:id(\d+)                       | user_details         |
+| GET    | /users/:id(\d+)/mapping               | user_details_mapping |
+| GET    | /users                                | user_list            |
+| GET    | /users/mapping                        | user_list_mapping    |
+| DELETE | /users/:id(\d+)                       | user_delete          |
+| POST   | /users/:UserId(\d+)/articles          | user_articles_create |
+| GET    | /users/:UserId(\d+)/articles          | user_articles_list   |
+| DELETE | /users/:UserId(\d+)/articles/:id(\d+) | user_articles_delete |
+
+</Collapsable>
+
+## Register your Entity Routes
+
+import { Tabs, TabList, TabPanels, Tab, TabPanel } from "@chakra-ui/core";
+
+<Tabs>
+  <TabList>
+    <Tab>Koa</Tab>
+    <Tab>Express</Tab>
+  </TabList>
+
+  <TabPanels>
+    <TabPanel>
+
+```typescript
+
+import { AddressInfo } from "net";
+import _ as Koa from "koa";
+import _ as bodyParser from "koa-bodyparser";
+import { Connection } from "typeorm";
+import { makeKoaEntityRouters } from "@astahmer/entity-routes";
+
+export async function setupKoaApp(connection: Connection) {
+const entities = connection.entityMetadatas.map((meta) => meta.target) as Function[];
+
+    const bridgeRouters = await makeKoaEntityRouters({ connection, entities, options });
+    const app = new Koa();
+    app.use(bodyParser());
+
+    // Register all routes on koa server
+    bridgeRouters.forEach((router) => app.use(router.instance.routes()));
+
+    // Always validate when no groups are passed on validators
+    setEntityValidatorsDefaultOption(entities);
+
+    const server = app.listen(); // random port
+    const baseURL = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+    const client = axios.create({ baseURL });
+    return { baseURL, server, client };
+
+}
+
+```
+
+</TabPanel>
+<TabPanel>
+
+```typescript
+import { AddressInfo } from "net";
+import * as express from "express";
+import * as bodyParser from "body-parser";
+import { Connection } from "typeorm";
+import { makeExpressEntityRouters } from "@astahmer/entity-routes";
+
+export async function setupExpressApp(connection: Connection) {
+    const entities = connection.entityMetadatas.map((meta) => meta.target) as Function[];
+
+    const bridgeRouters = await makeExpressEntityRouters({ connection, entities, options });
+    const app = express();
+    app.use(bodyParser.json());
+    app.use(bodyParser.urlencoded({ extended: true }));
+
+    // Register all routes on Express server
+    bridgeRouters.forEach((router) => app.use(router.instance));
+
+    const server = app.listen(); // random port
+    const baseURL = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+    const client = axios.create({ baseURL });
+    return { baseURL, server, client };
+}
+```
+
+</TabPanel>
+  </TabPanels>
+</Tabs>
+
+## Final step
+
+That's it. There is no final step. Your routes are ready.
