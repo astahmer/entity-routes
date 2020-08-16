@@ -3,6 +3,7 @@ import { ReactNode, useState } from "react";
 import { Box, Collapse, Switch, Flex, Text, useColorMode, useClipboard, BoxProps } from "@chakra-ui/core";
 import { CopyButton } from "dokz/dist/components/Code";
 import Highlight, { defaultProps } from "prism-react-renderer";
+import rangeParser from "parse-numeric-range";
 
 export type CodeProps = {
     className: string;
@@ -17,11 +18,11 @@ export type CodePropsMetaString = {
     left?: boolean;
 };
 
-export function Code({ metastring, ...props }: CodeProps) {
+export function Code({ ...props }: CodeProps) {
     const [isOpen, setIsOpened] = useState(true);
     const toggle = () => setIsOpened(!isOpen);
 
-    const metas = extractMeta<CodePropsMetaString>(metastring || "");
+    const metas = extractMeta<CodePropsMetaString>(props.metastring || "");
     const { title, left, collapsable } = metas;
 
     return (
@@ -30,7 +31,7 @@ export function Code({ metastring, ...props }: CodeProps) {
                 {...metas}
                 {...props}
                 isOpen={isOpen}
-                preProps={{ paddingTop: collapsable && "30px", paddingBottom: title && "25px" }}
+                preProps={{ paddingTop: collapsable && "30px", paddingBottom: title && "30px" }}
             />
             {title && (
                 <Box
@@ -65,12 +66,14 @@ export const DokzCode = ({ children, className, isOpen, preProps, ...rest }) => 
     const language = className && className.replace(/language-/, "");
     const { onCopy, hasCopied } = useClipboard(code);
 
+    const shouldHighlightLine = calculateLinesToHighlight(rest.metastring);
+
     return (
         <Box position="relative">
             <Highlight {...defaultProps} theme={prismTheme[colorMode]} code={code} language={language}>
                 {({ className, style, tokens, getLineProps, getTokenProps }) => (
                     <Collapse
-                        p="20px"
+                        p="25px"
                         // pt='30px'
                         borderRadius="8px"
                         as="pre"
@@ -103,7 +106,12 @@ export const DokzCode = ({ children, className, isOpen, preProps, ...rest }) => 
                             right="10px"
                         />
                         {tokens.map((line, i) => (
-                            <div key={i} {...getLineProps({ line, key: i })}>
+                            <Box
+                                key={i}
+                                {...getLineProps({ line, key: i })}
+                                bg={shouldHighlightLine(i) && "gray.600"}
+                                width="fit-content"
+                            >
                                 <Box
                                     display="inline-block"
                                     // position='absolute'
@@ -117,7 +125,7 @@ export const DokzCode = ({ children, className, isOpen, preProps, ...rest }) => 
                                 {line.map((token, key) => (
                                     <span key={key} {...getTokenProps({ token, key })} />
                                 ))}
-                            </div>
+                            </Box>
                         ))}
                     </Collapse>
                 )}
@@ -188,3 +196,15 @@ export function extractMeta<T = Record<string, string>>(string: string): Partial
 
     return metas;
 }
+
+// Taken from https://prince.dev/highlight-with-react
+const RE = /{([\d,-]+)}/;
+export const calculateLinesToHighlight = (meta) => {
+    if (RE.test(meta)) {
+        const strlineNumbers = RE.exec(meta)[1];
+        const lineNumbers = rangeParser(strlineNumbers);
+        return (index) => lineNumbers.includes(index + 1);
+    } else {
+        return () => false;
+    }
+};
