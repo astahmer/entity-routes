@@ -2,8 +2,7 @@
 title: Quick start
 ---
 
-import { Collapsable } from "@/components/Collapsable.tsx";
-import { DataTable } from "@/components/DataTable.tsx";
+import { DataTable, Collapsable } from "@/components";
 
 ## Make your entities
 
@@ -15,7 +14,7 @@ Then there are 2 @ decorators that are specific to entity-routes :
 
 Here is a simple example.
 
-```typescript
+```typescript collapsable
 export class AbstractEntity {
     @Groups("all")
     @PrimaryGeneratedColumn()
@@ -53,31 +52,24 @@ export class Article extends AbstractEntity {
 
 It will automatically generate those routes :
 
-<DataTable
-    columns={["Verb", "Path", "Name"]}
-    rows={[
-        ["POST", "/users", "user_create"],
-        ["POST", "/users/mapping", "user_mapping_create"],
-    ]}
-/>
-
-<Collapsable collapse={{startingHeight:200}}>
-
-| Verb   | Path                                  | Name                 |
-| ------ | ------------------------------------- | -------------------- |
-| POST   | /users                                | user_create          |
-| POST   | /users/mapping                        | user_create_mapping  |
-| PUT    | /users/:id(\d+)                       | user_update          |
-| PUT    | /users/:id(\d+)/mapping               | user_update_mapping  |
-| GET    | /users/:id(\d+)                       | user_details         |
-| GET    | /users/:id(\d+)/mapping               | user_details_mapping |
-| GET    | /users                                | user_list            |
-| GET    | /users/mapping                        | user_list_mapping    |
-| DELETE | /users/:id(\d+)                       | user_delete          |
-| POST   | /users/:UserId(\d+)/articles          | user_articles_create |
-| GET    | /users/:UserId(\d+)/articles          | user_articles_list   |
-| DELETE | /users/:UserId(\d+)/articles/:id(\d+) | user_articles_delete |
-
+<Collapsable collapse={{ startingHeight: 230 }} suffix="rows">
+    <DataTable
+        columns={["Verb", "Path", "Name"]}
+        rows={[
+            ["POST", "/users", "user_create"],
+            ["POST", "/users/mapping", "user_create_mapping"],
+            ["PUT", "/users/:id(\\d+)", "user_update"],
+            ["PUT", "/users/:id(\\d+)/mapping", "user_update_mapping"],
+            ["GET", "/users/:id(\\d+)", "user_details"],
+            ["GET", "/users/:id(\\d+)/mapping", "user_details_mapping"],
+            ["GET", "/users", "user_list"],
+            ["GET", "/users/mapping", "user_list_mapping"],
+            ["DELETE", "/users/:id(\\d+)", "user_delete"],
+            ["POST", "/users/:UserId(\\d+)/articles", "user_articles_create"],
+            ["GET", "/users/:UserId(\\d+)/articles", "user_articles_list"],
+            ["DELETE", "/users/:UserId(\\d+)/articles/:id(\\d+)", "user_articles_delete"],
+        ]}
+    />
 </Collapsable>
 
 ## Register your Entity Routes

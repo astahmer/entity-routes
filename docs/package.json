@@ -27,6 +27,7 @@
         "chalk": "^4.1.0",
         "compose-function": "^3.0.3",
         "consola": "^2.15.0",
+        "next-images": "^1.4.1",
         "prettier": "^2.0.5",
         "replace-in-file": "^6.1.0",
         "rimraf": "^3.0.2",

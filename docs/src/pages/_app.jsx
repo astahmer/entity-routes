@@ -1,22 +1,8 @@
-import { DokzProvider, GithubLink, ColorModeSwitch, Wrapper, MDXComponents, Link } from "dokz";
+import { DokzProvider, GithubLink, ColorModeSwitch, Link } from "dokz";
 import React, { Fragment } from "react";
 import Head from "next/head";
-import { Stack } from "@chakra-ui/core";
 
-import { Code } from "@/components/Code";
-
-// Add h1 to every page based on name(dokz)/title(typedoc)
-const WrappedWrapper = ({ children, ...props }) => {
-    const title = props.meta.title || props.meta.name;
-    return (
-        <Wrapper {...props}>
-            <Stack spacing={4}>
-                {title && <MDXComponents.h1>{title}</MDXComponents.h1>}
-                {children}
-            </Stack>
-        </Wrapper>
-    );
-};
+import { Code, Table, Wrapper } from "@/components";
 
 export default function App(props) {
     const { Component, pageProps } = props;
@@ -43,7 +29,7 @@ export default function App(props) {
                     "getting-started": true,
                     "entity-routes": true,
                 }}
-                mdxComponents={{ wrapper: WrappedWrapper, code: Code }}
+                mdxComponents={{ code: Code, table: Table, wrapper: Wrapper }}
             >
                 <Component {...pageProps} />
             </DokzProvider>

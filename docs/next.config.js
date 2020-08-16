@@ -1,8 +1,9 @@
 const compose = require("compose-function");
 const { withDokz } = require("dokz/dist/plugin");
 const emoji = require("remark-emoji");
+const withImages = require("next-images");
 
-const composed = compose(withDokz);
+const composed = compose(withImages, withDokz);
 
 module.exports = composed({
     pageExtensions: ["js", "jsx", "md", "mdx", "ts", "tsx"],

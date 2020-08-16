@@ -1,20 +1,21 @@
 import { useState } from "react";
-import { Collapse, Button, Flex } from "@chakra-ui/core";
+import { Collapse, Button, Flex, Box } from "@chakra-ui/core";
 
-export function Collapsable({ children, collapse, button }) {
+export function Collapsable({ children, collapse, button, btnLabel, suffix = "" }) {
     const [show, setShow] = useState(false);
 
     const handleToggle = () => setShow(!show);
 
     return (
         <>
-            <Collapse startingHeight={20} {...collapse} isOpen={show}>
-                {children}
-            </Collapse>
+            <Box mb={!show ? "1em" : "-0.5em"}>
+                <Collapse startingHeight={20} {...collapse} isOpen={show}>
+                    {children}
+                </Collapse>
+            </Box>
             <Flex justifyContent={["center", "flex-start"]} alignItems="center">
-                {!show && "[...]"}
-                <Button size="sm" ml="1em" mt={show && "-0.5em"} {...button} onClick={handleToggle}>
-                    Show {show ? "Less" : "More"}
+                <Button size="sm" {...button} onClick={handleToggle}>
+                    {btnLabel ? btnLabel(show) : "Show " + (show ? "less" : "more") + " " + suffix}
                 </Button>
             </Flex>
         </>

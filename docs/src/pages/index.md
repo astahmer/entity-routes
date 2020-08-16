@@ -2,6 +2,10 @@
 name: Features
 ---
 
+import { Logo } from '@/components/Logo';
+
+<Logo />
+
 `entity-routes` enables you to design your API around your [TypeORM](https://github.com/typeorm/typeorm/) entities in minutes.
 It is compatible with **Express/Koa** or any connect-like framework, _which should mean any middleware-based node layer_ (like Next, Nuxt, etc...).
 

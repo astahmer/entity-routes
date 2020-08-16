@@ -1,8 +1,11 @@
 import { MDXComponents } from "dokz";
+import { BoxProps } from "@chakra-ui/core";
+import { Table } from "./Table";
 
-export function DataTable({ columns, rows }) {
+export type DataTableProps = { columns: string[]; rows: string[][] } & BoxProps;
+export function DataTable({ columns, rows, ...props }: DataTableProps) {
     return (
-        <MDXComponents.table>
+        <Table {...props}>
             <thead>
                 <tr>
                     {columns.map((col, i) => (
@@ -11,14 +14,14 @@ export function DataTable({ columns, rows }) {
                 </tr>
             </thead>
             <tbody>
-                {rows.map((row) => (
-                    <tr>
+                {rows.map((row, i) => (
+                    <tr key={i}>
                         {row.map((col, i) => (
                             <MDXComponents.td key={i}>{col}</MDXComponents.td>
                         ))}
                     </tr>
                 ))}
             </tbody>
-        </MDXComponents.table>
+        </Table>
     );
 }

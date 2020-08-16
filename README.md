@@ -205,7 +205,6 @@ I wanted to get rid of writing the same boring controllers again & again for eac
 
 _Inspired by an internal project made at [ACSEO](https://acseo.fr/) with ApiPlatform (Symfony/PHP)_
 
-
 ## License
 
 MIT © 2020 Alexandre Stahmer

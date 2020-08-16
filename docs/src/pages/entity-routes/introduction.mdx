@@ -2,6 +2,8 @@
 title: Introduction
 ---
 
+import { DocAlert } from "@/components/DocAlert.tsx";
+
 ## Generic Entity
 
 The only constraint to use @EntityRoute is to have an `id` property always exposed on all your entities used by EntityRoute.
@@ -29,12 +31,11 @@ And then you would make all your entities `extends` from this one, [just like an
 
 The only decorator needed to register an **EntityRouter**[TODO docref] is... well, `@EntityRoute`.
 
-> Good to know: The name distinction is to avoid any conflict between the **service** and the **decorator**, such distinctions are also made for the **built-in filters** [TODO docref] such as @Search[TODO docref]/SearchFilter[TODO docref] and @Pagination[TODO docref]/PaginationFilter[TODO docref].
-Here is the @EntityRoute signature :
-
-```typescript
-function EntityRoute(args: EntityRouteArgs = { operations: [] }, options: EntityRouteConfig = {}): ClassDecorator;
-```
+<DocAlert>
+    The name distinction is to avoid any conflict between the **service** and the **decorator**, such distinctions are
+    also made for the **built-in filters** [TODO docref] such as @Search[TODO docref]/SearchFilter[TODO docref] and
+    @Pagination[TODO docref]/PaginationFilter[TODO docref].
+</DocAlert>
 
 ## Mapping
 
