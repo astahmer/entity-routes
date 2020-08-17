@@ -2,7 +2,7 @@
 title: Quick start
 ---
 
-import { DataTable, Collapsable } from "@/components";
+import { Tabs, TabList, TabPanels, Tab, TabPanel } from "@chakra-ui/core";
 
 ## Make your entities
 
@@ -52,29 +52,22 @@ export class Article extends AbstractEntity {
 
 It will automatically generate those routes :
 
-<Collapsable collapse={{ startingHeight: 230 }} suffix="rows">
-    <DataTable
-        columns={["Verb", "Path", "Name"]}
-        rows={[
-            ["POST", "/users", "user_create"],
-            ["POST", "/users/mapping", "user_create_mapping"],
-            ["PUT", "/users/:id(\\d+)", "user_update"],
-            ["PUT", "/users/:id(\\d+)/mapping", "user_update_mapping"],
-            ["GET", "/users/:id(\\d+)", "user_details"],
-            ["GET", "/users/:id(\\d+)/mapping", "user_details_mapping"],
-            ["GET", "/users", "user_list"],
-            ["GET", "/users/mapping", "user_list_mapping"],
-            ["DELETE", "/users/:id(\\d+)", "user_delete"],
-            ["POST", "/users/:UserId(\\d+)/articles", "user_articles_create"],
-            ["GET", "/users/:UserId(\\d+)/articles", "user_articles_list"],
-            ["DELETE", "/users/:UserId(\\d+)/articles/:id(\\d+)", "user_articles_delete"],
-        ]}
-    />
-</Collapsable>
+| Verb   | Path                                  | Name                 |
+| ------ | ------------------------------------- | -------------------- |
+| POST   | /users                                | user_create          |
+| POST   | /users/mapping                        | user_create_mapping  |
+| PUT    | /users/:id(\d+)                       | user_update          |
+| PUT    | /users/:id(\d+)/mapping               | user_update_mapping  |
+| GET    | /users/:id(\d+)                       | user_details         |
+| GET    | /users/:id(\d+)/mapping               | user_details_mapping |
+| GET    | /users                                | user_list            |
+| GET    | /users/mapping                        | user_list_mapping    |
+| DELETE | /users/:id(\d+)                       | user_delete          |
+| POST   | /users/:UserId(\d+)/articles          | user_articles_create |
+| GET    | /users/:UserId(\d+)/articles          | user_articles_list   |
+| DELETE | /users/:UserId(\d+)/articles/:id(\d+) | user_articles_delete |
 
 ## Register your Entity Routes
-
-import { Tabs, TabList, TabPanels, Tab, TabPanel } from "@chakra-ui/core";
 
 <Tabs>
   <TabList>
@@ -85,16 +78,15 @@ import { Tabs, TabList, TabPanels, Tab, TabPanel } from "@chakra-ui/core";
   <TabPanels>
     <TabPanel>
 
-```typescript
-
+```typescript {10,15}
 import { AddressInfo } from "net";
-import _ as Koa from "koa";
-import _ as bodyParser from "koa-bodyparser";
+import * as Koa from "koa";
+import * as bodyParser from "koa-bodyparser";
 import { Connection } from "typeorm";
 import { makeKoaEntityRouters } from "@astahmer/entity-routes";
 
 export async function setupKoaApp(connection: Connection) {
-const entities = connection.entityMetadatas.map((meta) => meta.target) as Function[];
+    const entities = connection.entityMetadatas.map((meta) => meta.target) as Function[];
 
     const bridgeRouters = await makeKoaEntityRouters({ connection, entities, options });
     const app = new Koa();
@@ -103,22 +95,16 @@ const entities = connection.entityMetadatas.map((meta) => meta.target) as Functi
     // Register all routes on koa server
     bridgeRouters.forEach((router) => app.use(router.instance.routes()));
 
-    // Always validate when no groups are passed on validators
-    setEntityValidatorsDefaultOption(entities);
-
     const server = app.listen(); // random port
     const baseURL = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
-    const client = axios.create({ baseURL });
-    return { baseURL, server, client };
-
+    return { baseURL, server };
 }
-
 ```
 
 </TabPanel>
 <TabPanel>
 
-```typescript
+```typescript {10,16}
 import { AddressInfo } from "net";
 import * as express from "express";
 import * as bodyParser from "body-parser";
@@ -138,8 +124,7 @@ export async function setupExpressApp(connection: Connection) {
 
     const server = app.listen(); // random port
     const baseURL = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
-    const client = axios.create({ baseURL });
-    return { baseURL, server, client };
+    return { baseURL, server };
 }
 ```
 
@@ -150,3 +135,5 @@ export async function setupExpressApp(connection: Connection) {
 ## Final step
 
 That's it. There is no final step. Your routes are ready.
+
+[Let's move on and see more in details every features of entity-routes.](/entity-routes/introduction)

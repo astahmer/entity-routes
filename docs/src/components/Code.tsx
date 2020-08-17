@@ -18,7 +18,7 @@ export type CodePropsMetaString = {
     left?: boolean;
 };
 
-export function Code({ ...props }: CodeProps) {
+export function Code(props: CodeProps) {
     const [isOpen, setIsOpened] = useState(true);
     const toggle = () => setIsOpened(!isOpen);
 
@@ -57,13 +57,14 @@ export function Code({ ...props }: CodeProps) {
 
 // Directly taken from https://github.com/remorses/dokz/blob/375f3ab217/dokz/src/components/Code.tsx
 // Replaced codeblock Box with Collapse & pass isOpen/startingHeight
+const langRegex = /language-/;
 export const DokzCode = ({ children, className, isOpen, preProps, ...rest }) => {
     // console.log({rest, live})
     const { colorMode } = useColorMode();
     let { prismTheme } = useDokzConfig();
 
     const code = typeof children === "string" ? children.trim() : "";
-    const language = className && className.replace(/language-/, "");
+    const language = className && className.replace(langRegex, "");
     const { onCopy, hasCopied } = useClipboard(code);
 
     const shouldHighlightLine = calculateLinesToHighlight(rest.metastring);
