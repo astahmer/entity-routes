@@ -14,7 +14,7 @@ export const Wrapper = ({ children, ...props }) => {
     return (
         <DokzWrapper {...props} meta={meta}>
             <Stack spacing={4}>
-                {title && <MDXComponents.h1>{title}</MDXComponents.h1>}
+                {title && <MDXComponents.h1 id={title.toLowerCase()}>{title}</MDXComponents.h1>}
                 {children}
             </Stack>
         </DokzWrapper>
