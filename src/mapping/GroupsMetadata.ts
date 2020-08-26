@@ -24,14 +24,14 @@ export class GroupsMetadata {
     readonly decoratedProps: string[] = [];
 
     /**
-     * An array of props always exposed no matter which operation or route context
+     * An array of props always exposed no matter which operation or route scope
      * @example
      * always = ["create", "read", "specificGroup", "otherCustomOperation"]
      */
     readonly always: RouteOperation[] = [];
 
     /**
-     * An object of Operation containing global props (exposed no matter which route context)
+     * An object of Operation containing global props (exposed no matter which route scope)
      * @example
      * globals = {
      *     create: ["id", "name", "email", "startDate", "endDate"],
@@ -43,7 +43,7 @@ export class GroupsMetadata {
     readonly globalOperations: PropsByOperations = {};
 
     /**
-     * An object of route contexts as keys & values of array of props always exposed no matter which operation for that context
+     * An object of route scopes as keys & values of array of props always exposed no matter which operation for that context
      * @example
      * locals = {
      *     user: ["id", "name", "email", "startDate", "endDate"],
@@ -73,7 +73,7 @@ export class GroupsMetadata {
 
     /**
      * An object with every exposed props merged
-     * (globals + specific + parents globals + specific) for each route context > Operations
+     * (globals + specific + parents globals + specific) for each route scope > Operations
      */
     readonly exposedPropsByContexts: PropsByContextByOperations = {};
 
@@ -114,7 +114,7 @@ export class GroupsMetadata {
             let i = 0;
 
             if (groups[route] === "all") {
-                // Allowing any operation as long as it's in that route context
+                // Allowing any operation as long as it's in that route scope
                 if (!this.localAlways[route]) {
                     this.localAlways[route] = [];
                 }
@@ -150,7 +150,7 @@ export class GroupsMetadata {
      * this.globals = { create: ["email"], details: ["role"] }
      * this.locals = { user: ["name"] };
      * this.routes = { user: { create: ["startDate", "endDate"], list: ["role"] }, category: { details: ["startDate"] } };
-     * // for route context = 'user'
+     * // for route scope = 'user'
      * return {
      *     create: ["id", "email", "name", "startDate", "endDate"],
      *     details: ["id", "role", "name"], list: ["id", "name", "role"]

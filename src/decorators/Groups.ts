@@ -5,9 +5,9 @@ import { EntityGroupsMetadata } from "@/mapping/EntityGroupsMetadata";
 import { PartialRecord } from "@/utils-types";
 
 /**
- * Expose decorated property for each operation for each listed EntityRoute context
+ * Expose decorated property for each operation for each listed EntityRoute scope
  *
- * @param groups An object containing a list of every EntityRoute context
+ * @param groups An object containing a list of every EntityRoute scope
  * @param groups.route Contains an array of Operation in which the decorated property will be exposed
  */
 export function Groups(groups: GroupsDecoratorArg): PropertyDecorator;
@@ -20,9 +20,9 @@ export function Groups(groups: GroupsDecoratorArg): PropertyDecorator;
 export function Groups(operations: GroupsOperationOrShortcuts): PropertyDecorator;
 
 /**
- * Expose decorated computed property (method) for each operation for each listed EntityRoute context
+ * Expose decorated computed property (method) for each operation for each listed EntityRoute scope
  *
- * @param groups  An array containing a list of operation in which the decorated property will be exposed / An object containing a list of every EntityRoute context
+ * @param groups  An array containing a list of operation in which the decorated property will be exposed / An object containing a list of every EntityRoute scope
  * @param groups.route Contains an array of Operation in which the decorated property will be exposed
  * @param alias Override default generated name for this computed property in response
  */
@@ -97,7 +97,7 @@ export type PropsByOperations = PartialRecord<RouteOperation, string[]>;
 
 /**
  * An object containing many routeContext (keys) associated to OperationsGroups (values)
- * A route context key is the tableName of the EntityRoute (/users => user, /pictures => picture).
+ * A route scope key is the tableName of the EntityRoute (/users => user, /pictures => picture).
  */
 export type PropsByContextByOperations = Record<string, PropsByOperations>;
 
