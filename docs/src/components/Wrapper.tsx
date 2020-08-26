@@ -17,6 +17,13 @@ export const Wrapper = ({ children, ...props }) => {
                 {title && <MDXComponents.h1 id={title.toLowerCase()}>{title}</MDXComponents.h1>}
                 {children}
             </Stack>
+            {/* Make table of contents (on the right) scrollable, max height to 100 minus header */}
+            <style jsx global>{`
+                .mainContent + div {
+                    overflow: auto;
+                    max-height: calc(100vh - 62px);
+                }
+            `}</style>
         </DokzWrapper>
     );
 };
