@@ -6,6 +6,7 @@
 .pnp.js
 
 sidebar.json
+docs.json
 
 # testing
 /coverage
