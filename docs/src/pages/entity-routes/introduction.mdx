@@ -30,11 +30,14 @@ export class AbstractEntity {
 }
 ```
 
-And then you would make all your entities `extends` from this one, [just like any other class inheritance with Typescript](https://www.typescriptlang.org/docs/handbook/classes.html). You can learn more about TypeORM table inheritance [here](https://typeorm.io/#/entity-inheritance).
+And then you would make all your entities `extends` from this one,
+[just like any other class inheritance with Typescript](https://www.typescriptlang.org/docs/handbook/classes.html).
+You can learn more about TypeORM table inheritance [here](https://typeorm.io/#/entity-inheritance).
 
-## Register an EntityRoute
+## Create an EntityRouter
 
-The [`@EntityRoute`](/api-reference/globals#entityroute) decorator registers an [**EntityRouter**](/api-reference/classes/entityrouter).
+The [`@EntityRoute`](/api-reference/globals#entityroute) decorator creates an
+[**EntityRouter**](/api-reference/classes/entityrouter) on the decorated [entity](https://typeorm.io/#/entities/what-is-entity).
 
 <DocAlert>
     The name distinction is to avoid any conflict between the service (EntityRouter) and the decorator (EntityRoute).
@@ -54,12 +57,12 @@ export class User extends AbstractEntity {
 
 It takes two arguments, both optional. _[Complete definition here](/api-reference/globals/entityroute)._
 
-[The first argument](/api-reference/globals#entityrouteargs) defines **your routes**.
+The first argument ([EntityRouteArgs](/api-reference/globals#entityrouteargs)) defines **your routes**.
 
 -   a string `path`, which will be the root path for all routes on that entity.
     **Path should start with a "/".**
 -   an array of `operations`, which will enable matching CRUD actions.
-    For example, adding `create` operation will lead to having a POST:/users route in the example above.
+    For example, adding `create` operation will lead to having a `POST:/users` route in the example above.
 
 <DocAlert>
     When no path is specified, it defaults to the entity name. With the example above on User entity, the base path
@@ -80,18 +83,45 @@ It looks like this.
 @EntityRoute({ path: "/users", operations: CRUD_OPERATIONS })
 ```
 
-# Route Mapping
+## Usage
 
-## So what is it ?
+After you have decorated every entities for which you want to create an [**EntityRouter**](/api-reference/classes/entityrouter)
+and exposed their properties (with the [@Groups decorator](/api-reference/globals#groups)),
+you must register your routes on your node application.
 
-The **route mapping** is a description of every properties exposed for a specific `route context`.
+Any implementation of the makeXXXEntityRouters should wrap the [makeEntityRouters](/api-reference/globals#makeentityrouters),
+so the arguments to pass ([MakeEntityRouters](/api-reference/globals#makeentityrouters)) should remain the basically the same :
 
-Let's start by defining what we call a `route context`. It is defined by 2 elements :
+-   connection: [TypeORM Connection](https://typeorm.io/#/connection)
+-   entities: an array of every entities that you decorated with `@EntityRoute` and for which you want its [`EntityRouter`](classses/entityrouter) to be used
+-   options: [EntityRouteOptions](/api-reference/globals#entityrouteoptions), [defaults](/api-reference/globals#const-defaultentityrouteoptions)
+
+```typescript title="Example with a Koa API"
+const app = new Koa();
+const bridgeRouters = await makeKoaEntityRouters({ connection, entities, options });
+bridgeRouters.forEach((router) => app.use(router.instance.routes()));
+```
+
+## Route options
+
+TODO EntityRouter options > route options > components options
+TOOD metadatas
+
+## Route Mapping
+
+### Definition
+
+The **route mapping** is a description of every properties exposed for a specific `route scope`.
+
+A route mapping is auto-generated for every basic operations and accessible by adding "/mapping"
+to the path of the route it describe, the same HTTP verb is used.
+
+Let's start by defining what we call a `route scope`. It is defined by 2 elements :
 
 -   The route main [entity](https://typeorm.io/#/entities/what-is-entity)
 -   An [operation](introduction#operations), for example any of the [C|R|U|D operations](/api-reference/globals#groupsoperation)
 
-Examples (using routes generated from the [Quick start](../getting-started/quick-start)) :
+Examples (using routes generated from the [Quick start example](../getting-started/quick-start)) :
 
 | Verb   | Path                                  | Entity  | Operation |
 | ------ | ------------------------------------- | ------- | --------- |
@@ -110,20 +140,22 @@ Examples (using routes generated from the [Quick start](../getting-started/quick
 
 <DocAlert status="info">
 
-The route main entity for the subresources routes is `Article` and not `User`
+The route main entity for subresources routes is its relation entity, here it is `Article` and not `User`.
 
 </DocAlert>
 <Divider />
 
-With the [TODO docref @Groups] decorator you can expose any property (or method [TODO docref computedmethod]), from any entity in the context of your choice.
+With the [@Groups decorator](/api-reference/globals#groups) you can expose any property (or method [/docref computedmethod]),
+from any entity in the context of your choice.
 
-What that means is that you can for example have a different mapping for the `User` **creation** route and the `User` **update** route. More on that [later](introduction#groups).
+What that means is that you can for example have a different mapping for the `User` **creation** route and the `User` **update** route.
+More on that [later](introduction#groups).
 
 _Of course this also means that you can have differents constraints for each context._
 
 ## Operations
 
-There are two kinds of operations : `RouteOperation` and `GroupsOperation`.
+There are two kinds of operations : [`RouteOperation`](globals#routeoperation) and [`GroupsOperation`](globals#groupsoperation).
 
 ### RouteOperation
 
@@ -137,7 +169,7 @@ type RouteOperation = RouteDefaultOperation | string;
 For basic operations, a RouteOperation defines which [**RouteController**](/api-reference/classes/routecontroller) method will be used for a specific route.
 The basic groups are those that you know well, the [CRUD](/api-reference/globals#groupsoperation) ones.
 
-For [custom actions](/docref), a custom operation (any string) can be used to make your own specific route context.
+For [custom actions](/docref), a custom operation (any string) can be used to make your own specific `route scope`.
 
 ### GroupsOperation
 
@@ -148,33 +180,51 @@ type GroupsOperation = "create" | "list" | "details" | "update" | string;
 type GroupsOperationOrShortcuts = GroupsOperation[] | "all" | "basic";
 ```
 
+### Shortcuts
+
 There are two shortcuts available for @Groups decorator : "all" and "basic".
 
 -   "all" litteraly means no matter which operations, the property decorated will be exposed.
--   "basic" means every basic CRUD operations : `[create, list, details, update]`
+-   "basic" means every basic [`CRUD_OPERATIONS`](globals#const-crud_operations) : `[create, list, details, update]`
 
 <DocAlert status="info">
 
-Each `GroupsOperation` match one from `RouteOperation`, except `delete` since there is no property exposed in a DELETE route response.
+Each [`GroupsOperation`](globals#groupsoperation) match one from [`RouteOperation`](globals#routeoperation), except `delete` since there is no property exposed in a DELETE route response.
 
 </DocAlert>
 
 ## Groups
 
-By using the [@Groups decorator](/api-reference/globals#groups), you can expose the decorated property through one or more `route contexts`.
+By using the [@Groups decorator](/api-reference/globals#groups), you can expose the decorated property through one or more `route scopes`.
 
-TODO DataTable + Collapse on row click ?
+### Definition
 
-<Tabs>
-  <TabList>
-    <Tab>Route/Local comparisons</Tab>
-    <Tab>GroupsMetadata output</Tab>
-  </TabList>
+"Exposed" has different meaning for the `persist` operations (**create/update**) and the `read` operations (**details/list**).
 
-<TabPanels>
-<TabPanel>
+-   For a `read` operation, an exposed property will be returned in a route response.
+-   For a `persist` operation, an exposed property value will be upsertable from a request body.
+-   A custom operation is considered both a `read` and `persist` operation
 
-| Syntax                                                     | Route Context                       | Local Context (User)                     |
+You can expose a property locally (for an entity `route scope`) using an object with entity `route scope` as keys and values as operations :
+
+```typescript
+// The decorated property value will be insertable
+// when creating this entity from the POST:/users route
+// and also returned in GET:/users/:userId
+@Groups({ user: ["create", "details"] })
+```
+
+Or you can expose a property globally (for **any** entity `route scope`) using an array of operations :
+
+```typescript
+@Groups(["create", "details"])
+```
+
+There are also the [shortcuts](introduction#shortcuts) `all` and `basic` that you can use directly, or use as a route scope value.
+
+Below is a summary.
+
+| Groups                                                     | Route Scope                         | Operations for the User route scope      |
 | ---------------------------------------------------------- | ----------------------------------- | ---------------------------------------- |
 | @Groups(["create", "details"])                             | All                                 | ["create", "details"]                    |
 | @Groups({ user: ["create", "details"], article: ["list"]}) | User(C+D)/Article(L)                | ["create", "details"]                    |
@@ -182,33 +232,8 @@ TODO DataTable + Collapse on row click ?
 | @Groups("all")                                             | All                                 | All                                      |
 | @Groups({ user: "all", article: ["list"], role: "basic"})  | User(all)/Article(list)/Role(basic) | All                                      |
 
-</TabPanel>
-<TabPanel>
-<Preview options={[{name: '@Groups(["create", "details"])', json: {
-    "decoratedProps": ["name"],
-    "always": [],
-    "globalOperations": {},
-    "localAlways": {},
-    "routes": {
-        "user": {
-            "create": ["name"],
-            "details": ["name"]
-        },
-        "article": {
-            "list": ["name"]
-        }
-    },
-    "exposedPropsByContexts": {},
-    "deepMergeOptions": {
-        "withUniqueArrayValues": true
-    }
-}}]}>
-
-</Preview>
-
-</TabPanel>
-</TabPanels>
-</Tabs>
+If you need to expose a nested property of a relation (single or collections), you can just add the same group on both the relation entity and the nested property wanted.
+TODO example
 
 ### Examples
 
@@ -218,16 +243,12 @@ Given a `User` entity described here.
 @EntityRoute({ path: "/users", operations: ["create", "update", "details", "list", "delete"] })
 @Entity()
 export class User extends AbstractEntity {
-    @Groups("basic")
-    @Groups(["admin_custom"])
     @Column()
     name: string;
 
-    @Groups({ user: "basic", role: ["details"] })
     @Column()
     birthDate: Date;
 
-    @Groups({ user: ["create", "details"] })
     @Column()
     email: string;
 }
@@ -235,7 +256,7 @@ export class User extends AbstractEntity {
 
 _Code examples below have been shortened with only relevants parts._
 
-Let's say we want to expose the name through basic CRUD operations.
+Let's say we want to expose the user name through basic [`CRUD_OPERATIONS`](globals#const-crud_operations) for any context.
 
 ```typescript {2}
 class User {
@@ -244,22 +265,39 @@ class User {
 }
 ```
 
-But we would also like to expose it on a custom context, using a custom operation _(which is matching a custom route action with the same operation)_.
-All you have to do is to decorate the same property with another @Groups.
+But we would also like to expose it for any `route scope`, on a custom operation _(which is matching a custom route action with the same operation)_.
 
-```typescript {3}
+```typescript {4,10}
+// You could decorate it with another @Groups
 class User {
     @Groups("basic")
     @Groups(["admin_custom"])
     name: string;
 }
+
+// or write all the operations yourself and get the same result
+class User {
+    @Groups(["create", "update", "list", "details", "admin_custom"])
+    name: string;
+}
 ```
 
-## Route
+And finally, we want to expose it precisely on the article context on customList operation.
 
-## Route Context
+```typescript {4,10}
+// You can just decorate it with yet another @Groups, you get the idea.
+class User {
+    @Groups("basic")
+    @Groups(["admin_custom"])
+    @Groups({ article: ["customList"] })
+    name: string;
+}
+```
 
-Every request passing through the `RequestContextMiddleware` will have a custom RequestContext attached to the current request context state.
+## Request Context
+
+Every request passing through the `RequestContextMiddleware` will have a custom
+[RequestContext](/api-reference/globals#requestcontext) attached to the current `request context state`.
 
 ```typescript
 type RequestContext<Entity extends GenericEntity = GenericEntity, QP = QueryParams, State = Record<string, any>> = {
@@ -282,29 +320,130 @@ type RequestContext<Entity extends GenericEntity = GenericEntity, QP = QueryPara
 };
 ```
 
-## Store
+### Store
 
-Requests passing through the `RequestContextMiddleware` will also be stored in the `requestStore` until the request is over, when it will be removed from the store in the `EndResponseMiddleware`.
+Requests passing through the `RequestContextMiddleware` will also be stored in the `requestStore`
+until the request is over, when it will be removed from the store in the `EndResponseMiddleware`.
 
-You can retrieve a request context using the `getRequestContext` method with its key.
+You can retrieve a request context using the [`getRequestContext`](globals#getrequestcontext) method with its key.
 Each context key is made by generating a [uuid (v4)](https://github.com/uuidjs/uuid).
 
 ```typescript
+const requestStore = new Map<string, ContextWithState>();
 const getRequestContext = (key: string) => requestStore.get(key);
-```
 
-```typescript
 type RequestState<Entity extends GenericEntity = GenericEntity> = {
     requestId: string;
     requestContext: RequestContext<Entity>;
     queryRunner: QueryRunner;
 };
 type ContextWithState = Context<any, EntityRouteState>;
-const requestStore = new Map<string, ContextWithState>();
 ```
 
 ## Subresources
 
+It's a way to generate a dedicated endpoint for an entity property.
+
+Let's say you have a `User` entity that owns a collection of `articles`.
+Rather than exposing the `articles` in the `/users` route and have a lot of unnecessary nested data,
+you might want to directly access the article list with only the properties you want for that `route scope`.
+
+By decorating the `articles` property with the [@Subresource decorator](/api-reference/globals#subresource), you generates 3 routes :
+
+-   `GET:/users/:userId/articles`, which will list all articles of the given user
+-   `POST:/users/:userId/articles`, which will allow you to join an article to this user (a new article is inserted if no article id is given !)
+-   `DELETE:/users/:userId/articles/:articleId`, which will allow you to remove the relation between the given user/article
+
+```typescript {7}
+@EntityRoute({ path: "/users", operations: CRUD_OPERATIONS })
+@Entity()
+class User {
+    @Column()
+    name: string;
+
+    @Subresource(() => Article)
+    articles: Article[];
+}
+```
+
+Of course, you can customize your Subresource using [SubresourceOptions](/api-reference/globals#subresourceoptions) as optional second argument.
+
+Subresources are nestable by default, so you could have a `GET:/users/:userId/articles/comments` by making article.comments a subresouce as well.
+
 ## Filters
 
+A very common need for APIs is to filter a list through different conditions.
+There are 2 basic filters built-in, both extending the [`AbstractFilter`](classses/abstractfilter) :
+
+-   [`SearchFilter`](classses/searchfilter), used with the `@Search decorator`, allows you to search using a [`StrategyType`](globals#strategytype)
+-   [`PaginationFilter`](classses/paginationfilter), used with the `@Pagination decorator`, allows you to paginate and order the results
+
+| Filter           | Decorator   | Specific options                                                     | Default options getter           |
+| ---------------- | ----------- | -------------------------------------------------------------------- | -------------------------------- |
+| AbstractFilter   | none        | all/allShallow/allNested                                             | getSearchFilterDefaultConfig     |
+| SearchFilter     | @Search     | defaultWhereStrategy                                                 | getSearchFilterDefaultConfig     |
+| PaginationFilter | @Pagination | defaultOrderBys / defaultOrderDirection / defaultRetrievedItemsLimit | getPaginationFilterDefaultConfig |
+
+With the [`AbstractFilter`](classses/abstractfilter) class (docref), you can quickly define which properties will be filterable.
+To do so, you need to set its options ([`DefaultFilterOptions`](globals#defaultfilteroptions)) accordingly or/and by passing an array of property paths.
+
+```typescript title="You can decorate an entity like this"
+@Search(["firstName", ["role.identifier", "CONTAINS"]], { defaultWhereStrategy: "STARTS_WITH" })
+```
+
+In this example the firstName property will default to `STARTS_WITH` unless it is overriden
+by specifiying another [`StrategyType`](globals#strategytype) (docref) directly in the request.
+
+If neither of them satisfies your need, you can always make your own custom filter by extending the [`AbstractFilter`](classses/abstractfilter) (docref).
+
 ## Hooks
+
+If you need to alter some part of the request handling, there are hooks available.
+These hooks are basic functions receiving different arguments that will help you change or make something happens when called.
+
+> Possible hooks are [before/after][handle/?:(clean/validate/persist)/?:(read/format)/respond]
+
+```typescript
+type HookSchema = Partial<{
+    /**
+     * Called right after the requestContext has been set by the appropriate middleware &
+     * right before the request is handled by the response middleware
+     */
+    beforeHandle: HookFnOnHandle;
+    // Called after the request has been handled
+    afterHandle: HookFnOnHandle;
+
+    // Called right before the response status & body are set
+    beforeRespond: HookFnOnRespond;
+    // Called right after the response status & body are set
+    afterRespond: HookFnOnRespond;
+
+    // Called right before cleaning an entity from database
+    beforeClean: HookFnBeforeClean;
+    // Called right after cleaning an entity from database
+    afterClean: HookFnAfterClean;
+
+    // Called right before the validation of the request body
+    beforeValidate: HookFnBeforeValidate;
+    // Called right after the validation of the request body
+    afterValidate: HookFnAfterValidate;
+
+    // Called right before persisting payload from the request body
+    beforePersist: HookFnBeforePersist;
+    // Called right after persisting payload from the request body
+    afterPersist: HookFnAfterPersist;
+
+    // Called right before reading an item or a collection from database
+    beforeRead: HookFnBeforeRead;
+    // Called right after reading an item or a collection from database
+    afterRead: HookFnAfterRead;
+
+    // Called right before removing (or softDelete entity/unlink subresource) an entity from database
+    beforeRemove: HookFnBeforeRemove;
+    // Called right after removing (or softDelete entity/unlink subresource) an entity from database
+    afterRemove: HookFnAfterRemove;
+}>;
+```
+
+You can pass a [`HookSchema`](globals#hookschema) in the `hooks` key of the options (EntityRouteOptions docref) argument,
+available when making entity routers (using [`makeEntityRouters`](globals#makeentityrouters)) or directly in the `@EntityRouter` (docref).
