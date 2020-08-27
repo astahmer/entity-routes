@@ -34,9 +34,14 @@ export default function App(props) {
                         groups: true,
                         subresources: true,
                         filters: true,
+                        decorators: true,
                         hooks: true,
                         "request-context": true,
+                        middlewares: true,
+                        "response-lifecycle": true,
                     },
+                    internals: true,
+                    compatibility: true,
                     "api-reference": true,
                 }}
                 mdxComponents={{ code: Code, table: Table, wrapper: Wrapper }}
