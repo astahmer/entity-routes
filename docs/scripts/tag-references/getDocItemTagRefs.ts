@@ -1,6 +1,6 @@
 const urlByCategories = {
     Enumeration: "enums/",
-    Class: "classses/",
+    Class: "classes/",
     Interface: "interfaces/",
     "Type alias": "globals#",
     Function: "globals#",
