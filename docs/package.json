@@ -8,7 +8,7 @@
         "start": "next start",
         "docs:clean": "rimraf ./src/pages/api-reference/",
         "docs:api": "typedoc --hideBreadcrumbs --skipSidebar ../src/index.ts",
-        "docs:fix": "node fix-typedoc.js",
+        "docs:fix": "ts-node -T -O '{\"module\":\"commonjs\"}' ./scripts/fixDocs.ts",
         "docs:json": "typedoc --hideBreadcrumbs --skipSidebar --json ./docs.json ../src/index.ts",
         "docs:build": "npm run docs:clean && npm run docs:repo && npm run docs:api && npm run docs:fix"
     },
@@ -35,6 +35,7 @@
         "replace-in-file": "^6.1.0",
         "rimraf": "^3.0.2",
         "shelljs": "^0.8.4",
+        "ts-node": "^9.0.0",
         "typedoc": "^0.17.0-3",
         "typedoc-plugin-markdown": "^2.4.0",
         "typescript": "^3.9.7"
