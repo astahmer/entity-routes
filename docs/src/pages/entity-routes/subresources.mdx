@@ -6,7 +6,7 @@ It's a way to generate a dedicated endpoint for an entity property.
 
 Let's say you have a `User` entity that owns a collection of `articles`.
 Rather than exposing the `articles` in the `/users` route and have a lot of unnecessary nested data,
-you might want to directly access the article list with only the properties you want for that [`route scope`](/route-scope/).
+you might want to directly access the article list with only the properties you want for that [`route scope`](/entity-routes/route-scope).
 
 By decorating the `articles` property with the [@Subresource](/api-reference/globals#subresource) decorator, you generates 3 routes :
 

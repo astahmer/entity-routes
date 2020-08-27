@@ -1,24 +1,26 @@
 ---
-title: Route Mapping
+title: Route Scope
 ---
 
 import { DocAlert } from "@/components";
 
-## Definition
+Let's start by defining what we call a **route scope**.
 
-The **route mapping** is a description of every properties exposed through the `@Groups` decorator for a specific [`route scope`](/route-scope/).
-
-A route mapping endpoint is auto-generated for every basic operations and accessible by adding "/mapping"
-to the path of the route it describe, (the same HTTP verb as the operation it describes is used.)
-
-Let's start by defining what we call a [`route scope`](/route-scope/). It is defined by 2 elements :
+It is a unique combination of 2 elements :
 
 -   The route main [entity](https://typeorm.io/#/entities/what-is-entity)
--   An [operation](introduction#operations), for example any of the [C|R|U|D operations](/api-reference/globals#groupsoperation)
+-   An [operation](/api-reference/introduction#operations), for example any of the [C|R|U|D operations](/api-reference/globals#groupsoperation)
+
+## Inferred Mapping
+
+The **mapping** is a description of every properties exposed through the [`@Groups`](/api-reference/globals#groups) decorator for a specific **route scope**.
+
+A route mapping endpoint is auto-generated for every basic operations and accessible by adding _"/mapping"_
+to the path of the route it describe, the same HTTP verb as the operation it describes is used.
 
 ## Examples
 
-This example is made using routes generated from the [Quick start example](../getting-started/quick-start) :
+These are the routes generated from the [Quick start example](../getting-started/quick-start) :
 
 | Verb   | Path                                  | Entity  | Operation |
 | ------ | ------------------------------------- | ------- | --------- |
@@ -37,7 +39,7 @@ This example is made using routes generated from the [Quick start example](../ge
 
 <DocAlert status="info" mt="20px">
 
-The route main entity for subresources routes is its relation entity, here is `Article` and not `User`.
+The route main entity for subresources routes is its relation entity, here it is `Article` and not `User`.
 
 </DocAlert>
 <Divider />
@@ -48,6 +50,7 @@ With the [@Groups](/api-reference/globals#groups) decorator you can expose any p
 from any entity in the context of your choice.
 
 What that means is that you can for example have a different mapping for the `User` **creation** route and the `User` **update** route.
-More on that [later](introduction#groups).
+More on that [later](/api-reference/introduction#groups).
 
 _Of course this also means that you can have differents constraints for each context._
+TODO Validator docref

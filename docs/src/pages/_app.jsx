@@ -29,7 +29,7 @@ export default function App(props) {
                     "getting-started": true,
                     "entity-routes": {
                         introduction: true,
-                        "route-mapping": true,
+                        "route-scope": true,
                         operations: true,
                         groups: true,
                         subresources: true,

@@ -1,5 +1,7 @@
 const tagsByReferences = {
-    "/route-scope/": ["`route scope`"],
+    "/entity-routes/route-scope/": ["`route scope`", "`route scopes`"],
+    "/entity-routes/operations/": ["**operations**"],
+    "/entity-routes/groups/": ["**groups**"],
     "http://typeorm.io/": ["`TypeORM`"],
     "https://typeorm.io/#/one-to-one-relations": ["`OneToOne`"],
     "https://typeorm.io/#/many-to-one-one-to-many-relations": ["`OneToMany`", "`ManyToOne`"],
