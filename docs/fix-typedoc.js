@@ -5,9 +5,6 @@ const pageDir = "./src/pages";
 const generatedDocsDir = pageDir + "/api-reference";
 
 const tagReferences = require("./tag-references");
-// const tags = Object.keys(tagReferences);
-// const references = Object.values(tagReferences);
-// consola.info(tagReferences, tags, references);
 
 const typeDocs = require("./docs.json");
 const urlByCategories = {
@@ -20,13 +17,6 @@ const urlByCategories = {
     "Object literal": "globals#const-",
 };
 
-// const docsReferences = typeDocs.children.map(({ id, name, kindString }) => ({
-//     id,
-//     name,
-//     kindString,
-//     url: urlByCategories[kindString] + name.toLowerCase(),
-// }));
-
 const shouldBeConstKind = ["Variable", "Object literal"];
 /** Returns false if doc item should not be included as tag ref */
 const validateTagRef = ({ kindString, flags }) =>
@@ -36,8 +26,15 @@ const validateTagRef = ({ kindString, flags }) =>
 const getDocTagRef = ({ name, kindString, flags }) =>
     validateTagRef({ kindString, flags }) && urlByCategories[kindString] + name.toLowerCase();
 
+/** Return reference name unless it's a decorator then prepend a @ */
+const getTagRefName = ({ name, kindString, signatures }) =>
+    kindString === "Function" && signatures?.find((item) => item.type?.name?.endsWith("Decorator")) ? "@" + name : name;
+
 /** Make a tuple of [tag/ref] from a doc item */
-const toTagRef = ({ name, kindString }) => ["`" + name + "`", getDocTagRef({ name, kindString })];
+const toTagRef = ({ name, kindString, signatures }) => [
+    "`" + getTagRefName({ name, kindString, signatures }) + "`",
+    getDocTagRef({ name, kindString }),
+];
 
 /** Filter to return only items with valid ref */
 const withRef = ([tag, ref]) => ref;
@@ -50,12 +47,12 @@ function getDocItemTagRefs(root) {
     );
 }
 
-const docsTagRefs = getDocItemTagRefs(typeDocs);
+const docsTagRefs = Object.fromEntries(getDocItemTagRefs(typeDocs));
 // consola.info(docsTagRefs);
 
 (async function run() {
     // replaceMarkdownLinks();
-    // replaceTagReferences(Object.fromEntries(docsTagRefs));
+    replaceTagReferences(docsTagRefs);
     // replaceTagReferences(tagReferences);
 })();
 
@@ -89,8 +86,10 @@ async function replaceTagReferences(source) {
     const tags = Object.keys(source).map((tag) => new RegExp(tag, "g"));
     // console.dir(tags, { maxArrayLength: 500 });
     // console.log(source);
+    const results = [];
     try {
         const options = {
+            dry: true,
             files,
             ignore,
             from: tags,
@@ -103,20 +102,23 @@ async function replaceTagReferences(source) {
                 if (before === openBracket || after === closeBracket) return tag;
 
                 const result = `[${tag}](${reference})`;
-                console.log({
+                const word = fileContent.substr(position - 1, tag.length + 2);
+
+                results.push({
                     tag,
                     reference,
                     before,
                     after,
                     result,
-                    word: fileContent.substr(position - 1, tag.length + 2),
+                    word,
                     fileName,
                 });
+
                 return tag;
                 return result;
             },
         };
-        const results = await replace(options);
+        await replace(options);
         consola.success("Done replacing references");
         return results;
     } catch (error) {

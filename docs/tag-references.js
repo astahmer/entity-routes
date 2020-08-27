@@ -1,6 +1,5 @@
 const tagsByReferences = {
     "/route-scope/": ["`route scope`"],
-    "/api-reference/globals#subresource": ["`@Subresource decorator`", "route subresource"],
     "http://typeorm.io/": ["TypeORM"],
 };
 
