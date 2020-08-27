@@ -1,5 +1,5 @@
 import { getDocItemTagRefs } from "./tag-references/getDocItemTagRefs";
-import { replaceTagReferences } from "./tag-references/replaceTagsRefs";
+import { replaceTagReferences } from "./tag-references/replaceTagReferences";
 import { replaceMarkdownLinks } from "./replaceMarkdownLinks";
 import customReferences from "./references";
 
@@ -14,8 +14,8 @@ const fromPath = pageDir;
 const ignorePath = generatedDocsDir;
 
 async function run() {
-    // replaceMarkdownLinks({ fromPath: generatedDocsDir});
-    replaceTagReferences({ source: typeDocRefs, fromPath, ignorePath });
+    replaceMarkdownLinks({ fromPath: generatedDocsDir });
+    replaceTagReferences({ source: typeDocRefs, fromPath, ignorePath, prefix: "/api-reference/" });
     replaceTagReferences({ source: customReferences, fromPath, ignorePath });
 }
 

@@ -8,11 +8,13 @@ export async function replaceTagReferences({
     fromPath,
     ignorePath,
     source,
+    prefix = "",
     dry,
 }: {
     fromPath: string;
     ignorePath?: string;
     source: Record<string, string>;
+    prefix?: string;
     dry?: boolean;
 }) {
     const files = fromPath + "/**/*.{md,mdx}";
@@ -38,7 +40,7 @@ export async function replaceTagReferences({
                 // If tag was already processed, skip it
                 if (before === openBracket || after === closeBracket) return tag;
 
-                const result = `[${tag}](${reference})`;
+                const result = `[${tag}](${prefix}${reference})`;
                 const word = fileContent.substr(position - 1, tag.length + 2);
 
                 results.push({
