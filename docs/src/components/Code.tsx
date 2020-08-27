@@ -15,15 +15,16 @@ export type CodeProps = {
 export type CodePropsMetaString = {
     title?: string;
     collapsable?: boolean;
+    hidden?: boolean;
     left?: boolean;
 };
 
 export function Code(props: CodeProps) {
-    const [isOpen, setIsOpened] = useState(true);
-    const toggle = () => setIsOpened(!isOpen);
-
     const metas = extractMeta<CodePropsMetaString>(props.metastring || "");
-    const { title, left, collapsable } = metas;
+    const { title, left, collapsable, hidden } = metas;
+
+    const [isOpen, setIsOpened] = useState(!hidden);
+    const toggle = () => setIsOpened(!isOpen);
 
     return (
         <Box position="relative">
