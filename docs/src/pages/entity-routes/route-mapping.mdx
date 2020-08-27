@@ -1,0 +1,53 @@
+---
+title: Route Mapping
+---
+
+import { DocAlert } from "@/components";
+
+## Definition
+
+The **route mapping** is a description of every properties exposed through the `@Groups` decorator for a specific [`route scope`](/route-scope/).
+
+A route mapping endpoint is auto-generated for every basic operations and accessible by adding "/mapping"
+to the path of the route it describe, (the same HTTP verb as the operation it describes is used.)
+
+Let's start by defining what we call a [`route scope`](/route-scope/). It is defined by 2 elements :
+
+-   The route main [entity](https://typeorm.io/#/entities/what-is-entity)
+-   An [operation](introduction#operations), for example any of the [C|R|U|D operations](/api-reference/globals#groupsoperation)
+
+## Examples
+
+This example is made using routes generated from the [Quick start example](../getting-started/quick-start) :
+
+| Verb   | Path                                  | Entity  | Operation |
+| ------ | ------------------------------------- | ------- | --------- |
+| POST   | /users                                | User    | create    |
+| POST   | /users/mapping                        | User    | create    |
+| PUT    | /users/:id(\d+)                       | User    | update    |
+| PUT    | /users/:id(\d+)/mapping               | User    | update    |
+| GET    | /users/:id(\d+)                       | User    | get       |
+| GET    | /users/:id(\d+)/mapping               | User    | get       |
+| GET    | /users                                | User    | list      |
+| GET    | /users/mapping                        | User    | list      |
+| DELETE | /users/:id(\d+)                       | User    | delete    |
+| POST   | /users/:UserId(\d+)/articles          | Article | create    |
+| GET    | /users/:UserId(\d+)/articles          | Article | list      |
+| DELETE | /users/:UserId(\d+)/articles/:id(\d+) | Article | delete    |
+
+<DocAlert status="info" mt="20px">
+
+The route main entity for subresources routes is its relation entity, here is `Article` and not `User`.
+
+</DocAlert>
+<Divider />
+
+## Exposing properties
+
+With the [@Groups](/api-reference/globals#groups) decorator you can expose any property (or method [/docref computedmethod]),
+from any entity in the context of your choice.
+
+What that means is that you can for example have a different mapping for the `User` **creation** route and the `User` **update** route.
+More on that [later](introduction#groups).
+
+_Of course this also means that you can have differents constraints for each context._

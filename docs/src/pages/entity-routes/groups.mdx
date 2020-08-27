@@ -1,0 +1,156 @@
+---
+title: Groups
+---
+
+By using the [@Groups](/api-reference/globals#groups) decorator, you can expose the decorated property through one or more `route scopes`.
+
+That also means that by default, there will be no properties exposed for your entities.
+This allows you to have optimized queries by specifiying precisely which properties and relations are selected from the database.
+
+## Definition
+
+"Exposed" has different meaning for the `persist` operations (**create/update**) and the `read` operations (**details/list**).
+
+-   For a `read` operation, an exposed property will be returned in a route response.
+-   For a `persist` operation, an exposed property value will be upsertable from a request body.
+-   A custom operation is considered both a `read` and `persist` operation
+
+You can expose a property locally (for an entity [`route scope`](/route-scope/)) using an object with entity [`route scope`](/route-scope/) as keys and values as operations :
+
+```typescript
+// The decorated property value will be insertable
+// when creating this entity from the POST:/users route
+// and also returned in GET:/users/:userId
+@Groups({ user: ["create", "details"] })
+```
+
+Or you can expose a property globally (for **any** entity [`route scope`](/route-scope/)) using an array of operations :
+
+```typescript
+@Groups(["create", "details"])
+```
+
+There are also the [shortcuts](introduction#shortcuts) `all` and `basic` that you can use directly, or use as a route scope value.
+
+Below is a summary.
+
+| Groups                                                     | Route Scope                         | Operations for the User route scope      |
+| ---------------------------------------------------------- | ----------------------------------- | ---------------------------------------- |
+| @Groups(["create", "details"])                             | All                                 | ["create", "details"]                    |
+| @Groups({ user: ["create", "details"], article: ["list"]}) | User(C+D)/Article(L)                | ["create", "details"]                    |
+| @Groups("basic")                                           | All                                 | ["create", "update", "details", "list",] |
+| @Groups("all")                                             | All                                 | All                                      |
+| @Groups({ user: "all", article: ["list"], role: "basic"})  | User(all)/Article(list)/Role(basic) | All                                      |
+
+If you need to expose a nested property of a relation (single or collections), you can just add the same group on both the relation entity and the nested property wanted.
+
+## Examples
+
+_Code examples below have been shortened with only relevants parts._
+
+### Basic operations
+
+Given a `User` entity described here.
+
+```typescript
+@EntityRoute({ path: "/users", operations: ["create", "update", "details", "list", "delete"] })
+@Entity()
+export class User extends AbstractEntity {
+    @Column()
+    name: string;
+
+    @Column()
+    birthDate: Date;
+
+    @Column()
+    email: string;
+}
+```
+
+Let's say we want to expose the user name through basic [`CRUD_OPERATIONS`](globals#const-crud_operations) for any context.
+
+```typescript {2}
+class User {
+    @Groups("basic")
+    name: string;
+}
+```
+
+But we would also like to expose it for any [`route scope`](/route-scope/), on a custom operation _(which is matching a custom route action with the same operation)_.
+
+```typescript {4,10}
+// You could decorate it with another @Groups
+class User {
+    @Groups("basic")
+    @Groups(["admin_custom"])
+    name: string;
+}
+
+// or write all the operations yourself and get the same result
+class User {
+    @Groups(["create", "update", "list", "details", "admin_custom"])
+    name: string;
+}
+```
+
+And finally, we want to expose it precisely on the article context on customList operation.
+
+```typescript {4,10}
+// You can just decorate it with yet another @Groups, you get the idea.
+class User {
+    @Groups("basic")
+    @Groups(["admin_custom"])
+    @Groups({ article: ["customList"] })
+    name: string;
+}
+```
+
+### Nested property
+
+Given a `User` entity described here.
+
+```typescript
+@EntityRoute({ path: "/users", operations: ["create", "update", "details", "list", "delete"] })
+@Entity()
+export class User extends AbstractEntity {
+    @Column()
+    name: string;
+
+    @ManyToOne(() => Role)
+    role: Role;
+}
+```
+
+And a `Role` entity described here.
+
+```typescript
+@EntityRoute()
+@Entity()
+export class Role extends AbstractEntity {
+    @Column()
+    title: string;
+}
+```
+
+To expose a nested property, you need to decorate with `@Groups` both the relation and the property with the same operation.
+
+For this example, let's expose the user's role.title property for the details route (`GET:/user/xxx route`).
+
+```typescript
+class User extends AbstractEntity {
+    @Groups({ user: ["details"] })
+    @ManyToOne(() => Role)
+    role: Role;
+}
+```
+
+```typescript
+class Role extends AbstractEntity {
+    @Groups({ user: ["details"] })
+    @Column()
+    title: string;
+}
+```
+
+That's it ! The user details route will contain a role object with a title property inside.
+This works the exact same way with a property that is a collection ([`OneToMany`](https://typeorm.io/#/many-to-one-one-to-many-relations)/[`ManyToMany`](https://typeorm.io/#/many-to-many-relations)) instead of a single relation ([`OneToOne`](https://typeorm.io/#/one-to-one-relations)/[`ManyToOne`](https://typeorm.io/#/many-to-one-one-to-many-relations)).

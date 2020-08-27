@@ -25,9 +25,19 @@ export default function App(props) {
                 branch="main"
                 initialColorMode="dark"
                 sidebarOrdering={{
-                    "index.md": false,
+                    "index.md": true,
                     "getting-started": true,
-                    "entity-routes": true,
+                    "entity-routes": {
+                        introduction: true,
+                        "route-mapping": true,
+                        operations: true,
+                        groups: true,
+                        subresources: true,
+                        filters: true,
+                        hooks: true,
+                        "request-context": true,
+                    },
+                    "api-reference": true,
                 }}
                 mdxComponents={{ code: Code, table: Table, wrapper: Wrapper }}
             >

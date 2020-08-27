@@ -1,0 +1,27 @@
+---
+title: Filters
+---
+
+A very common need for APIs is to filter a list through different conditions.
+There are 2 basic filters built-in, both extending the [`AbstractFilter`](classses/abstractfilter) :
+
+-   [`SearchFilter`](classses/searchfilter), used with the `@Search decorator`, allows you to search using a [`StrategyType`](globals#strategytype)
+-   [`PaginationFilter`](classses/paginationfilter), used with the `@Pagination decorator`, allows you to paginate and order the results
+
+| Filter           | Decorator   | Specific options                                                     | Default options getter           |
+| ---------------- | ----------- | -------------------------------------------------------------------- | -------------------------------- |
+| AbstractFilter   | none        | all/allShallow/allNested                                             | getSearchFilterDefaultConfig     |
+| SearchFilter     | @Search     | defaultWhereStrategy                                                 | getSearchFilterDefaultConfig     |
+| PaginationFilter | @Pagination | defaultOrderBys / defaultOrderDirection / defaultRetrievedItemsLimit | getPaginationFilterDefaultConfig |
+
+With the [`AbstractFilter`](classses/abstractfilter) class (docref), you can quickly define which properties will be filterable.
+To do so, you need to set its options ([`DefaultFilterOptions`](globals#defaultfilteroptions)) accordingly or/and by passing an array of property paths.
+
+```typescript title="You can decorate an entity like this"
+@Search(["firstName", ["role.identifier", "CONTAINS"]], { defaultWhereStrategy: "STARTS_WITH" })
+```
+
+In this example the firstName property will default to `STARTS_WITH` unless it is overriden
+by specifiying another [`StrategyType`](globals#strategytype) (docref) directly in the request.
+
+If neither of them satisfies your need, you can always make your own custom filter by extending the [`AbstractFilter`](classses/abstractfilter) (docref).

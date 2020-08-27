@@ -1,0 +1,43 @@
+---
+title: Operations
+---
+
+import { DocAlert } from "@/components";
+
+There are two kinds of operations : [`RouteOperation`](globals#routeoperation) and [`GroupsOperation`](globals#groupsoperation).
+
+## RouteOperation
+
+```typescript
+// Used by @EntityRoute decorator
+// they defines which routes are availables
+type RouteDefaultOperation = "create" | "list" | "details" | "update" | "delete";
+type RouteOperation = RouteDefaultOperation | string;
+```
+
+For basic operations, a RouteOperation defines which [**RouteController**](/api-reference/classes/routecontroller) method will be used for a specific route.
+The basic groups are those that you know well, the [CRUD](/api-reference/globals#groupsoperation) ones.
+
+For [custom actions](/docref), a custom operation (any string) can be used to make your own specific [`route scope`](/route-scope/).
+
+## GroupsOperation
+
+```typescript
+// Used by @Groups decorator
+// they define in which context a property is exposed
+type GroupsOperation = "create" | "list" | "details" | "update" | string;
+type GroupsOperationOrShortcuts = GroupsOperation[] | "all" | "basic";
+```
+
+## Shortcuts
+
+There are two shortcuts available for @Groups decorator : "all" and "basic".
+
+-   "all" litteraly means no matter which operations, the property decorated will be exposed.
+-   "basic" means every basic [`CRUD_OPERATIONS`](globals#const-crud_operations) : `[create, list, details, update]`
+
+<DocAlert status="info">
+
+Each [`GroupsOperation`](globals#groupsoperation) match one from [`RouteOperation`](globals#routeoperation), except `delete` since there is no property exposed in a DELETE route response.
+
+</DocAlert>
