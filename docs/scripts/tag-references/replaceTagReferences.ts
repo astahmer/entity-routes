@@ -20,8 +20,7 @@ export async function replaceTagReferences({
     const files = fromPath + "/**/*.{md,mdx}";
     const ignore = ignorePath + "/**";
 
-    consola.info(`Starting to replace tag references in handwritten files in: ${files}`);
-    consola.info(`Ignoring files in: ${ignore}`);
+    consola.info(`Replacing tag references in handwritten files in: ${files}`);
 
     const tags = Object.keys(source).map((tag) => new RegExp(tag, "g"));
     const results = [];
@@ -57,7 +56,6 @@ export async function replaceTagReferences({
             },
         };
         await replace(options);
-        console.log(results);
         consola.success(`Done replacing ${results.length} references`);
         return results;
     } catch (error) {

@@ -21,7 +21,7 @@ export default function App(props) {
                     <GithubLink key="0" url="https://github.com/astahmer/entity-routes" />,
                     <ColorModeSwitch key="1" />,
                 ]}
-                githubUrl="astahmer/entity-routes-web"
+                githubUrl="astahmer/entity-routes/docs"
                 branch="main"
                 initialColorMode="dark"
                 sidebarOrdering={{
@@ -42,7 +42,7 @@ export default function App(props) {
                     },
                     internals: true,
                     compatibility: true,
-                    "api-reference": true,
+                    definitions: true,
                 }}
                 mdxComponents={{ code: Code, table: Table, wrapper: Wrapper }}
             >

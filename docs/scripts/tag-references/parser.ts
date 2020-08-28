@@ -32,7 +32,7 @@ const withRef = ([tag, ref]) => ref;
 
 /** Recursively get tag ref from item & item.children  */
 export function getDocItemTagRefs(root) {
-    return root.children.reduce(
+    return (root?.children || []).reduce(
         (acc, item) => acc.concat([toTagRef(item)].filter(withRef), item.children ? getDocItemTagRefs(item) : []),
         []
     );

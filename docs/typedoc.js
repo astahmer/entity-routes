@@ -1,9 +1,13 @@
 const pkg = require("./package.json");
-const destDir = pkg.scripts["docs:clean"].split("rimraf ")[1];
+const destDir = pkg.directories.typedoc;
 
 module.exports = {
     mode: "library",
     theme: "docusaurus2",
     tsconfig: "../tsconfig.json",
     out: destDir,
+    readme: "none",
+    hideBreadcrumbs: false,
+    skipSidebar: true,
+    json: "./docs.json",
 };

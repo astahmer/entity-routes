@@ -29,4 +29,6 @@ yarn-debug.log*
 yarn-error.log*
 
 # Generated docs
-/src/pages/api-reference
+/src/pages/definitions
+
+.vercel

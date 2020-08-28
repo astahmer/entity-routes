@@ -2,15 +2,20 @@
     "name": "entity-route-web",
     "version": "0.0.1",
     "private": true,
+    "directories": {
+        "typedoc": "./src/pages/definitions",
+        "typedocEntrypoint": "../src/index.ts",
+        "docFix": "./scripts/fixDocs.ts"
+    },
     "scripts": {
         "dev": "next dev",
         "build": "next build",
         "start": "next start",
-        "docs:clean": "rimraf ./src/pages/api-reference/",
-        "docs:api": "typedoc --hideBreadcrumbs --skipSidebar ../src/index.ts",
-        "docs:fix": "ts-node -T -O '{\"module\":\"commonjs\"}' ./scripts/fixDocs.ts",
-        "docs:json": "typedoc --hideBreadcrumbs --skipSidebar --json ./docs.json ../src/index.ts",
-        "docs:build": "npm run docs:clean && npm run docs:repo && npm run docs:api && npm run docs:fix"
+        "docs:clean": "rimraf $npm_package_directories_typedoc",
+        "docs:make": "typedoc $npm_package_directories_typedocEntrypoint",
+        "docs:fix": "ts-node -T -O '{\"module\":\"commonjs\"}' $npm_package_directories_docFix",
+        "docs:build": "npm run docs:clean && npm run docs:make && npm run docs:fix",
+        "deploy": "npm run docs:build && vercel"
     },
     "dependencies": {
         "@chakra-ui/core": "0.x",
