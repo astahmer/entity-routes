@@ -141,4 +141,46 @@ describe("EntityRouter", () => {
         server.close();
         return closeTestConnection();
     });
+
+    it("can add inherited global middlewares before/after requestContext middleware", async () => {
+        let count = 0;
+        const increment = () => count++;
+        const state: ObjectLiteral = {};
+
+        const beforeMw = async (ctx: Context, next: Function) => {
+            ctx.state.increment = increment;
+            state[count] = ctx.state.requestContext; // should be undefined
+            return next();
+        };
+        const afterMw = async (ctx: Context, next: Function) => {
+            ctx.state.increment();
+            state[count] = ctx.state.requestContext; // should be defined
+            return next();
+        };
+
+        @EntityRoute({ operations: ["list"] })
+        @Entity()
+        class User {
+            @PrimaryGeneratedColumn()
+            id: string;
+
+            @Column()
+            username: string;
+        }
+
+        const entities = [User];
+        const { server, client } = await setupKoaApp(entities, {
+            beforeCtxMiddlewares: [beforeMw],
+            afterCtxMiddlewares: [afterMw],
+        });
+
+        await client.get("/user");
+
+        expect(state[0]).toBeUndefined();
+        expect(state[1]).toHaveProperty("ctx");
+        expect(count).toEqual(1);
+
+        server.close();
+        return closeTestConnection();
+    });
 });

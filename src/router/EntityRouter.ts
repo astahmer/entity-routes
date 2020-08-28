@@ -167,16 +167,8 @@ export type EntityRouterFactoryOptions<T extends AnyFunction = any> = {
 };
 
 export type EntityRouteActionConfig = Omit<RouteActionConfig, "middlewares"> &
-    Pick<EntityRouteBaseOptions, "beforeCtxMiddlewares" | "afterCtxMiddlewares"> &
+    Pick<EntityRouteOptions, "beforeCtxMiddlewares" | "afterCtxMiddlewares"> &
     (RouteActionClassOptions | RouteActionFunctionOptions);
-export type EntityRouteBaseOptions = {
-    /** Custom actions using current EntityRouter prefix/instance */
-    actions?: EntityRouteActionConfig[];
-    /** Middlewares to be pushed before requestContext middleware */
-    beforeCtxMiddlewares?: Function[];
-    /** Middlewares to be pushed after requestContext middleware */
-    afterCtxMiddlewares?: Function[];
-};
 
 export type EntityRouteOptions = {
     /** Is max depth enabled by default on all entities for any request context for this router */
@@ -199,7 +191,14 @@ export type EntityRouteOptions = {
     withDeleted?: boolean;
     /** Hook schema of custom functions to be run at specific operations in a request processing */
     hooks?: HookSchema;
+    /** Middlewares to be pushed before requestContext middleware */
+    beforeCtxMiddlewares?: Function[];
+    /** Middlewares to be pushed after requestContext middleware */
+    afterCtxMiddlewares?: Function[];
 };
-export type EntityRouteConfig = EntityRouteBaseOptions & EntityRouteOptions;
+export type EntityRouteConfig = {
+    /** Custom actions using current EntityRouter prefix/instance */
+    actions?: EntityRouteActionConfig[];
+} & EntityRouteOptions;
 
 export type EntityRouterOptions = EntityRouterFactoryOptions & EntityRouteConfig;
