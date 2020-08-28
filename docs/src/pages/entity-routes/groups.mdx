@@ -2,7 +2,7 @@
 title: Groups
 ---
 
-By using the [@Groups](/api-reference/globals#groups) decorator, you can expose the decorated property through one or more `route scopes`.
+By using the [@Groups](/definitions#groups) decorator, you can expose the decorated property through one or more [`route scopes`](/entity-routes/route-scope/).
 
 That also means that by default, there will be no properties exposed for your entities.
 This allows you to have optimized queries by specifiying precisely which properties and relations are selected from the database.
@@ -30,7 +30,7 @@ Or you can expose a property globally (for **any** entity [`route scope`](/entit
 @Groups(["create", "details"])
 ```
 
-There are also the [shortcuts](/api-reference/introduction#shortcuts) `all` and `basic` that you can use directly, or use as a route scope value.
+There are also the [shortcuts](operations#shortcuts) `all` and `basic` that you can use directly, or use as a route scope value.
 
 Below is a summary.
 
@@ -67,7 +67,7 @@ export class User extends AbstractEntity {
 }
 ```
 
-Let's say we want to expose the user name through basic [`CRUD_OPERATIONS`](/api-reference/globals#const-crud_operations) for any context.
+Let's say we want to expose the user name through basic [`CRUD_OPERATIONS`](/definitions#const-crud_operations) for any context.
 
 ```typescript {2}
 class User {
@@ -132,7 +132,7 @@ export class Role extends AbstractEntity {
 }
 ```
 
-To expose a nested property, you need to decorate with [`@Groups`](/api-reference/globals#groups) both the relation and the property with the same operation.
+To expose a nested property, you need to decorate with [`@Groups`](/definitions#groups) both the relation and the property with the same operation.
 
 For this example, let's expose the user's role.title property for the details route (`GET:/user/xxx route`).
 

@@ -5,7 +5,7 @@ title: Request Context
 ## Request Context
 
 Every request passing through the `RequestContextMiddleware` will have a custom
-[RequestContext](/api-reference/globals#requestcontext) attached to the current `request context state`.
+[RequestContext](/definitions#requestcontext) attached to the current `request context state`.
 
 ```typescript
 type RequestContext<Entity extends GenericEntity = GenericEntity, QP = QueryParams, State = Record<string, any>> = {
@@ -33,7 +33,7 @@ type RequestContext<Entity extends GenericEntity = GenericEntity, QP = QueryPara
 Requests passing through the `RequestContextMiddleware` will also be stored in the `requestStore`
 until the request is over, when it will be removed from the store in the `EndResponseMiddleware`.
 
-You can retrieve a request context using the [`getRequestContext`](/api-reference/globals#getrequestcontext) method with its key.
+You can retrieve a request context using the [`getRequestContext`](/definitions#getrequestcontext) method with its key.
 Each context key is made by generating a [uuid (v4)](https://github.com/uuidjs/uuid).
 
 ```typescript

@@ -4,9 +4,9 @@ title: Introduction
 
 import { DocAlert } from "@/components";
 
-An entity for `entity-router` is nothing more than a TypeORM entity. We only expects you to implement the [`GenericEntity`](/api-reference/interfaces/genericentity) interface on every entities used.
+An entity for `entity-router` is nothing more than a TypeORM entity. We only expects you to implement the [`GenericEntity`](/definitions/interfaces/genericentity) interface on every entities used.
 
-Please refer to the `TypeORM` documentation about how to make [entities](https://typeorm.io/#/entities).
+Please refer to the [`TypeORM`](http://typeorm.io/) documentation about how to make [entities](https://typeorm.io/#/entities).
 
 ## Creating your entities
 
@@ -39,8 +39,8 @@ You can learn more about TypeORM table inheritance [here](https://typeorm.io/#/e
 
 ## Creating an EntityRouter
 
-The [`@EntityRoute`](/api-reference/globals#entityroute) decorator creates an
-[`EntityRouter`](/api-reference/classes/entityrouter) on the decorated [entity](https://typeorm.io/#/entities/what-is-entity).
+The [`@EntityRoute`](/definitions#entityroute) decorator creates an
+[`EntityRouter`](/definitions/classes/entityrouter) on the decorated [entity](https://typeorm.io/#/entities/what-is-entity).
 
 <DocAlert>
     The name distinction is to avoid any conflict between the service (EntityRouter) and the decorator (EntityRoute).
@@ -58,9 +58,9 @@ export class User extends AbstractEntity {
 }
 ```
 
-It takes two arguments, both optional. _[Complete definition here](/api-reference/globals/entityroute)._
+It takes two arguments, both optional. _[Complete definition here](/definitions#entityroute)._
 
-The first argument ([EntityRouteArgs](/api-reference/globals#entityrouteargs)) defines **your routes**.
+The first argument ([EntityRouteArgs](/definitions#entityrouteargs)) defines **your routes**.
 
 -   a string `path`, which will be the root path for all routes on that entity.
     **Path should start with a "/".**
@@ -72,14 +72,14 @@ The first argument ([EntityRouteArgs](/api-reference/globals#entityrouteargs)) d
     would be equal to "/user"
 </DocAlert>
 
-The second argument ([EntityRouteConfig](/api-reference/globals#entityrouteconfig)) defines the options passed to every routes on that entity.
+The second argument ([EntityRouteConfig](/definitions#entityrouteconfig)) defines the options passed to every routes on that entity.
 
 <DocAlert>
     When no args are passed, the EntityRoute is registered to be used by others as a Subresource but generates no routes
     for its own entity.
 </DocAlert>
 
-If you don't wan't to write all operations everytime you just need to import & use [CRUD_OPERATIONS](/api-reference/globals#const-crud_operations).
+If you don't wan't to write all operations everytime you just need to import & use [CRUD_OPERATIONS](/definitions#const-crud_operations).
 It looks like this.
 
 ```typescript
@@ -88,16 +88,16 @@ It looks like this.
 
 ## Usage
 
-After you have decorated every entities for which you want to create an [**EntityRouter**](/api-reference/classes/entityrouter)
-and exposed their properties (with the [@Groups](/api-reference/globals#groups) decorator),
+After you have decorated every entities for which you want to create an [**EntityRouter**](/definitions/classes/entityrouter)
+and exposed their properties (with the [@Groups](/definitions#groups) decorator),
 you must register your routes on your node application.
 
-Any implementation of the makeXXXEntityRouters should wrap the [makeEntityRouters](/api-reference/globals#makeentityrouters),
-so the arguments to pass ([MakeEntityRouters](/api-reference/globals#makeentityrouters)) should remain the basically the same :
+Any implementation of the makeXXXEntityRouters should wrap the [makeEntityRouters](/definitions#makeentityrouters),
+so the arguments to pass ([MakeEntityRouters](/definitions#makeentityrouters)) should remain the basically the same :
 
 -   connection: [TypeORM Connection](https://typeorm.io/#/connection)
--   entities: an array of every entities that you decorated with [`@EntityRoute`](/api-reference/globals#entityroute) and for which you want its [`EntityRouter`](/api-reference/classes/entityrouter) to be used
--   options: [EntityRouteOptions](/api-reference/globals#entityrouteoptions), [defaults](/api-reference/globals#const-defaultentityrouteoptions)
+-   entities: an array of every entities that you decorated with [`@EntityRoute`](/definitions#entityroute) and for which you want its [`EntityRouter`](/definitions/classes/entityrouter) to be used
+-   options: [EntityRouteOptions](/definitions#entityrouteoptions), [defaults](/definitions#const-defaultentityrouteoptions)
 
 ```typescript title="Example with a Koa API"
 const app = new Koa();
@@ -134,10 +134,10 @@ type EntityRouteOptions = {
 };
 ```
 
-There are multiple stages where you can set an [`EntityRouteOptions`](/api-reference/globals#entityrouteoptions).
+There are multiple stages where you can set an [`EntityRouteOptions`](/definitions#entityrouteoptions).
 
-1. You can set global options for your `entity-routes` by passing them to [`makeEntityRouters`](/api-reference/globals#makeentityrouters) (or an implentation of it such as [`makeExpressEntityRouters`](/api-reference/globals#makeexpressentityrouters)) options key.
-2. You can then override the global options by passing a custom options object to the [`@EntityRoute`](/api-reference/globals#entityroute) decorator as 2nd argument.
-3. If you directly use a component's (such as [`RouteController`](/api-reference/classes/routecontroller), [`Reader`](/api-reference/classes/reader) or any other) method you can also pass just the options that are needed locally
+1. You can set global options for your `entity-routes` by passing them to [`makeEntityRouters`](/definitions#makeentityrouters) (or an implentation of it such as [`makeExpressEntityRouters`](/definitions#makeexpressentityrouters)) options key.
+2. You can then override the global options by passing a custom options object to the [`@EntityRoute`](/definitions#entityroute) decorator as 2nd argument.
+3. If you directly use a component's (such as [`RouteController`](/definitions/classes/routecontroller), [`Reader`](/definitions/classes/reader) or any other) method you can also pass just the options that are needed locally
 
-You can retrieve the [`RouteMetadata`](/api-reference/globals#routemetadata) registered by an [`@EntityRoute`](/api-reference/globals#entityroute) decorator by using the [`getRouteMetadata`](/api-reference/globals#getroutemetadata) function.
+You can retrieve the [`RouteMetadata`](/definitions#routemetadata) registered by an [`@EntityRoute`](/definitions#entityroute) decorator by using the [`getRouteMetadata`](/definitions#getroutemetadata) function.
