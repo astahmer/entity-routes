@@ -14,11 +14,14 @@ const typeDocRefs = Object.fromEntries(getDocItemTagRefs(typeDocsReflections));
 const fromPath = pageDir;
 const ignorePath = generatedDocsDir;
 
+const args = process.argv.slice(2);
+const dry = args[0] === "--dry";
+
 async function run() {
     return Promise.all([
         replaceTypedocLinks({ fromPath: generatedDocsDir, prefix }),
-        replaceTagReferences({ source: typeDocRefs, fromPath, ignorePath, prefix: prefix + "/" }),
-        replaceTagReferences({ source: references, fromPath, ignorePath }),
+        replaceTagReferences({ name: "Typedoc", source: typeDocRefs, fromPath, ignorePath, prefix: prefix + "/", dry }),
+        replaceTagReferences({ name: "handwritten files", source: references, fromPath, ignorePath, dry }),
     ]);
 }
 

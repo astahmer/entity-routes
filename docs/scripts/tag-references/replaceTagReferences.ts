@@ -9,18 +9,20 @@ export async function replaceTagReferences({
     ignorePath,
     source,
     prefix = "",
+    name,
     dry,
 }: {
     fromPath: string;
     ignorePath?: string;
     source: Record<string, string>;
     prefix?: string;
+    name: string;
     dry?: boolean;
 }) {
     const files = fromPath + "/**/*.{md,mdx}";
     const ignore = ignorePath + "/**";
 
-    consola.info(`Replacing tag references in handwritten files in: ${files}`);
+    consola.info(`Replacing tag references in ${name} in: ${files}`);
 
     const tags = Object.keys(source).map((tag) => new RegExp(tag, "g"));
     const results = [];
@@ -56,9 +58,10 @@ export async function replaceTagReferences({
             },
         };
         await replace(options);
-        consola.success(`Done replacing ${results.length} references`);
+        dry && console.log(results);
+        consola.success(`Done replacing ${results.length} ${name} references`);
         return results;
     } catch (error) {
-        consola.error("Error while replacing references", error);
+        consola.error(`Error while replacing ${name} references`, error);
     }
 }
