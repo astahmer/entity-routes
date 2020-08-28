@@ -11,8 +11,9 @@ export async function replaceMarkdownLinks({ fromPath }) {
             from: [/\.md/g, `"<>"`],
             to: ["", `"<\\>"`],
         };
-        await replace(options);
-        consola.success("Done replacing links");
+        const results = await replace(options);
+        const changedResults = results.filter((item) => item.hasChanged);
+        consola.success(`Done replacing ${changedResults.length} links`);
     } catch (error) {
         consola.error("Error while replacing links", error);
     }
