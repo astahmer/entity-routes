@@ -2,10 +2,10 @@ const urlByCategories = {
     Enumeration: "enums/",
     Class: "classes/",
     Interface: "interfaces/",
-    "Type alias": "globals#",
-    Function: "globals#",
-    Variable: "globals#const-",
-    "Object literal": "globals#const-",
+    "Type alias": "definitions#",
+    Function: "definitions#",
+    Variable: "definitions#const-",
+    "Object literal": "definitions#const-",
 };
 
 const shouldBeConstKind = ["Variable", "Object literal"];
