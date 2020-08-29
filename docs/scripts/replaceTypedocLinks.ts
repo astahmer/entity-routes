@@ -4,6 +4,7 @@ const replace = require("replace-in-file");
 const consola = require("consola");
 
 const externalLinkRegex = /\[\w+\]\(\w+\/\w+\)/g;
+const indexLinkRegex = /\[\w+\]\((..\/)?index#(\w+|-)+\)/g;
 
 export async function replaceTypedocLinks({ fromPath, prefix }) {
     consola.info("Fixing typedoc links");
@@ -32,6 +33,12 @@ export async function replaceTypedocLinks({ fromPath, prefix }) {
             files: fromPath + "/index.md",
             from: externalLinkRegex,
             to: (match) => match.slice(0, match.indexOf("(")) + `(${prefix}/` + match.slice(match.indexOf("(") + 1),
+        });
+        // Replace index# to /definitions# from links
+        await replace({
+            files: fromPath + "/index.md",
+            from: indexLinkRegex,
+            to: (match) => match.replace("index#", `${prefix}#`),
         });
         // Remove breadcrumb & h2 from /definitions/index
         await replace({
