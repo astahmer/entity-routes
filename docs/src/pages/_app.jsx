@@ -16,6 +16,11 @@ export default function App(props) {
                 />
             </Head>
             <DokzProvider
+                headerLogo={
+                    <Link href="/">
+                        <img src="/logo-full.png" style={{ opacity: 0.8 }} width="200px" />
+                    </Link>
+                }
                 headerItems={[
                     <Link href="/">Docs</Link>,
                     <GithubLink key="0" url="https://github.com/astahmer/entity-routes" />,
@@ -35,10 +40,10 @@ export default function App(props) {
                         subresources: true,
                         filters: true,
                         decorators: true,
-                        hooks: true,
                         "request-context": true,
                         middlewares: true,
-                        "response-lifecycle": true,
+                        hooks: true,
+                        "request-lifecycle": true,
                     },
                     internals: true,
                     compatibility: true,
