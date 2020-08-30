@@ -18,11 +18,16 @@ const args = process.argv.slice(2);
 const dry = args[0] === "--dry";
 
 async function run() {
-    return Promise.all([
-        replaceTypedocLinks({ fromPath: generatedDocsDir, prefix }),
-        replaceTagReferences({ name: "Typedoc", source: typeDocRefs, fromPath, ignorePath, prefix: prefix + "/", dry }),
-        replaceTagReferences({ name: "handwritten files", source: references, fromPath, ignorePath, dry }),
-    ]);
+    await replaceTypedocLinks({ fromPath: generatedDocsDir, prefix });
+    await replaceTagReferences({
+        name: "Typedoc Definitions",
+        source: typeDocRefs,
+        fromPath,
+        ignorePath,
+        prefix: prefix + "/",
+        dry,
+    });
+    await replaceTagReferences({ name: "custom", source: references, fromPath, ignorePath, dry });
 }
 
 export default run();
