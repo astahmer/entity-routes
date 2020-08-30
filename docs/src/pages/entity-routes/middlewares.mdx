@@ -2,4 +2,81 @@
 title: Middlewares
 ---
 
-TODO
+import { DocAlert } from "@/components";
+import { Tabs, TabList, TabPanels, Tab, TabPanel } from "@chakra-ui/core";
+
+Middlewares are functions that process the request, chained one by one, which make them very easy to re-use. Using
+middlewares you can handle authentication, logging, permissions, etc.
+
+A middleware has access to the [`req`](https://nodejs.org/api/http.html#http_class_http_clientrequest) and the
+[`res`](https://nodejs.org/api/http.html#http_class_http_serverresponse) objects from the
+[Node http module](https://nodejs.org/api/http.html). If using `afterCtxMiddlewares`, you also get access to the route
+[`RequestContext`](/definitions/definitions#requestcontext).
+
+<DocAlert status="info">
+
+Learn more about them from [Koa's documentation](https://github.com/koajs/koa) or from
+[Express's documentation](https://expressjs.com/en/guide/using-middleware.html)
+
+</DocAlert>
+
+## Usage
+
+You can add middlewares to an [`EntityRouter`](/definitions/classes/entityrouter) by passing them in the
+[`EntityRouteOptions`](/definitions/definitions#entityrouteoptions), which means that you can both register a local
+middleware for a specific [`EntityRouter`](/definitions/classes/entityrouter) or register global middlewares by passing
+them to the [`makeEntityRouters`](/definitions/definitions#makeentityrouters).
+
+The implementation itself of a middleware will depend of the [`maker`](/entity-routes/introduction#maker/) used.
+
+-   If you use Koa, you can use the [`makeKoaEntityRouters`](/definitions/definitions#makekoaentityrouters)
+    [`maker`](/entity-routes/introduction#maker/).
+-   If you use Express or a compatible API (Next, Nuxt, etc.), you can use the
+    [`makeExpressEntityRouters`](/definitions/definitions#makeexpressentityrouters)
+    [`maker`](/entity-routes/introduction#maker/).
+
+A basic middleware looks like this :
+
+<Tabs>
+  <TabList>
+    <Tab>Koa</Tab>
+    <Tab>Express</Tab>
+  </TabList>
+
+  <TabPanels>
+    <TabPanel>
+
+```typescript title="Example taken from https://koajs.com/"
+const logMw = async (ctx, next) => {
+    const start = Date.now();
+    await next();
+    const ms = Date.now() - start;
+    ctx.set("X-Response-Time", `${ms}ms`);
+};
+```
+
+</TabPanel>
+    <TabPanel>
+
+```typescript title="Example taken from https://expressjs.com/fr/guide/using-middleware.html"
+const timeMw = function (req, res, next) {
+    console.log("Time:", Date.now());
+    next();
+};
+```
+
+</TabPanel>
+
+  </TabPanels>
+</Tabs>
+
+## Differences with [**hooks**](/entity-routes/hooks/)
+
+If you want to intervene at some point of the request handling (and potentially alter part), you might want to check
+[**hooks**](hooks) rather than using middlewares.
+
+They differ from middlewares since they do not receive the context/req/res arguments but rather just the relevant parts
+of what they are dedicated to.
+
+Middlewares are more powerful, they can for example end the request handling and send a response, whereas
+[**hooks**](/entity-routes/hooks/) can at most alter their part.

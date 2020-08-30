@@ -2,20 +2,25 @@
 title: Groups
 ---
 
-By using the [@Groups](/definitions#groups) decorator, you can expose the decorated property through one or more [`route scopes`](/entity-routes/route-scope/).
+By using the [@Groups](/definitions#groups) decorator, you can expose the decorated property through one or more
+[`route scopes`](/entity-routes/route-scope/).
 
-That also means that by default, there will be no properties exposed for your entities.
-This allows you to have optimized queries by specifiying precisely which properties and relations are selected from the database.
+That also means that by default, there will be no properties exposed for your entities. This allows you to have
+optimized queries by specifiying precisely which properties and relations are selected from the database.
 
 ## Definition
 
-"Exposed" has different meaning for the `persist` operations (**create/update**) and the `read` operations (**details/list**).
+"Exposed" has different meaning for the `persist` [**operations**](/entity-routes/operations/) (_create/update_) and the
+`read` [**operations**](/entity-routes/operations/) (_details/list_).
 
--   For a `read` operation, an exposed property will be returned in a route response.
--   For a `persist` operation, an exposed property value will be upsertable from a request body.
--   A custom operation is considered both a `read` and `persist` operation
+-   For a `read` [**operation**](/entity-routes/operations/), an exposed property will be returned in a route response.
+-   For a `persist` [**operation**](/entity-routes/operations/), an exposed property value will be upsertable from a
+    request body.
+-   A custom [**operation**](/entity-routes/operations/) is considered both a `read` and `persist`
+    [**operation**](/entity-routes/operations/)
 
-You can expose a property locally (for an entity [`route scope`](/entity-routes/route-scope) using an object with entity [`route scope`](/entity-routes/route-scope) as keys and values as operations :
+You can expose a property locally (for an entity [`route scope`](/entity-routes/route-scope) using an object with entity
+[`route scope`](/entity-routes/route-scope) as keys and values as [**operations**](/entity-routes/operations/) :
 
 ```typescript
 // The decorated property value will be insertable
@@ -24,13 +29,15 @@ You can expose a property locally (for an entity [`route scope`](/entity-routes/
 @Groups({ user: ["create", "details"] })
 ```
 
-Or you can expose a property globally (for **any** entity [`route scope`](/entity-routes/route-scope) using an array of operations :
+Or you can expose a property globally (for **any** entity [`route scope`](/entity-routes/route-scope) using an array of
+[**operations**](/entity-routes/operations/) :
 
 ```typescript
 @Groups(["create", "details"])
 ```
 
-There are also the [shortcuts](operations#shortcuts) `all` and `basic` that you can use directly, or use as a route scope value.
+There are also the [shortcuts](operations#shortcuts) `all` and `basic` that you can use directly, or use as a route
+scope value.
 
 Below is a summary.
 
@@ -42,13 +49,14 @@ Below is a summary.
 | @Groups("all")                                             | All                                 | All                                      |
 | @Groups({ user: "all", article: ["list"], role: "basic"})  | User(all)/Article(list)/Role(basic) | All                                      |
 
-If you need to expose a nested property of a relation (single or collections), you can just add the same group on both the relation entity and the nested property wanted.
+If you need to expose a nested property of a relation (single or collections), you can just add the same group on both
+the relation entity and the nested property wanted.
 
 ## Examples
 
 _Code examples below have been shortened with only relevants parts._
 
-### Basic operations
+### Basic [**operations**](/entity-routes/operations/)
 
 Given a `User` entity described here.
 
@@ -67,7 +75,8 @@ export class User extends AbstractEntity {
 }
 ```
 
-Let's say we want to expose the user name through basic [`CRUD_OPERATIONS`](/definitions#const-crud_operations) for any context.
+Let's say we want to expose the user name through basic [`CRUD_OPERATIONS`](/definitions#const-crud_operations) for any
+context.
 
 ```typescript {2}
 class User {
@@ -76,7 +85,9 @@ class User {
 }
 ```
 
-But we would also like to expose it for any [`route scope`](/entity-routes/route-scope), on a custom operation _(which is matching a custom route action with the same operation)_.
+But we would also like to expose it for any [`route scope`](/entity-routes/route-scope), on a custom
+[**operation**](/entity-routes/operations/) _(which is matching a custom route action with the same
+[**operation**](/entity-routes/operations/))_.
 
 ```typescript {4,10}
 // You could decorate it with another @Groups
@@ -93,7 +104,8 @@ class User {
 }
 ```
 
-And finally, we want to expose it precisely on the article context on customList operation.
+And finally, we want to expose it precisely on the article context on customList
+[**operation**](/entity-routes/operations/).
 
 ```typescript {4,10}
 // You can just decorate it with yet another @Groups, you get the idea.
@@ -132,7 +144,8 @@ export class Role extends AbstractEntity {
 }
 ```
 
-To expose a nested property, you need to decorate with [`@Groups`](/definitions#groups) both the relation and the property with the same operation.
+To expose a nested property, you need to decorate with [`@Groups`](/definitions#groups) both the relation and the
+property with the same [**operation**](/entity-routes/operations/).
 
 For this example, let's expose the user's role.title property for the details route (`GET:/user/xxx route`).
 
@@ -152,5 +165,8 @@ class Role extends AbstractEntity {
 }
 ```
 
-That's it ! The user details route will contain a role object with a title property inside.
-This works the exact same way with a property that is a collection ([`OneToMany`](https://typeorm.io/#/many-to-one-one-to-many-relations)/[`ManyToMany`](https://typeorm.io/#/many-to-many-relations)) instead of a single relation ([`OneToOne`](https://typeorm.io/#/one-to-one-relations)/[`ManyToOne`](https://typeorm.io/#/many-to-one-one-to-many-relations)).
+That's it ! The user details route will contain a role object with a title property inside. This works the exact same
+way with a property that is a collection
+([`OneToMany`](https://typeorm.io/#/many-to-one-one-to-many-relations)/[`ManyToMany`](https://typeorm.io/#/many-to-many-relations))
+instead of a single relation
+([`OneToOne`](https://typeorm.io/#/one-to-one-relations)/[`ManyToOne`](https://typeorm.io/#/many-to-one-one-to-many-relations)).

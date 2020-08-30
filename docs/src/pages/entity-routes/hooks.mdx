@@ -2,8 +2,8 @@
 title: Hooks
 ---
 
-If you need to alter some part of the request handling, there are hooks available.
-These hooks are basic functions receiving different arguments that will help you change or make something happens when called.
+If you need to alter some part of the request handling, there are hooks available. These hooks are basic functions
+receiving arguments that will help you change or make something happens when called.
 
 > Possible hooks are [before/after][handle/?:(clean/validate/persist)/?:(read/format)/respond]
 
@@ -49,5 +49,7 @@ type HookSchema = Partial<{
 }>;
 ```
 
-You can pass a [`HookSchema`](/definitions#hookschema) in the `hooks` key of the options (EntityRouteOptions docref) argument,
-available when making entity routers (using [`makeEntityRouters`](/definitions#makeentityrouters)) or directly in the `@EntityRouter` (docref).
+You can pass a [`HookSchema`](/definitions#hookschema) in the `hooks` key of the options
+([`EntityRouteOptions`](/definitions/definitions#entityrouteoptions)) argument, available when making entity routers
+(using [`makeEntityRouters`](/definitions#makeentityrouters)) or directly in the
+[`@EntityRoute`](/definitions/definitions#entityroute).

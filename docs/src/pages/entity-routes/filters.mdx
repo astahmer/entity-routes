@@ -2,11 +2,13 @@
 title: Filters
 ---
 
-A very common need for APIs is to filter a list through different conditions.
-There are 2 basic filters built-in, both extending the [`AbstractFilter`](/definitions/classes/abstractfilter) :
+A very common need for APIs is to filter a list through different conditions. There are 2 basic filters built-in, both
+extending the [`AbstractFilter`](/definitions/classes/abstractfilter) :
 
--   [`SearchFilter`](/definitions/classes/searchfilter), used with the `@Search decorator`, allows you to search using a [`StrategyType`](/definitions#strategytype)
--   [`PaginationFilter`](/definitions/classes/paginationfilter), used with the `@Pagination decorator`, allows you to paginate and order the results
+-   [`SearchFilter`](/definitions/classes/searchfilter), used with the `@Search decorator`, allows you to search using a
+    [`StrategyType`](/definitions#strategytype)
+-   [`PaginationFilter`](/definitions/classes/paginationfilter), used with the `@Pagination decorator`, allows you to
+    paginate and order the results
 
 | Filter           | Decorator   | Specific options                                                     | Default options getter           |
 | ---------------- | ----------- | -------------------------------------------------------------------- | -------------------------------- |
@@ -14,14 +16,18 @@ There are 2 basic filters built-in, both extending the [`AbstractFilter`](/defin
 | SearchFilter     | @Search     | defaultWhereStrategy                                                 | getSearchFilterDefaultConfig     |
 | PaginationFilter | @Pagination | defaultOrderBys / defaultOrderDirection / defaultRetrievedItemsLimit | getPaginationFilterDefaultConfig |
 
-With the [`AbstractFilter`](/definitions/classes/abstractfilter) class (docref), you can quickly define which properties will be filterable.
-To do so, you need to set its options ([`DefaultFilterOptions`](/definitions#defaultfilteroptions)) accordingly or/and by passing an array of property paths.
+With the [`AbstractFilter`](/definitions/classes/abstractfilter) class, you can quickly define which properties will be
+filterable. To do so, you need to set its options ([`DefaultFilterOptions`](/definitions#defaultfilteroptions))
+accordingly or/and by passing an array of property paths.
 
 ```typescript title="You can decorate an entity like this"
 @Search(["firstName", ["role.identifier", "CONTAINS"]], { defaultWhereStrategy: "STARTS_WITH" })
 ```
 
-In this example the firstName property will default to `STARTS_WITH` unless it is overriden
-by specifiying another [`StrategyType`](/definitions#strategytype) (docref) directly in the request.
+In this example the firstName property will default to `STARTS_WITH` unless it is overriden by specifiying another
+[`StrategyType`](/definitions#strategytype) directly in the request.
 
-If neither of them satisfies your need, you can always make your own custom filter by extending the [`AbstractFilter`](/definitions/classes/abstractfilter) (docref).
+If neither of them satisfies your need, you can always make your own custom filter by extending the
+[`AbstractFilter`](/definitions/classes/abstractfilter).
+
+TODO StrategyType

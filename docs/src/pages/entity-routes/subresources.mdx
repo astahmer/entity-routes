@@ -2,19 +2,26 @@
 title: Subresources
 ---
 
+import { DocAlert } from "@/components";
+
 It's a way to generate a dedicated endpoint for an entity property.
 
-Let's say you have a `User` entity that owns a collection of `articles`.
-Rather than exposing the `articles` in the `/users` route and have a lot of unnecessary nested data,
-you might want to directly access the article list with only the properties you want for that [`route scope`](/entity-routes/route-scope).
+Let's say you have a `User` entity that owns a collection of `articles`. Rather than exposing the `articles` in the
+`/users` route and have a lot of unnecessary nested data, you might want to directly access the `article` list with only
+the properties you want for that [`route scope`](/entity-routes/route-scope).
 
-By decorating the `articles` property with the [@Subresource](/definitions#subresource) decorator, you generates 3 routes :
+By decorating the `articles` property with the [@Subresource](/definitions#subresource) decorator, you generates 3
+routes :
 
--   `GET:/users/:userId/articles`, which will list all articles of the given user
--   `POST:/users/:userId/articles`, which will allow you to join an article to this user (a new article is inserted if no article id is given !)
--   `DELETE:/users/:userId/articles/:articleId`, which will allow you to remove the relation between the given user/article
+-   `GET:/users/:userId/articles`, which will list all `articles` of the given `user`
+-   `POST:/users/:userId/articles`, which will allow you to join an `article` to this `user` (a new `article` is
+    inserted if no `article`.id is given !)
+-   `DELETE:/users/:userId/articles/:articleId`, which will allow you to remove the relation between the given
+    `user`/`article`
 
-```typescript {7}
+Let's implement that :
+
+```typescript {7,11}
 @EntityRoute({ path: "/users", operations: CRUD_OPERATIONS })
 @Entity()
 class User {
@@ -24,8 +31,102 @@ class User {
     @Subresource(() => Article)
     articles: Article[];
 }
+
+@EntityRoute()
+@Entity()
+class Article {
+    @Column()
+    name: string;
+
+    @Subresource(() => Article)
+    articles: Article[];
+}
 ```
 
-Of course, you can customize your Subresource using [SubresourceOptions](/definitions#subresourceoptions) as optional second argument.
+<DocAlert status="warning">
 
-Subresources are nestable by default, so you could have a `GET:/users/:userId/articles/comments` by making article.comments a subresouce as well.
+For an entity to be used as a Subresource, it **must have an [`EntityRouter`](/definitions/classes/entityrouter)**
+registered. And if you don't want to generates CRUD routes, you can just provide no arguments to
+[`@EntityRoute`](/definitions/definitions#entityroute) just like the example above.
+
+</DocAlert>
+
+Of course, you can customize your Subresource using [SubresourceOptions](/definitions#subresourceoptions) as optional
+second argument.
+
+| Option key    | Type                                                                    | Default                                   | Description                                                    |
+| ------------- | ----------------------------------------------------------------------- | ----------------------------------------- | -------------------------------------------------------------- |
+| operations    | [`SubresourceOperation`](/definitions/definitions#subresourceoperation) | `["create", "list", "details", "delete"]` | Defines which routes should be generated for this subresource  |
+| maxDepth      | number                                                                  | undefined                                 | Restrict the depth of subresources nesting allow from this one |
+| canHaveNested | boolean                                                                 | true                                      | Allow this subresource to have nested child subresources       |
+| canBeNested   | boolean                                                                 | true                                      | Allow this subresource to be used as a child subresource       |
+
+<DocAlert status="info">
+
+-   By just specifying "create" as [`SubresourceOperation`](/definitions/definitions#subresourceoperation), only the
+    `POST:/users/:userId/articles` would be generated.
+-   A single relation should use the `details` [`SubresourceOperation`](/definitions/definitions#subresourceoperation)
+    whereas a collection should use the `list` [`SubresourceOperation`](/definitions/definitions#subresourceoperation).
+
+</DocAlert>
+
+## Nesting
+
+Subresources are nestable by default, so you could have a `GET:/users/:userId/articles/comments` by making
+article.comments a subresouce as well. And if you're crazy enough, nothing stops you from nesting further with a
+`GET:/users/:userId/articles/comments/upvotes`, etc.
+
+<DocAlert status="info">
+
+The [`defaultEntityRouteOptions`](/definitions/definitions#const-defaultentityrouteoptions) (passed to the
+[`makers`](/entity-routes/introduction#maker/)) has a `defaultSubresourceMaxDepthLvl: 2`.
+
+</DocAlert>
+
+You can control the max depth.
+
+## Single relation subresouce
+
+The example above and most use-cases of subresources will be for collection relation
+([`OneToMany`](https://typeorm.io/#/many-to-one-one-to-many-relations)/[`ManyToMany`](https://typeorm.io/#/many-to-many-relations)).
+But sometimes you might want a single relation
+([`OneToOne`](https://typeorm.io/#/one-to-one-relations)/[`ManyToOne`](https://typeorm.io/#/many-to-one-one-to-many-relations))
+to be a subresouce.
+
+There is actually no difference in usage between single/collection subresouces but here's an example for the sake of it.
+
+Let's say you have a `User` entity that is linked with a `config` relation. Rather than exposing the `config` in the
+`/users` route and have a lot of unnecessary nested data, you might want to directly access the config with only the
+properties you want for that [`route scope`](/entity-routes/route-scope).
+
+By decorating the `config` property with the [@Subresource](/definitions#subresource) decorator, you generates 3 routes
+:
+
+-   `GET:/users/:userId/config`, which will show you the `config` of the given `user`
+-   `POST:/users/:userId/config`, which will allow you to join a `config` to this `user` (a new `config` is inserted if
+    no `config`.id is given !)
+-   `DELETE:/users/:userId/config`, which will allow you to remove the relation between the given `user`/`config`
+
+## Subresources formating in response
+
+With the [`EntityRouteOptions`](/definitions/definitions#entityrouteoptions) key `shouldSetSubresourcesIriOnItem`, the
+corresponding subresources IRI are added for each items having subresources (without exposing them through
+[`@Groups`](/definitions/definitions#groups)).
+
+<DocAlert status="info">
+
+The [`defaultEntityRouteOptions`](/definitions/definitions#const-defaultentityrouteoptions) (passed to the
+[`makers`](/entity-routes/introduction#maker/)) has a `shouldSetSubresourcesIriOnItem: true`.
+
+</DocAlert>
+
+Here's how that would look like : TODO
+
+And that's what would happen if you exposed properties from that subresouce relation (with
+[`@Groups`](/definitions/definitions#groups)): TODO
+
+TODO IRI doc TODO standard response doc ?
+
+## Metadata
+
+getRouteSubresourcesMetadata

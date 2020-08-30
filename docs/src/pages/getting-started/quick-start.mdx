@@ -2,15 +2,18 @@
 title: Quick start
 ---
 
+import { DocAlert } from "@/components";
 import { Tabs, TabList, TabPanels, Tab, TabPanel } from "@chakra-ui/core";
 
 ## Make your entities
 
-You're just going to have to create your TypeORM entities just like you always did.
-Then there are 2 @ decorators that are specific to entity-routes :
+You're just going to have to create your TypeORM entities just like you always did. Then there are 2 @ decorators that
+are specific to entity-routes :
 
--   **@EntityRoute** which is a class decorator, must be placed at the top of it so that your entities can be exposed through an EntityRouter.
--   **@Groups** which is a property decorator, must be placed at the top of every properties you want to expose through your routes, more details on it later
+-   **@EntityRoute** which is a class decorator, must be placed at the top of it so that your entities can be exposed
+    through an EntityRouter.
+-   **@Groups** which is a property decorator, must be placed at the top of every properties you want to expose through
+    your routes, more details on it later
 
 Here is a simple example.
 
@@ -137,3 +140,11 @@ export async function setupExpressApp(connection: Connection) {
 That's it. There is no final step. Your routes are ready.
 
 [Move on to learn more about entity-routes.](/entity-routes/introduction)
+
+<DocAlert status="success">
+
+While browsing the documentation, if you feel like an example is missing, feel free to check the
+[`tests`](https://github.com/astahmer/entity-routes/tree/main/tests) folder to see the actual usage of the feature you
+were reading about.
+
+</DocAlert>

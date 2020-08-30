@@ -6,7 +6,8 @@ title: Installation
 npm i @astahmer/entity-routes typeorm reflect-metadata
 ```
 
-Since this library depends on Typescript [Decorators](https://www.typescriptlang.org/docs/handbook/decorators.html), just like [Typeorm](https://typeorm.io/), we need to enable Typescript decorators
+Since this library depends on Typescript [Decorators](https://www.typescriptlang.org/docs/handbook/decorators.html),
+just like [Typeorm](https://typeorm.io/), we need to enable Typescript decorators
 
 ```json title=./tsconfig.json
 {

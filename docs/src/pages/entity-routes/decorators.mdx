@@ -2,4 +2,21 @@
 title: Decorators
 ---
 
-TODO
+Using decorators is a very clear way to describe your entities an can be used in many means. For example : how
+properties are exposed, validated, which have dedicated endpoints, etc.
+
+Although we heavily rely on the use of decorators with `entity-routes`, there are only 8 built-in decorators right now,
+and you should mostly just use the first three here :
+
+| Definition                                             | Kind                                | Description-                                                                                                                                                                                                                     | Learn more                   |
+| ------------------------------------------------------ | ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------- |
+| [`@EntityRoute`](/definitions/definitions#entityroute) | ClassDecorator                      | Register an [`EntityRouter`](/definitions/classes/entityrouter) for the decorated `@Entity`.                                                                                                                                     | [Introduction](introduction) |
+| [`@Groups`](/definitions/definitions#groups)           | PropertyDecorator / MethodDecorator | Expose a property/method through a [`route scope`](/entity-routes/route-scope/).                                                                                                                                                 | [Groups](groups)             |
+| [`@Subresource`](/definitions/definitions#subresource) | PropertyDecorator                   | Generates a dedicated endpoint (with auto database joins) for a property.                                                                                                                                                        | [Subresources](subresources) |
+| [`@DependsOn`](/definitions/definitions#dependson)     | MethodDecorator                     | Allows to list dependencies (others entity properties) needed for that method to run properly.                                                                                                                                   | TODO                         |
+| [`@MaxDepth`](/definitions/definitions#maxdepth)       | ClassDecorator / PropertyDecorator  | Sets a max depth on the decorated property or every properties of the decorated entity.                                                                                                                                          | TODO                         |
+| [`@Search`](/definitions/definitions#search)           | ClassDecorator                      | Register the [`SearchFilter`](/definitions/classes/searchfilter) for the decorated entity.                                                                                                                                       | TODO                         |
+| [`@Pagination`](/definitions/definitions#pagination)   | ClassDecorator                      | Allow ordering a property.                                                                                                                                                                                                       | TODO                         |
+| [`@OrderBy`](/definitions/definitions#orderby)         | PropertyDecorator                   | Register a property for [`PaginationFilter`](/definitions/classes/paginationfilter) & allow specifiying default [`OrderDirection`](/definitions/definitions#orderdirection) & which nested property should be used for ordering. | TODO                         |
+
+TODO maxdepth
