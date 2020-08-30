@@ -15,7 +15,7 @@ function inverseReferences(refs: CustomDocRef): Record<string, string> {
     return Object.entries(refs).reduce(
         (acc, [url, tags]) => ({
             ...acc,
-            ...tags.reduce((tagsAcc, string) => ({ ...tagsAcc, [escapeRegex(string)]: url }), {}),
+            ...tags.reduce((tagsAcc, string) => ({ ...tagsAcc, [string]: url }), {}),
         }),
         {}
     );

@@ -1,3 +1,5 @@
+import { escapeRegex } from "../helpers";
+
 const replace = require("replace-in-file");
 const consola = require("consola");
 
@@ -22,9 +24,9 @@ export async function replaceTagReferences({
     const files = fromPath + "/**/*.{md,mdx}";
     const ignore = ignorePath + "/**";
 
-    consola.info(`Replacing tag references in ${name} in: ${files}`);
+    consola.info(`Replacing ${name} tag references in: ${files}`);
 
-    const tags = Object.keys(source).map((tag) => new RegExp(tag, "g"));
+    const tags = Object.keys(source).map((tag) => new RegExp(escapeRegex(tag), "g"));
     const results = [];
 
     try {
@@ -33,7 +35,7 @@ export async function replaceTagReferences({
             files,
             ignore,
             from: tags,
-            to: (tag, position, fileContent, fileName) => {
+            to: (tag: string, position: number, fileContent: string, fileName: string) => {
                 const before = fileContent[position - 1];
                 const after = fileContent[position + tag.length];
 
@@ -44,7 +46,7 @@ export async function replaceTagReferences({
                 const result = `[${tag}](${prefix}${reference})`;
                 const word = fileContent.substr(position - 1, tag.length + 2);
 
-                results.push({
+                const entry = {
                     tag,
                     reference,
                     before,
@@ -52,7 +54,9 @@ export async function replaceTagReferences({
                     result,
                     word,
                     fileName,
-                });
+                };
+
+                results.push(entry);
 
                 return result;
             },
