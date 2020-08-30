@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.5](https://github.com/astahmer/entity-routes/compare/v0.1.4...v0.1.5) (2020-08-30)
+
+
+### Features
+
+* **docs:** init with dokz ([59f7a22](https://github.com/astahmer/entity-routes/commit/59f7a220e825691fd6c5184df867983b626ef257))
+* **EntityRouter:** allow having global before/after middlewares ([239a754](https://github.com/astahmer/entity-routes/commit/239a7540dc9bbdf1951fed066711bc5a91488c38))
+
+
+### Bug Fixes
+
+* typings ([545b7ff](https://github.com/astahmer/entity-routes/commit/545b7ff58c0a0414641fab5d0beae1a12be3fcfc))
+* wording ([7b6b61d](https://github.com/astahmer/entity-routes/commit/7b6b61d522815a3c99449db638e117b993a326ce))
+
 ### [0.1.4](https://github.com/astahmer/entity-routes/compare/v0.1.3...v0.1.4) (2020-08-02)
 
 
