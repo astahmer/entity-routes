@@ -24,7 +24,7 @@
         "@emotion/core": "^10.0.28",
         "@emotion/styled": "^10.0.27",
         "dokz": "^1.0.70",
-        "next": "latest",
+        "next": "^9.5.3",
         "parse-numeric-range": "^1.2.0",
         "react": "^16.13.1",
         "react-dom": "16.13.1",
