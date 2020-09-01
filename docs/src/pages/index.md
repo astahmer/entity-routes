@@ -3,7 +3,9 @@ name: Features
 withoutTitle: true
 ---
 
-![Logo](/logo-full.png)
+import { Logo } from '@/components/Logo.tsx'
+
+<Logo />
 
 `entity-routes` enables you to design your API around your [TypeORM](https://github.com/typeorm/typeorm/) `entities` in
 minutes. It is compatible with [**Express**](https://expressjs.com/)/[**Koa**](https://koajs.com/) or any connect-like
