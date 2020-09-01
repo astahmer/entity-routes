@@ -73,7 +73,7 @@ export const DokzCode = ({ children, className, isOpen, preProps, ...rest }) => 
     const isMinimal = lineCount <= 5;
 
     return (
-        <Box position="relative" mt={isMinimal && "20px"}>
+        <Box position="relative" mb={isMinimal && "10px"}>
             <Highlight {...defaultProps} theme={prismTheme[colorMode]} code={code} language={language}>
                 {({ className, style, tokens, getLineProps, getTokenProps }) => (
                     <Collapse
@@ -97,7 +97,8 @@ export const DokzCode = ({ children, className, isOpen, preProps, ...rest }) => 
                             alignItems="center"
                             className="dokz hiddenInPrint"
                             position="absolute"
-                            top={!isMinimal ? "8px" : "-20px"}
+                            top={!isMinimal && "8px"}
+                            bottom={isMinimal && "-20px"}
                             right="10px"
                         >
                             <Box opacity={0.6} fontSize="0.9em">
