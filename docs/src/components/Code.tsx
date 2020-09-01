@@ -1,6 +1,6 @@
 import { useDokzConfig } from "dokz";
 import { ReactNode, useState } from "react";
-import { Box, Collapse, Switch, Flex, Text, useColorMode, useClipboard, BoxProps } from "@chakra-ui/core";
+import { Box, Collapse, Switch, Flex, Text, useColorMode, useClipboard, BoxProps, Stack } from "@chakra-ui/core";
 import { CopyButton } from "dokz/dist/components/Code";
 import Highlight, { defaultProps } from "prism-react-renderer";
 import rangeParser from "parse-numeric-range";
@@ -69,13 +69,15 @@ export const DokzCode = ({ children, className, isOpen, preProps, ...rest }) => 
     const { onCopy, hasCopied } = useClipboard(code);
 
     const shouldHighlightLine = calculateLinesToHighlight(rest.metastring);
+    const lineCount = code.split("\n").length;
+    const isMinimal = lineCount <= 5;
 
     return (
-        <Box position="relative">
+        <Box position="relative" mt={isMinimal && "20px"}>
             <Highlight {...defaultProps} theme={prismTheme[colorMode]} code={code} language={language}>
                 {({ className, style, tokens, getLineProps, getTokenProps }) => (
                     <Collapse
-                        p="25px"
+                        p={!isMinimal ? "25px" : "10px"}
                         // pt='30px'
                         borderRadius="8px"
                         as="pre"
@@ -89,24 +91,20 @@ export const DokzCode = ({ children, className, isOpen, preProps, ...rest }) => 
                         isOpen={isOpen}
                         startingHeight={100}
                     >
-                        <Box
+                        <Stack
+                            spacing={2}
+                            direction="row"
+                            alignItems="center"
                             className="dokz hiddenInPrint"
-                            opacity={0.6}
-                            fontSize="0.9em"
                             position="absolute"
-                            right="40px"
-                            top="8px"
-                        >
-                            {language}
-                        </Box>
-                        <CopyButton
-                            className="dokz hiddenInPrint"
-                            onClick={onCopy}
-                            hasCopied={hasCopied}
-                            position="absolute"
-                            top="10px"
+                            top={!isMinimal ? "8px" : "-20px"}
                             right="10px"
-                        />
+                        >
+                            <Box opacity={0.6} fontSize="0.9em">
+                                {language}
+                            </Box>
+                            <CopyButton onClick={onCopy} hasCopied={hasCopied} />
+                        </Stack>
                         {tokens.map((line, i) => (
                             <Box
                                 key={i}
@@ -118,9 +116,9 @@ export const DokzCode = ({ children, className, isOpen, preProps, ...rest }) => 
                                     display="inline-block"
                                     // position='absolute'
                                     textAlign="right"
-                                    minW="40px"
+                                    minW={!isMinimal ? "40px" : "20px"}
                                     opacity={0.4}
-                                    pr="30px"
+                                    pr={!isMinimal ? "30px" : "15px"}
                                 >
                                     {i + 1}
                                 </Box>
