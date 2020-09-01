@@ -1,5 +1,6 @@
 ---
 name: Features
+withoutTitle: true
 ---
 
 ![Logo](/logo-full.png)
