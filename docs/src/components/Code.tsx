@@ -17,13 +17,14 @@ export type CodePropsMetaString = {
     bottomLeft?: string;
     bottomRight?: string;
     collapsable?: boolean;
+    minimal?: boolean;
     hidden?: boolean;
     left?: boolean;
 };
 
 export function Code(props: CodeProps) {
     const metas = extractMeta<CodePropsMetaString>(props.metastring || "");
-    const { title, bottomLeft, bottomRight, collapsable, hidden } = metas;
+    const { title, bottomLeft, bottomRight, collapsable, hidden, minimal } = metas;
 
     const hasBottomTxt = bottomLeft || bottomRight;
 
@@ -98,14 +99,15 @@ export const DokzCode = ({ children, className, isOpen, preProps, ...rest }) => 
 
     const shouldHighlightLine = calculateLinesToHighlight(rest.metastring);
     const lineCount = code.split("\n").length;
-    const isMinimal = lineCount <= 5;
+    const isShort = lineCount <= 5;
+    const isMinimal = language === "json" || rest.minimal;
 
     return (
-        <Box position="relative" mb={isMinimal && "10px"}>
+        <Box position="relative" mb={isShort && "10px"}>
             <Highlight {...defaultProps} theme={prismTheme[colorMode]} code={code} language={language}>
                 {({ className, style, tokens, getLineProps, getTokenProps }) => (
                     <Collapse
-                        p={!isMinimal ? "25px" : "10px"}
+                        p={!isShort && !isMinimal ? "25px" : "10px"}
                         // pt='30px'
                         borderRadius="8px"
                         as="pre"
@@ -125,8 +127,8 @@ export const DokzCode = ({ children, className, isOpen, preProps, ...rest }) => 
                             alignItems="center"
                             className="dokz hiddenInPrint"
                             position="absolute"
-                            top={!isMinimal && "8px"}
-                            bottom={isMinimal && "-20px"}
+                            top={!isShort && "8px"}
+                            bottom={isShort && "-20px"}
                             right="10px"
                         >
                             <Box opacity={0.6} fontSize="0.9em">
@@ -145,9 +147,9 @@ export const DokzCode = ({ children, className, isOpen, preProps, ...rest }) => 
                                     display="inline-block"
                                     // position='absolute'
                                     textAlign="right"
-                                    minW={!isMinimal ? "40px" : "20px"}
+                                    minW={!isShort ? "40px" : "20px"}
                                     opacity={0.4}
-                                    pr={!isMinimal ? "30px" : "15px"}
+                                    pr={!isShort ? "30px" : "15px"}
                                 >
                                     {i + 1}
                                 </Box>
