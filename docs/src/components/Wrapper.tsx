@@ -13,7 +13,7 @@ export const Wrapper = ({ children, ...props }) => {
 
     return (
         <DokzWrapper {...props} meta={meta}>
-            <Stack spacing={[8, 7, 7, 6, 6]} fontSize={[16, 16, 16, 16, 17]}>
+            <Stack spacing={6} fontSize={[16, 16, 16, 16, 17]} shouldWrapChildren>
                 {/* Add h1 to every page based on name(dokz)/title(typedoc) */}
                 {title && withTitle && <MDXComponents.h1 id={title.toLowerCase()}>{title}</MDXComponents.h1>}
                 {children}
