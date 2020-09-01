@@ -1,5 +1,5 @@
-import { Entity, ManyToOne, Column, PrimaryGeneratedColumn, getRepository, EntityMetadata } from "typeorm";
-import { getGroupsMetadata, Groups, formatGroupsMethodName, GroupsMetadata, EntityGroupsMetadata } from "@/index";
+import { Entity, ManyToOne, Column, PrimaryGeneratedColumn, getRepository, EntityMetadata, OneToMany } from "typeorm";
+import { getGroupsMetadata, Groups, formatGroupsMethodName, EntityGroupsMetadata, Subresource } from "@/index";
 import { createTestConnection, closeTestConnection } from "../testConnection";
 
 describe("EntityGroupsMetadata", () => {
@@ -26,18 +26,35 @@ describe("EntityGroupsMetadata", () => {
         @Groups({ user: ["details"] })
         role: Role;
 
+        @Groups("basic")
+        @Subresource(() => Article)
+        @OneToMany(() => Article, (article) => article.author)
+        articles: Article[];
+
         @Groups(["list", "details"], "identifier")
         getIdentifier() {
             return `${this.id}_${this.role.title}_${this.name}`;
         }
     }
 
-    beforeAll(() => createTestConnection([User, Role]));
+    @Entity()
+    class Article extends AbstractEntity {
+        @Groups("basic")
+        @Column()
+        title: string;
+
+        @Groups("basic")
+        @ManyToOne(() => User, (user) => user.articles)
+        author: User;
+    }
+
+    beforeAll(() => createTestConnection([User, Role, Article]));
     afterAll(closeTestConnection);
 
     it("should getExposedPropsOn", () => {
         const metadata = getGroupsMetadata(User);
         expect(metadata.getExposedPropsOn("details", metadata.entityMeta)).toEqual([
+            "articles",
             formatGroupsMethodName("getIdentifier", "identifier"),
             "name",
             "role",
@@ -70,7 +87,7 @@ describe("EntityGroupsMetadata", () => {
     it("should getRelationPropsMetas", () => {
         const metadata = getGroupsMetadata(User);
         const relationMetadatas = metadata.getRelationPropsMetas("details", metadata.entityMeta);
-        expect(relationMetadatas.map((meta) => meta.propertyName)).toEqual(["role"]);
+        expect(relationMetadatas.map((meta) => meta.propertyName)).toEqual(["articles", "role"]);
     });
 
     it("should getComputedProps", () => {

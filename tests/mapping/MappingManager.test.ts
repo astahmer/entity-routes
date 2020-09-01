@@ -2,7 +2,7 @@ import { MappingManager, MappingItem, ENTITY_META_SYMBOL } from "@/mapping/Mappi
 import { Container } from "typedi";
 import { Entity, Column, getRepository, ManyToOne, PrimaryGeneratedColumn, OneToMany, EntityMetadata } from "typeorm";
 import { createTestConnection, closeTestConnection } from "@@/tests/testConnection";
-import { EntityGroupsMetadata, Groups, GROUPS_METAKEY } from "@/index";
+import { EntityGroupsMetadata, Groups, GROUPS_METAKEY, Subresource } from "@/index";
 
 describe("MappingManager", () => {
     const manager = Container.get(MappingManager);
@@ -31,6 +31,8 @@ describe("MappingManager", () => {
         @Groups({ user: ["details"], article: ["details"] })
         role: Role;
 
+        @Groups({ user: ["details"] })
+        @Subresource(() => Article)
         @OneToMany(() => Article, (article) => article.writer)
         articles: Article[];
 
@@ -127,6 +129,7 @@ describe("MappingManager", () => {
         const mapping = manager.make(metadata, operation, { pretty: true });
 
         expect(mapping).toEqual({
+            articles: "@id[]",
             id: "Number",
             name: "String",
             role: { id: "Number", title: "String" },
