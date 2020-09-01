@@ -14,6 +14,8 @@ export type CodeProps = {
 
 export type CodePropsMetaString = {
     title?: string;
+    bottomLeft?: string;
+    bottomRight?: string;
     collapsable?: boolean;
     hidden?: boolean;
     left?: boolean;
@@ -21,7 +23,9 @@ export type CodePropsMetaString = {
 
 export function Code(props: CodeProps) {
     const metas = extractMeta<CodePropsMetaString>(props.metastring || "");
-    const { title, left, collapsable, hidden } = metas;
+    const { title, bottomLeft, bottomRight, collapsable, hidden } = metas;
+
+    const hasBottomTxt = bottomLeft || bottomRight;
 
     const [isOpen, setIsOpened] = useState(!hidden);
     const toggle = () => setIsOpened(!isOpen);
@@ -32,18 +36,42 @@ export function Code(props: CodeProps) {
                 {...metas}
                 {...props}
                 isOpen={isOpen}
-                preProps={{ paddingTop: collapsable && "30px", paddingBottom: title && "30px" }}
+                preProps={{ paddingTop: collapsable ? "30px" : title && "25px", paddingBottom: hasBottomTxt && "30px" }}
             />
             {title && (
+                <Box
+                    className="dokz hiddenInPrint"
+                    opacity={0.7}
+                    fontSize="0.8em"
+                    position="absolute"
+                    left="10px"
+                    top="5px"
+                >
+                    {title}
+                </Box>
+            )}
+            {bottomLeft && (
+                <Box
+                    className="dokz hiddenInPrint"
+                    opacity={0.8}
+                    fontSize="0.9em"
+                    position="absolute"
+                    left="10px"
+                    bottom="5px"
+                >
+                    {bottomLeft}
+                </Box>
+            )}
+            {bottomRight && (
                 <Box
                     className="dokz hiddenInPrint"
                     opacity={0.6}
                     fontSize="0.7em"
                     position="absolute"
-                    {...{ [isOpen && left ? "left" : "right"]: "10px" }}
+                    right="10px"
                     bottom="8px"
                 >
-                    {title}
+                    {bottomRight}
                 </Box>
             )}
             {collapsable && (
