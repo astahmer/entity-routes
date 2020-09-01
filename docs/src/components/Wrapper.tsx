@@ -19,9 +19,6 @@ export const Wrapper = ({ children, ...props }) => {
             </Stack>
             {/* Make table of contents (on the right) scrollable, max height to 100 minus header */}
             <style jsx global>{`
-                hr {
-                    margin-bottom: 3em !important;
-                }
                 .mainContent + div {
                     overflow: auto;
                     max-height: calc(100vh - 62px);

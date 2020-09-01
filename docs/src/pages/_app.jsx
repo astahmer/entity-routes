@@ -1,8 +1,9 @@
-import { DokzProvider, GithubLink, ColorModeSwitch, Link } from "dokz";
+import { DokzProvider, GithubLink, ColorModeSwitch, Link, MDXComponents } from "dokz";
 import React, { Fragment } from "react";
 import Head from "next/head";
 
 import { Code, Table, Wrapper } from "@/components";
+import { Divider } from "@chakra-ui/core";
 
 export default function App(props) {
     const { Component, pageProps } = props;
@@ -49,7 +50,17 @@ export default function App(props) {
                     compatibility: true,
                     definitions: true,
                 }}
-                mdxComponents={{ code: Code, table: Table, wrapper: Wrapper }}
+                mdxComponents={{
+                    code: Code,
+                    table: Table,
+                    wrapper: Wrapper,
+                    h2: (props) => (
+                        <>
+                            <Divider mt="1.5em" />
+                            <MDXComponents.h2 {...props} />
+                        </>
+                    ),
+                }}
             >
                 <Component {...pageProps} />
             </DokzProvider>
