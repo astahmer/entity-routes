@@ -7,8 +7,9 @@ export const Wrapper = ({ children, ...props }) => {
     const withTitle = !meta?.withoutTitle;
 
     if (title && meta?.tableOfContents?.children?.length) {
-        meta.tableOfContents.children[0].slug = "#" + title.toLowerCase();
-        meta.tableOfContents.children[0].title = title;
+        if (meta.tableOfContents.children[0].title !== title) {
+            meta.tableOfContents.children.unshift({ title, slug: "#" + title.toLowerCase(), depth: 1 });
+        }
     }
 
     return (
