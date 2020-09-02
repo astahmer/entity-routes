@@ -1,5 +1,8 @@
 import { Stack } from "@chakra-ui/core";
 import { Wrapper as DokzWrapper, MDXComponents } from "dokz";
+import { useEffect } from "react";
+import { useRouter } from "next/router";
+import { reset } from "@/functions/codeBlocks";
 
 export const Wrapper = ({ children, ...props }) => {
     const title = props.meta.title || props.meta.name;
@@ -11,6 +14,24 @@ export const Wrapper = ({ children, ...props }) => {
             meta.tableOfContents.children.unshift({ title, slug: "#" + title.toLowerCase(), depth: 1 });
         }
     }
+
+    const router = useRouter();
+
+    // On route change, reset code block count
+    useEffect(() => {
+        const handleRouteChange = (url) => {
+            reset();
+            console.log("App is changing to: ", url);
+        };
+
+        router.events.on("routeChangeStart", handleRouteChange);
+
+        // If the component is unmounted, unsubscribe
+        // from the event with the `off` method:
+        return () => {
+            router.events.off("routeChangeStart", handleRouteChange);
+        };
+    }, []);
 
     return (
         <DokzWrapper {...props} meta={meta}>

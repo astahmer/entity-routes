@@ -1,9 +1,12 @@
+/** @jsx jsx */
+import { jsx } from "@emotion/core";
 import { useDokzConfig } from "dokz";
-import { ReactNode, useState } from "react";
-import { Box, Collapse, Switch, Flex, Text, useColorMode, useClipboard, BoxProps, Stack } from "@chakra-ui/core";
+import { ReactNode, useState, useRef } from "react";
+import { Box, Collapse, Switch, Flex, Text, useColorMode, useClipboard, BoxProps, Stack, Link } from "@chakra-ui/core";
 import { CopyButton } from "dokz/dist/components/Code";
 import Highlight, { defaultProps } from "prism-react-renderer";
 import rangeParser from "parse-numeric-range";
+import { getIndex, increment } from "@/functions/codeBlocks";
 
 export type CodeProps = {
     className: string;
@@ -17,27 +20,52 @@ export type CodePropsMetaString = {
     bottomLeft?: string;
     bottomRight?: string;
     collapsable?: boolean;
-    minimal?: boolean;
     hidden?: boolean;
     left?: boolean;
+    slug?: string;
+    withoutLang?: boolean;
 };
 
 export function Code(props: CodeProps) {
     const metas = extractMeta<CodePropsMetaString>(props.metastring || "");
-    const { title, bottomLeft, bottomRight, collapsable, hidden, minimal } = metas;
-
+    const { title, bottomLeft, bottomRight, collapsable, hidden, slug, withoutLang } = metas;
     const hasBottomTxt = bottomLeft || bottomRight;
+    const language = props.className?.replace(langRegex, "");
 
     const [isOpen, setIsOpened] = useState(!hidden);
     const toggle = () => setIsOpened(!isOpen);
 
+    const index = useRef(getIndex());
+    const identifier = `code-${slug || index.current}` + (withoutLang ? "" : `-${language}`);
+
+    // Only increment code count on first render (not in useEffect so that it works in SSR) and if no custom slug used
+    if (!slug && getIndex() === index.current) {
+        increment();
+    }
+
     return (
-        <Box position="relative">
+        <Box position="relative" id={identifier} css={{ "&:hover a": { opacity: 1 } }}>
+            <Link
+                position="absolute"
+                left="-20px"
+                aria-label="anchor"
+                as="a"
+                color="gray.500"
+                fontWeight="normal"
+                outline="none"
+                _focus={{ opacity: 1, boxShadow: "outline" }}
+                opacity={0}
+                ml="0.375rem"
+                href={`#${identifier}`}
+            >
+                #
+            </Link>
             <DokzCode
                 {...metas}
                 {...props}
                 isOpen={isOpen}
                 preProps={{ paddingTop: collapsable ? "30px" : title && "25px", paddingBottom: hasBottomTxt && "30px" }}
+                codeBlockIdentifier={identifier}
             />
             {title && (
                 <Box
@@ -142,17 +170,21 @@ export const DokzCode = ({ children, className, isOpen, preProps, ...rest }) => 
                                 {...getLineProps({ line, key: i })}
                                 bg={shouldHighlightLine(i) && "gray.600"}
                                 width="fit-content"
+                                id={`${rest.codeBlockIdentifier}-line-${i + 1}`}
                             >
-                                <Box
+                                <Link
                                     display="inline-block"
                                     // position='absolute'
                                     textAlign="right"
                                     minW={!isShort ? "40px" : "20px"}
                                     opacity={0.4}
                                     pr={!isShort ? "30px" : "15px"}
+                                    aria-label="anchor"
+                                    as="a"
+                                    href={`#${rest.codeBlockIdentifier}-line-${i + 1}`}
                                 >
                                     {i + 1}
-                                </Box>
+                                </Link>
                                 {line.map((token, key) => (
                                     <span key={key} {...getTokenProps({ token, key })} />
                                 ))}
