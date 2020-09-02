@@ -11,7 +11,7 @@ middlewares you can handle authentication, logging, permissions, etc.
 A middleware has access to the [`req`](https://nodejs.org/api/http.html#http_class_http_clientrequest) and the
 [`res`](https://nodejs.org/api/http.html#http_class_http_serverresponse) objects from the
 [Node http module](https://nodejs.org/api/http.html). If using `afterCtxMiddlewares`, you also get access to the route
-[`RequestContext`](/definitions/definitions#requestcontext).
+[`RequestContext`](/definitions#requestcontext).
 
 <DocAlert status="info">
 
@@ -23,17 +23,16 @@ Learn more about them from [Koa's documentation](https://github.com/koajs/koa) o
 ## Usage
 
 You can add middlewares to an [`EntityRouter`](/definitions/classes/entityrouter) by passing them in the
-[`EntityRouteOptions`](/definitions/definitions#entityrouteoptions), which means that you can both register a local
-middleware for a specific [`EntityRouter`](/definitions/classes/entityrouter) or register global middlewares by passing
-them to the [`makeEntityRouters`](/definitions/definitions#makeentityrouters).
+[`EntityRouteOptions`](/definitions#entityrouteoptions), which means that you can both register a local middleware for a
+specific [`EntityRouter`](/definitions/classes/entityrouter) or register global middlewares by passing them to the
+[`makeEntityRouters`](/definitions#makeentityrouters).
 
-The implementation itself of a middleware will depend of the [`maker`](/entity-routes/introduction#maker/) used.
+The implementation itself of a middleware will depend of the [`maker`](/entity-routes/introduction#maker) used.
 
--   If you use Koa, you can use the [`makeKoaEntityRouters`](/definitions/definitions#makekoaentityrouters)
-    [`maker`](/entity-routes/introduction#maker/).
+-   If you use Koa, you can use the [`makeKoaEntityRouters`](/definitions#makekoaentityrouters)
+    [`maker`](/entity-routes/introduction#maker).
 -   If you use Express or a compatible API (Next, Nuxt, etc.), you can use the
-    [`makeExpressEntityRouters`](/definitions/definitions#makeexpressentityrouters)
-    [`maker`](/entity-routes/introduction#maker/).
+    [`makeExpressEntityRouters`](/definitions#makeexpressentityrouters) [`maker`](/entity-routes/introduction#maker).
 
 A basic middleware looks like this :
 

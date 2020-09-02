@@ -47,53 +47,63 @@ class Article {
 
 For an entity to be used as a Subresource, it **must have an [`EntityRouter`](/definitions/classes/entityrouter)**
 registered. And if you don't want to generates CRUD routes, you can just provide no arguments to
-[`@EntityRoute`](/definitions/definitions#entityroute) just like the example above.
+[`@EntityRoute`](/definitions#entityroute) just like the example above.
 
 </DocAlert>
 
 Of course, you can customize your Subresource using [SubresourceOptions](/definitions#subresourceoptions) as optional
 second argument.
 
-| Option key    | Type                                                                    | Default                                   | Description                                                    |
-| ------------- | ----------------------------------------------------------------------- | ----------------------------------------- | -------------------------------------------------------------- |
-| operations    | [`SubresourceOperation`](/definitions/definitions#subresourceoperation) | `["create", "list", "details", "delete"]` | Defines which routes should be generated for this subresource  |
-| maxDepth      | number                                                                  | undefined                                 | Restrict the depth of subresources nesting allow from this one |
-| canHaveNested | boolean                                                                 | true                                      | Allow this subresource to have nested child subresources       |
-| canBeNested   | boolean                                                                 | true                                      | Allow this subresource to be used as a child subresource       |
+| Option key    | Type                                                        | Default                                   | Description                                                    |
+| ------------- | ----------------------------------------------------------- | ----------------------------------------- | -------------------------------------------------------------- |
+| operations    | [`SubresourceOperation`](/definitions#subresourceoperation) | `["create", "list", "details", "delete"]` | Defines which routes should be generated for this subresource  |
+| maxDepth      | number                                                      | undefined                                 | Restrict the depth of subresources nesting allow from this one |
+| canHaveNested | boolean                                                     | true                                      | Allow this subresource to have nested child subresources       |
+| canBeNested   | boolean                                                     | true                                      | Allow this subresource to be used as a child subresource       |
 
 <DocAlert status="info">
 
--   By just specifying "create" as [`SubresourceOperation`](/definitions/definitions#subresourceoperation), only the
+-   By just specifying "create" as [`SubresourceOperation`](/definitions#subresourceoperation), only the
     `POST:/users/:userId/articles` would be generated.
--   A single relation should use the `details` [`SubresourceOperation`](/definitions/definitions#subresourceoperation)
-    whereas a collection should use the `list` [`SubresourceOperation`](/definitions/definitions#subresourceoperation).
+-   A single relation should use the `details` [`SubresourceOperation`](/definitions#subresourceoperation) whereas a
+    collection should use the `list` [`SubresourceOperation`](/definitions#subresourceoperation).
 
 </DocAlert>
 
 ## Nesting
 
 Subresources are nestable by default, so you could have a `GET:/users/:userId/articles/comments` by making
-article.comments a subresouce as well. And if you're crazy enough, nothing stops you from nesting further with a
+`Article.comments` a subresource as well. And if you're crazy enough, nothing stops you from nesting further with a
 `GET:/users/:userId/articles/comments/upvotes`, etc.
 
 <DocAlert status="info">
 
-The [`defaultEntityRouteOptions`](/definitions/definitions#const-defaultentityrouteoptions) (passed to the
-[`makers`](/entity-routes/introduction#maker/)) has a `defaultSubresourceMaxDepthLvl: 2`.
+The [`defaultEntityRouteOptions`](/definitions#const-defaultentityrouteoptions) (passed to the
+[`makers`](/entity-routes/introduction#maker)) has a `defaultSubresourceMaxDepthLvl: 2`.
 
 </DocAlert>
 
-You can control the max depth.
+### Max depth
 
-## Single relation subresouce
+You can control the max depth using the maxDepth key of [SubresourceOptions](/definitions#subresourceoptions). Each
+maxDepth is independant from each other.
+
+---
+
+registerSubresource(User, Article, "articles", { maxDepth: 5 }); registerSubresource(Article, Comment, "comments");
+registerSubresource(Comment, Upvote, "upvotes", { maxDepth: 3 }); That means you could have a `maxDepth = 5` on
+`User.articles` subresource but still no
+
+## Single relation subresource
 
 The example above and most use-cases of subresources will be for collection relation
 ([`OneToMany`](https://typeorm.io/#/many-to-one-one-to-many-relations)/[`ManyToMany`](https://typeorm.io/#/many-to-many-relations)).
 But sometimes you might want a single relation
 ([`OneToOne`](https://typeorm.io/#/one-to-one-relations)/[`ManyToOne`](https://typeorm.io/#/many-to-one-one-to-many-relations))
-to be a subresouce.
+to be a subresource.
 
-There is actually no difference in usage between single/collection subresouces but here's an example for the sake of it.
+There is actually no difference in usage between single/collection subresources but here's an example for the sake of
+it.
 
 Let's say you have a `User` entity that is linked with a `config` relation. Rather than exposing the `config` in the
 `/users` route and have a lot of unnecessary nested data, you might want to directly access the config with only the
@@ -109,21 +119,96 @@ By decorating the `config` property with the [@Subresource](/definitions#subreso
 
 ## Subresources formating in response
 
-With the [`EntityRouteOptions`](/definitions/definitions#entityrouteoptions) key `shouldSetSubresourcesIriOnItem`, the
-corresponding subresources IRI are added for each items having subresources (without exposing them through
-[`@Groups`](/definitions/definitions#groups)).
+With the [`EntityRouteOptions`](/definitions#entityrouteoptions) key `shouldSetSubresourcesIriOnItem`, the corresponding
+subresources IRI are added for each items having subresources (without exposing them through
+[`@Groups`](/definitions#groups)).
 
 <DocAlert status="info">
 
-The [`defaultEntityRouteOptions`](/definitions/definitions#const-defaultentityrouteoptions) (passed to the
-[`makers`](/entity-routes/introduction#maker/)) has a `shouldSetSubresourcesIriOnItem: true`.
+The [`defaultEntityRouteOptions`](/definitions#const-defaultentityrouteoptions) (passed to the
+[`makers`](/entity-routes/introduction#maker)) has a `shouldSetSubresourcesIriOnItem: true`.
 
 </DocAlert>
 
-Here's how that would look like : TODO
+Using the same example from above with User/Article, here's how that would look like :
 
-And that's what would happen if you exposed properties from that subresouce relation (with
-[`@Groups`](/definitions/definitions#groups)): TODO
+```typescript
+@EntityRoute({ path: "/users", operations: CRUD_OPERATIONS }, { shouldSetSubresourcesIriOnItem: true })
+@Entity()
+export class User extends AbstractEntity {
+    @Groups({ user: ["create", "details"], article: ["list"] })
+    @Column()
+    name: string;
+
+    @Subresource(() => Article)
+    @OneToMany(() => Article, (article) => article.author)
+    articles: Article[];
+}
+
+@EntityRoute()
+@Entity()
+export class Article extends AbstractEntity {
+    @Groups("basic")
+    @Column()
+    title: string;
+
+    @Groups("basic")
+    @Column()
+    content: string;
+
+    @Groups("basic")
+    @ManyToOne(() => User, (user) => user.articles)
+    author: User;
+}
+```
+
+Response on user details :
+
+```json {6} bottomLeft="GET:/users/1" bottomRight="A link to the articles subresource"
+{
+    "@context": {
+        "operation": "details",
+        "entity": "user"
+    },
+    "articles": "/api/users/1/articles",
+    "id": 1,
+    "name": "Alex"
+}
+```
+
+And that's what would happen if you exposed properties from that subresource relation (with
+[`@Groups`](/definitions#groups)):
+
+```typescript {3} minimal
+class User {
+    // ...
+    @Groups("basic")
+    @Subresource(() => Article)
+    @OneToMany(() => Article, (article) => article.author)
+    articles: Article[];
+}
+```
+
+Response on user details route with `User.articles` exposed :
+
+```json
+{
+    "@context": {
+        "operation": "details",
+        "entity": "user"
+    },
+    "articles": [
+        {
+            "author": "/api/users/1",
+            "content": "Lorem ipsum",
+            "id": 1,
+            "title": "First article"
+        }
+    ],
+    "id": 1,
+    "name": "Alex"
+}
+```
 
 TODO IRI doc TODO standard response doc ?
 

@@ -20,8 +20,11 @@ With the [`AbstractFilter`](/definitions/classes/abstractfilter) class, you can 
 filterable. To do so, you need to set its options ([`DefaultFilterOptions`](/definitions#defaultfilteroptions))
 accordingly or/and by passing an array of property paths.
 
-```typescript title="You can decorate an entity like this"
-@Search(["firstName", ["role.identifier", "CONTAINS"]], { defaultWhereStrategy: "STARTS_WITH" })
+```typescript
+@Search(
+    ["firstName", ["role.identifier", "CONTAINS"]],
+    { defaultWhereStrategy: "STARTS_WITH" }
+)
 ```
 
 In this example the firstName property will default to `STARTS_WITH` unless it is overriden by specifiying another

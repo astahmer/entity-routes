@@ -18,14 +18,14 @@ Using `entity-routes` **you won't have to write any boilerplate controllers** wi
 every `entities` you have.
 
 You can just decorate your `entity` with [`@EntityRoute`](/entity-routes/introduction) and enable the
-[**operations**](/entity-routes/introduction#operations) you want.
+[**operations**](/entity-routes/operations) you want.
 
 ## [Granular control over which properties are exposed](/entity-route/groups)
 
 With the [`@Groups`](/entity-routes/groups) decorator you can configure your properties to be exposed in a specific or
 all [`route scopes`](/entity-routes/route-scope/). This will lead to optimized SQL queries with only properties exposed
-through [`@Groups`](/definitions/definitions#groups) to be selected. You can control recursion depth with
-[`@MaxDepth`](/definitions/definitions#maxdepth) decorator.
+through [`@Groups`](/definitions#groups) to be selected. You can control recursion depth with
+[`@MaxDepth`](/definitions#maxdepth) decorator.
 
 ## [Subresources](/entity-route/subresource)
 
@@ -41,8 +41,8 @@ decorators on your `entities` to describe how to validate them
 ## [Auto Route Mappings](/entity-route/route-scope#inferred-mapping)
 
 `entity-routes` generates endpoints (for each [`route scope`](/entity-routes/route-scope/)) to get the summary of an
-entity exposed properties, inferred from your `@Entity` `entities` and their
-[`@Groups`](/definitions/definitions#groups) decorated properties.
+entity exposed properties, inferred from your `@Entity` `entities` and their [`@Groups`](/definitions#groups) decorated
+properties.
 
 ## [Filters](/entity-route/filters)
 
@@ -58,8 +58,8 @@ There are [**hooks**](/entity-routes/hooks/) available to intervene at any point
 ## Computed properties
 
 You can have methods exposed as properties in your API responses. Those methods can be asynchronous and can also require
-other entity properties that are not exposed through [`@Groups`](/definitions/definitions#groups) and still be resolved
-with [`@DependsOn`](/definitions/definitions#dependson) decorator. (title TODO docref)
+other entity properties that are not exposed through [`@Groups`](/definitions#groups) and still be resolved with
+[`@DependsOn`](/definitions#dependson) decorator. (title TODO docref)
 
 ## Re-usable service components
 
