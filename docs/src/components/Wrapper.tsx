@@ -5,8 +5,8 @@ import { useRouter } from "next/router";
 import { reset } from "@/functions/codeBlocks";
 
 export const Wrapper = ({ children, ...props }) => {
-    const title = props.meta.title || props.meta.name;
     const meta = props.meta;
+    const title = meta?.title || meta?.name;
     const withTitle = !meta?.withoutTitle;
 
     if (title && meta?.tableOfContents?.children?.length) {
