@@ -159,6 +159,8 @@ function ImportDialog({ onSave }) {
             onSave(json);
         } catch (error) {
             setError(error);
+        } finally {
+            onClose();
         }
     };
 
