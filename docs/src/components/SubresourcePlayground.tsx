@@ -368,7 +368,9 @@ const SubresourceRoutes = () => {
     const removeLastSubresource = (entity: string, routeIndex: number) =>
         setRoutes(
             entity,
-            setValueAt(entities[entity].routes, entities[entity].routes[routeIndex].slice(0, -1), routeIndex)
+            entities[entity].routes[routeIndex].length
+                ? setValueAt(entities[entity].routes, entities[entity].routes[routeIndex].slice(0, -1), routeIndex)
+                : [...entities[entity].routes.slice(0, routeIndex), ...entities[entity].routes.slice(routeIndex + 1)]
         );
 
     return (
