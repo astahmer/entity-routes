@@ -36,6 +36,7 @@ import {
     ModalFooter,
     Textarea,
     IModal,
+    Tooltip,
     useClipboard,
 } from "@chakra-ui/core";
 
@@ -138,7 +139,7 @@ export function SubresourcePlayground() {
                 <Toolbar onSubmit={addEntity} onMaxDepthChange={setGlobalMaxDepth} />
                 <PropsByEntities />
                 <SubresourceRoutes />
-                <Debug json={{ globalMaxDepth, entities }} />
+                <Debug json={entities} />
             </Stack>
         </MaxDepthContext.Provider>
     );
@@ -407,15 +408,16 @@ const SubresourceRoute = ({
 
     const state = entities[entity];
 
-    const currentDepth = route.length;
+    const currentDepth = 1 + route.length;
     const defaultMaxDepth = globalMaxDepth || 2;
-    const maxDepths = route.map((subresource) => entities[entity].maxDepths[subresource] || defaultMaxDepth);
+    const maxDepths = route.map((subresource) => entities[subresource].maxDepths[entity] || defaultMaxDepth);
     const relativeMaxDepths = maxDepths.map((maxDepth, depth) => maxDepth + depth);
     const hasReachedMaxDepth = relativeMaxDepths.some((maxDepth) => currentDepth > maxDepth);
-    hasReachedMaxDepth && console.log({ route, currentDepth, maxDepths, relativeMaxDepths, hasReachedMaxDepth });
 
     const lastPart = route[route.length - 1] || entity;
     const lastPartProperties = entities[lastPart]?.properties || [];
+
+    const isDisabled = hasReachedMaxDepth || !lastPartProperties.length;
 
     return (
         <Flex direction="row" alignItems="baseline" width="fit-content" key={entity + routeIndex}>
@@ -439,13 +441,20 @@ const SubresourceRoute = ({
                 <Menu>
                     <MenuButton
                         as={(props) => (
-                            <Button
-                                {...props}
-                                variant="ghost"
-                                aria-label="Add subresource"
-                                size="xs"
-                                isDisabled={!lastPartProperties.length}
-                            />
+                            <Tooltip
+                                hasArrow
+                                aria-label={"Add subresource"}
+                                label={"Add subresource"}
+                                placement="bottom"
+                            >
+                                <Button
+                                    {...props}
+                                    variant="ghost"
+                                    aria-label="Add subresource"
+                                    size="xs"
+                                    isDisabled={isDisabled}
+                                />
+                            </Tooltip>
                         )}
                     >
                         <Icon name="add" />
