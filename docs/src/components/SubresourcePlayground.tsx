@@ -70,7 +70,6 @@ type MaxDepthContext = {
 const MaxDepthContext = createContext<MaxDepthContext>(null);
 
 let resetKey = 0;
-// TODO Import/Export subresource config
 // TODO Auto routes generation ?
 export function SubresourcePlayground() {
     const [globalMaxDepth, setGlobalMaxDepth] = useState(2);
@@ -83,8 +82,6 @@ export function SubresourcePlayground() {
 
     // Generics
     const addEntity = (name: string) => setEntities((current) => ({ ...current, [name]: defaultEntity }));
-    // TODO Remove (routes with subresources) from entity
-    // TODO Remove max depths for entity
     const removeEntity = (name: string) =>
         setEntities((current) =>
             Object.fromEntries(
@@ -95,7 +92,10 @@ export function SubresourcePlayground() {
                         {
                             maxDepths: { ...otherMaxDepths },
                             properties: removeValue(properties, name),
-                            routes: removeValue(routes, name),
+                            routes: routes.map((route) => {
+                                const index = route.findIndex((subresource) => subresource === name);
+                                return index !== -1 ? route.slice(0, index) : route;
+                            }),
                         },
                     ])
             )
@@ -293,8 +293,6 @@ const EntityProps = ({ item }: EntityProps) => {
             [property]: typeof maxDepth === "string" ? Number(maxDepth) : maxDepth,
         });
 
-    console.log(item);
-
     return (
         <Stack direction="column" alignItems="center" shouldWrapChildren>
             <Tag size="sm" rounded="full" variant="solid" variantColor="cyan">
@@ -410,7 +408,7 @@ const SubresourceRoute = ({
 
     const currentDepth = 1 + route.length;
     const defaultMaxDepth = globalMaxDepth || 2;
-    const maxDepths = route.map((subresource) => entities[subresource].maxDepths[entity] || defaultMaxDepth);
+    const maxDepths = route.map((subresource) => entities[subresource]?.maxDepths[entity] || defaultMaxDepth);
     const relativeMaxDepths = maxDepths.map((maxDepth, depth) => maxDepth + depth);
     const hasReachedMaxDepth = relativeMaxDepths.some((maxDepth) => currentDepth > maxDepth);
 
