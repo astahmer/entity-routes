@@ -66,9 +66,8 @@ export class SubresourceMaker<Entity extends GenericEntity> {
             // Checks for every max depth of every subresources including this one
             const currentMaxDepth = subresourceProp.maxDepth || this.options.defaultSubresourceMaxDepthLvl || 2;
             const maxDepths = (parents?.maxDepths || []).concat(currentMaxDepth);
-            const hasReachedMaxDepth = maxDepths
-                .map((maxDepth, depth) => maxDepth + depth)
-                .some((maxDepth) => currentDepth > maxDepth);
+            const relativeMaxDepths = maxDepths.map((maxDepth, depth) => maxDepth + depth);
+            const hasReachedMaxDepth = relativeMaxDepths.some((maxDepth) => currentDepth > maxDepth);
 
             if (hasReachedMaxDepth) continue;
 
