@@ -425,7 +425,14 @@ const SubresourceRoute = ({
             {route.map((subresource, subresourceIndex) => (
                 <SubresourcePart
                     key={subresourceIndex}
-                    {...{ entity, routeIndex, setSubresourceAt, subresource, index: subresourceIndex }}
+                    {...{
+                        entity,
+                        routeIndex,
+                        setSubresourceAt,
+                        subresource,
+                        index: subresourceIndex,
+                        properties: lastPartProperties,
+                    }}
                 />
             ))}
             <Box position="relative">
@@ -468,11 +475,16 @@ const SubresourceRoute = ({
 type SubresourcePartProps = Pick<SubresourceRouteProps, "setSubresourceAt" | "entity" | "routeIndex"> & {
     subresource: string;
     index: number;
+    properties: string[];
 };
-const SubresourcePart = ({ entity, routeIndex, setSubresourceAt, subresource, index }: SubresourcePartProps) => {
-    const { entities } = useContext(MaxDepthContext);
-    const state = entities[entity];
-
+const SubresourcePart = ({
+    entity,
+    routeIndex,
+    setSubresourceAt,
+    subresource,
+    index,
+    properties,
+}: SubresourcePartProps) => {
     return (
         <Flex key={index} alignItems="center">
             <Box as="span" mx="1">
@@ -487,7 +499,7 @@ const SubresourcePart = ({ entity, routeIndex, setSubresourceAt, subresource, in
                         {subresource}
                     </MenuButton>
                     <MenuList zIndex={10}>
-                        {state.properties.map((item, i) => (
+                        {properties.map((item, i) => (
                             <MenuItem key={i} onClick={() => setSubresourceAt(entity, item, routeIndex, index)}>
                                 {item}
                             </MenuItem>
