@@ -36,6 +36,7 @@ import {
     ModalFooter,
     Textarea,
     IModal,
+    useClipboard,
 } from "@chakra-ui/core";
 
 const baseEntityNames = ["User", "Article", "Comment", "Upvote"];
@@ -202,8 +203,11 @@ function BasicDialog({ children, isOpen, onClose, title, actions }: BasicDialogP
 }
 
 const Toolbar = ({ onSubmit, onMaxDepthChange }) => {
-    const { resetEntities, setEntities } = useContext(MaxDepthContext);
+    const { entities, resetEntities, setEntities } = useContext(MaxDepthContext);
     const inputRef = useRef<HTMLInputElement>();
+
+    const valueToCopy = JSON.stringify(entities, null, 4);
+    const { onCopy, hasCopied } = useClipboard(valueToCopy);
 
     return (
         <Box
@@ -255,6 +259,9 @@ const Toolbar = ({ onSubmit, onMaxDepthChange }) => {
                 </Box>
                 <Button onClick={resetEntities}>Reset</Button>
                 <ImportDialog onSave={(json) => setEntities(json)} />
+                <Button onClick={onCopy} ml={2}>
+                    {hasCopied ? "Copied" : "Export config"}
+                </Button>
             </Stack>
         </Box>
     );
