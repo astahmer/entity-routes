@@ -71,6 +71,7 @@ const MaxDepthContext = createContext<MaxDepthContext>(null);
 
 let resetKey = 0;
 // TODO Auto routes generation ?
+// TODO canHaveNested/canBeNested
 export function SubresourcePlayground() {
     const [globalMaxDepth, setGlobalMaxDepth] = useState(2);
     const [entities, setEntities] = useState<Entities>(makeRecordFromKeys(baseEntityNames, defaultEntity));
@@ -408,13 +409,22 @@ const SubresourceRoute = ({
 }: SubresourceRouteProps) => {
     const { entities, globalMaxDepth } = useContext(MaxDepthContext);
 
-    const state = entities[entity];
-
     const currentDepth = 1 + route.length;
     const defaultMaxDepth = globalMaxDepth || 2;
-    const maxDepths = route.map((subresource) => entities[subresource]?.maxDepths[entity] || defaultMaxDepth);
-    const relativeMaxDepths = maxDepths.map((maxDepth, depth) => maxDepth + depth);
-    const hasReachedMaxDepth = relativeMaxDepths.some((maxDepth) => currentDepth > maxDepth);
+    const maxDepths = route.map((subresource, index) => [
+        subresource,
+        entities[route[index - 1] || entity]?.maxDepths[subresource] || defaultMaxDepth,
+        route[index - 1] || entity,
+    ]) as [string, number, string][];
+    const relativeMaxDepths = maxDepths.map(([subresource, maxDepth, parent], depth) => [
+        subresource,
+        maxDepth + depth,
+        parent,
+    ]);
+    const maxDepthReachedOnIndex = relativeMaxDepths.findIndex(([_, maxDepth]) => currentDepth > maxDepth);
+    const [maxDepthReachedOnProp, maxDepthReachedAt, maxDepthReachedFromParent] =
+        maxDepths[maxDepthReachedOnIndex] || [];
+    const hasReachedMaxDepth = maxDepthReachedOnIndex !== -1;
 
     const lastPart = route[route.length - 1] || entity;
     const lastPartProperties = entities[lastPart]?.properties || [];
@@ -422,7 +432,7 @@ const SubresourceRoute = ({
     const isDisabled = hasReachedMaxDepth || !lastPartProperties.length;
 
     return (
-        <Flex direction="row" alignItems="baseline" width="fit-content" key={entity + routeIndex}>
+        <Flex direction="row" alignItems="center" width="fit-content" key={entity + routeIndex}>
             <Box as="span" mr="2">
                 {entity}
             </Box>
@@ -431,71 +441,96 @@ const SubresourceRoute = ({
                     key={subresourceIndex}
                     {...{
                         entity,
+                        route,
                         routeIndex,
                         setSubresourceAt,
                         subresource,
                         index: subresourceIndex,
-                        properties: lastPartProperties,
+                        isMaxDepthReached: subresourceIndex === maxDepthReachedOnIndex,
                     }}
                 />
             ))}
-            <Box position="relative">
-                <Menu>
-                    <MenuButton
-                        as={(props) => (
-                            <Tooltip
-                                hasArrow
-                                aria-label={"Add subresource"}
-                                label={"Add subresource"}
-                                placement="bottom"
-                            >
-                                <Button
-                                    {...props}
-                                    variant="ghost"
-                                    aria-label="Add subresource"
-                                    size="xs"
-                                    isDisabled={isDisabled}
-                                />
-                            </Tooltip>
-                        )}
-                    >
-                        <Icon name="add" />
-                    </MenuButton>
-                    <MenuList>
-                        {lastPartProperties.map((name) => (
-                            <MenuItem key={name} onClick={() => addSubresource(entity, routeIndex, name)}>
-                                {name}
-                            </MenuItem>
-                        ))}
-                    </MenuList>
-                </Menu>
-            </Box>
-            {state.routes[routeIndex].length && (
+            {hasReachedMaxDepth ? (
+                <Tooltip
+                    hasArrow
+                    aria-label={`Max depth (${maxDepthReachedAt}) reached on ${maxDepthReachedFromParent}.${maxDepthReachedOnProp}`}
+                    label={`Max depth (${maxDepthReachedAt}) reached on ${maxDepthReachedFromParent}.${maxDepthReachedOnProp}`}
+                    placement="bottom"
+                >
+                    <Flex width="28px" justifyContent="center" alignItems="center">
+                        <Icon name="warning" color="yellow.500" />
+                    </Flex>
+                </Tooltip>
+            ) : (
+                <Box position="relative">
+                    <Menu>
+                        <MenuButton
+                            as={(props) => (
+                                <Tooltip
+                                    hasArrow
+                                    aria-label={"Add subresource"}
+                                    label={"Add subresource"}
+                                    placement="bottom"
+                                >
+                                    <Button
+                                        {...props}
+                                        variant="ghost"
+                                        aria-label="Add subresource"
+                                        size="xs"
+                                        isDisabled={isDisabled}
+                                    />
+                                </Tooltip>
+                            )}
+                        >
+                            <Icon name="add" />
+                        </MenuButton>
+                        <MenuList>
+                            {lastPartProperties.map((name) => (
+                                <MenuItem key={name} onClick={() => addSubresource(entity, routeIndex, name)}>
+                                    {name}
+                                </MenuItem>
+                            ))}
+                        </MenuList>
+                    </Menu>
+                </Box>
+            )}
+
+            <Tooltip
+                hasArrow
+                aria-label={"Remove last subresource"}
+                label={"Remove last subresource"}
+                placement="bottom"
+            >
                 <IconButton
                     variant="ghost"
-                    aria-label="Remove subresource"
+                    aria-label="Remove last subresource"
                     icon="delete"
                     size="xs"
                     onClick={() => removeLastSubresource(entity, routeIndex)}
                 />
-            )}
+            </Tooltip>
         </Flex>
     );
 };
 
-type SubresourcePartProps = Pick<SubresourceRouteProps, "setSubresourceAt" | "entity" | "routeIndex"> & {
+type SubresourcePartProps = Pick<SubresourceRouteProps, "setSubresourceAt" | "entity" | "route" | "routeIndex"> & {
     subresource: string;
     index: number;
-    properties: string[];
+    isMaxDepthReached: boolean;
 };
 const SubresourcePart = ({
     entity,
+    route,
     routeIndex,
     setSubresourceAt,
     subresource,
     index,
-    properties,
+    isMaxDepthReached,
 }: SubresourcePartProps) => {
+    const { entities } = useContext(MaxDepthContext);
+    const prevPart = route[index - 1] || entity;
+    const prevPartProperties = entities[prevPart]?.properties || [];
+
     return (
         <Flex key={index} alignItems="center">
             <Box as="span" mx="1">
@@ -505,12 +540,27 @@ const SubresourcePart = ({
             <Stack alignItems="center" direction="row" shouldWrapChildren>
                 <Menu key={"editSub" + entity + routeIndex + index}>
                     <MenuButton
-                        as={(props) => <Button {...props} variant="ghost" aria-label="Edit subresource" padding="2" />}
+                        as={(props) => (
+                            <Button
+                                {...props}
+                                variant="ghost"
+                                aria-label="Edit subresource"
+                                padding="2"
+                                color={isMaxDepthReached && "yellow.400"}
+                            />
+                        )}
                     >
-                        {subresource}
+                        <Tooltip
+                            hasArrow
+                            aria-label={"Change subresource"}
+                            label={"Change subresource"}
+                            placement="bottom"
+                        >
+                            {subresource}
+                        </Tooltip>
                     </MenuButton>
                     <MenuList zIndex={10}>
-                        {properties.map((item, i) => (
+                        {prevPartProperties.map((item, i) => (
                             <MenuItem key={i} onClick={() => setSubresourceAt(entity, item, routeIndex, index)}>
                                 {item}
                             </MenuItem>
