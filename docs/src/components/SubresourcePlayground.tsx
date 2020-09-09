@@ -1,4 +1,4 @@
-import { useState, useRef, createContext, useContext, ReactNode } from "react";
+import { useState, useRef, createContext, useContext, ChangeEvent } from "react";
 import {
     Box,
     Stack,
@@ -27,18 +27,15 @@ import {
     InputGroup,
     InputRightAddon,
     useDisclosure,
-    Modal,
-    ModalOverlay,
-    ModalContent,
-    ModalHeader,
-    ModalCloseButton,
-    ModalBody,
-    ModalFooter,
     Textarea,
-    IModal,
     Tooltip,
     useClipboard,
+    Switch,
+    FormLabel,
+    Grid,
 } from "@chakra-ui/core";
+import { BasicDialog } from "./BasicDialog";
+import { Debug } from "./Debug";
 
 const baseEntityNames = ["User", "Article", "Comment", "Upvote"];
 const makeRecordFromKeys = (keys: string[], defaultValue: any) =>
@@ -46,32 +43,37 @@ const makeRecordFromKeys = (keys: string[], defaultValue: any) =>
         keys.map((name) => [name, typeof defaultValue === "function" ? defaultValue(name) : defaultValue])
     );
 
-const defaultEntity: Entity = { maxDepths: {}, properties: [], routes: [[]] };
-type Entity = { maxDepths: Record<string, number>; properties: string[]; routes: Array<string[]> };
+const defaultEntity: Entity = { maxDepths: {}, properties: [], routes: [[]], canHaveNested: true, canBeNested: true };
+type Entity = {
+    maxDepths: Record<string, number>;
+    properties: string[];
+    routes: Array<string[]>;
+    canHaveNested: boolean;
+    canBeNested: boolean;
+};
 type Entities = Record<string, Entity>;
 
-const Debug = ({ json }) => <pre>{JSON.stringify(json || {}, null, 4)}</pre>;
 const addValue = (arr: any[], value: any) => (arr || []).concat(value);
 const setValueAt = (arr: any[], value: any, index: number) => [...arr.slice(0, index), value, ...arr.slice(index + 1)];
 const removeValue = (arr: any[], value: any) => arr.filter((item) => item !== value);
 
-type MaxDepthContext = {
+type SubresourcePlaygroundContext = {
     resetEntities: () => void;
     setEntities: (value: Record<string, Entity>) => void;
     entities: Record<string, Entity>;
     entityNames: string[];
     removeEntity: (name: string) => void;
     setMaxDepths: (entity: string, maxDepths: Record<string, number>) => void;
+    setBoolean: (entity: string, key: string, value: boolean) => void;
     setProperties: (entity: string, properties: string[]) => void;
     setRoutes: (entity: string, routes: Array<string[]>) => void;
     addRoute: (entity: string) => void;
     globalMaxDepth: number;
 };
-const MaxDepthContext = createContext<MaxDepthContext>(null);
+const SubresourcePlaygroundContext = createContext<SubresourcePlaygroundContext>(null);
 
 let resetKey = 0;
 // TODO Auto routes generation ?
-// TODO canHaveNested/canBeNested
 export function SubresourcePlayground() {
     const [globalMaxDepth, setGlobalMaxDepth] = useState(2);
     const [entities, setEntities] = useState<Entities>(makeRecordFromKeys(baseEntityNames, defaultEntity));
@@ -88,17 +90,28 @@ export function SubresourcePlayground() {
             Object.fromEntries(
                 Object.entries(current)
                     .filter(([key, value]) => key !== name)
-                    .map(([key, { maxDepths: { [name]: removed, ...otherMaxDepths }, properties, routes }]) => [
-                        key,
-                        {
-                            maxDepths: { ...otherMaxDepths },
-                            properties: removeValue(properties, name),
-                            routes: routes.map((route) => {
-                                const index = route.findIndex((subresource) => subresource === name);
-                                return index !== -1 ? route.slice(0, index) : route;
-                            }),
-                        },
-                    ])
+                    .map(
+                        ([
+                            key,
+                            {
+                                maxDepths: { [name]: removed, ...otherMaxDepths },
+                                properties,
+                                routes,
+                                ...rest
+                            },
+                        ]) => [
+                            key,
+                            {
+                                maxDepths: { ...otherMaxDepths },
+                                properties: removeValue(properties, name),
+                                routes: routes.map((route) => {
+                                    const index = route.findIndex((subresource) => subresource === name);
+                                    return index !== -1 ? route.slice(0, index) : route;
+                                }),
+                                ...rest,
+                            },
+                        ]
+                    )
             )
         );
 
@@ -113,14 +126,14 @@ export function SubresourcePlayground() {
 
     const setMaxDepths = (entity: string, maxDepths: Record<string, number>) =>
         setEntityKeyValue(entity, "maxDepths", maxDepths);
-    // Properties
     const setProperties = (entity: string, properties: string[]) => setEntityKeyValue(entity, "properties", properties);
+    const setBoolean = (entity: string, key: string, value: boolean) => setEntityKeyValue(entity, key, value);
 
     // Routes
     const setRoutes = (entity: string, routes: Array<string[]>) => setEntityKeyValue(entity, "routes", routes);
     const addRoute = (entity: string) => setRoutes(entity, [...entities[entity].routes, []]);
 
-    const ctx: MaxDepthContext = {
+    const ctx: SubresourcePlaygroundContext = {
         resetEntities,
         setEntities,
         entities,
@@ -128,21 +141,21 @@ export function SubresourcePlayground() {
         removeEntity,
         setMaxDepths,
         setProperties,
+        setBoolean,
         setRoutes,
         addRoute,
         globalMaxDepth,
     };
 
     return (
-        <MaxDepthContext.Provider value={ctx} key={resetKey}>
-            Reset key : {resetKey}
+        <SubresourcePlaygroundContext.Provider value={ctx} key={resetKey}>
             <Stack spacing={6} shouldWrapChildren>
                 <Toolbar onSubmit={addEntity} onMaxDepthChange={setGlobalMaxDepth} />
                 <PropsByEntities />
-                <SubresourceRoutes />
+                <SubresourceRouteList />
                 <Debug json={entities} />
             </Stack>
-        </MaxDepthContext.Provider>
+        </SubresourcePlaygroundContext.Provider>
     );
 }
 
@@ -184,30 +197,8 @@ function ImportDialog({ onSave }) {
     );
 }
 
-// type WithChildren = {children: ReactNode};
-type BasicDialogProps = Pick<IModal, "children" | "isOpen" | "onClose"> & { title: string; actions?: ReactNode };
-function BasicDialog({ children, isOpen, onClose, title, actions }: BasicDialogProps) {
-    return (
-        <Modal isOpen={isOpen} onClose={onClose} blockScrollOnMount={false}>
-            <ModalOverlay />
-            <ModalContent>
-                <ModalHeader>{title}</ModalHeader>
-                <ModalCloseButton />
-                <ModalBody>{children}</ModalBody>
-
-                <ModalFooter>
-                    <Button mr={3} onClick={onClose}>
-                        Close
-                    </Button>
-                    {actions}
-                </ModalFooter>
-            </ModalContent>
-        </Modal>
-    );
-}
-
 const Toolbar = ({ onSubmit, onMaxDepthChange }) => {
-    const { entities, resetEntities, setEntities } = useContext(MaxDepthContext);
+    const { entities, resetEntities, setEntities } = useContext(SubresourcePlaygroundContext);
     const inputRef = useRef<HTMLInputElement>();
 
     const valueToCopy = JSON.stringify(entities, null, 4);
@@ -225,30 +216,28 @@ const Toolbar = ({ onSubmit, onMaxDepthChange }) => {
             }}
         >
             <Stack direction="row" alignItems="flex-end" spacing="4">
-                <Box>
-                    <Stack direction="row">
-                        <Stack spacing={4}>
-                            <InputGroup size="sm">
-                                <Input
-                                    ref={inputRef}
-                                    rounded="0"
-                                    placeholder="Add new entity name"
-                                    name="entityName"
-                                    maxWidth={300}
+                <Stack direction="row">
+                    <Stack spacing={4}>
+                        <InputGroup size="sm">
+                            <Input
+                                ref={inputRef}
+                                rounded="0"
+                                placeholder="Add new entity name"
+                                name="entityName"
+                                maxWidth={300}
+                            />
+                            <InputRightAddon padding="0">
+                                <IconButton
+                                    variant="ghost"
+                                    aria-label="Add new entity"
+                                    icon="check"
+                                    size="sm"
+                                    type="submit"
                                 />
-                                <InputRightAddon padding="0">
-                                    <IconButton
-                                        variant="ghost"
-                                        aria-label="Add new entity"
-                                        icon="check"
-                                        size="sm"
-                                        type="submit"
-                                    />
-                                </InputRightAddon>
-                            </InputGroup>
-                        </Stack>
+                            </InputRightAddon>
+                        </InputGroup>
                     </Stack>
-                </Box>
+                </Stack>
                 <Box>
                     Global max depth :
                     <Stack direction="row">
@@ -272,23 +261,81 @@ const Toolbar = ({ onSubmit, onMaxDepthChange }) => {
 };
 
 const PropsByEntities = () => {
-    const ctx = useContext(MaxDepthContext);
+    const ctx = useContext(SubresourcePlaygroundContext);
 
     return (
         <Box>
             Available subresources relation :
             <Stack direction="row" spacing="50px" shouldWrapChildren flexWrap="wrap">
                 {ctx.entityNames.map((item, i) => (
-                    <EntityProps key={item + i} item={item} />
+                    <EntityPropList key={item + i} item={item} />
                 ))}
             </Stack>
         </Box>
     );
 };
 
-type EntityProps = { item: string };
-const EntityProps = ({ item }: EntityProps) => {
-    const { entities, entityNames, addRoute, removeEntity, setProperties, setMaxDepths } = useContext(MaxDepthContext);
+const BoolOption = ({ item, name }) => {
+    const { entities, setBoolean } = useContext(SubresourcePlaygroundContext);
+
+    return (
+        <Grid gridTemplateColumns="45px 1fr" justifyContent="flex-end">
+            <Switch
+                id={`switch-${item}-${name}`}
+                name={name}
+                defaultIsChecked={entities[item][name]}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => setBoolean(item, e.target.name, e.target.checked)}
+            />
+            <FormLabel htmlFor={`switch-${item}-${name}`}>{name}</FormLabel>
+        </Grid>
+    );
+};
+
+const EntityName = ({ item }) => {
+    const { addRoute, removeEntity } = useContext(SubresourcePlaygroundContext);
+    return (
+        <Tag size="sm" rounded="full" variant="solid" variantColor="cyan">
+            <TagLabel onClick={() => addRoute(item)} cursor="pointer">
+                {item}
+            </TagLabel>
+            <TagCloseButton onClick={() => removeEntity(item)} />
+        </Tag>
+    );
+};
+
+const EntityProp = ({ item, entity, setMaxDepth }) => {
+    const { entities } = useContext(SubresourcePlaygroundContext);
+
+    return (
+        <>
+            <Checkbox value={entity} defaultIsChecked={entities[item].properties.includes(entity)}>
+                {entity}
+                {item === entity && " (Recursive)"}
+            </Checkbox>
+            {entities[item].properties.includes(entity) && (
+                <Editable placeholder="Max depth" defaultValue={entities[item].maxDepths[entity] as any}>
+                    {({ isEditing, onRequestEdit }) => (
+                        <>
+                            {!isEditing && entities[item].maxDepths[entity] && (
+                                <span onClick={onRequestEdit}>Max depth: </span>
+                            )}
+                            <EditablePreview />
+                            <EditableInput
+                                width="90px"
+                                {...{ type: "number", min: 1 }}
+                                onInput={(e) => setMaxDepth(item, entity, (e.target as any).value)}
+                            />
+                        </>
+                    )}
+                </Editable>
+            )}
+        </>
+    );
+};
+
+type EntityPropList = { item: string };
+const EntityPropList = ({ item }: EntityPropList) => {
+    const { entities, entityNames, setProperties, setMaxDepths } = useContext(SubresourcePlaygroundContext);
 
     const setMaxDepth = (entity: string, property: string, maxDepth: number) =>
         setMaxDepths(entity, {
@@ -298,48 +345,18 @@ const EntityProps = ({ item }: EntityProps) => {
 
     return (
         <Stack direction="column" alignItems="center" shouldWrapChildren>
-            <Tag size="sm" rounded="full" variant="solid" variantColor="cyan">
-                <TagLabel onClick={() => addRoute(item)} cursor="pointer">
-                    {item}
-                </TagLabel>
-                <TagCloseButton onClick={() => removeEntity(item)} />
-            </Tag>
+            <EntityName item={item} />
+            <Flex direction="column">
+                <BoolOption item={item} name="canHaveNested" />
+                <BoolOption item={item} name="canBeNested" />
+            </Flex>
             <CheckboxGroup
                 defaultValue={entities[item].properties}
                 onChange={(value) => setProperties(item, value as string[])}
             >
                 <Stack direction="column" mb="4">
                     {entityNames.map((entity, i) => (
-                        <>
-                            <Checkbox
-                                value={entity}
-                                key={i}
-                                defaultIsChecked={entities[item].properties.includes(entity)}
-                            >
-                                {entity}
-                                {item === entity && " (Recursive)"}
-                            </Checkbox>
-                            {entities[item].properties.includes(entity) && (
-                                <Editable
-                                    placeholder="Max depth"
-                                    defaultValue={entities[item].maxDepths[entity] as any}
-                                >
-                                    {({ isEditing, onRequestEdit }) => (
-                                        <>
-                                            {!isEditing && entities[item].maxDepths[entity] && (
-                                                <span onClick={onRequestEdit}>Max depth: </span>
-                                            )}
-                                            <EditablePreview />
-                                            <EditableInput
-                                                width="90px"
-                                                {...{ type: "number", min: 1 }}
-                                                onInput={(e) => setMaxDepth(item, entity, (e.target as any).value)}
-                                            />
-                                        </>
-                                    )}
-                                </Editable>
-                            )}
-                        </>
+                        <EntityProp {...{ item, setMaxDepth, entity, i }} />
                     ))}
                 </Stack>
             </CheckboxGroup>
@@ -347,8 +364,8 @@ const EntityProps = ({ item }: EntityProps) => {
     );
 };
 
-const SubresourceRoutes = () => {
-    const { entities, entityNames, setRoutes } = useContext(MaxDepthContext);
+const SubresourceRouteList = () => {
+    const { entities, entityNames, setRoutes } = useContext(SubresourcePlaygroundContext);
 
     // Replace current subresource with selected && remove later parts
     const setSubresourceAt = (entity: string, subresource: string, routeIndex: number, propIndex: number) =>
@@ -407,7 +424,7 @@ const SubresourceRoute = ({
     removeLastSubresource,
     setSubresourceAt,
 }: SubresourceRouteProps) => {
-    const { entities, globalMaxDepth } = useContext(MaxDepthContext);
+    const { entities, globalMaxDepth } = useContext(SubresourcePlaygroundContext);
 
     const currentDepth = 1 + route.length;
     const defaultMaxDepth = globalMaxDepth || 2;
@@ -427,9 +444,10 @@ const SubresourceRoute = ({
     const hasReachedMaxDepth = maxDepthReachedOnIndex !== -1;
 
     const lastPart = route[route.length - 1] || entity;
-    const lastPartProperties = entities[lastPart]?.properties || [];
+    const lastPartProperties = (entities[lastPart]?.properties || []).filter((prop) => entities[prop].canBeNested);
 
-    const isDisabled = hasReachedMaxDepth || !lastPartProperties.length;
+    const isDisabled =
+        hasReachedMaxDepth || !lastPartProperties.length || (route.length && !entities[lastPart].canHaveNested);
 
     return (
         <Flex direction="row" alignItems="center" width="fit-content" key={entity + routeIndex}>
@@ -527,9 +545,9 @@ const SubresourcePart = ({
     index,
     isMaxDepthReached,
 }: SubresourcePartProps) => {
-    const { entities } = useContext(MaxDepthContext);
+    const { entities } = useContext(SubresourcePlaygroundContext);
     const prevPart = route[index - 1] || entity;
-    const prevPartProperties = entities[prevPart]?.properties || [];
+    const prevPartProperties = (entities[prevPart]?.properties || []).filter((prop) => entities[prop].canBeNested);
 
     return (
         <Flex key={index} alignItems="center">
