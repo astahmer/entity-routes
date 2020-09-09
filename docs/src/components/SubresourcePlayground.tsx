@@ -408,6 +408,11 @@ const SubresourceRouteList = () => {
     );
 };
 
+const maxDepthWarning = ([maxDepthReachedOnProp, maxDepthReachedAt, maxDepthReachedFromParent]) =>
+    `Max depth (${maxDepthReachedAt}) reached on ${maxDepthReachedFromParent}.${maxDepthReachedOnProp}`;
+const lastPartWarning = (entity: string) => `${entity} doesn't have any more properties availables`;
+const cantBeNestedWarning = (entity: string) => `${entity} can't be nested`;
+
 type SubresourceRouteProps = {
     addSubresource: (entity: string, routeIndex: number, subresource: string) => void;
     removeLastSubresource: (entity: string, routeIndex: number) => void;
@@ -439,15 +444,26 @@ const SubresourceRoute = ({
         parent,
     ]);
     const maxDepthReachedOnIndex = relativeMaxDepths.findIndex(([_, maxDepth]) => currentDepth > maxDepth);
-    const [maxDepthReachedOnProp, maxDepthReachedAt, maxDepthReachedFromParent] =
-        maxDepths[maxDepthReachedOnIndex] || [];
+    const maxDepthInfos = maxDepths[maxDepthReachedOnIndex];
     const hasReachedMaxDepth = maxDepthReachedOnIndex !== -1;
 
     const lastPart = route[route.length - 1] || entity;
     const lastPartProperties = (entities[lastPart]?.properties || []).filter((prop) => entities[prop].canBeNested);
 
-    const isDisabled =
-        hasReachedMaxDepth || !lastPartProperties.length || (route.length && !entities[lastPart].canHaveNested);
+    const hasNoProperties = !lastPartProperties.length;
+    const cantBeNested = route.length && !entities[lastPart].canHaveNested;
+    const isDisabled = hasReachedMaxDepth || hasNoProperties || cantBeNested;
+
+    const disabledWarning = isDisabled
+        ? hasReachedMaxDepth
+            ? maxDepthWarning(maxDepthInfos)
+            : hasNoProperties
+            ? lastPartWarning(lastPart)
+            : cantBeNested
+            ? cantBeNestedWarning(lastPart)
+            : ""
+        : "";
+    // `Max depth (${maxDepthReachedAt}) reached on ${maxDepthReachedFromParent}.${maxDepthReachedOnProp}`
 
     return (
         <Flex direction="row" alignItems="center" width="fit-content" key={entity + routeIndex}>
@@ -468,13 +484,8 @@ const SubresourceRoute = ({
                     }}
                 />
             ))}
-            {hasReachedMaxDepth ? (
-                <Tooltip
-                    hasArrow
-                    aria-label={`Max depth (${maxDepthReachedAt}) reached on ${maxDepthReachedFromParent}.${maxDepthReachedOnProp}`}
-                    label={`Max depth (${maxDepthReachedAt}) reached on ${maxDepthReachedFromParent}.${maxDepthReachedOnProp}`}
-                    placement="bottom"
-                >
+            {isDisabled ? (
+                <Tooltip hasArrow aria-label={disabledWarning} label={disabledWarning} placement="bottom">
                     <Flex width="28px" justifyContent="center" alignItems="center">
                         <Icon name="warning" color="yellow.500" />
                     </Flex>
