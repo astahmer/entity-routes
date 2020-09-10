@@ -33,6 +33,8 @@ import {
     Switch,
     FormLabel,
     Grid,
+    InputLeftAddon,
+    Divider,
 } from "@chakra-ui/core";
 import { BasicDialog } from "./BasicDialog";
 import { Debug } from "./Debug";
@@ -57,6 +59,11 @@ const addValue = (arr: any[], value: any) => (arr || []).concat(value);
 const setValueAt = (arr: any[], value: any, index: number) => [...arr.slice(0, index), value, ...arr.slice(index + 1)];
 const removeValue = (arr: any[], value: any) => arr.filter((item) => item !== value);
 
+const getUniqueRoutes = (routes: string[][]) =>
+    Array.from(new Set(routes.map((item) => item.join("_"))))
+        .filter(Boolean)
+        .map((item) => item.split("_"));
+
 type SubresourcePlaygroundContext = {
     resetEntities: () => void;
     setEntities: (value: Record<string, Entity>) => void;
@@ -73,7 +80,6 @@ type SubresourcePlaygroundContext = {
 const SubresourcePlaygroundContext = createContext<SubresourcePlaygroundContext>(null);
 
 let resetKey = 0;
-// TODO Auto routes generation ?
 export function SubresourcePlayground() {
     const [globalMaxDepth, setGlobalMaxDepth] = useState(2);
     const [entities, setEntities] = useState<Entities>(makeRecordFromKeys(baseEntityNames, defaultEntity));
@@ -85,6 +91,7 @@ export function SubresourcePlayground() {
 
     // Generics
     const addEntity = (name: string) => setEntities((current) => ({ ...current, [name]: defaultEntity }));
+    // Remove entity, remove maxDepth/properties references & cut routes path after the removed entity
     const removeEntity = (name: string) =>
         setEntities((current) =>
             Object.fromEntries(
@@ -132,6 +139,37 @@ export function SubresourcePlayground() {
     // Routes
     const setRoutes = (entity: string, routes: Array<string[]>) => setEntityKeyValue(entity, "routes", routes);
     const addRoute = (entity: string) => setRoutes(entity, [...entities[entity].routes, []]);
+    // TODO check canHaveNested / canBeNested
+    const generateRoutes = () => {
+        // Recursively add every nested route possible from that path on that entity
+        function addNestedRoutes(entity: string, subresource: string, path: string[], routes: string[][]) {
+            const currentPath = path.concat(subresource);
+            const { hasReachedMaxDepth } = getMaxDepthData({ entity, route: path, globalMaxDepth, entities });
+
+            if (hasReachedMaxDepth) {
+                routes.push(path);
+                return;
+            }
+
+            entities[subresource].properties.map((prop) => addNestedRoutes(entity, prop, currentPath, routes));
+        }
+
+        // For each entity, add every possible routes recursively and de-duplicate them
+        const entityRoutes = Object.fromEntries(
+            Object.entries(entities).map(([name, entity]) => {
+                const nestedRoutes = [];
+                entity.properties.map((prop) => addNestedRoutes(name, prop, [], nestedRoutes));
+                return [name, getUniqueRoutes(nestedRoutes)];
+            })
+        );
+
+        // Update each entities.routes
+        setEntities((current) =>
+            Object.fromEntries(
+                Object.entries(current).map(([key, value]) => [key, { ...value, routes: entityRoutes[key] }])
+            )
+        );
+    };
 
     const ctx: SubresourcePlaygroundContext = {
         resetEntities,
@@ -149,10 +187,13 @@ export function SubresourcePlayground() {
 
     return (
         <SubresourcePlaygroundContext.Provider value={ctx} key={resetKey}>
-            <Stack spacing={6} shouldWrapChildren>
-                <Toolbar onSubmit={addEntity} onMaxDepthChange={setGlobalMaxDepth} />
+            <Stack spacing={6} shouldWrapChildren mt="4">
+                <Toolbar onSubmit={addEntity} onMaxDepthChange={setGlobalMaxDepth} generateRoutes={generateRoutes} />
+                <Divider />
                 <PropsByEntities />
+                <Divider />
                 <SubresourceRouteList />
+                <Divider />
                 <Debug json={entities} />
             </Stack>
         </SubresourcePlaygroundContext.Provider>
@@ -180,7 +221,7 @@ function ImportDialog({ onSave }) {
 
     return (
         <>
-            <Button onClick={onOpen}>Import config</Button>
+            <Button onClick={onOpen}>Import</Button>
             <BasicDialog
                 {...{ isOpen, onClose }}
                 title="Import JSON"
@@ -197,7 +238,7 @@ function ImportDialog({ onSave }) {
     );
 }
 
-const Toolbar = ({ onSubmit, onMaxDepthChange }) => {
+const Toolbar = ({ onSubmit, onMaxDepthChange, generateRoutes }) => {
     const { entities, resetEntities, setEntities } = useContext(SubresourcePlaygroundContext);
     const inputRef = useRef<HTMLInputElement>();
 
@@ -216,45 +257,36 @@ const Toolbar = ({ onSubmit, onMaxDepthChange }) => {
             }}
         >
             <Stack direction="row" alignItems="flex-end" spacing="4">
+                <InputGroup size="sm">
+                    <Input
+                        ref={inputRef}
+                        rounded="0"
+                        placeholder="Add new entity name"
+                        name="entityName"
+                        maxWidth={300}
+                    />
+                    <InputRightAddon padding="0">
+                        <IconButton variant="ghost" aria-label="Add new entity" icon="check" size="sm" type="submit" />
+                    </InputRightAddon>
+                </InputGroup>
                 <Stack direction="row">
-                    <Stack spacing={4}>
+                    <NumberInput min={1} size="sm" defaultValue={2} onChange={onMaxDepthChange}>
                         <InputGroup size="sm">
-                            <Input
-                                ref={inputRef}
-                                rounded="0"
-                                placeholder="Add new entity name"
-                                name="entityName"
-                                maxWidth={300}
-                            />
-                            <InputRightAddon padding="0">
-                                <IconButton
-                                    variant="ghost"
-                                    aria-label="Add new entity"
-                                    icon="check"
-                                    size="sm"
-                                    type="submit"
-                                />
-                            </InputRightAddon>
+                            <InputLeftAddon children="Max depth" />
+                            <Input as={() => <NumberInputField width="60px" />} />
                         </InputGroup>
-                    </Stack>
+                        <NumberInputStepper>
+                            <NumberIncrementStepper />
+                            <NumberDecrementStepper />
+                        </NumberInputStepper>
+                    </NumberInput>
                 </Stack>
-                <Box>
-                    Global max depth :
-                    <Stack direction="row">
-                        <NumberInput min={1} size="sm" defaultValue={2} onChange={onMaxDepthChange}>
-                            <NumberInputField pl="2" />
-                            <NumberInputStepper>
-                                <NumberIncrementStepper />
-                                <NumberDecrementStepper />
-                            </NumberInputStepper>
-                        </NumberInput>
-                    </Stack>
-                </Box>
+            </Stack>
+            <Stack direction="row" mt="4" shouldWrapChildren>
                 <Button onClick={resetEntities}>Reset</Button>
                 <ImportDialog onSave={(json) => setEntities(json)} />
-                <Button onClick={onCopy} ml={2}>
-                    {hasCopied ? "Copied" : "Export config"}
-                </Button>
+                <Button onClick={onCopy}>{hasCopied ? "Copied" : "Export"}</Button>
+                <Button onClick={generateRoutes}>Generate all possible route</Button>
             </Stack>
         </Box>
     );
@@ -378,11 +410,13 @@ const SubresourceRouteList = () => {
             )
         );
 
+    // Add subresource part at the entity.route[index]
     const addSubresource = (entity: string, routeIndex: number, subresource: string) =>
         setRoutes(
             entity,
             setValueAt(entities[entity].routes, addValue(entities[entity].routes[routeIndex], subresource), routeIndex)
         );
+    // Remove the last part of a entity.route[index] or remove whole route if route was already empty
     const removeLastSubresource = (entity: string, routeIndex: number) =>
         setRoutes(
             entity,
@@ -408,6 +442,40 @@ const SubresourceRouteList = () => {
     );
 };
 
+/** Mirror API.SubresourceManager behavior with subresources max depths */
+function getMaxDepthData({
+    route,
+    globalMaxDepth,
+    entities,
+    entity: entityName,
+}: {
+    route: string[];
+    globalMaxDepth: number;
+    entities: Record<string, Entity>;
+    entity: string;
+}) {
+    const currentDepth = 1 + route.length;
+    const defaultMaxDepth = globalMaxDepth || 2;
+
+    const maxDepths = route.map((subresource, index) => [
+        subresource,
+        entities[route[index - 1] || entityName]?.maxDepths[subresource] || defaultMaxDepth,
+        route[index - 1] || entityName,
+    ]) as [string, number, string][];
+    const relativeMaxDepths = maxDepths.map(([subresource, maxDepth, parent], depth) => [
+        subresource,
+        maxDepth + depth,
+        parent,
+    ]);
+    // console.log({ route, entities, maxDepths });
+
+    const maxDepthReachedOnIndex = relativeMaxDepths.findIndex(([_, maxDepth]) => currentDepth > maxDepth);
+    const maxDepthInfos = maxDepths[maxDepthReachedOnIndex];
+    const hasReachedMaxDepth = maxDepthReachedOnIndex !== -1;
+
+    return { hasReachedMaxDepth, maxDepthInfos, maxDepthReachedOnIndex };
+}
+
 const maxDepthWarning = ([maxDepthReachedOnProp, maxDepthReachedAt, maxDepthReachedFromParent]) =>
     `Max depth (${maxDepthReachedAt}) reached on ${maxDepthReachedFromParent}.${maxDepthReachedOnProp}`;
 const lastPartWarning = (entity: string) => `${entity} doesn't have any more properties availables`;
@@ -431,21 +499,12 @@ const SubresourceRoute = ({
 }: SubresourceRouteProps) => {
     const { entities, globalMaxDepth } = useContext(SubresourcePlaygroundContext);
 
-    const currentDepth = 1 + route.length;
-    const defaultMaxDepth = globalMaxDepth || 2;
-    const maxDepths = route.map((subresource, index) => [
-        subresource,
-        entities[route[index - 1] || entity]?.maxDepths[subresource] || defaultMaxDepth,
-        route[index - 1] || entity,
-    ]) as [string, number, string][];
-    const relativeMaxDepths = maxDepths.map(([subresource, maxDepth, parent], depth) => [
-        subresource,
-        maxDepth + depth,
-        parent,
-    ]);
-    const maxDepthReachedOnIndex = relativeMaxDepths.findIndex(([_, maxDepth]) => currentDepth > maxDepth);
-    const maxDepthInfos = maxDepths[maxDepthReachedOnIndex];
-    const hasReachedMaxDepth = maxDepthReachedOnIndex !== -1;
+    const { hasReachedMaxDepth, maxDepthInfos, maxDepthReachedOnIndex } = getMaxDepthData({
+        route,
+        globalMaxDepth,
+        entities,
+        entity,
+    });
 
     const lastPart = route[route.length - 1] || entity;
     const lastPartProperties = (entities[lastPart]?.properties || []).filter((prop) => entities[prop].canBeNested);
@@ -454,6 +513,7 @@ const SubresourceRoute = ({
     const cantBeNested = route.length && !entities[lastPart].canHaveNested;
     const isDisabled = hasReachedMaxDepth || hasNoProperties || cantBeNested;
 
+    // Dispaly correct warning based on disabled condition
     const disabledWarning = isDisabled
         ? hasReachedMaxDepth
             ? maxDepthWarning(maxDepthInfos)
@@ -514,6 +574,7 @@ const SubresourceRoute = ({
                             <Icon name="add" />
                         </MenuButton>
                         <MenuList>
+                            {/* TODO Disable part when it would lead to a duplicated route */}
                             {lastPartProperties.map((name) => (
                                 <MenuItem key={name} onClick={() => addSubresource(entity, routeIndex, name)}>
                                     {name}
