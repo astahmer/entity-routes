@@ -69,6 +69,7 @@ type SubresourcePlaygroundContext = {
     setEntities: (value: Record<string, Entity>) => void;
     entities: Record<string, Entity>;
     entityNames: string[];
+    addEntity: (name: string) => void;
     removeEntity: (name: string) => void;
     setMaxDepths: (entity: string, maxDepths: Record<string, number>) => void;
     setBoolean: (entity: string, key: string, value: boolean) => void;
@@ -176,6 +177,7 @@ export function SubresourcePlayground() {
         setEntities,
         entities,
         entityNames,
+        addEntity,
         removeEntity,
         setMaxDepths,
         setProperties,
@@ -324,12 +326,10 @@ const BoolOption = ({ item, name }) => {
 };
 
 const EntityName = ({ item }) => {
-    const { addRoute, removeEntity } = useContext(SubresourcePlaygroundContext);
+    const { removeEntity } = useContext(SubresourcePlaygroundContext);
     return (
         <Tag size="sm" rounded="full" variant="solid" variantColor="cyan">
-            <TagLabel onClick={() => addRoute(item)} cursor="pointer">
-                {item}
-            </TagLabel>
+            <TagLabel> {item}</TagLabel>
             <TagCloseButton onClick={() => removeEntity(item)} />
         </Tag>
     );
@@ -367,7 +367,7 @@ const EntityProp = ({ item, entity, setMaxDepth }) => {
 
 type EntityPropList = { item: string };
 const EntityPropList = ({ item }: EntityPropList) => {
-    const { entities, entityNames, setProperties, setMaxDepths } = useContext(SubresourcePlaygroundContext);
+    const { entities, entityNames, addRoute, setProperties, setMaxDepths } = useContext(SubresourcePlaygroundContext);
 
     const setMaxDepth = (entity: string, property: string, maxDepth: number) =>
         setMaxDepths(entity, {
@@ -377,7 +377,18 @@ const EntityPropList = ({ item }: EntityPropList) => {
 
     return (
         <Stack direction="column" alignItems="center" shouldWrapChildren>
-            <EntityName item={item} />
+            <Stack direction="row">
+                <Tooltip hasArrow aria-label={`Add ${item} route`} label={`Add ${item} route`} placement="bottom">
+                    <IconButton
+                        variant="ghost"
+                        aria-label={`Add ${item} route`}
+                        icon="add"
+                        size="xs"
+                        onClick={() => addRoute(item)}
+                    />
+                </Tooltip>
+                <EntityName item={item} />
+            </Stack>
             <Flex direction="column">
                 <BoolOption item={item} name="canHaveNested" />
                 <BoolOption item={item} name="canBeNested" />
@@ -397,7 +408,7 @@ const EntityPropList = ({ item }: EntityPropList) => {
 };
 
 const SubresourceRouteList = () => {
-    const { entities, entityNames, setRoutes } = useContext(SubresourcePlaygroundContext);
+    const { entities, entityNames, addRoute, setRoutes } = useContext(SubresourcePlaygroundContext);
 
     // Replace current subresource with selected && remove later parts
     const setSubresourceAt = (entity: string, subresource: string, routeIndex: number, propIndex: number) =>
@@ -438,6 +449,26 @@ const SubresourceRouteList = () => {
                     ))
                 )}
             </Stack>
+            <Menu>
+                <MenuButton
+                    as={(props) => (
+                        <Tooltip hasArrow aria-label={"Add route"} label={"Add route"} placement="bottom">
+                            <Button {...props} variant="outline" aria-label="Add route" size="sm" mt="4">
+                                Add route
+                            </Button>
+                        </Tooltip>
+                    )}
+                >
+                    <Icon name="add" />
+                </MenuButton>
+                <MenuList>
+                    {entityNames.map((name) => (
+                        <MenuItem key={name} onClick={() => addRoute(name)}>
+                            {name}
+                        </MenuItem>
+                    ))}
+                </MenuList>
+            </Menu>
         </Box>
     );
 };
@@ -467,7 +498,6 @@ function getMaxDepthData({
         maxDepth + depth,
         parent,
     ]);
-    // console.log({ route, entities, maxDepths });
 
     const maxDepthReachedOnIndex = relativeMaxDepths.findIndex(([_, maxDepth]) => currentDepth > maxDepth);
     const maxDepthInfos = maxDepths[maxDepthReachedOnIndex];
