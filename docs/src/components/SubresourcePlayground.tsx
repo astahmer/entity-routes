@@ -523,7 +523,8 @@ const SubresourceRoute = ({
             ? cantBeNestedWarning(lastPart)
             : ""
         : "";
-    // `Max depth (${maxDepthReachedAt}) reached on ${maxDepthReachedFromParent}.${maxDepthReachedOnProp}`
+
+    const removeSubresourceLabel = route.length ? "Remove last subresource" : "Remove route";
 
     return (
         <Flex direction="row" alignItems="center" width="fit-content" key={entity + routeIndex}>
@@ -585,15 +586,10 @@ const SubresourceRoute = ({
                 </Box>
             )}
 
-            <Tooltip
-                hasArrow
-                aria-label={"Remove last subresource"}
-                label={"Remove last subresource"}
-                placement="bottom"
-            >
+            <Tooltip hasArrow aria-label={removeSubresourceLabel} label={removeSubresourceLabel} placement="bottom">
                 <IconButton
                     variant="ghost"
-                    aria-label="Remove last subresource"
+                    aria-label={removeSubresourceLabel}
                     icon="delete"
                     size="xs"
                     onClick={() => removeLastSubresource(entity, routeIndex)}
