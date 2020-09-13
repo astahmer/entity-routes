@@ -1,4 +1,4 @@
-import { useState, useRef, createContext, useContext, ChangeEvent } from "react";
+import React, { useState, useRef, createContext, useContext, ChangeEvent, useMemo } from "react";
 import {
     Box,
     Stack,
@@ -35,6 +35,11 @@ import {
     Grid,
     InputLeftAddon,
     Divider,
+    Accordion,
+    AccordionHeader,
+    AccordionIcon,
+    AccordionItem,
+    AccordionPanel,
 } from "@chakra-ui/core";
 import { BasicDialog } from "./BasicDialog";
 import { Debug } from "./Debug";
@@ -69,6 +74,7 @@ type SubresourcePlaygroundContext = {
     setEntities: (value: Record<string, Entity>) => void;
     entities: Record<string, Entity>;
     entityNames: string[];
+    entityRoutes: Record<string, string[]>;
     addEntity: (name: string) => void;
     removeEntity: (name: string) => void;
     setMaxDepths: (entity: string, maxDepths: Record<string, number>) => void;
@@ -84,11 +90,19 @@ let resetKey = 0;
 export function SubresourcePlayground() {
     const [globalMaxDepth, setGlobalMaxDepth] = useState(2);
     const [entities, setEntities] = useState<Entities>(makeRecordFromKeys(baseEntityNames, defaultEntity));
-    const entityNames = Object.keys(entities);
     const resetEntities = () => {
         resetKey++;
         setEntities(makeRecordFromKeys(baseEntityNames, defaultEntity));
     };
+
+    const entityNames = Object.keys(entities);
+    const entityRoutes = useMemo(
+        () =>
+            Object.fromEntries(
+                Object.entries(entities).map(([name, entity]) => [name, entity.routes.map((route) => route.join("_"))])
+            ),
+        [entities]
+    );
 
     // Generics
     const addEntity = (name: string) => setEntities((current) => ({ ...current, [name]: defaultEntity }));
@@ -140,17 +154,20 @@ export function SubresourcePlayground() {
     // Routes
     const setRoutes = (entity: string, routes: Array<string[]>) => setEntityKeyValue(entity, "routes", routes);
     const addRoute = (entity: string) => setRoutes(entity, [...entities[entity].routes, []]);
-    // TODO check canHaveNested / canBeNested
     const generateRoutes = () => {
         // Recursively add every nested route possible from that path on that entity
-        function addNestedRoutes(entity: string, subresource: string, path: string[], routes: string[][]) {
-            const currentPath = path.concat(subresource);
-            const { hasReachedMaxDepth } = getMaxDepthData({ entity, route: path, globalMaxDepth, entities });
+        function addNestedRoutes(entity: string, subresource: string, route: string[], routes: string[][]) {
+            const currentPath = route.concat(subresource);
+            const { hasReachedMaxDepth } = getMaxDepthData({ entity, route, globalMaxDepth, entities });
 
-            if (hasReachedMaxDepth) {
-                routes.push(path);
+            const cantHaveNested = route.length && !entities[route[route.length - 1]].canHaveNested;
+            const cantBeNested = route.length && !entities[subresource].canBeNested;
+            if (hasReachedMaxDepth || cantHaveNested || cantBeNested) {
+                routes.push(route);
                 return;
             }
+
+            routes.push(currentPath);
 
             entities[subresource].properties.map((prop) => addNestedRoutes(entity, prop, currentPath, routes));
         }
@@ -177,6 +194,7 @@ export function SubresourcePlayground() {
         setEntities,
         entities,
         entityNames,
+        entityRoutes,
         addEntity,
         removeEntity,
         setMaxDepths,
@@ -193,10 +211,9 @@ export function SubresourcePlayground() {
                 <Toolbar onSubmit={addEntity} onMaxDepthChange={setGlobalMaxDepth} generateRoutes={generateRoutes} />
                 <Divider />
                 <PropsByEntities />
-                <Divider />
+                <Divider my="0" />
                 <SubresourceRouteList />
-                <Divider />
-                <Debug json={entities} />
+                {/* <Debug json={entities} /> */}
             </Stack>
         </SubresourcePlaygroundContext.Provider>
     );
@@ -215,7 +232,7 @@ function ImportDialog({ onSave }) {
             resetKey++;
             onSave(json);
         } catch (error) {
-            setError(error);
+            setError(error.message);
         } finally {
             onClose();
         }
@@ -241,7 +258,7 @@ function ImportDialog({ onSave }) {
 }
 
 const Toolbar = ({ onSubmit, onMaxDepthChange, generateRoutes }) => {
-    const { entities, resetEntities, setEntities } = useContext(SubresourcePlaygroundContext);
+    const { entities, entityNames, addRoute, resetEntities, setEntities } = useContext(SubresourcePlaygroundContext);
     const inputRef = useRef<HTMLInputElement>();
 
     const valueToCopy = JSON.stringify(entities, null, 4);
@@ -289,6 +306,24 @@ const Toolbar = ({ onSubmit, onMaxDepthChange, generateRoutes }) => {
                 <ImportDialog onSave={(json) => setEntities(json)} />
                 <Button onClick={onCopy}>{hasCopied ? "Copied" : "Export"}</Button>
                 <Button onClick={generateRoutes}>Generate all possible route</Button>
+                <Menu>
+                    <MenuButton
+                        as={(props) => (
+                            <Button {...props} aria-label="Add route">
+                                Add route
+                            </Button>
+                        )}
+                    >
+                        <Icon name="add" />
+                    </MenuButton>
+                    <MenuList>
+                        {entityNames.map((name) => (
+                            <MenuItem key={name} onClick={() => addRoute(name)}>
+                                {name}
+                            </MenuItem>
+                        ))}
+                    </MenuList>
+                </Menu>
             </Stack>
         </Box>
     );
@@ -298,14 +333,11 @@ const PropsByEntities = () => {
     const ctx = useContext(SubresourcePlaygroundContext);
 
     return (
-        <Box>
-            Available subresources relation :
-            <Stack direction="row" spacing="50px" shouldWrapChildren flexWrap="wrap">
-                {ctx.entityNames.map((item, i) => (
-                    <EntityPropList key={item + i} item={item} />
-                ))}
-            </Stack>
-        </Box>
+        <Stack direction="row" spacing="50px" shouldWrapChildren flexWrap="wrap">
+            {ctx.entityNames.map((item, i) => (
+                <EntityPropList key={item + i} item={item} />
+            ))}
+        </Stack>
     );
 };
 
@@ -408,7 +440,7 @@ const EntityPropList = ({ item }: EntityPropList) => {
 };
 
 const SubresourceRouteList = () => {
-    const { entities, entityNames, addRoute, setRoutes } = useContext(SubresourcePlaygroundContext);
+    const { entities, entityNames, setRoutes } = useContext(SubresourcePlaygroundContext);
 
     // Replace current subresource with selected && remove later parts
     const setSubresourceAt = (entity: string, subresource: string, routeIndex: number, propIndex: number) =>
@@ -437,39 +469,35 @@ const SubresourceRouteList = () => {
         );
 
     return (
-        <Box>
-            Routes with subresources :
-            <Stack>
-                {entityNames.map((entity, i) =>
-                    entities[entity].routes.map((route, routeIndex) => (
-                        <SubresourceRoute
-                            key={entity + routeIndex}
-                            {...{ entity, addSubresource, removeLastSubresource, setSubresourceAt, route, routeIndex }}
-                        />
-                    ))
-                )}
-            </Stack>
-            <Menu>
-                <MenuButton
-                    as={(props) => (
-                        <Tooltip hasArrow aria-label={"Add route"} label={"Add route"} placement="bottom">
-                            <Button {...props} variant="outline" aria-label="Add route" size="sm" mt="4">
-                                Add route
-                            </Button>
-                        </Tooltip>
-                    )}
-                >
-                    <Icon name="add" />
-                </MenuButton>
-                <MenuList>
-                    {entityNames.map((name) => (
-                        <MenuItem key={name} onClick={() => addRoute(name)}>
-                            {name}
-                        </MenuItem>
-                    ))}
-                </MenuList>
-            </Menu>
-        </Box>
+        <Accordion allowMultiple>
+            <Flex direction="column">
+                {entityNames.map((entity, i) => (
+                    <AccordionItem defaultIsOpen key={i} border={!i && "none"}>
+                        <AccordionHeader>
+                            <Box flex="1" textAlign="left">
+                                {entity} routes
+                            </Box>
+                            <AccordionIcon />
+                        </AccordionHeader>
+                        <AccordionPanel pb={1}>
+                            {entities[entity].routes.map((route, routeIndex) => (
+                                <SubresourceRoute
+                                    key={entity + routeIndex}
+                                    {...{
+                                        entity,
+                                        addSubresource,
+                                        removeLastSubresource,
+                                        setSubresourceAt,
+                                        route,
+                                        routeIndex,
+                                    }}
+                                />
+                            ))}
+                        </AccordionPanel>
+                    </AccordionItem>
+                ))}
+            </Flex>
+        </Accordion>
     );
 };
 
@@ -509,7 +537,7 @@ function getMaxDepthData({
 const maxDepthWarning = ([maxDepthReachedOnProp, maxDepthReachedAt, maxDepthReachedFromParent]) =>
     `Max depth (${maxDepthReachedAt}) reached on ${maxDepthReachedFromParent}.${maxDepthReachedOnProp}`;
 const lastPartWarning = (entity: string) => `${entity} doesn't have any more properties availables`;
-const cantBeNestedWarning = (entity: string) => `${entity} can't be nested`;
+const cantHaveNestedWarning = (entity: string) => `${entity} can't be nested`;
 
 type SubresourceRouteProps = {
     addSubresource: (entity: string, routeIndex: number, subresource: string) => void;
@@ -527,7 +555,7 @@ const SubresourceRoute = ({
     removeLastSubresource,
     setSubresourceAt,
 }: SubresourceRouteProps) => {
-    const { entities, globalMaxDepth } = useContext(SubresourcePlaygroundContext);
+    const { entities, entityRoutes, globalMaxDepth } = useContext(SubresourcePlaygroundContext);
 
     const { hasReachedMaxDepth, maxDepthInfos, maxDepthReachedOnIndex } = getMaxDepthData({
         route,
@@ -540,8 +568,8 @@ const SubresourceRoute = ({
     const lastPartProperties = (entities[lastPart]?.properties || []).filter((prop) => entities[prop].canBeNested);
 
     const hasNoProperties = !lastPartProperties.length;
-    const cantBeNested = route.length && !entities[lastPart].canHaveNested;
-    const isDisabled = hasReachedMaxDepth || hasNoProperties || cantBeNested;
+    const cantHaveNested = route.length && !entities[lastPart].canHaveNested;
+    const isDisabled = hasReachedMaxDepth || hasNoProperties || cantHaveNested;
 
     // Dispaly correct warning based on disabled condition
     const disabledWarning = isDisabled
@@ -549,8 +577,8 @@ const SubresourceRoute = ({
             ? maxDepthWarning(maxDepthInfos)
             : hasNoProperties
             ? lastPartWarning(lastPart)
-            : cantBeNested
-            ? cantBeNestedWarning(lastPart)
+            : cantHaveNested
+            ? cantHaveNestedWarning(lastPart)
             : ""
         : "";
 
@@ -605,9 +633,12 @@ const SubresourceRoute = ({
                             <Icon name="add" />
                         </MenuButton>
                         <MenuList>
-                            {/* TODO Disable part when it would lead to a duplicated route */}
                             {lastPartProperties.map((name) => (
-                                <MenuItem key={name} onClick={() => addSubresource(entity, routeIndex, name)}>
+                                <MenuItem
+                                    key={name}
+                                    onClick={() => addSubresource(entity, routeIndex, name)}
+                                    isDisabled={entityRoutes[entity].includes(route.concat(name).join("_"))}
+                                >
                                     {name}
                                 </MenuItem>
                             ))}
