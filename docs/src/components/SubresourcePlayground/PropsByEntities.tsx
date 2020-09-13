@@ -119,7 +119,7 @@ function EntityPropList({ item }) {
             >
                 <Stack direction="column" mb="4">
                     {entityNames.map((entity, i) => (
-                        <EntityProp {...{ item, setMaxDepth, entity, i }} />
+                        <EntityProp key={entity + i} {...{ item, setMaxDepth, entity, i }} />
                     ))}
                 </Stack>
             </CheckboxGroup>

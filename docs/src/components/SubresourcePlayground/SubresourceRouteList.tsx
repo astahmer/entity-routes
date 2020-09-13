@@ -61,7 +61,12 @@ export function SubresourceRouteList() {
         <Accordion allowMultiple>
             <Flex direction="column">
                 {entityNames.map((entity, i) => (
-                    <AccordionItem defaultIsOpen key={i} border={!i && "none"}>
+                    <AccordionItem
+                        defaultIsOpen
+                        key={i}
+                        borderTop={!i && "none"}
+                        borderBottom={i === entityNames.length - 1 && "none"}
+                    >
                         <AccordionHeader>
                             <Box flex="1" textAlign="left">
                                 {entity} routes

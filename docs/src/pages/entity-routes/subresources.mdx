@@ -86,15 +86,11 @@ The [`defaultEntityRouteOptions`](/definitions#const-defaultentityrouteoptions) 
 ### Max depth
 
 You can control the max depth using the maxDepth key of [SubresourceOptions](/definitions#subresourceoptions). Each
-maxDepth is independant from each other.
+maxDepth is independant from each other. Feel free to play with it on the playground below.
+
+## Playground
 
 <SubresourcePlayground />
-
----
-
-registerSubresource(User, Article, "articles", { maxDepth: 5 }); registerSubresource(Article, Comment, "comments");
-registerSubresource(Comment, Upvote, "upvotes", { maxDepth: 3 }); That means you could have a `maxDepth = 5` on
-`User.articles` subresource but still no
 
 ## Single relation subresource
 
