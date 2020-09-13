@@ -15,12 +15,14 @@ import { SubresourceRouteList } from "./SubresourceRouteList";
 import { Toolbar } from "./Toolbar";
 
 let resetKey = 0;
-export function SubresourcePlayground() {
+export function SubresourcePlayground({ initialState }) {
     const [globalMaxDepth, setGlobalMaxDepth] = useState(2);
-    const [entities, setEntities] = useState<Entities>(makeRecordFromKeys(baseEntityNames, defaultEntity));
-    const resetEntities = () => {
+    const [entities, setEntities] = useState<Entities>(
+        initialState || makeRecordFromKeys(baseEntityNames, defaultEntity)
+    );
+    const resetEntities = (state) => {
         resetKey++;
-        setEntities(makeRecordFromKeys(baseEntityNames, defaultEntity));
+        setEntities(state || makeRecordFromKeys(baseEntityNames, defaultEntity));
     };
 
     const entityNames = useMemo(() => Object.keys(entities), [entities]);

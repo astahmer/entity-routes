@@ -70,8 +70,8 @@ export function Toolbar({ onSubmit, onMaxDepthChange, generateRoutes }) {
                 </Stack>
             </Stack>
             <Stack direction="row" mt="4" shouldWrapChildren>
-                <Button onClick={resetEntities}>Reset</Button>
-                <ImportDialog onSave={(json) => setEntities(json)} />
+                <Button onClick={() => resetEntities()}>Reset</Button>
+                <ImportDialog onSave={(json) => resetEntities(json)} />
                 <Button onClick={onCopy}>{hasCopied ? "Copied" : "Export"}</Button>
                 <Button onClick={generateRoutes}>Generate all possible route</Button>
                 <Menu>
@@ -107,7 +107,6 @@ function ImportDialog({ onSave }) {
         try {
             const json = JSON.parse(value);
             console.log(json);
-            // resetKey++;
             onSave(json);
         } catch (error) {
             setError(error.message);

@@ -36,7 +36,7 @@ export const getUniqueRoutes = (routes: string[][]) =>
         .map((item) => item.split("_"));
 
 export type SubresourcePlaygroundContext = {
-    resetEntities: () => void;
+    resetEntities: (value?: Record<string, Entity>) => void;
     setEntities: (value: Record<string, Entity>) => void;
     entities: Record<string, Entity>;
     entityNames: string[];
