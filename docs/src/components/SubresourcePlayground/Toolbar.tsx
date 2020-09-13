@@ -73,7 +73,7 @@ export function Toolbar({ onSubmit, onMaxDepthChange, generateRoutes }) {
                 <Button onClick={() => resetEntities()}>Reset</Button>
                 <ImportDialog onSave={(json) => resetEntities(json)} />
                 <Button onClick={onCopy}>{hasCopied ? "Copied" : "Export"}</Button>
-                <Button onClick={generateRoutes}>Generate all possible route</Button>
+                <Button onClick={generateRoutes}>Generate all possible routes</Button>
                 <Menu>
                     <MenuButton
                         as={(props) => (

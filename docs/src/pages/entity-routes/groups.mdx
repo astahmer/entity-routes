@@ -33,6 +33,9 @@ Or you can expose a property globally (for **any** entity [`route scope`](/entit
 [**operations**](/entity-routes/operations/) :
 
 ```typescript
+// The decorated property value will be insertable
+// when creating this entity from any POST:/xxx route
+// and also returned in any GET:/xxx/:xxxId
 @Groups(["create", "details"])
 ```
 
@@ -117,7 +120,9 @@ class User {
 }
 ```
 
-### Nested property
+### Relations
+
+### IRI
 
 Given a `User` entity described here.
 
@@ -144,10 +149,39 @@ export class Role extends AbstractEntity {
 }
 ```
 
-To expose a nested property, you need to decorate with [`@Groups`](/definitions#groups) both the relation and the
-property with the same [**operation**](/entity-routes/operations/).
+[Remember](/entity-routes/introduction#1-creating-your-entities), since every entities should extend from the
+GenericEntity interface and always have the `id` property exposed, you can expose your relations IRI by just decorating
+the relation with `@Groups` on the parent entity.
 
-For this example, let's expose the user's role.title property for the details route (`GET:/user/xxx route`).
+```typescript {2}
+class User extends AbstractEntity {
+    @Groups({ user: ["details"] })
+    @ManyToOne(() => Role)
+    role: Role;
+}
+```
+
+If no other properties than `id` are exposed on role for the user.details `route scope`, you will end up with a response
+such as :
+
+```json {8}
+{
+    "@context": {
+        "operation": "details",
+        "entity": "user"
+    },
+    "id": 1,
+    "name": "Alex",
+    "role": "/api/role/1"
+}
+```
+
+### Nested property
+
+To expose a nested property, you need to decorate with [`@Groups`](/definitions#groups) both the relation (on the parent
+entity) and the property (of the relation) with the same `route scope`.
+
+For this example, let's expose the user's role.title property for the details route (`GET:/user/xxx` route).
 
 ```typescript {2}
 class User extends AbstractEntity {
@@ -165,8 +199,84 @@ class Role extends AbstractEntity {
 }
 ```
 
-That's it ! The user details route will contain a role object with a title property inside. This works the exact same
-way with a property that is a collection
+That's it ! The user details route (`GET:/user/1`) will contain a role object with a title property inside :
+
+```json {8-11}
+{
+    "@context": {
+        "operation": "details",
+        "entity": "user"
+    },
+    "id": 1,
+    "name": "Alex",
+    "role": {
+        "id": 1,
+        "title": "Admin"
+    }
+}
+```
+
+This works the exact same way with a property that is a collection
 ([`OneToMany`](https://typeorm.io/#/many-to-one-one-to-many-relations)/[`ManyToMany`](https://typeorm.io/#/many-to-many-relations))
 instead of a single relation
 ([`OneToOne`](https://typeorm.io/#/one-to-one-relations)/[`ManyToOne`](https://typeorm.io/#/many-to-one-one-to-many-relations)).
+
+Still, for the sake of it let's have an example using User/Articles entities. Let's expose the user's articles.title
+property for the list route (`GET:/user/xxx` route).
+
+```typescript {2}
+class User extends AbstractEntity {
+    @Groups({ user: ["details"] })
+    @Subresource(() => Article)
+    @OneToMany(() => Article, (article) => article.author)
+    articles: Article[];
+}
+```
+
+```typescript {2}
+class Article extends AbstractEntity {
+    @Groups({ user: ["details"] })
+    @Column()
+    title: string;
+
+    @Column()
+    content: string;
+
+    @ManyToOne(() => User, (user) => user.articles)
+    author: User;
+}
+```
+
+And you would end up with this kind of response :
+
+```json {6-11}
+{
+    "@context": {
+        "operation": "details",
+        "entity": "user"
+    },
+    "articles": [
+        {
+            "id": 1,
+            "title": "First article"
+        }
+    ],
+    "id": 1,
+    "name": "Alex"
+}
+```
+
+Of course, if you hadn't exposed the articles.title property while keeping user.articles exposed, you would only have
+the articles IRI returned :
+
+```json {6}
+{
+    "@context": {
+        "operation": "details",
+        "entity": "user"
+    },
+    "articles": ["/api/article/1"],
+    "id": 1,
+    "name": "Alex"
+}
+```

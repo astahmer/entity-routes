@@ -64,7 +64,7 @@ second argument.
 <DocAlert status="info">
 
 -   By just specifying "create" as [`SubresourceOperation`](/definitions#subresourceoperation), only the
-    `POST:/users/:userId/articles` would be generated.
+    `POST:/users/:userId/articles` would be generated. You get the idea, this works the same for others operations.
 -   A single relation should use the `details` [`SubresourceOperation`](/definitions#subresourceoperation) whereas a
     collection should use the `list` [`SubresourceOperation`](/definitions#subresourceoperation).
 
@@ -86,9 +86,19 @@ The [`defaultEntityRouteOptions`](/definitions#const-defaultentityrouteoptions) 
 ### Max depth
 
 You can control the max depth using the maxDepth key of [SubresourceOptions](/definitions#subresourceoptions). Each
-maxDepth is independant from each other. Feel free to play with it on the playground below.
+maxDepth is independant from each other. If no max depth is defined, it will fallback to the
+`defaultSubresourceMaxDepthLvl` of `EntityRouteOptions`, and if somehow no `defaultSubresourceMaxDepthLvl` is defined,
+it will default to 2.
 
 ## Playground
+
+Feel free to play with the playground below to experience how max depths works.
+
+The routes are intentionnaly not all added initially, you can add them yourself by adding a route using the "+" button
+next to the entity name tags, and then selecting each subresource properties you want in your routes.
+
+Or you can just click on "Generate all possible routes" and see each possibilities for the config defined above. You can
+also hover on the warning icon to see the reason why the subresource can not be nested further.
 
 <SubresourcePlayground />
 
