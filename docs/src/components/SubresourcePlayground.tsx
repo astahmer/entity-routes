@@ -538,6 +538,7 @@ const maxDepthWarning = ([maxDepthReachedOnProp, maxDepthReachedAt, maxDepthReac
     `Max depth (${maxDepthReachedAt}) reached on ${maxDepthReachedFromParent}.${maxDepthReachedOnProp}`;
 const lastPartWarning = (entity: string) => `${entity} doesn't have any more properties availables`;
 const cantHaveNestedWarning = (entity: string) => `${entity} can't be nested`;
+const allSubRoutesAlreadyAddedWarning = () => `All sub routes are already added`;
 
 type SubresourceRouteProps = {
     addSubresource: (entity: string, routeIndex: number, subresource: string) => void;
@@ -569,7 +570,10 @@ const SubresourceRoute = ({
 
     const hasNoProperties = !lastPartProperties.length;
     const cantHaveNested = route.length && !entities[lastPart].canHaveNested;
-    const isDisabled = hasReachedMaxDepth || hasNoProperties || cantHaveNested;
+    const allSubRoutesAlreadyAdded = lastPartProperties.every((name) =>
+        entityRoutes[entity].includes(route.concat(name).join("_"))
+    );
+    const isDisabled = hasReachedMaxDepth || hasNoProperties || cantHaveNested || allSubRoutesAlreadyAdded;
 
     // Dispaly correct warning based on disabled condition
     const disabledWarning = isDisabled
@@ -579,6 +583,8 @@ const SubresourceRoute = ({
             ? lastPartWarning(lastPart)
             : cantHaveNested
             ? cantHaveNestedWarning(lastPart)
+            : allSubRoutesAlreadyAdded
+            ? allSubRoutesAlreadyAddedWarning()
             : ""
         : "";
 
