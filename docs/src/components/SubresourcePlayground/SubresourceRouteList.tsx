@@ -31,6 +31,8 @@ import {
 export function SubresourceRouteList() {
     const { entities, entityNames, setRoutes } = useContext(SubresourcePlaygroundContext);
 
+    const entitiesWithRoutes = entityNames.filter((entity) => entities[entity].routes.length);
+
     // Replace current subresource with selected && remove later parts
     const setSubresourceAt = (entity: string, subresource: string, routeIndex: number, propIndex: number) =>
         setRoutes(
@@ -60,12 +62,12 @@ export function SubresourceRouteList() {
     return (
         <Accordion allowMultiple>
             <Flex direction="column">
-                {entityNames.map((entity, i) => (
+                {entitiesWithRoutes.map((entity, i) => (
                     <AccordionItem
                         defaultIsOpen
                         key={i}
                         borderTop={!i && "none"}
-                        borderBottom={i === entityNames.length - 1 && "none"}
+                        borderBottom={i === entitiesWithRoutes.length - 1 && "none"}
                     >
                         <AccordionHeader>
                             <Box flex="1" textAlign="left">
