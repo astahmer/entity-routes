@@ -59,7 +59,7 @@ export function Toolbar({ onSubmit, onMaxDepthChange, generateRoutes }) {
                 <Stack direction="row">
                     <NumberInput min={1} size="sm" defaultValue={2} onChange={onMaxDepthChange}>
                         <InputGroup size="sm">
-                            <InputLeftAddon children="Max depth" />
+                            <InputLeftAddon children="Global max depth" />
                             <Input as={() => <NumberInputField width="60px" />} />
                         </InputGroup>
                         <NumberInputStepper>

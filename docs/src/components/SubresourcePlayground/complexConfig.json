@@ -1,0 +1,50 @@
+{
+    "User": {
+        "maxDepths": {
+            "User": 3,
+            "Article": 5,
+            "Manager": 3
+        },
+        "properties": ["Article", "Comment", "Manager"],
+        "routes": [["Article"], ["Comment"], ["Manager"]],
+        "canBeNested": true,
+        "canHaveNested": true
+    },
+    "Article": {
+        "maxDepths": {
+            "User": 4
+        },
+        "properties": ["User", "Comment"],
+        "routes": [["User"], ["Comment"]],
+        "canHaveNested": true,
+        "canBeNested": true
+    },
+    "Comment": {
+        "maxDepths": {
+            "Article": 2,
+            "Upvote": 3
+        },
+        "properties": ["Article", "User", "Upvote"],
+        "routes": [["Article"], ["User"], ["Upvote"]],
+        "canHaveNested": true,
+        "canBeNested": true
+    },
+    "Upvote": {
+        "maxDepths": {
+            "User": 1
+        },
+        "properties": ["User", "Comment"],
+        "routes": [["User"], ["Comment"]],
+        "canBeNested": true,
+        "canHaveNested": true
+    },
+    "Manager": {
+        "maxDepths": {
+            "Article": 5
+        },
+        "properties": ["Article"],
+        "routes": [["Article"]],
+        "canBeNested": true,
+        "canHaveNested": true
+    }
+}
