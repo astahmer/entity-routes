@@ -182,6 +182,7 @@ export const DokzCode = ({ children, className, isOpen, preProps, ...rest }) => 
                                     aria-label="anchor"
                                     as="a"
                                     href={`#${rest.codeBlockIdentifier}-line-${i + 1}`}
+                                    userSelect="none"
                                 >
                                     {i + 1}
                                 </Link>
