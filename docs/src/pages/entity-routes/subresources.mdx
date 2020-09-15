@@ -102,7 +102,7 @@ also hover on the warning icon to see the reason why the subresource can not be 
 
 <SubresourcePlayground />
 
-## Single relation subresource
+## With single relations
 
 The example above and most use-cases of subresources will be for collection relation
 ([`OneToMany`](https://typeorm.io/#/many-to-one-one-to-many-relations)/[`ManyToMany`](https://typeorm.io/#/many-to-many-relations)).
@@ -125,7 +125,7 @@ By decorating the `config` property with the [@Subresource](/definitions#subreso
     no `config`.id is given !)
 -   `DELETE:/users/:userId/config`, which will allow you to remove the relation between the given `user`/`config`
 
-## Subresources formating in response
+## Format in response
 
 With the [`EntityRouteOptions`](/definitions#entityrouteoptions) key `shouldSetSubresourcesIriOnItem`, the corresponding
 subresources IRI are added for each items having subresources (without exposing them through
@@ -156,50 +156,43 @@ export class User extends AbstractEntity {
 @EntityRoute()
 @Entity()
 export class Article extends AbstractEntity {
-    @Groups("basic")
-    @Column()
-    title: string;
-
-    @Groups("basic")
-    @Column()
-    content: string;
-
-    @Groups("basic")
     @ManyToOne(() => User, (user) => user.articles)
     author: User;
+
+    @Groups({ user: ["details"] })
+    @Column()
+    title: string;
 }
 ```
 
 Response on user details :
 
-```json {6} bottomLeft="GET:/users/1" bottomRight="A link to the articles subresource"
+```json {6} bottomLeft="GET:/users/1" bottomRight="The article property is an array of IRI"
 {
     "@context": {
         "operation": "details",
         "entity": "user"
     },
-    "articles": "/api/users/1/articles",
+    "articles": ["/api/users/1/articles"],
     "id": 1,
     "name": "Alex"
 }
 ```
 
-And that's what would happen if you exposed properties from that subresource relation (with
-[`@Groups`](/definitions#groups)):
+And if you exposed properties from that subresource relation (with [`@Groups`](/definitions#groups)):
 
 ```typescript {3} minimal
 class User {
-    // ...
-    @Groups("basic")
+    @Groups({ user: ["details"] })
     @Subresource(() => Article)
     @OneToMany(() => Article, (article) => article.author)
     articles: Article[];
 }
 ```
 
-Response on user details route with `User.articles` exposed :
+This is how the response would look like with `User.articles` exposed :
 
-```json
+```json {6-11} bottomLeft="GET:/users/1" bottomRight="The article property is an array of object with every nested properties of article exposed"
 {
     "@context": {
         "operation": "details",
@@ -207,8 +200,6 @@ Response on user details route with `User.articles` exposed :
     },
     "articles": [
         {
-            "author": "/api/users/1",
-            "content": "Lorem ipsum",
             "id": 1,
             "title": "First article"
         }

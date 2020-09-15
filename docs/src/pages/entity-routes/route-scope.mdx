@@ -3,6 +3,7 @@ title: Route Scope
 ---
 
 import { DocAlert } from "@/components";
+import { Tabs, TabList, TabPanels, Tab, TabPanel } from "@chakra-ui/core";
 
 Let's start by defining what we call a **route scope**.
 
@@ -18,26 +19,42 @@ properties on that scope.
 
 These are the routes generated from the [Quick start example](../getting-started/quick-start) :
 
-| Verb   | Path                                  | Entity  | Operation |
-| ------ | ------------------------------------- | ------- | --------- |
-| POST   | /users                                | User    | create    |
-| POST   | /users/mapping                        | User    | create    |
-| PUT    | /users/:id(\d+)                       | User    | update    |
-| PUT    | /users/:id(\d+)/mapping               | User    | update    |
-| GET    | /users/:id(\d+)                       | User    | get       |
-| GET    | /users/:id(\d+)/mapping               | User    | get       |
-| GET    | /users                                | User    | list      |
-| GET    | /users/mapping                        | User    | list      |
-| DELETE | /users/:id(\d+)                       | User    | delete    |
-| POST   | /users/:UserId(\d+)/articles          | Article | create    |
-| GET    | /users/:UserId(\d+)/articles          | Article | list      |
-| DELETE | /users/:UserId(\d+)/articles/:id(\d+) | Article | delete    |
+| Verb   | Path                                  | Entity  | Operation | Route scope         |
+| ------ | ------------------------------------- | ------- | --------- | ------------------- |
+| POST   | /users                                | User    | create    | user.create         |
+| POST   | /users/mapping                        | User    | create    | user.create.mapping |
+| PUT    | /users/:id(\d+)                       | User    | update    | user.update         |
+| PUT    | /users/:id(\d+)/mapping               | User    | update    | user.update.mapping |
+| GET    | /users/:id(\d+)                       | User    | get       | user.get            |
+| GET    | /users/:id(\d+)/mapping               | User    | get       | user.get.mapping    |
+| GET    | /users                                | User    | list      | user.list           |
+| GET    | /users/mapping                        | User    | list      | user.list.mapping   |
+| DELETE | /users/:id(\d+)                       | User    | delete    | user.delete         |
+| POST   | /users/:UserId(\d+)/articles          | Article | create    | article.create      |
+| GET    | /users/:UserId(\d+)/articles          | Article | list      | article.list        |
+| DELETE | /users/:UserId(\d+)/articles/:id(\d+) | Article | delete    | article.delete      |
 
 <DocAlert status="info" mt="20px">
 
 The route main entity for subresources routes is its relation entity, here it is `Article` and not `User`.
 
 </DocAlert>
+
+This also means that subresources share the same route scope as their property entity router. For example, if you had an
+`EntityRouter` set up on the `Article` entity with `["create", "update", "list"]` **operations**, you would have those
+routes generated :
+
+| Verb | Path                       | Entity  | Operation | Route scope            |
+| ---- | -------------------------- | ------- | --------- | ---------------------- |
+| POST | /articles                  | Article | create    | article.create         |
+| POST | /articles/mapping          | Article | create    | article.create.mapping |
+| PUT  | /articles/:id(\d+)         | Article | update    | article.update         |
+| PUT  | /articles/:id(\d+)/mapping | Article | update    | article.update.mapping |
+| GET  | /articles                  | Article | list      | article.list           |
+| GET  | /articles/mapping          | Article | list      | article.list.mapping   |
+
+So, if you need to retrieve a subresource route mapping, it's actually just the subresource entity mapping for the same
+operation you're looking for !
 
 ## Exposing properties
 
@@ -62,12 +79,63 @@ This mapping route will give you the response schema expected on the actual rout
 
 <DocAlert status="info" mt="20px">
 
-There is a `pretty` query parameter available to make it less verbose, it looks like a GraphQL request body, as you can
-see below.
+There is a `pretty` query parameter (?pretty=true) available to make it less verbose, it looks kind of like a GraphQL
+request body, as you can see below.
 
 </DocAlert>
 
-TODO
+<Tabs>
+  <TabList>
+    <Tab>Mapping</Tab>
+    <Tab>Pretty mapping</Tab>
+  </TabList>
+
+  <TabPanels>
+    <TabPanel>
+
+```json
+{
+    "context": {
+        "operation": "details.mapping",
+        "entity": "user"
+    },
+    "routeMapping": {
+        "selectProps": ["name", "id"],
+        "relationProps": ["articles"],
+        "exposedProps": ["name", "id", "articles"],
+        "mapping": {
+            "articles": {
+                "selectProps": ["id"],
+                "relationProps": [],
+                "exposedProps": ["id"],
+                "mapping": {}
+            }
+        }
+    }
+}
+```
+
+</TabPanel>
+<TabPanel>
+
+```json
+{
+    "context": {
+        "operation": "details.mapping",
+        "entity": "user"
+    },
+    "routeMapping": {
+        "name": "String",
+        "id": "Number",
+        "articles": "@id[]"
+    }
+}
+```
+
+</TabPanel>
+
+  </TabPanels>
+</Tabs>
 
 ## Scoped Validation
 

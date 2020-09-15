@@ -10,6 +10,7 @@ import { SaveItemArgs } from "@/database/Persistor";
 import { RequestContext } from "@/router/MiddlewareMaker";
 
 @Service()
+/** Clean the request body by removing any property not mapped for that route scope */
 export class Cleaner {
     get mappingManager() {
         return Container.get(MappingManager);

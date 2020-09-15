@@ -27,8 +27,9 @@ accordingly or/and by passing an array of property paths.
 )
 ```
 
-In this example the firstName property will default to `STARTS_WITH` unless it is overriden by specifiying another
-[`StrategyType`](/definitions#strategytype) directly in the request.
+In this example the `firstName` property will default to `STARTS_WITH` unless it is overriden by specifiying another
+[`StrategyType`](/definitions#strategytype) directly in the request, whereas the `role.identifier` property will default
+to `CONTAINS` strategy, unless overriden direclty in the request.
 
 If neither of them satisfies your need, you can always make your own custom filter by extending the
 [`AbstractFilter`](/definitions/classes/abstractfilter).
