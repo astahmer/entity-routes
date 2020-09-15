@@ -177,6 +177,8 @@ export type EntityRouteOptions = {
     defaultMaxDepthLvl?: number;
     /** In case of max depth reached on a relation, should it at retrieve its id and then stop instead of just stopping ? */
     shouldMaxDepthReturnRelationPropsId?: boolean;
+    /** Allow to opt-out of IRI's and directly return ids instead */
+    useIris?: boolean;
     /** In case of a relation with no other mapped props (from groups) for a request: should it unwrap "relation { id }" to relation = id ? */
     shouldEntityWithOnlyIdBeFlattenedToIri?: boolean;
     /** Should set subresource IRI for prop decorated with @Subresource */

@@ -156,7 +156,19 @@ describe("Formater", () => {
             });
         });
 
-        it("Subresource (comments) should have been added", async () => {
+        it("Subresource (comments) as iris should have been added", async () => {
+            const entityMetadata = getRepository(User).metadata;
+
+            const formatedWithSubresource = await formater.formatItem({
+                item,
+                operation: "details",
+                entityMetadata,
+                options: { shouldSetSubresourcesIriOnItem: true, useIris: true },
+            });
+            expect(formatedWithSubresource.comments).toEqual("/api/user/1/comments");
+        });
+
+        it("Subresource (comments) as ids should have been added", async () => {
             const entityMetadata = getRepository(User).metadata;
 
             const formatedWithSubresource = await formater.formatItem({
@@ -165,7 +177,7 @@ describe("Formater", () => {
                 entityMetadata,
                 options: { shouldSetSubresourcesIriOnItem: true },
             });
-            expect(formatedWithSubresource.comments).toEqual("/api/user/1/comments");
+            expect(formatedWithSubresource.comments).toEqual(1);
         });
 
         it("Relations (articles) should have been flattened to iri", async () => {
@@ -175,9 +187,21 @@ describe("Formater", () => {
                 item,
                 operation: "details",
                 entityMetadata,
-                options: { shouldEntityWithOnlyIdBeFlattenedToIri: true },
+                options: { shouldEntityWithOnlyIdBeFlattenedToIri: true, useIris: true },
             });
             expect(formatedWithFlatIri.articles).toEqual(["/api/article/1", "/api/article/2"]);
+        });
+
+        it("Relations (articles) should have been flattened to id", async () => {
+            const entityMetadata = getRepository(User).metadata;
+
+            const formatedWithFlatIri = await formater.formatItem({
+                item,
+                operation: "details",
+                entityMetadata,
+                options: { shouldEntityWithOnlyIdBeFlattenedToIri: true },
+            });
+            expect(formatedWithFlatIri.articles).toEqual([1, 2]);
         });
 
         it("return unregistered class objects (!entity) untouched", async () => {
@@ -217,12 +241,12 @@ describe("Formater", () => {
                 item,
                 operation: "details",
                 entityMetadata,
-                options: { shouldEntityWithOnlyIdBeFlattenedToIri: true },
+                options: { shouldEntityWithOnlyIdBeFlattenedToIri: true, useIris: true },
             };
             const flattenedResult = await formater.formatItem(args);
             const result = await formater.formatItem({
                 ...args,
-                options: { shouldEntityWithOnlyIdBeFlattenedToIri: true, shouldOnlyFlattenNested: true },
+                options: { shouldEntityWithOnlyIdBeFlattenedToIri: true, shouldOnlyFlattenNested: true, useIris: true },
             });
 
             expect(flattenedResult).toEqual("/api/article/123");

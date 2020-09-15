@@ -77,7 +77,7 @@ export class Formater {
 
         // Can only flatten self if it has 1 key (id) & no computed props exposed
         // Also check that we are in a nested prop rather than root if shouldOnlyFlattenNested is true
-        if (shouldFlatten) return idToIRI(entityMetadata, item.id) as any;
+        if (shouldFlatten) return options?.useIris ? (idToIRI(entityMetadata, item.id) as any) : item.id;
 
         // If clone is null that means we are at item's root
         if (!clone) clone = {};
@@ -142,7 +142,7 @@ export class Formater {
         }
 
         if (options.shouldSetSubresourcesIriOnItem) {
-            this.setSubresourcesIriOnItem(clone, entityMetadata);
+            this.setSubresourcesIriOnItem(clone, entityMetadata, { useIris: options?.useIris });
         }
 
         promises.push(makePromise(item, clone, getRepository(item.constructor.name).metadata));
@@ -167,13 +167,19 @@ export class Formater {
     }
 
     /** For each item's subresources, add their corresponding IRIs to this item */
-    private setSubresourcesIriOnItem<Entity extends GenericEntity>(item: Entity, entityMetadata: EntityMetadata) {
+    private setSubresourcesIriOnItem<Entity extends GenericEntity>(
+        item: Entity,
+        entityMetadata: EntityMetadata,
+        options?: Pick<FormaterOptions, "useIris">
+    ) {
         const subresourceProps = getRouteSubresourcesMetadata(entityMetadata.target as Function).properties;
 
         let key;
         for (key in subresourceProps) {
             if (!item[key as keyof Entity]) {
-                (item as any)[key as keyof Entity] = idToIRI(entityMetadata, item.id) + "/" + key;
+                (item as any)[key as keyof Entity] = options?.useIris
+                    ? idToIRI(entityMetadata, item.id) + "/" + key
+                    : item.id;
             }
         }
     }
@@ -219,7 +225,7 @@ export const getComputedPropMethodAndKey = (computed: string) => {
 
 export type FormaterOptions = Pick<
     EntityRouteOptions,
-    "shouldEntityWithOnlyIdBeFlattenedToIri" | "shouldSetSubresourcesIriOnItem"
+    "useIris" | "shouldEntityWithOnlyIdBeFlattenedToIri" | "shouldSetSubresourcesIriOnItem"
 > & { shouldOnlyFlattenNested?: boolean };
 export type FormaterArgs<Entity extends GenericEntity = GenericEntity> = Required<
     Pick<RequestContext<Entity>, "operation">

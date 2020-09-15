@@ -57,6 +57,7 @@ export async function makeEntityRouters<T extends AnyFunction = any>({
 export const defaultEntityRouteOptions: EntityRouteOptions = {
     isMaxDepthEnabledByDefault: true,
     defaultMaxDepthLvl: 2,
+    useIris: true,
     shouldMaxDepthReturnRelationPropsId: true,
     shouldEntityWithOnlyIdBeFlattenedToIri: true,
     shouldSetSubresourcesIriOnItem: true,
