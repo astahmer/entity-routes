@@ -1,0 +1,25 @@
+{
+    "routes": [
+        { "name": "index.md", "title": "Features" },
+        { "name": "getting-started" },
+        {
+            "name": "entity-routes",
+            "routes": [
+                { "name": "introduction" },
+                { "name": "route-scope" },
+                { "name": "operations" },
+                { "name": "groups", "routes": [{ "name": "definitions" }, { "name": "examples" }] },
+                { "name": "subresources" },
+                { "name": "filters" },
+                { "name": "decorators" },
+                { "name": "request-context" },
+                { "name": "middlewares" },
+                { "name": "hooks" },
+                { "name": "request-lifecycle" }
+            ]
+        },
+        { "name": "internals" },
+        { "name": "compatibility" },
+        { "name": "definitions", "routes": [{ "name": "index.md" }] }
+    ]
+}

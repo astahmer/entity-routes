@@ -30,26 +30,6 @@ export default function App(props) {
                 githubUrl="astahmer/entity-routes/docs"
                 branch="main"
                 initialColorMode="dark"
-                sidebarOrdering={{
-                    "index.md": true,
-                    "getting-started": true,
-                    "entity-routes": {
-                        introduction: true,
-                        "route-scope": true,
-                        operations: true,
-                        groups: true,
-                        subresources: true,
-                        filters: true,
-                        decorators: true,
-                        "request-context": true,
-                        middlewares: true,
-                        hooks: true,
-                        "request-lifecycle": true,
-                    },
-                    internals: true,
-                    compatibility: true,
-                    definitions: true,
-                }}
                 mdxComponents={{
                     code: Code,
                     table: Table,

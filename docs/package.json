@@ -24,12 +24,13 @@
         "@chakra-ui/core": "^0.8.0",
         "@emotion/core": "^10.0.28",
         "@emotion/styled": "^10.0.27",
-        "dokz": "^1.0.70",
+        "dokz": "^1.0.71",
         "next": "^9.5.3",
         "parse-numeric-range": "^1.2.0",
         "patch-package": "^6.2.2",
         "react": "^16.13.1",
         "react-dom": "16.13.1",
+        "react-storage-hooks": "^4.0.1",
         "remark-emoji": "^2.1.0"
     },
     "devDependencies": {

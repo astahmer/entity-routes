@@ -135,11 +135,11 @@ export const DokzCode = ({ children, className, isOpen, preProps, ...rest }) => 
             <Highlight {...defaultProps} theme={prismTheme[colorMode]} code={code} language={language}>
                 {({ className, style, tokens, getLineProps, getTokenProps }) => (
                     <Collapse
-                        p={!isShort && !isMinimal ? "25px" : "10px"}
+                        p={!isShort && !isMinimal ? "20px" : "10px"}
                         // pt='30px'
                         borderRadius="8px"
                         as="pre"
-                        fontSize="0.9em"
+                        fontSize="0.85em"
                         className={"dokz codeContainer " + className}
                         style={{ ...style }}
                         // boxShadow='0 0 10px 20px rgba(0,0,0,0.01)'
