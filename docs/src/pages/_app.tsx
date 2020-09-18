@@ -30,6 +30,7 @@ export default function App(props) {
                 githubUrl="astahmer/entity-routes/docs"
                 branch="main"
                 initialColorMode="dark"
+                maxPageWidth="1350px"
                 mdxComponents={{
                     code: Code,
                     table: Table,
