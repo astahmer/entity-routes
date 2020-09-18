@@ -170,6 +170,7 @@ export type EntityRouteActionConfig = Omit<RouteActionConfig, "middlewares"> &
     Pick<EntityRouteOptions, "beforeCtxMiddlewares" | "afterCtxMiddlewares"> &
     (RouteActionClassOptions | RouteActionFunctionOptions);
 
+// TODO Wrap props in ListDetailsOptions key
 export type EntityRouteOptions = {
     /** Is max depth enabled by default on all entities for any request context for this router */
     isMaxDepthEnabledByDefault?: boolean;

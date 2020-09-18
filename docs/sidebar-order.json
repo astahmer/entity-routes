@@ -6,6 +6,8 @@
             "name": "entity-routes",
             "routes": [
                 { "name": "introduction" },
+                { "name": "entity-router" },
+                { "name": "route-response" },
                 { "name": "route-scope" },
                 { "name": "operations" },
                 { "name": "groups", "routes": [{ "name": "definitions" }, { "name": "examples" }] },

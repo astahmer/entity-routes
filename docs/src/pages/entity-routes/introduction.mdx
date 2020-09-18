@@ -3,7 +3,6 @@ title: Introduction
 ---
 
 import { DocAlert } from "@/components";
-import { Divider } from "@chakra-ui/core";
 
 <DocAlert status="success" >
 
@@ -13,166 +12,44 @@ were reading about.
 
 </DocAlert>
 
-<Divider />
+## Main Features
 
-An entity for `entity-router` is nothing more than a TypeORM entity.
+-   Instant CRUD with a simple `@EntityRoute` decorator
+-   [Granular control over which properties are exposed](/entity-routes/groups/definitions) (with `@Groups`) in which
+    route scope
+-   [`Subresources`](/entity-routes/subresources): Entity properties that have dedicated endpoints, can be nested
+-   Independant service components (Database `Reader`, `Persister`, `RelationManager` etc...)
+-   Built-in powerful [`filters`](/entity-routes/filters) for lists (`Search`/`Pagination`) that should fit well for 99%
+    use cases
+-   Custom filters if you find yourself in the 1%
+-   [`Hooks`](/entity-routes/hooks) to alter a request handling at any point in the process
+-   Built-in validation using
+    [class-validator](https://github.com/typestack/class-validator)/[entity-validator](https://github.com/astahmer/entity-validator)
+    decorators on your entities
+-   Inferred entity route mappings (with generated endpoints to get the summary of an entity exposed properties for each
+    contexts)
+-   Computed properties: methods, possibly async, exposed as properties
+-   `@MaxDepth` decorator for entity/properties
+-   Optimized SQL queries with only exposed properties selected
+-   Soft delete/restoration supported (also for Subresources)
+-   Standardized REST [responses](/entity-routes/response-format)
 
-<DocAlert status="info">
+## Perks
 
-Please refer to the [`TypeORM`](http://typeorm.io/) documentation on how to make
-[`entities`](https://typeorm.io/#/entities).
+-   0 config required
+-   Type-safe API
+-   Almost complete code coverage (95%+)
+-   Out-of-the-box support for Koa/Express (therefore Next, Nuxt) integrations and compatible and any other
+    middleware-based framework using adapters
+-   Everything (types included) is exported so you can use it your own way
 
-</DocAlert>
+## What/Why
 
-## 1. Creating your entities
+Basically this is a **Node / Typescript** route handler tightly coupled with
+**[TypeORM](https://github.com/typeorm/typeorm/)** entities.
 
-Every `entities` used by `entity-routes` should have an `id` property exposed through any
-[`route scope`](/entity-routes/route-scope/), so that they properly implement the
-[`GenericEntity`](/definitions/interfaces/genericentity).
+I wanted to get rid of writing the same boring controllers again & again for each entities and I could not find a NodeJS
+project that would fit my needs : being simple enough not to require any configuration (or controllers), yet easily
+customizable when needed.
 
-```typescript {3} slug="generic-entity" withoutLang
-interface GenericEntity {
-    [k: string]: any;
-    id: string | number;
-}
-```
-
-So a minimal implementation should look at least like this :
-
-```typescript {2,4}
-export class AbstractEntity {
-    @Groups("all")
-    @PrimaryGeneratedColumn()
-    id: number;
-}
-```
-
-And then you would make all your entities `extends` from this one,
-[just like any other class inheritance with Typescript](https://www.typescriptlang.org/docs/handbook/classes.html). You
-can learn more about [`TypeORM`](http://typeorm.io/) table inheritance [here](https://typeorm.io/#/entity-inheritance).
-
-## 2. Creating an EntityRouter
-
-The [`@EntityRoute`](/definitions#entityroute) decorator creates an [`EntityRouter`](/definitions/classes/entityrouter)
-on the decorated [entity](https://typeorm.io/#/entities/what-is-entity).
-
-<DocAlert>
-    The name distinction is to avoid any conflict between the service (EntityRouter) and the decorator (EntityRoute).
-</DocAlert>
-
-Example :
-
-```typescript {1}
-@EntityRoute({ path: "/users", operations: ["create", "update", "details", "list", "delete"] })
-@Entity()
-export class User extends AbstractEntity {
-    @Groups("basic")
-    @Column()
-    name: string;
-}
-```
-
-It takes two arguments, both optional. _[Complete definition here](/definitions#entityroute)._
-
-The first argument ([EntityRouteArgs](/definitions#entityrouteargs)) defines **your routes**.
-
--   a string `path`, which will be the root path for all routes on that entity. **Path should start with a "/".**
--   an array of [**operations**](/entity-routes/operations/), which will enable matching CRUD actions. For example,
-    adding `create` [**operation**](/entity-routes/operations/) will lead to having a `POST:/users` route in the example
-    above.
-
-<DocAlert>
-    When no path is specified, it defaults to the entity name. With the example above on User entity, the base path
-    would be equal to "/user"
-</DocAlert>
-
-The second argument ([EntityRouteConfig](/definitions#entityrouteconfig)) defines the options passed to every routes on
-that entity.
-
-<DocAlert>
-    When no args are passed, the EntityRoute is registered to be used by others as a Subresource but generates no routes
-    for its own entity.
-</DocAlert>
-
-If you don't wan't to write all [**operations**](/entity-routes/operations/) everytime you just need to import & use
-[CRUD_OPERATIONS](/definitions#const-crud_operations). It looks like this.
-
-```typescript
-@EntityRoute({ path: "/users", operations: CRUD_OPERATIONS })
-```
-
-## 3. Usage
-
-After you have decorated every entities for which you want to create an
-[**EntityRouter**](/definitions/classes/entityrouter) and exposed their properties (with the
-[@Groups](/definitions#groups) decorator), you must register your routes on your node application.
-
-### Maker
-
-Any [`maker`](/entity-routes/introduction#maker) should wrap the [makeEntityRouters](/definitions#makeentityrouters), so
-the arguments to pass ([MakeEntityRouters](/definitions#makeentityrouters)) should remain the basically the same :
-
--   connection: the [TypeORM Connection](https://typeorm.io/#/connection) used
--   entities: an array of every entities that you decorated with [`@EntityRoute`](/definitions#entityroute) and for
-    which you want its [`EntityRouter`](/definitions/classes/entityrouter) to be used
--   options: [EntityRouteOptions](/definitions#entityrouteoptions), an object of global options that will be passed down
-    to all [`EntityRouter`](/definitions/classes/entityrouter)
-    ([defaults](/definitions#const-defaultentityrouteoptions))
-
-```typescript bottomRight="Example with a Koa API"
-const app = new Koa();
-const bridgeRouters = await makeKoaEntityRouters({ connection, entities, options });
-bridgeRouters.forEach((router) => app.use(router.instance.routes()));
-```
-
-There are 2 built-in makers: [`makeKoaEntityRouters`](/definitions#makekoaentityrouters) &
-[`makeExpressEntityRouters`](/definitions#makeexpressentityrouters).
-
-If your Node framework doesn't support classic middleware syntax (Express-like with `(req, res, next) => void` or
-Koa-like with `(ctx, next) => void`), you can make your own `maker` with your own custom `ContextAdapter`. TODO link
-
-## Route options
-
-Here are the options available :
-
-```typescript collapsable
-type EntityRouteOptions = {
-    /** Is max depth enabled by default on all entities for any request context for this router */
-    isMaxDepthEnabledByDefault?: boolean;
-    /** Default level of depth at which the nesting should stop for this router */
-    defaultMaxDepthLvl?: number;
-    /** In case of max depth reached on a relation, should it at retrieve its id and then stop instead of just stopping ? */
-    shouldMaxDepthReturnRelationPropsId?: boolean;
-    /** In case of a relation with no other mapped props (from groups) for a request: should it unwrap "relation { id }" to relation = id ? */
-    shouldEntityWithOnlyIdBeFlattenedToIri?: boolean;
-    /** Should set subresource IRI for prop decorated with @Subresource */
-    shouldSetSubresourcesIriOnItem?: boolean;
-    /** Default level of subresources max depth path */
-    defaultSubresourceMaxDepthLvl?: number;
-    /** Default CreateUpdateOptions */
-    defaultCreateUpdateOptions?: CreateUpdateOptions;
-    /** Allow soft deletion using TypeORM @DeleteDateColumn */
-    allowSoftDelete?: boolean;
-    /** When true, list/details will also select softDeleted entities */
-    withDeleted?: boolean;
-    /** Hook schema of custom functions to be run at specific operations in a request processing */
-    hooks?: HookSchema;
-};
-```
-
-There are multiple stages where you can set an [`EntityRouteOptions`](/definitions#entityrouteoptions).
-
-1. You can set global options for your `entity-routes` by passing them to
-   [`makeEntityRouters`](/definitions#makeentityrouters) (or an implentation of it such as
-   [`makeExpressEntityRouters`](/definitions#makeexpressentityrouters)) options key.
-2. You can then override the global options by passing a custom options object to the
-   [`@EntityRoute`](/definitions#entityroute) decorator as 2nd argument.
-3. If you directly use a component's (such as [`RouteController`](/definitions/classes/routecontroller),
-   [`Reader`](/definitions/classes/reader) or any other) method you can also pass just the options that are needed
-   locally
-
-## Metadata
-
-You can retrieve the [`RouteMetadata`](/definitions#routemetadata) registered by an
-[`@EntityRoute`](/definitions#entityroute) decorator by using the [`getRouteMetadata`](/definitions#getroutemetadata)
-function.
+_Inspired by an internal project made at [ACSEO](https://acseo.fr/) with ApiPlatform (Symfony/PHP)_

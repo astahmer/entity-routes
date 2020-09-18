@@ -14,7 +14,7 @@ export const FooterButtons = ({ ...rest }) => {
     const router = useRouter();
     const pathname = router?.pathname || "";
     const { sidebarTree } = useContext(WrapperContext);
-    const { current, next: nextTree, previous: prevTree } = findSubtreeInPathByUrl(sidebarTree, pathname) || {};
+    const { next: nextTree, previous: prevTree } = findSubtreeInPathByUrl(sidebarTree, pathname) || {};
 
     const [isPrevDir, isNextDir] = [prevTree?.children?.length, nextTree?.children?.length];
     const [prev, next] = [isPrevDir ? prevTree.children[0] : prevTree, isNextDir ? nextTree.children[0] : nextTree];
@@ -22,7 +22,7 @@ export const FooterButtons = ({ ...rest }) => {
         isPrevDir ? `${formatTitle(prevTree.name)}: ${prev.title}` : prev?.title,
         isNextDir ? `${formatTitle(nextTree.name)}: ${next.title}` : next?.title,
     ];
-    console.log("subtree", { current, nextTree, prevTree });
+    // console.log("subtree", { current, nextTree, prevTree });
 
     // TODO Update chakra-ui to 1.0
     // https://github.com/chakra-ui/chakra-ui/issues/798
@@ -79,7 +79,7 @@ export function findSubtreeInPathByUrl(
     for (let i = 0; i < tree.children.length; i++) {
         let child = tree.children[i];
         if (child.url === url) {
-            console.log({ child, tree, parent });
+            // console.log({ child, tree, parent });
             return {
                 previous: tree.children[i - 1] || parent?.children[parentIndex - 1],
                 current: tree,

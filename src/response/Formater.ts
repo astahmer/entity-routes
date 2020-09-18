@@ -40,6 +40,7 @@ export class Formater {
 
         // Wait for computed props to be all set
         await Promise.all(promises);
+        // TODO Externalize computed prop setting since you can opt-out of response formating
 
         return deepSort(clone);
     }
