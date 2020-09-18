@@ -45,7 +45,7 @@ A basic middleware looks like this :
   <TabPanels>
     <TabPanel>
 
-```typescript title="Example taken from https://koajs.com/"
+```typescript bottomLeft="Example taken from https://koajs.com/"
 const logMw = async (ctx, next) => {
     const start = Date.now();
     await next();
@@ -57,7 +57,7 @@ const logMw = async (ctx, next) => {
 </TabPanel>
     <TabPanel>
 
-```typescript title="Example taken from https://expressjs.com/fr/guide/using-middleware.html"
+```typescript bottomLeft="Example taken from https://expressjs.com/fr/guide/using-middleware.html"
 const timeMw = function (req, res, next) {
     console.log("Time:", Date.now());
     next();

@@ -16,7 +16,7 @@ export type CodeProps = {
 };
 
 export type CodePropsMetaString = {
-    title?: string;
+    topLeft?: string;
     bottomLeft?: string;
     bottomRight?: string;
     collapsable?: boolean;
@@ -28,7 +28,7 @@ export type CodePropsMetaString = {
 
 export function Code(props: CodeProps) {
     const metas = extractMeta<CodePropsMetaString>(props.metastring || "");
-    const { title, bottomLeft, bottomRight, collapsable, hidden, slug, withoutLang } = metas;
+    const { topLeft, bottomLeft, bottomRight, collapsable, hidden, slug, withoutLang } = metas;
     const hasBottomTxt = bottomLeft || bottomRight;
     const language = props.className?.replace(langRegex, "");
 
@@ -64,10 +64,13 @@ export function Code(props: CodeProps) {
                 {...metas}
                 {...props}
                 isOpen={isOpen}
-                preProps={{ paddingTop: collapsable ? "30px" : title && "25px", paddingBottom: hasBottomTxt && "30px" }}
+                preProps={{
+                    paddingTop: collapsable ? "30px" : topLeft && "25px",
+                    paddingBottom: hasBottomTxt && "30px",
+                }}
                 codeBlockIdentifier={identifier}
             />
-            {title && (
+            {topLeft && (
                 <Box
                     className="dokz hiddenInPrint"
                     opacity={0.7}
@@ -76,7 +79,7 @@ export function Code(props: CodeProps) {
                     left="10px"
                     top="5px"
                 >
-                    {title}
+                    {topLeft}
                 </Box>
             )}
             {bottomLeft && (
