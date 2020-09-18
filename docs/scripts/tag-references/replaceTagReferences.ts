@@ -40,6 +40,8 @@ export async function replaceTagReferences({
                 const after = fileContent[position + tag.length];
 
                 const reference = source[tag];
+                // TODO update reference if it has changed since last time
+
                 // If tag was already processed, skip it
                 if (before === openBracket || after === closeBracket) return tag;
 
