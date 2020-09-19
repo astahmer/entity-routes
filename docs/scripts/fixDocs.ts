@@ -1,6 +1,7 @@
 import path from "path";
 import { replaceTypedocLinks } from "./replaceTypedocLinks";
-import { getDocItemTagRefs, replaceTagReferences, references } from "./tag-references";
+import { getDocItemTagRefs, replaceTagReferences, references, ReplaceTagReferencesArgs } from "./tag-references";
+import { updateTagReferences } from "./tag-references/updateTagReferences";
 
 const pkg = require("../package.json");
 
@@ -17,17 +18,23 @@ const ignorePath = generatedDocsDir;
 const args = process.argv.slice(2);
 const dry = args[0] === "--dry";
 
+const typeDocArgs = {
+    name: "Typedoc Definitions",
+    source: typeDocRefs,
+    fromPath,
+    ignorePath,
+    prefix,
+    dry,
+};
+
 async function run() {
     await replaceTypedocLinks({ fromPath: generatedDocsDir, prefix });
-    await replaceTagReferences({
-        name: "Typedoc Definitions",
-        source: typeDocRefs,
-        fromPath,
-        ignorePath,
-        prefix: prefix + "/",
-        dry,
-    });
+    await replaceTagReferences(typeDocArgs);
     await replaceTagReferences({ name: "custom", source: references, fromPath, ignorePath, dry });
+    await updateTagReferences({
+        ...typeDocArgs,
+        ignoreSource: Object.entries(references).map(([tag, ref]) => `[\`${tag}\`](${typeDocArgs.prefix}${ref})`),
+    });
 }
 
 export default run();

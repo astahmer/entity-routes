@@ -5,6 +5,15 @@ const consola = require("consola");
 
 const [openBracket, closeBracket] = ["[", "]"];
 
+export type ReplaceTagReferencesArgs = {
+    fromPath: string;
+    ignorePath?: string;
+    source: Record<string, string>;
+    prefix?: string;
+    name: string;
+    dry?: boolean;
+};
+
 /** Replace tags from given source by its reference */
 export async function replaceTagReferences({
     fromPath,
@@ -13,14 +22,7 @@ export async function replaceTagReferences({
     prefix = "",
     name,
     dry,
-}: {
-    fromPath: string;
-    ignorePath?: string;
-    source: Record<string, string>;
-    prefix?: string;
-    name: string;
-    dry?: boolean;
-}) {
+}: ReplaceTagReferencesArgs) {
     const files = fromPath + "/**/*.{md,mdx}";
     const ignore = ignorePath + "/**";
 

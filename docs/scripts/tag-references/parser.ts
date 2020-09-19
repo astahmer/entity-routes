@@ -1,7 +1,7 @@
 const urlByCategories = {
-    Enumeration: "enums/",
-    Class: "classes/",
-    Interface: "interfaces/",
+    Enumeration: "/enums/",
+    Class: "/classes/",
+    Interface: "/interfaces/",
     "Type alias": "#",
     Function: "#",
     Variable: "#const-",
