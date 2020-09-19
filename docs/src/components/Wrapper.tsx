@@ -1,13 +1,13 @@
 import { Stack } from "@chakra-ui/core";
 import { MDXComponents } from "dokz";
-import React, { createContext, useEffect, useMemo } from "react";
-import { useRouter } from "next/router";
+import React, { createContext, useMemo } from "react";
 import { reset } from "@/functions/codeBlocks";
 
 // Dokz override
 import { DirectoryTree } from "dokz/dist/components/support";
 // import { Wrapper as DokzWrapper } from "dokz/dist/components/Wrapper";
 import { DokzWrapper, getMdxSidebarTree } from "./DokzOverride";
+import { useRouteChanged } from "@/functions/useRouteChanged";
 
 export const Wrapper = ({ children, ...props }) => {
     const meta = props.meta;
@@ -24,31 +24,16 @@ export const Wrapper = ({ children, ...props }) => {
     const order = getSidebarOrder();
     const sidebarTree = useMemo(() => orderTree({ tree, order }), [tree, order]);
 
-    const router = useRouter();
-
     // TODO Gtag manager ?
     // On route change, reset code block count
-    useEffect(() => {
-        const handleRouteChange = (url) => {
-            reset();
-            console.log("App is changing to: ", url);
-        };
-        const handleRouteChangeComplete = () => {
+    useRouteChanged({
+        onStart: reset,
+        onComplete: () => {
             document.body.style.scrollBehavior = "auto";
             document.body.scrollTo({ top: 0, left: 0, behavior: "auto" });
             document.body.style.scrollBehavior = undefined;
-        };
-
-        router.events.on("routeChangeStart", handleRouteChange);
-        router.events.on("routeChangeComplete", handleRouteChangeComplete);
-
-        // If the component is unmounted, unsubscribe
-        // from the event with the `off` method:
-        return () => {
-            router.events.off("routeChangeStart", handleRouteChange);
-            router.events.off("routeChangeComplete", handleRouteChangeComplete);
-        };
-    }, []);
+        },
+    });
 
     return (
         <WrapperContext.Provider value={{ sidebarTree }}>
