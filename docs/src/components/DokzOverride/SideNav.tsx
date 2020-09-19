@@ -72,6 +72,7 @@ const NavTreeComponent = ({
     );
 };
 
+// TODO Update chakra-ui to hopefully fix collapse initial value
 function CollapsableTreeNode({ title, path, depth, subTree }) {
     const key = "sidenav-state-" + path;
     const [active, setActive] = useStorageState(typeof window === "undefined" ? null : localStorage, key, "");

@@ -2,7 +2,6 @@ import { useColorMode, theme, Box, CSSReset, Stack, Flex } from "@chakra-ui/core
 import { css, Global } from "@emotion/core";
 
 import { FloatingTableOfContents, TableOfContentsContext, useDokzConfig } from "dokz";
-import NavBar from "dokz/dist/components/NavBar";
 import { DirectoryTree, globalStyles } from "dokz/dist/components/support";
 import { PropagatedThemeProvider } from "dokz/dist/components/Wrapper";
 // import { FooterButtons } from "dokz/dist/components/FooterButtons";
@@ -10,6 +9,7 @@ import { SideNav } from "./SideNav";
 import { useContext } from "react";
 import { WrapperContext } from "../Wrapper";
 import { FooterButtons } from "./FooterButtons";
+import NavBar from "./NavBar";
 
 const SIDENAV_W = 280;
 const TABLE_OF_C_W = 200;

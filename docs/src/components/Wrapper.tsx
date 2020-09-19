@@ -58,6 +58,8 @@ export const Wrapper = ({ children, ...props }) => {
 const defaultSidebarTree: DirectoryTree = { name: "pages", children: [] };
 export const WrapperContext = createContext({ sidebarTree: defaultSidebarTree });
 
+// TODO FloatingTableOfContents Quick links (View source / See test file/folder), both from page meta
+
 type SidebarOrder = {
     /** Sidebar label */
     title?: string;
