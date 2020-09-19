@@ -13,10 +13,6 @@ import { ComponentLink } from "dokz/dist/components/NavLink";
 // https://github.com/remorses/dokz/blob/61f9ddbbc923c2b287de86f8ec6e482b8afd4846/dokz/src/components/SideNav.tsx
 type SideNavProps = DokzSideNavProps & { orderingFn?: Function };
 export const SideNav = ({ tree, orderingFn, ...rest }: SideNavProps) => {
-    // const { sidebarOrdering, docsRootPath = "pages" } = useDokzConfig();
-    // tree = (orderingFn || applySidebarOrdering)({ tree, order: sidebarOrdering });
-    // tree = findTreeInPath(tree, docsRootPath) || tree;
-
     if (!tree) {
         console.error(new Error(`sidenav tree is null`));
         tree = { name: "", children: [] };
@@ -42,7 +38,6 @@ const NavTreeComponent = ({
     title = "",
     path,
     meta,
-    ...rest
 }: DirectoryTree & { depth?: number; hideDivider?: boolean }) => {
     const isFolder = !url;
     const formattedTitle = meta ? meta.sidebar_label || meta.title : title || formatTitle(name || "");

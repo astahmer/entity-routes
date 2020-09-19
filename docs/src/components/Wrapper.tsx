@@ -74,9 +74,14 @@ const defaultSidebarTree = { name: "pages", children: [] };
 export const WrapperContext = createContext({ sidebarTree: defaultSidebarTree });
 
 type SidebarOrder = {
+    /** Sidebar label */
     title?: string;
+    /** File basename */
     name?: string;
+    /** Children routes */
     routes?: SidebarOrder[];
+    /** If adding a link to sidebar even though there is no corresponding page, use this */
+    url?: string;
 };
 function getSidebarOrder(): SidebarOrder {
     try {
@@ -90,17 +95,25 @@ const MDX_EXTENSION_REGEX = /\.mdx?/;
 const equalWithoutExtension = (a: string, b: string) =>
     a.replace(MDX_EXTENSION_REGEX, "") === b.replace(MDX_EXTENSION_REGEX, "");
 
+/** Re-order sidebar from sidebar-order.json */
 function orderTree({ tree, order }: { tree: DirectoryTree; order: SidebarOrder }) {
     const { children, ...rest } = tree || defaultSidebarTree;
-    const orderedTree = { ...rest, children: [] };
+    const orderedTree: DirectoryTree = { ...rest, children: [] };
 
+    // Re-order & add each children from sidebar-order.json
     order.routes.forEach((route) => {
         const item = children.find((child) => equalWithoutExtension(child.name, route.name));
         const orderedItem = route.routes?.length ? orderTree({ tree: item, order: route }) : item;
-        orderedItem && orderedTree.children.push(orderedItem);
+        if (orderedItem) {
+            orderedTree.children.push(orderedItem);
+        } else if (route.url) {
+            const { routes, ...rest } = route;
+            orderedTree.children.push({ ...rest, children: route.routes, hasNoPage: true } as DirectoryTree);
+        }
     });
 
-    if (children.length !== orderedTree.children.length) {
+    // If there are tree.children omitted in sidebar-order.json, append them
+    if (children.length !== orderedTree.children.filter((child) => !(child as any).hasNoPage).length) {
         orderedTree.children.push(
             ...children.filter((child) => !orderedTree.children.find((addedChild) => addedChild.name === child.name))
         );
