@@ -40,13 +40,29 @@ export async function replaceTagReferences({
             to: (tag: string, position: number, fileContent: string, fileName: string) => {
                 const before = fileContent[position - 1];
                 const after = fileContent[position + tag.length];
-
-                const reference = source[tag];
-                // TODO update reference if it has changed since last time
-
                 // If tag was already processed, skip it
                 if (before === openBracket || after === closeBracket) return tag;
 
+                const prevOpenBracket = getNextCharIndex({
+                    char: openBracket,
+                    str: fileContent,
+                    direction: "prev",
+                    start: position,
+                });
+                const prevCloseBracket = getNextCharIndex({
+                    char: closeBracket,
+                    str: fileContent,
+                    direction: "prev",
+                    start: position,
+                });
+
+                // Prevent adding tag reference on handwritten link using tag
+                // ex: [More on that `tag`](/reference-link)
+                // `tag` would match and witout below condition would be wrapped to
+                // [More on that [`tag`](/rereference)](/handwritten-link)
+                if (prevOpenBracket > prevCloseBracket) return tag;
+
+                const reference = source[tag];
                 const result = `[${tag}](${prefix}${reference})`;
                 const word = fileContent.substr(position - 1, tag.length + 2);
 
@@ -72,4 +88,16 @@ export async function replaceTagReferences({
     } catch (error) {
         consola.error(`Error while replacing ${name} references`, error);
     }
+}
+
+type GetNextCharIndexArgs = { char: string; str: string; start: number; direction: "prev" | "next" };
+function getNextCharIndex({ char, str, start, direction = "next" }: GetNextCharIndexArgs) {
+    let currentIndex = start;
+    let currentChar = str[currentIndex];
+
+    while (currentChar !== char) {
+        currentChar = str[direction === "next" ? ++currentIndex : --currentIndex];
+    }
+
+    return currentIndex;
 }
