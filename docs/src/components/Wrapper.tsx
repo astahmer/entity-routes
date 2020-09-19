@@ -55,7 +55,7 @@ export const Wrapper = ({ children, ...props }) => {
     );
 };
 
-const defaultSidebarTree = { name: "pages", children: [] };
+const defaultSidebarTree: DirectoryTree = { name: "pages", children: [] };
 export const WrapperContext = createContext({ sidebarTree: defaultSidebarTree });
 
 type SidebarOrder = {
@@ -67,6 +67,8 @@ type SidebarOrder = {
     routes?: SidebarOrder[];
     /** If adding a link to sidebar even though there is no corresponding page, use this */
     url?: string;
+    /** If you want to override some meta, this key will be merged with sidebar:child.meta */
+    meta?: Record<string, any>;
 };
 function getSidebarOrder(): SidebarOrder {
     try {
@@ -80,20 +82,36 @@ const MDX_EXTENSION_REGEX = /\.mdx?/;
 const equalWithoutExtension = (a: string, b: string) =>
     a.replace(MDX_EXTENSION_REGEX, "") === b.replace(MDX_EXTENSION_REGEX, "");
 
-/** Re-order sidebar from sidebar-order.json */
+/** Recursively re-order sidebar from sidebar-order.json */
 function orderTree({ tree, order }: { tree: DirectoryTree; order: SidebarOrder }) {
     const { children, ...rest } = tree || defaultSidebarTree;
     const orderedTree: DirectoryTree = { ...rest, children: [] };
 
     // Re-order & add each children from sidebar-order.json
     order.routes.forEach((route) => {
-        const item = children.find((child) => equalWithoutExtension(child.name, route.name));
-        const orderedItem = route.routes?.length ? orderTree({ tree: item, order: route }) : item;
-        if (orderedItem) {
+        // Find sidebar.json item from sidebar-order.json route.name
+        const item = children.find((child) => equalWithoutExtension(child.name, route.name || ""));
+
+        const { routes, ...rest } = route;
+        // Shallow merge item/route except for meta that is also shallow merged
+        const itemMeta = (item || {}).meta;
+        const meta = itemMeta && route.meta && { ...itemMeta, ...route.meta };
+        const merged = { ...item, ...rest, meta } as DirectoryTree;
+
+        // If route has child, re-order them
+        const orderedItem = route.routes?.length ? orderTree({ tree: merged, order: route }) : merged;
+
+        // If a page exists for that sidebar-order route
+        if (item) {
             orderedTree.children.push(orderedItem);
         } else if (route.url) {
-            const { routes, ...rest } = route;
-            orderedTree.children.push({ ...rest, children: route.routes, hasNoPage: true } as DirectoryTree);
+            // New sidebar item with no corresponding page & therefore has a url manually defined
+            orderedTree.children.push({
+                name: route.title.toLowerCase(),
+                ...rest,
+                children: route.routes,
+                hasNoPage: true,
+            } as DirectoryTree);
         }
     });
 
