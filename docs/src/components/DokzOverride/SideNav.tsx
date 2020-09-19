@@ -1,5 +1,4 @@
-import React, { useEffect } from "react";
-import { useStorageState } from "react-storage-hooks";
+import React, { useEffect, useState } from "react";
 
 import { Box, Collapse, Divider, Stack, useDisclosure } from "@chakra-ui/core";
 import { DirectoryTree, formatTitle } from "dokz/dist/components/support";
@@ -72,14 +71,8 @@ const NavTreeComponent = ({
     );
 };
 
-// TODO Update chakra-ui to hopefully fix collapse initial value
 function CollapsableTreeNode({ title, path, depth, subTree }) {
-    const key = "sidenav-state-" + path;
-    const [active, setActive] = useStorageState(typeof window === "undefined" ? null : localStorage, key, "");
-    const { onToggle, isOpen } = useDisclosure(!!active);
-    useEffect(() => {
-        setActive(isOpen ? "true" : null);
-    }, [isOpen]);
+    const { onToggle, isOpen } = useDisclosure();
     return (
         <Stack spacing="0px">
             <Box display="flex" alignItems="center" cursor="pointer" onClick={onToggle} py="0.2em" my="0.2em">
