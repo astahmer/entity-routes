@@ -33,13 +33,20 @@ export const Wrapper = ({ children, ...props }) => {
             reset();
             console.log("App is changing to: ", url);
         };
+        const handleRouteChangeComplete = () => {
+            document.body.style.scrollBehavior = "auto";
+            document.body.scrollTo({ top: 0, left: 0, behavior: "auto" });
+            document.body.style.scrollBehavior = undefined;
+        };
 
         router.events.on("routeChangeStart", handleRouteChange);
+        router.events.on("routeChangeComplete", handleRouteChangeComplete);
 
         // If the component is unmounted, unsubscribe
         // from the event with the `off` method:
         return () => {
             router.events.off("routeChangeStart", handleRouteChange);
+            router.events.off("routeChangeComplete", handleRouteChangeComplete);
         };
     }, []);
 
