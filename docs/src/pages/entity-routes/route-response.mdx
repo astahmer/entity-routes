@@ -2,10 +2,10 @@
 title: Route response
 ---
 
-Each `entity-routes` response will be formated using a template defined by the route **operation** , either `list` or
+Each `entity-routes` response will be formated using a template defined by the route [**operation**](/entity-routes/operations/) , either `list` or
 `details`. All responses will share the `@context` part nonetheless.
 
-Here the actual ts type (`RouteResponse`) :
+Here the actual ts type ([`RouteResponse`](/definitions#routeresponse)) :
 
 ```ts
 type RouteResponse = {
@@ -34,7 +34,7 @@ type RouteResponse = {
 
 ## @context
 
--   `operation`/`entity` keys are always added and define the `route scope`
+-   `operation`/`entity` keys are always added and define the [`route scope`](/entity-routes/route-scope/)
 -   On a `persist` [**operation kind**](/entity-routes/groups/definitions#operation-kind), either `create` or `update`,
     the `validationErrors` key will be added and defaults to an empty array.
 -   On a `read` [**operation kind**](/entity-routes/groups/definitions#operation-kind), either `list` or `details`, the
@@ -47,31 +47,31 @@ You can avoid making another request on the entity `details` route (`GET:/xxx/12
 after an entity was persisted using auto-reloading.
 
 On `persist` operations (`create`/`update`), after the entity was successfully saved, it can be auto-reloaded using the
-`shouldAutoReload` key of the `CreateUpdateOptions` object, passed to the `create`/`update` methods of
-`RouteController`.
+`shouldAutoReload` key of the [`CreateUpdateOptions`](/definitions#createupdateoptions) object, passed to the `create`/`update` methods of
+[`RouteController`](/definitions/classes/routecontroller).
 
-When an entity is auto-reloaded, it is read from the database using the `getDetails` method of `RouteController`, so
+When an entity is auto-reloaded, it is read from the database using the `getDetails` method of [`RouteController`](/definitions/classes/routecontroller), so
 that the response is returned the exact same way as if it was requested through the `details` route (`GET:/xxx/123`).
-The **operation** used is either defined explictly by using the `responseOperation` key of the `CreateUpdateOptions`
+The [**operation**](/entity-routes/operations/) used is either defined explictly by using the `responseOperation` key of the [`CreateUpdateOptions`](/definitions#createupdateoptions)
 object, or defaults to `details` elsewise.
 
-> By default, it is enabled since the `defaultEntityRouteOptions` object has a `defaultCreateUpdateOptions` key set to
+> By default, it is enabled since the [`defaultEntityRouteOptions`](/definitions#const-defaultentityrouteoptions) object has a `defaultCreateUpdateOptions` key set to
 > `{ shouldAutoReload: true, shouldFormatResult: true }`.
 
 ## Format
 
-Response are formated using the `Formater`, itself called in the `getDetails`/`getList` methods of `RouteController`.
+Response are formated using the [`Formater`](/definitions/classes/formater), itself called in the `getDetails`/`getList` methods of [`RouteController`](/definitions/classes/routecontroller).
 That means auto-reloaded entities are also formated.
 
 The formater process each response item/items and perform the following tasks :
 
--   Remove any object that is not another Entity (object that implements `GenericEntity`) or is not a Date
--   Flatten item with only id if needed (and if `shouldSetSubresourcesIriOnItem` of `EntityRouteOptions` is true)
--   Set subresources IRI if item has any (and if `shouldSetSubresourcesIriOnItem` of `EntityRouteOptions` is true)
+-   Remove any object that is not another Entity (object that implements [`GenericEntity`](/definitions/interfaces/genericentity)) or is not a Date
+-   Flatten item with only id if needed (and if `shouldSetSubresourcesIriOnItem` of [`EntityRouteOptions`](/definitions#entityrouteoptions) is true)
+-   Set subresources IRI if item has any (and if `shouldSetSubresourcesIriOnItem` of [`EntityRouteOptions`](/definitions#entityrouteoptions) is true)
 -   Add computed properties to this item
 -   Sort item's property keys
 
-> By default, it is enabled since the `defaultEntityRouteOptions` object has a `defaultCreateUpdateOptions` key set to
+> By default, it is enabled since the [`defaultEntityRouteOptions`](/definitions#const-defaultentityrouteoptions) object has a `defaultCreateUpdateOptions` key set to
 > `{ shouldAutoReload: true, shouldFormatResult: true }`.
 
 ## Examples

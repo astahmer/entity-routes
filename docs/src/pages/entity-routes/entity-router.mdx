@@ -13,7 +13,7 @@ Please refer to the [`TypeORM`](http://typeorm.io/) documentation on how to make
 
 </DocAlert>
 
-There are 3 steps to make and use an `EntityRouter`.
+There are 3 steps to make and use an [`EntityRouter`](/definitions/classes/entityrouter).
 
 ## 1. Creating your entities
 
@@ -48,7 +48,7 @@ The [`@EntityRoute`](/definitions#entityroute) decorator creates an [`EntityRout
 on the decorated [entity](https://typeorm.io/#/entities/what-is-entity).
 
 <DocAlert>
-    The name distinction is to avoid any conflict between the service (`EntityRouter`) and the decorator
+    The name distinction is to avoid any conflict between the service ([`EntityRouter`](/definitions/classes/entityrouter)) and the decorator
     (`EntityRoute`).
 </DocAlert>
 
@@ -121,7 +121,7 @@ There are 2 built-in makers: [`makeKoaEntityRouters`](/definitions#makekoaentity
 [`makeExpressEntityRouters`](/definitions#makeexpressentityrouters).
 
 If your Node framework doesn't support classic middleware syntax (Express-like with `(req, res, next) => void` or
-Koa-like with `(ctx, next) => void`), you can make your own `maker` with your own custom `ContextAdapter`. TODO link
+Koa-like with `(ctx, next) => void`), you can make your own [`maker`](/entity-routes/introduction#maker/) with your own custom [`ContextAdapter`](/definitions#contextadapter). TODO link
 
 ## Route options
 

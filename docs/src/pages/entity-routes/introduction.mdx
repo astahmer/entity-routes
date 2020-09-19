@@ -14,11 +14,11 @@ were reading about.
 
 ## Main Features
 
--   Instant CRUD with a simple `@EntityRoute` decorator
--   [Granular control over which properties are exposed](/entity-routes/groups/definitions) (with `@Groups`) in which
+-   Instant CRUD with a simple [`@EntityRoute`](/definitions#entityroute) decorator
+-   [Granular control over which properties are exposed](/entity-routes/groups/definitions) (with [`@Groups`](/definitions#groups)) in which
     route scope
 -   [`Subresources`](/entity-routes/subresources): Entity properties that have dedicated endpoints, can be nested
--   Independant service components (Database `Reader`, `Persister`, `RelationManager` etc...)
+-   Independant service components (Database [`Reader`](/definitions/classes/reader), `Persister`, [`RelationManager`](/definitions/classes/relationmanager) etc...)
 -   Built-in powerful [`filters`](/entity-routes/filters) for lists (`Search`/`Pagination`) that should fit well for 99%
     use cases
 -   Custom filters if you find yourself in the 1%
@@ -29,7 +29,7 @@ were reading about.
 -   Inferred entity route mappings (with generated endpoints to get the summary of an entity exposed properties for each
     contexts)
 -   Computed properties: methods, possibly async, exposed as properties
--   `@MaxDepth` decorator for entity/properties
+-   [`@MaxDepth`](/definitions#maxdepth) decorator for entity/properties
 -   Optimized SQL queries with only exposed properties selected
 -   Soft delete/restoration supported (also for Subresources)
 -   Standardized REST [responses](/entity-routes/response-format)

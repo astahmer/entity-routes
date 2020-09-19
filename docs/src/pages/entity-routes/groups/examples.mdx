@@ -96,7 +96,7 @@ export class Role extends AbstractEntity {
 
 [Remember](/entity-routes/introduction#1-creating-your-entities), since every entities should extend from the
 GenericEntity interface and always have the `id` property exposed, you can expose your relations IRI by just decorating
-the relation with `@Groups` on the parent entity.
+the relation with [`@Groups`](/definitions#groups) on the parent entity.
 
 ```typescript {2}
 class User extends AbstractEntity {
@@ -106,7 +106,7 @@ class User extends AbstractEntity {
 }
 ```
 
-If no other properties than `id` are exposed on role for the user.details `route scope`, you will end up with a response
+If no other properties than `id` are exposed on role for the user.details [`route scope`](/entity-routes/route-scope/), you will end up with a response
 such as :
 
 ```json {8}
@@ -124,7 +124,7 @@ such as :
 ### Nested property
 
 To expose a nested property, you need to decorate with [`@Groups`](/definitions#groups) both the relation (on the parent
-entity) and the property (of the relation) with the same `route scope`.
+entity) and the property (of the relation) with the same [`route scope`](/entity-routes/route-scope/).
 
 For this example, let's expose the user's role.title property for the details route (`GET:/user/xxx` route).
 
