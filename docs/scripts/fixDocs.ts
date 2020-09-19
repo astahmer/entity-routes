@@ -27,6 +27,8 @@ const typeDocArgs = {
     dry,
 };
 
+const { exec } = require("child_process");
+
 async function run() {
     await replaceTypedocLinks({ fromPath: generatedDocsDir, prefix });
     await replaceTagReferences(typeDocArgs);
@@ -35,6 +37,7 @@ async function run() {
         ...typeDocArgs,
         ignoreSource: Object.entries(references).map(([tag, ref]) => `[\`${tag}\`](${typeDocArgs.prefix}${ref})`),
     });
+    exec("npm run prettier");
 }
 
 export default run();
