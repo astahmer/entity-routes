@@ -34,15 +34,17 @@ These are the routes generated from the [Quick start example](../getting-started
 | GET    | /users/:UserId(\d+)/articles          | Article | list      | article.list        |
 | DELETE | /users/:UserId(\d+)/articles/:id(\d+) | Article | delete    | article.delete      |
 
-<DocAlert status="info" mt="20px">
+<DocAlert status="info">
 
 The route main entity for subresources routes is its relation entity, here it is `Article` and not `User`.
 
 </DocAlert>
 
+### Subresources
+
 This also means that subresources share the same route scope as their property entity router. For example, if you had an
-[`EntityRouter`](/definitions/classes/entityrouter) set up on the `Article` entity with `["create", "update", "list"]` [**operations**](/entity-routes/operations/), you would have those
-routes generated :
+[`EntityRouter`](/definitions/classes/entityrouter) set up on the `Article` entity with `["create", "update", "list"]`
+[**operations**](/entity-routes/operations/), you would have those routes generated :
 
 | Verb | Path                       | Entity  | Operation | Route scope            |
 | ---- | -------------------------- | ------- | --------- | ---------------------- |

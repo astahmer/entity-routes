@@ -4,7 +4,7 @@ title: Operations
 
 import { DocAlert } from "@/components";
 
-There are two kinds of _operations_ : [`RouteOperation`](/definitions#routeoperation) and
+There are two types of _operations_ : [`RouteOperation`](/definitions#routeoperation) and
 [`GroupsOperation`](/definitions#groupsoperation).
 
 ## RouteOperation
@@ -23,6 +23,15 @@ For basic _operations_, a [`RouteOperation`](/definitions#routeoperation) define
 For [custom actions](/docref), any string can be used to make your own specific
 [`route scope`](/entity-routes/route-scope).
 
+[More on `@EntityRoute` here](/entity-routes/entity-router).
+
+### Example
+
+```ts
+@EntityRoute({ path: "/users", operations: ["create", "list"] })
+// ...
+```
+
 ## GroupsOperation
 
 ```typescript
@@ -32,13 +41,7 @@ type GroupsOperation = "create" | "list" | "details" | "update" | string;
 type GroupsOperationOrShortcuts = GroupsOperation[] | "all" | "basic";
 ```
 
-## Shortcuts
-
-There are two shortcuts available for @Groups decorator : "all" and "basic".
-
--   "all" litteraly means no matter which operations, the property decorated will be exposed.
--   "basic" means every basic [`CRUD_OPERATIONS`](/definitions#const-crud_operations) :
-    `[create, list, details, update]`
+These are used to define the [`route scopes`](/entity-routes/route-scope/) where a property might be exposed.
 
 <DocAlert status="info">
 
@@ -46,3 +49,41 @@ Each [`GroupsOperation`](/definitions#groupsoperation) match one from [`RouteOpe
 except `delete` since there is no property exposed in a DELETE route response.
 
 </DocAlert>
+
+[More on `@Groups` here](/entity-routes/entity-router).
+
+## Shortcuts
+
+There are two shortcuts available for @Groups decorator : "all" and "basic".
+
+-   `all` litteraly means no matter which operations, the property decorated will be exposed.
+-   `basic` means every basic [`CRUD_OPERATIONS`](/definitions#const-crud_operations) :
+    `[create, list, details, update]`
+
+Both shortcuts can be used both on a scoped entity or globally registered for a property.
+
+### Example
+
+```ts bottomLeft="Global"
+// ...
+@Entity()
+class User extends AbstractEntity {
+    @Groups("basic")
+    @Column()
+    name: string;
+
+    // ...
+}
+```
+
+```ts bottomLeft="Scoped"
+// ...
+@Entity()
+class User extends AbstractEntity {
+    @Groups({ user: "all", article: ["create", "list"], role: "basic" })
+    @Column()
+    name: string;
+
+    // ...
+}
+```

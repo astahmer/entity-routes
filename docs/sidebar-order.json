@@ -13,7 +13,20 @@
                 { "name": "groups", "routes": [{ "name": "definitions" }, { "name": "examples" }] },
                 { "name": "subresources" },
                 { "name": "filters" },
-                { "name": "decorators" },
+                {
+                    "name": "decorators",
+                    "routes": [
+                        { "name": "list" },
+                        { "title": "@EntityRoute", "url": "/entity-routes/entity-router" },
+                        { "title": "@Groups", "url": "/entity-routes/groups/definitions" },
+                        { "title": "@Subresources", "url": "/entity-routes/subresources" },
+                        { "name": "depends-on", "title": "@DependsOn", "meta": { "chiasse": "oui" } },
+                        { "title": "@MaxDepth", "url": "/entity-routes/groups/max-depth" },
+                        { "title": "@Search", "url": "/entity-routes/filters/search" },
+                        { "title": "@Pagination", "url": "/entity-routes/filters/pagination" },
+                        { "title": "@OrderBy", "url": "/entity-routes/filters/pagination#order-by" }
+                    ]
+                },
                 { "name": "request-context" },
                 { "name": "middlewares" },
                 { "name": "hooks" },
