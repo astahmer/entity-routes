@@ -179,7 +179,7 @@ export const DokzCode = ({ children, className, isOpen, preProps, ...rest }) => 
                                     display="inline-block"
                                     // position='absolute'
                                     textAlign="right"
-                                    minW={!isShort ? "40px" : "20px"}
+                                    w={!isShort ? "40px" : "20px"}
                                     opacity={0.4}
                                     pr={!isShort ? "30px" : "15px"}
                                     aria-label="anchor"
