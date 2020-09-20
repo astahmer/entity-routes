@@ -89,7 +89,7 @@ const equalWithoutExtension = (a: string, b: string) =>
 
 /** Recursively re-order sidebar from sidebar-order.json */
 function orderTree({ tree, order }: { tree: DirectoryTree; order: SidebarOrder }) {
-    const { children, ...rest } = tree || defaultSidebarTree;
+    const { children = [], ...rest } = tree || defaultSidebarTree;
     const orderedTree: DirectoryTree = { ...rest, children: [] };
 
     // Re-order & add each children from sidebar-order.json
