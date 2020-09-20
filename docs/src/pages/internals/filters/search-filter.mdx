@@ -4,9 +4,10 @@ title: SearchFilter
 
 import { DocAlert } from "@/components";
 
-The `SearchFilter` allows you to filter efficiently a list of items with several [common SQL operators](#strategies)
-(such as `=`, `IN`, `EXISTS`, `LIKE`, etc) using [readable query parameter keys](#basic-usage). You can filter on
-[nested relations/properties](#relations) with [complex conditions](#complex-conditions).
+The [`SearchFilter`](/definitions/classes/searchfilter) allows you to filter efficiently a list of items with several
+[common SQL operators](#strategies) (such as `=`, `IN`, `EXISTS`, `LIKE`, etc) using
+[readable query parameter keys](#basic-usage). You can filter on [nested relations/properties](#relations) with
+[complex conditions](#complex-conditions).
 
 ## Decorator
 
@@ -168,8 +169,8 @@ values will end up with the same results as a `NOT IN`.
 
 ## Advanced usage
 
-Since any `StrategyType` is available for a `filterable property`, sometimes you might want to use another one than the
-default one. To do so you just need to use the strategy part of the `advanced syntax`.
+Since any [`StrategyType`](/definitions#strategytype) is available for a `filterable property`, sometimes you might want
+to use another one than the default one. To do so you just need to use the strategy part of the `advanced syntax`.
 
 There is a syntax for query parameters keys that makes filters very powerful. There are 4 parts to a
 [`FilterProperty`](/definitions#filterproperty) query parameter. Each part name is wrapped with parenthesis below (for
@@ -338,7 +339,7 @@ The query parameters would look like this :
 > Reminder: The complex condition names `(isAdmin)` and `(aboveId)` are completely arbitrary, you just need to use the
 > same string when you want to nest conditions.
 
-And the `SearchFilter` would generate a query like :
+And the [`SearchFilter`](/definitions/classes/searchfilter) would generate a query like :
 
 ```sql
 SELECT ... from users user
