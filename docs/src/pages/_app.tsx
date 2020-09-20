@@ -4,6 +4,7 @@ import Head from "next/head";
 
 import { Code, Table, Wrapper } from "@/components";
 import { Divider } from "@chakra-ui/core";
+import { ListItem } from "@/components/DokzOverride/ListItem";
 
 export default function App(props) {
     const { Component, pageProps } = props;
@@ -41,6 +42,13 @@ export default function App(props) {
                             <MDXComponents.h2 {...props} />
                         </>
                     ),
+                    h3: (props) => (
+                        <>
+                            <Divider mt="0.5em" opacity={0.4} />
+                            <MDXComponents.h2 {...props} />
+                        </>
+                    ),
+                    li: (props) => <ListItem {...props} />,
                 }}
             >
                 <Component {...pageProps} />
