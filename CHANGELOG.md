@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.6](https://github.com/astahmer/entity-routes/compare/v0.1.4...v0.1.6) (2020-09-20)
+
+
+### Features
+
+* **Formater:** allow opting-out of IRI's ([14ce94e](https://github.com/astahmer/entity-routes/commit/14ce94ed7f58763a9b81708619c69b334e182eeb))
+
+
+### Bug Fixes
+
+* **RelationManager:** isJoinAlreadyMade ([ada8986](https://github.com/astahmer/entity-routes/commit/ada8986cee20bb04d26ed0f46568087c2542f00e))
+* **tests:** filter related after paramName changes ([c449af7](https://github.com/astahmer/entity-routes/commit/c449af7762278a3321560af2ad78648d216b5d86))
+* **WhereManager:** add NOT to paramName ([ca0f776](https://github.com/astahmer/entity-routes/commit/ca0f7769165a8794f487d0a1176d8fa9a534aa6e))
+* **WhereManager:** paramName use strategy ([cae86b9](https://github.com/astahmer/entity-routes/commit/cae86b9a8e39e54594ce94b94e6914597ada2083))
+
 ### [0.1.5](https://github.com/astahmer/entity-routes/compare/v0.1.4...v0.1.5) (2020-08-30)
 
 
