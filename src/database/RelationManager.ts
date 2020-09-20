@@ -55,7 +55,7 @@ export class RelationManager {
             };
         } else {
             // Relation
-            const { isJoinAlreadyMade, alias } = aliasHandler.getAliasForRelation(qb, relation);
+            const { isJoinAlreadyMade, alias } = aliasHandler.getAliasForRelation(qb, relation, prevAlias);
 
             if (!isJoinAlreadyMade) {
                 qb.leftJoin((prevAlias || relation.entityMetadata.tableName) + "." + relation.propertyName, alias);
@@ -204,7 +204,7 @@ export class RelationManager {
         }
 
         const property = (prevAlias || entityMetadata.tableName) + "." + relation.inverseSidePropertyPath;
-        const alias = aliasHandler.getAliasForRelation(qb, relation.inverseRelation).alias;
+        const alias = aliasHandler.getAliasForRelation(qb, relation.inverseRelation, prevAlias).alias;
 
         const param = subresourceRelation.param && { parentId: subresourceRelation.id };
         const condition = subresourceRelation.param && alias + ".id = :parentId";

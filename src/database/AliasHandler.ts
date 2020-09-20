@@ -21,14 +21,14 @@ export class AliasHandler {
         return entityTableName + "_" + propName + "_" + this.aliases[this.getAliasKey(entityTableName, propName)];
     }
 
-    public isJoinAlreadyMade(qb: SelectQueryBuilder<any>, relation: RelationMetadata) {
-        return qb.expressionMap.joinAttributes.find(
-            (join) => join.entityOrProperty === relation.entityMetadata.tableName + "." + relation.propertyName
-        );
+    public isJoinAlreadyMade(qb: SelectQueryBuilder<any>, relation: RelationMetadata, prevAlias: string) {
+        const entityOrProperty = `${prevAlias || relation.entityMetadata.tableName}.${relation.propertyName}`;
+        const join = qb.expressionMap.joinAttributes.find((join) => join.entityOrProperty === entityOrProperty);
+        return join;
     }
 
-    public getAliasForRelation(qb: SelectQueryBuilder<any>, relation: RelationMetadata) {
-        const isJoinAlreadyMade = this.isJoinAlreadyMade(qb, relation);
+    public getAliasForRelation(qb: SelectQueryBuilder<any>, relation: RelationMetadata, prevAlias?: string) {
+        const isJoinAlreadyMade = this.isJoinAlreadyMade(qb, relation, prevAlias);
 
         const alias = isJoinAlreadyMade
             ? this.getPropertyLastAlias(relation.entityMetadata.tableName, relation.propertyName)
