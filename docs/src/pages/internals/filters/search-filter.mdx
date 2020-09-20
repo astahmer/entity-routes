@@ -2,4 +2,367 @@
 title: SearchFilter
 ---
 
+import { DocAlert } from "@/components";
+
+The `SearchFilter` allows you to filter efficiently a list of items with several [common SQL operators](#strategies)
+(such as `=`, `IN`, `EXISTS`, `LIKE`, etc) using [readable query parameter keys](#basic-usage). You can filter on
+[nested relations/properties](#relations) with [complex conditions](#complex-conditions).
+
+## Decorator
+
+You can register a SearchFilter on an entity using the [`@Search`](/definitions#search) decorator.
+
+You can directly pass an array of [`FilterProperty`](/definitions#filterproperty), which is an array of property/nested
+property path or a tuple of property/nested property path with a specific default [`StrategyType`](#strategies). This
+list contains the `filterable properties`.
+
+Each [`StrategyType`](#strategies) will allow you to filter a property through different conditions.
+
+> You can use any [`StrategyType`](#strategies) on a filterable property. Specifying one for a property path in the
+> [`FilterProperty`](/definitions#filterproperty) list just sets it as the default strategy to use for that property
+> path and allows you to omit it in query parameters.
+
+Example of use with a property, a property path with another `defaultWhereStrategy` and another global
+`defaultWhereStrategy` for that `@Entity` :
+
+```typescript
+@Search(
+    ["firstName", ["role.identifier", "CONTAINS"]],
+    { defaultWhereStrategy: "STARTS_WITH" }
+)
+```
+
+In this example the `firstName` property will default to `STARTS_WITH` unless it is overriden by specifiying another
+[`StrategyType`](/definitions#strategytype) directly in the request, whereas the `role.identifier` property will default
+to `CONTAINS` strategy, unless overriden directly in the request.
+
+### Property decorator
+
 TODO
+
+## Good to know
+
+<DocAlert status="info">
+
+You can filter on the same property using different strategies in the same request.
+
+</DocAlert>
+
+<DocAlert status="info">
+
+You can filter on multiple values by passing comma-separated values. Those values will be trimmed.
+[More details.](#multiple-values)
+
+</DocAlert>
+
+<DocAlert status="info">
+
+Filtering on a relation will implicitly filter on its `id`. [More details.](#relations)
+
+</DocAlert>
+
+<DocAlert status="info">
+
+The `defaultWhereStrategy` applied (if no options are passed) is the `EXACT` [`StrategyType`](#strategies).
+[More details.](#default-config).
+
+</DocAlert>
+
+## Basic Usage
+
+Once you have enabled the properties you want to filter, you can use them as query parameters on `list` operation for
+that `@Entity`.
+
+On a `User` entity, by enabling only the `firstName` and `role.identifier` properties :
+
+```typescript
+class AbstractEntity {
+    @PrimaryGeneratedColumn()
+    id: number;
+}
+
+@Entity()
+class Role extends AbstractEntity {
+    @Column()
+    identifier: string;
+}
+
+@Search(["firstName", ["role.identifier", "CONTAINS"]], { defaultWhereStrategy: "STARTS_WITH" })
+@Entity()
+class User extends AbstractEntity {
+    @Column()
+    firstName: string;
+
+    @ManyToOne(() => Role)
+    role: Role;
+}
+```
+
+With these query parameters :
+
+```json
+{ "id": "123", "firstName": "Alex", "role": "789", "role.identifier": "abc456" }
+```
+
+On the request: `GET:/users/?id=123&firstName=Alex&role=789&role.identifier=abc456`
+
+Only the `firstName` & `role.identifier` query parameters will be used as filtered since they alone were explicitly
+specified on @Search `filterable properties`.
+
+`firstName` strategy is `STARTS_WITH` since it is the `defaultWhereStrategy` given in options and `role.identifier`
+strategy is `CONTAINS` since it was provided in properties (in [`FilterProperty`](/definitions#filterproperty) tuple).
+
+## Strategies
+
+These strategies can be used both as `defaultWhereStrategy` or directly in query parameter with the
+[advanced syntax](#advanced-usage).
+
+| StrategyType          | Shortcut | SQL generated                         | Inverse SQL                             |
+| --------------------- | -------- | ------------------------------------- | --------------------------------------- |
+| EXACT                 | none     | prop = value                          | !=                                      |
+| IS                    | none     | prop IS value                         | IS NOT                                  |
+| IN                    | none     | prop IN value                         | NOT IN                                  |
+| EXISTS                | none     | prop IS NOT NULL                      | IS NULL                                 |
+| CONTAINS              | none     | prop LIKE %value%                     | NOT LIKE %value%                        |
+| STARTS_WITH           | none     | prop LIKE value%                      | NOT LIKE value%                         |
+| ENDS_WITH             | none     | prop LIKE %value                      | NOT LIKE %value                         |
+| BETWEEN               | <\>      | prop IS BETWEEN value                 | IS NOT BETWEEN                          |
+| BETWEEN_STRICT        | ><       | (valueMin > prop AND prop < valueMax) | (valueMin <= prop AND prop >= valueMax) |
+| LESS_THAN             | <        | prop < value                          | >=                                      |
+| LESS_THAN_OR_EQUAL    | <\|      | prop <= value                         | prop > value                            |
+| GREATER_THAN          | >        | prop > value                          | <=                                      |
+| GREATER_THAN_OR_EQUAL | >\|      | prop >= value                         | prop < value                            |
+
+> If you're wondering why `LESS_THAN_OR_EQUAL` and `GREATER_THAN_OR_EQUAL` use the `|` instead of `=` character, it's
+> because the `=` is already used to define the limit between the query parameter key and value.
+
+### Multiple values
+
+If you need to filter on the same [`FilterProperty`](/definitions#filterproperty) and
+[`StrategyType`](/definitions#strategytype) but with different values, you can use comma-separated values as query param
+value. Then each of these values will be trimmed and then wrapped in the same SQL condition with a `OR` conditions for
+each value.
+
+<DocAlert status="info">
+
+Passing an array of values to a query parameter with the strategy `EXACT` will be the same as using the `IN` strategy.
+Conversely, if you use the `NOT` operator by appending a `!` to the query parameter key, the `EXACT` with multiple
+values will end up with the same results as a `NOT IN`.
+
+</DocAlert>
+
+<DocAlert status="info">
+
+`BETWEEN_STRICT` is the only strategy that always requires exactly 2 values. Example: `{ "id><": "3, 8" }` or
+`{ "role.id;betweenStrict": "3, 8" }`
+
+</DocAlert>
+
+## Relations
+
+-   You can filter a relation property by enabling a [`FilterProperty`](/definitions#filterproperty) on its dot
+    delimited path. Example: `abc.def.ghi`
+-   You can filter on a relation by either enabling as [`FilterProperty`](/definitions#filterproperty) the relation
+    itself or by appending `.id`. Example: `{ "role": 123 }` is the same as `{ "role.id": 123 }`
+-   There is no limit to the nesting, be careful with the SQL performance of every LEFT JOIN made if you nest too far
+
+## Advanced usage
+
+Since any `StrategyType` is available for a `filterable property`, sometimes you might want to use another one than the
+default one. To do so you just need to use the strategy part of the `advanced syntax`.
+
+There is a syntax for query parameters keys that makes filters very powerful. There are 4 parts to a
+[`FilterProperty`](/definitions#filterproperty) query parameter. Each part name is wrapped with parenthesis below (for
+readability, there are no parenthesis in usage) :
+
+> `(complex condition)(propertyPath)(;StrategyType|shortcut)(!)`
+
+1. `complex condition`: **Optional.** The complex condition part might be used if you have advanced needs, it allows you
+   to nest and group conditions with the `and`|`or` operators. [More details here.](#complex-conditions)
+2. `propertyPath`: Using a dot delimited string, you can target a (`shallow`|`deeply nested`) (`relation`|`property`) to
+   filter on.
+3. `StrategyType|shortcut`: **Optional.** The StrategyType name (can be written camelCased or as UPPERCASE_SNAKE_CASE)
+   prepended by a colon or just the shortcut (without the colon) if there is any available.
+4. `!`: **Optional.** The NOT operator, by appending a `!` to a query parameter key, the StrategyType will be inversed.
+
+### Quick example
+
+Below is an example which makes no actual sense whatsoever, still, it remains valid and would produce the following
+query.
+
+With these query parameters :
+
+```json
+{
+    "id!": "123",
+    "id;greaterThan!": "456",
+    "owner.id!": "789,321,654",
+    "and(key0):owner.role.identifier": "admin",
+    "and(key0):owner.role.name;endsWith": "@gmail.com",
+    "or(key1):owner.birthDate<>": "1996-01-01T00:00:00, 2000-01-01T00:00:00",
+    "or(key1)and(nestedKey2):owner.id>": "987",
+    "or(key1)or(nestedKey2):owner.email;STARTS_WITH!": "abc"
+}
+```
+
+A query would be produced looking like this :
+
+```sql
+SELECT ... from teams team
+LEFT JOIN users team_owner ON team.owner_id = users.id
+LEFT JOIN roles team_owner_role ON team_owner_role.id = team_owner.role_id
+WHERE
+    team.id != 123
+AND team.id <= 456
+AND team_owner.id NOT IN (789, 321, 654)
+AND (
+        team_owner_role.identifier = "admin"
+    AND team_owner_role.name LIKE '%@gmail.com'
+)
+OR (
+        (team_owner.birthDate BETWEEN "1996-01-01T00:00:00" AND "2000-01-01T00:00:00")
+    AND (
+            team_owner.id > 987
+        OR team_owner.email NOT LIKE 'abc%'
+    )
+)
+
+```
+
+### Full example
+
+```typescript
+class AbstractEntity {
+    @PrimaryGeneratedColumn()
+    id: number;
+}
+
+@Entity()
+class Role extends AbstractEntity {
+    @Column()
+    identifier: string;
+}
+
+@Search({ all: true })
+@EntityRoute({ operations: ["list"] })
+@Entity()
+class User extends AbstractEntity {
+    @Column()
+    firstName: string;
+
+    @ManyToOne(() => Role)
+    role: Role;
+}
+```
+
+> On the `user.list` route scope (`GET:/users/`): Using `all: true`, you can filter on any property path from the `User`
+> entity. Here the default strategy used for every [`FilterProperty`](/definitions#filterproperty) is `EXACT` since it's
+> the global default one and none were specified on the @Search decorator.
+
+| Filter description                       | Query parameter key                                       | Query parameter value |
+| ---------------------------------------- | --------------------------------------------------------- | --------------------- |
+| Get all users with ids in list [1, 2, 3] | `id`                                                      | `1,2,3`               |
+| Get all users with role equal to 111     | `role` or `role.id`                                       | `111`                 |
+| Get all super_admin users                | `role.identifier`                                         | `super_admin`         |
+| Get all admin users                      | `role.identifier;endsWith` or `role.identifier;ENDS_WITH` | `_admin`              |
+
+### Complex conditions
+
+At some point, you might need to have more complex conditions to filter your list, requiring the SQL `OR` operator, or
+with maybe some `nested conditions`. That is possible using the `complex conditions` syntax.
+
+All you need for that is to prefix your condition with the `and` or `or` condition operator. When you have nested
+conditions you should append a `condition identifier` wrapped in parenthesis after the `condition operator`
+(`and`|`or`). That `condition identifier` can be any string you want, as long as you re-use the same consistently for
+the same conditions you want to nest.
+
+You can chain them indefinitely and add as much nested conditions as you want. It is recommended to use names that makes
+sense to make the query parameter key almost readable like an english sentence.
+
+<DocAlert status="info">
+
+You can omit the `and` operator, though you it is recommended to explicitly write it for readability. Example:
+`or(isAdmin)and(aboveId):id>` = `or(isAdmin)(aboveId):id>`
+
+</DocAlert>
+
+#### Example
+
+_Using the [same entities as the example above](#full-example)._
+
+For these query parameters :
+
+```json
+{
+    "id!": 123,
+    "or(isAdminNotSuperOrNameLike)and:role.identifier;contains": "admin",
+    "or(isAdminNotSuperOrNameLike)and:role.identifier!": "super_admin",
+    "or(isAdminNotSuperOrNameLike)or:firstName;startsWith": "Alex"
+}
+```
+
+You would have that query generated :
+
+```sql
+SELECT ... from users user
+LEFT JOIN roles user_role ON user_role.id = user.role_id
+WHERE
+    user.id != 123
+OR (
+    user_role.identifier LIKE '%admin%'
+    AND user_role.identifier != "super_admin"
+    OR user.firstName LIKE 'Alex%'
+)
+
+```
+
+#### Full example
+
+> To get all users with first name that starts with "Alex" that are either in the list [1, 2, 3] or that are admin and
+> with an id above 50 but not super_admin unless his first name is "Max" or "Nath". (Yes this is a complete unrealistic
+> demand, I just needed an example of a complex query.)
+
+The query parameters would look like this :
+
+```json
+{
+    "id": "1,2,3",
+    "firstName;startsWith": "Alex",
+    "or(isAdmin)and(aboveId):role.identifier;endswith": "_admin",
+    "or(isAdmin)and(aboveId):id>": "50",
+    "or(isAdmin)or(notSuperOrInList):role.identifier!": "super-admin",
+    "or(isAdmin)or(notSuperOrInList)or:firstName": "Max, Nath"
+}
+```
+
+> Reminder: The complex condition names `(isAdmin)` and `(aboveId)` are completely arbitrary, you just need to use the
+> same string when you want to nest conditions.
+
+And the `SearchFilter` would generate a query like :
+
+```sql
+SELECT ... from users user
+LEFT JOIN roles user_role ON user_role.id = user.role_id
+WHERE
+    user.id IN (1,2,3)
+AND user.firstName LIKE 'Alex%'
+OR (
+    (
+            user_role.identifier LIKE '%_admin'
+        AND user.id > 50
+    )
+    OR (
+            user_role.identifier != "super_admin"
+        OR user.firstName IN ("Max", "Nath")
+    )
+)
+
+```
+
+## Default config
+
+You can get the default [`SearchFilter`](/definitions/classes/searchfilter) using the
+[`getSearchFilterDefaultConfig`](/definitions#getsearchfilterdefaultconfig) function. It can be used for example to
+retrieve the `defaultWhereStrategy` inside the `options` key.
+
+<!-- ./docs/src/pages/definitions -->

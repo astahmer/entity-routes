@@ -1,0 +1,88 @@
+---
+title: Introduction
+---
+
+import { DocAlert } from "@/components";
+
+A very common need for APIs is to filter a list through different conditions.
+
+Filters receive query parameters to determine which conditions to apply, and the current request queryBuilder onto which
+apply them.
+
+They are registered using decorators on either an @Entity or a property.
+
+## Built-ins
+
+There are 2 basic filters built-in, both extending the [`AbstractFilter`](/definitions/classes/abstractfilter) :
+
+-   [`SearchFilter`](/definitions/classes/searchfilter), used with the `@Search decorator`, allows you to search using a
+    [`StrategyType`](/definitions#strategytype)
+-   [`PaginationFilter`](/definitions/classes/paginationfilter), used with the `@Pagination decorator`, allows you to
+    paginate and order the results
+
+| Filter           | Decorator   | Specific options                                                     | Default options getter           |
+| ---------------- | ----------- | -------------------------------------------------------------------- | -------------------------------- |
+| AbstractFilter   | none        | all/allShallow/allNested                                             | none                             |
+| SearchFilter     | @Search     | defaultWhereStrategy                                                 | getSearchFilterDefaultConfig     |
+| PaginationFilter | @Pagination | defaultOrderBys / defaultOrderDirection / defaultRetrievedItemsLimit | getPaginationFilterDefaultConfig |
+
+If neither of them satisfies your need, you can always make your own custom filter by extending the
+[`AbstractFilter`](/definitions/classes/abstractfilter).
+
+## Enabling properties
+
+<DocAlert status="warning">
+
+You will need to explicitly enable the properties you want to be filterable, else the corresponding query parameters
+will be ignored.
+
+</DocAlert>
+
+With the [`AbstractFilter`](/definitions/classes/abstractfilter) class, you can quickly define which properties will be
+filterable. To do so, you need to set its options ([`DefaultFilterOptions`](/definitions#defaultfilteroptions))
+accordingly or/and by passing an array of property paths ([`FilterProperty`](/definitions#filterproperty)).
+
+> By passing a dot delimited string, you can filter on a (deeply?) nested relation property
+
+### Allowing a set of properties
+
+Using the [`DefaultFilterOptions`](/definitions#defaultfilteroptions), you can allow every properties of a specific kind
+to be filtered.
+
+```ts
+type DefaultFilterOptions = {
+    /** Make all property paths filtereable by default */
+    all?: boolean;
+    /** Make all (not nested) properties filterable by default */
+    allShallow?: boolean;
+    /** Make all nested property paths filtereable by default */
+    allNested?: boolean;
+};
+```
+
+An example with the [`@Search`](/definitions#search) filter would look like this :
+
+```ts
+@Search({ all: true })
+```
+
+### Explicitly allow properties
+
+You can directly pass an array of [`FilterProperty`](/definitions#filterproperty), which is an array of property/nested
+property path.
+
+```ts
+@Search(["id", "firstName", "role.identifier"])
+```
+
+### Using both
+
+```ts
+@Search(["id", "firstName"], { allNested: true })
+```
+
+## Metadata
+
+You can retrieve the [`RouteFiltersMeta`](/definitions#routefiltersmeta) registered by an filter decorator (such as
+[`@Search`](/definitions#search), [`@Pagination`](/definitions#pagination) or [`@OrderBy`](/definitions#orderby)) by
+using the [`getRouteFiltersMeta`](/definitions#getroutefiltersmeta) function.

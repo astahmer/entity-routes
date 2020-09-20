@@ -12,7 +12,15 @@
                 { "name": "operations" },
                 { "name": "groups", "routes": [{ "name": "introduction" }, { "name": "examples" }] },
                 { "name": "subresources" },
-                { "name": "filters" },
+                {
+                    "name": "filters",
+                    "routes": [
+                        { "name": "introduction" },
+                        { "name": "search", "url": "/internals/filters/search-filter" },
+                        { "name": "pagination", "url": "/internals/filters/pagination-filter" },
+                        { "name": "custom-filter", "title": "Making a custom fitler" }
+                    ]
+                },
                 {
                     "name": "decorators",
                     "routes": [
@@ -33,7 +41,7 @@
                 { "name": "request-lifecycle" }
             ]
         },
-        { "name": "internals" },
+        { "name": "internals", "hidden": true },
         { "name": "compatibility" },
         { "name": "definitions", "routes": [{ "name": "index.md" }] }
     ]
