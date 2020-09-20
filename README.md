@@ -6,18 +6,20 @@ _No boilerplate controllers. No code generation. No bullshit._
 
 **This README is still a WIP.**
 
+[A documentation site is being built right now on the `feat/docs` branch.](https://entity-routes.vercel.app/)
+
 ## Table of Contents
 
--   [:sparkles: Core Features](#sparkles-core-features)
--   [:wrench: Installation](#wrench-installation)
--   [:bullettrain_side: Quick start](#bullettrain_side-quick-start)
+-   [Core Features](#core-features)
+-   [Installation](#installation)
+-   [Quick start](quick-start)
     -   [Using Koa](#using-koa)
     -   [Using Express/Next/Nuxt](#using-expressnextnuxt)
--   [:balloon: Benefits](#balloon-bonus-points)
--   [:question: What/why ?](#question-whatwhy-)
+-   [Benefits](#benefits)
+-   [What/why ?](#whatwhy-)
 -   [License](#license)
 
-## :sparkles: Core Features
+## Core Features
 
 -   Instant CRUD with a simple @EntityRoute decorator
 -   Independant service components (Database Reader, Persister, RelationManager etc...)
@@ -34,7 +36,7 @@ _No boilerplate controllers. No code generation. No bullshit._
 -   Hooks to alter a request handling at any point in the process
 -   Standardized REST responses
 
-## :wrench: Installation
+## Installation
 
 Since this library depends on TS Decorators just like typeorm, we need to install ReflectMetadata.
 
@@ -59,7 +61,7 @@ You also need this in your `tsconfig.json`
 
 > Learn about typescript decorators [here](https://www.typescriptlang.org/docs/handbook/decorators.html).
 
-## :bullettrain_side: Quick start
+## Quick start
 
 ### Make your entities
 
@@ -188,7 +190,7 @@ export async function setupExpressApp(connection: Connection) {
 
 That's it. There is no final step. Your routes are ready.
 
-## :balloon: Benefits
+## Benefits
 
 -   0 config required
 -   Compatible with Express, Koa, Next, Nuxt and any other middleware-based framework using adapters
@@ -197,7 +199,7 @@ That's it. There is no final step. Your routes are ready.
 -   Almost complete code coverage (95%+)
 -   Everything (types included) is exported so you can use it your own way
 
-## :question: What/why ?
+## What/why ?
 
 Basically this is a **Node / Typescript** route handler tightly coupled with **[TypeORM](https://github.com/typeorm/typeorm/)** entities.
 
