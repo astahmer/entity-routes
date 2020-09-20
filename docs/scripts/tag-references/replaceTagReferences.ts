@@ -97,6 +97,7 @@ function getNextCharIndex({ char, str, start, direction = "next" }: GetNextCharI
 
     while (currentChar !== char) {
         currentChar = str[direction === "next" ? ++currentIndex : --currentIndex];
+        if (currentIndex === 0) break;
     }
 
     return currentIndex;
