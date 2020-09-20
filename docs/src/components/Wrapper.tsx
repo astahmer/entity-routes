@@ -29,6 +29,7 @@ export const Wrapper = ({ children, ...props }) => {
     useRouteChanged({
         onStart: reset,
         onComplete: () => {
+            if (window.location.hash) return;
             document.body.style.scrollBehavior = "auto";
             document.body.scrollTo({ top: 0, left: 0, behavior: "auto" });
             document.body.style.scrollBehavior = undefined;
@@ -71,6 +72,7 @@ type SidebarOrder = {
     url?: string;
     /** If you want to override some meta, this key will be merged with sidebar:child.meta */
     meta?: Record<string, any>;
+    /** Will replace */
 };
 function getSidebarOrder(): SidebarOrder {
     try {
@@ -109,7 +111,7 @@ function orderTree({ tree, order }: { tree: DirectoryTree; order: SidebarOrder }
         } else if (route.url) {
             // New sidebar item with no corresponding page & therefore has a url manually defined
             orderedTree.children.push({
-                name: route.title.toLowerCase(),
+                name: route.title?.toLowerCase(),
                 ...rest,
                 children: route.routes,
                 hasNoPage: true,
