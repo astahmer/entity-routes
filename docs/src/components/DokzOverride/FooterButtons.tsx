@@ -2,7 +2,7 @@ import { useContext } from "react";
 import NextLink from "next/link";
 import { useRouter } from "next/router";
 
-import { Box, Stack } from "@chakra-ui/core";
+import { Box, Flex, Stack } from "@chakra-ui/core";
 import { css } from "@emotion/core";
 
 import { DirectoryTree, formatTitle } from "dokz/dist/components/support";
@@ -19,18 +19,21 @@ export const FooterButtons = ({ ...rest }) => {
     const [isPrevDir, isNextDir] = [prevTree?.children?.length, nextTree?.children?.length];
     const [prev, next] = [isPrevDir ? prevTree.children[0] : prevTree, isNextDir ? nextTree.children[0] : nextTree];
     const [prevTitle, nextTitle] = [
-        isPrevDir ? `${formatTitle(prevTree.name)}: ${prev.title}` : prev?.title,
-        isNextDir ? `${formatTitle(nextTree.name)}: ${next.title}` : next?.title,
+        isPrevDir ? `${formatTitle(prevTree.name)}: ${prev.title}` : formatTitle(prev?.name || prev?.title),
+        isNextDir ? `${formatTitle(nextTree.name)}: ${next.title}` : formatTitle(next?.name || next?.title),
     ];
-    // console.log("subtree", { current, nextTree, prevTree });
 
     // TODO Update chakra-ui to 1.0
     // https://github.com/chakra-ui/chakra-ui/issues/798
     return (
-        <Stack direction="row" spacing="6" {...rest}>
-            {prev?.url ? <Button title={prevTitle} type="prev" href={prev.url} w="100%" /> : <Box w="100%" />}
+        <Flex direction={["column", null, "row"]} justifyContent="space-between" {...rest}>
+            {prev?.url ? (
+                <Button title={prevTitle} type="prev" href={prev.url} w="100%" mr="1.5em" />
+            ) : (
+                <Box w="100%" />
+            )}
             {next?.url ? <Button title={nextTitle} type="next" href={next.url} w="100%" /> : <Box w="100%" />}
-        </Stack>
+        </Flex>
     );
 };
 
