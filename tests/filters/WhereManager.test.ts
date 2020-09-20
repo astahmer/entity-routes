@@ -337,7 +337,7 @@ describe("WhereManager", () => {
                     column: metadata.findColumnWithPropertyName("id"),
                     not: undefined,
                 })
-            ).toEqual({ whereOperator: "=", whereCondition: "user.id = :id", whereParam: { id: "123" } });
+            ).toEqual({ whereOperator: "=", whereCondition: "user.id = :id_EXACT", whereParam: { id_EXACT: "123" } });
         });
 
         it("NOT exact", () => {
@@ -350,7 +350,11 @@ describe("WhereManager", () => {
                     column: metadata.findColumnWithPropertyName("id"),
                     not: true,
                 })
-            ).toEqual({ whereOperator: "!=", whereCondition: "user.id != :id", whereParam: { id: "123" } });
+            ).toEqual({
+                whereOperator: "!=",
+                whereCondition: "user.id != :id_NOT_EXACT",
+                whereParam: { id_NOT_EXACT: "123" },
+            });
         });
 
         it("startsWith", () => {
@@ -363,7 +367,11 @@ describe("WhereManager", () => {
                     column: metadata.findColumnWithPropertyName("id"),
                     not: undefined,
                 })
-            ).toEqual({ whereOperator: "LIKE", whereCondition: "user.id LIKE :id", whereParam: { id: "123%" } });
+            ).toEqual({
+                whereOperator: "LIKE",
+                whereCondition: "user.id LIKE :id_STARTS_WITH",
+                whereParam: { id_STARTS_WITH: "123%" },
+            });
         });
 
         it("NOT startsWith", () => {
@@ -378,8 +386,8 @@ describe("WhereManager", () => {
                 })
             ).toEqual({
                 whereOperator: "NOT LIKE",
-                whereCondition: "user.id NOT LIKE :id",
-                whereParam: { id: "123%" },
+                whereCondition: "user.id NOT LIKE :id_NOT_STARTS_WITH",
+                whereParam: { id_NOT_STARTS_WITH: "123%" },
             });
         });
 
@@ -395,8 +403,8 @@ describe("WhereManager", () => {
                 })
             ).toEqual({
                 whereOperator: "BETWEEN",
-                whereCondition: "user.id BETWEEN :id_1 AND :id_2",
-                whereParam: { id_1: "123", id_2: "456" },
+                whereCondition: "user.id BETWEEN :id_BETWEEN_1 AND :id_BETWEEN_2",
+                whereParam: { id_BETWEEN_1: "123", id_BETWEEN_2: "456" },
             });
         });
         it("NOT between", () => {
@@ -411,8 +419,8 @@ describe("WhereManager", () => {
                 })
             ).toEqual({
                 whereOperator: "NOT BETWEEN",
-                whereCondition: "user.id NOT BETWEEN :id_1 AND :id_2",
-                whereParam: { id_1: "123", id_2: "456" },
+                whereCondition: "user.id NOT BETWEEN :id_NOT_BETWEEN_1 AND :id_NOT_BETWEEN_2",
+                whereParam: { id_NOT_BETWEEN_1: "123", id_NOT_BETWEEN_2: "456" },
             });
         });
 
@@ -430,8 +438,8 @@ describe("WhereManager", () => {
                 })
             ).toEqual({
                 whereOperator: ">",
-                whereCondition: "user.id > :id",
-                whereParam: { id: "123" },
+                whereCondition: "user.id > :id_BETWEEN_STRICT",
+                whereParam: { id_BETWEEN_STRICT: "123" },
             });
 
             // 2nd iteration
@@ -447,8 +455,8 @@ describe("WhereManager", () => {
                 })
             ).toEqual({
                 whereOperator: "<",
-                whereCondition: "user.id < :id_1",
-                whereParam: { id_1: "456" },
+                whereCondition: "user.id < :id_BETWEEN_STRICT_1",
+                whereParam: { id_BETWEEN_STRICT_1: "456" },
             });
         });
 
@@ -465,8 +473,8 @@ describe("WhereManager", () => {
                 })
             ).toEqual({
                 whereOperator: "<=",
-                whereCondition: "user.id <= :id",
-                whereParam: { id: "123" },
+                whereCondition: "user.id <= :id_NOT_BETWEEN_STRICT",
+                whereParam: { id_NOT_BETWEEN_STRICT: "123" },
             });
             expect(
                 manager.getWhereArgs({
@@ -480,8 +488,8 @@ describe("WhereManager", () => {
                 })
             ).toEqual({
                 whereOperator: ">=",
-                whereCondition: "user.id >= :id_1",
-                whereParam: { id_1: "456" },
+                whereCondition: "user.id >= :id_NOT_BETWEEN_STRICT_1",
+                whereParam: { id_NOT_BETWEEN_STRICT_1: "456" },
             });
         });
 
@@ -529,7 +537,11 @@ describe("WhereManager", () => {
                     column: metadata.findColumnWithPropertyName("id"),
                     not: undefined,
                 })
-            ).toEqual({ whereOperator: ">", whereCondition: "user.id > :id", whereParam: { id: "123" } });
+            ).toEqual({
+                whereOperator: ">",
+                whereCondition: "user.id > :id_GREATER_THAN",
+                whereParam: { id_GREATER_THAN: "123" },
+            });
         });
 
         it("NOT greaterThan", () => {
@@ -542,7 +554,11 @@ describe("WhereManager", () => {
                     column: metadata.findColumnWithPropertyName("id"),
                     not: true,
                 })
-            ).toEqual({ whereOperator: "<=", whereCondition: "user.id <= :id", whereParam: { id: "123" } });
+            ).toEqual({
+                whereOperator: "<=",
+                whereCondition: "user.id <= :id_NOT_GREATER_THAN",
+                whereParam: { id_NOT_GREATER_THAN: "123" },
+            });
         });
     });
 
@@ -576,7 +592,7 @@ describe("WhereManager", () => {
                     comparison: undefined,
                 },
             });
-            expect(whereExp.expressionMap.wheres).toEqual([{ type: "and", condition: "(user.id = :id)" }]);
+            expect(whereExp.expressionMap.wheres).toEqual([{ type: "and", condition: "(user.id = :id_EXACT)" }]);
         });
 
         it("exact - array value - default", () => {
@@ -597,7 +613,7 @@ describe("WhereManager", () => {
                 },
             });
             expect(whereExp.expressionMap.wheres).toEqual([
-                { type: "and", condition: "(user.id = :id OR user.id = :id_1)" },
+                { type: "and", condition: "(user.id = :id_EXACT OR user.id = :id_EXACT_1)" },
             ]);
         });
 
@@ -620,7 +636,7 @@ describe("WhereManager", () => {
                 },
             });
             expect(whereExp.expressionMap.wheres).toEqual([
-                { type: "and", condition: "user.id BETWEEN :id_1 AND :id_2" },
+                { type: "and", condition: "user.id BETWEEN :id_BETWEEN_1 AND :id_BETWEEN_2" },
             ]);
         });
 
@@ -641,7 +657,7 @@ describe("WhereManager", () => {
                     comparison: undefined,
                 },
             });
-            expect(whereExp.expressionMap.wheres).toEqual([{ type: "and", condition: "user.id IN (:...id)" }]);
+            expect(whereExp.expressionMap.wheres).toEqual([{ type: "and", condition: "user.id IN (:...id_IN)" }]);
         });
     });
 });

@@ -60,9 +60,9 @@ describe("Search filter", () => {
             // should have set conditions accordingly to queryParams
             // except "role.identifier" since options only allow shallow props to be filtered
             expect(qb.expressionMap.wheres).toEqual([
-                { type: "and", condition: "(user.id = :id)" },
-                { type: "and", condition: "(user.firstName = :firstName)" },
-                { type: "and", condition: "(user_role_1.id = :id)" },
+                { type: "and", condition: "(user.id = :id_EXACT)" },
+                { type: "and", condition: "(user.firstName = :firstName_EXACT)" },
+                { type: "and", condition: "(user_role_1.id = :id_EXACT)" },
             ]);
         });
     });
@@ -117,10 +117,13 @@ describe("Search filter", () => {
             // firstName strategy is LIKE since it is the defaultWhereStrategy given in options
             // and role.identifier strategy is CONTAINS since it was provided in properties (in FilterProperty tuple)
             expect(qb.expressionMap.wheres).toEqual([
-                { type: "and", condition: "(user.firstName LIKE :firstName)" },
-                { type: "and", condition: "(user_role_1.identifier LIKE :identifier)" },
+                { type: "and", condition: "(user.firstName LIKE :firstName_STARTS_WITH)" },
+                { type: "and", condition: "(user_role_1.identifier LIKE :identifier_CONTAINS)" },
             ]);
-            expect(qb.expressionMap.parameters).toEqual({ firstName: "Alex%", identifier: "%abc456%" });
+            expect(qb.expressionMap.parameters).toEqual({
+                firstName_STARTS_WITH: "Alex%",
+                identifier_CONTAINS: "%abc456%",
+            });
         });
     });
 
@@ -346,19 +349,19 @@ describe("Search filter", () => {
 
             filter.apply({ qb, aliasHandler, queryParams });
             expect(qb.expressionMap.wheres).toEqual([
-                { type: "and", condition: "(user.firstName = :firstName)" },
-                { type: "and", condition: "(user.id > :id)" },
-                { type: "or", condition: "(user.isAdmin = :isAdmin)" },
+                { type: "and", condition: "(user.firstName = :firstName_EXACT)" },
+                { type: "and", condition: "(user.id > :id_GREATER_THAN)" },
+                { type: "or", condition: "(user.isAdmin = :isAdmin_EXACT)" },
                 {
                     type: "or",
                     condition: `
                         (
                             (
-                                (user.birthDate > :birthDate) AND (user.email LIKE :email)
+                                (user.birthDate > :birthDate_GREATER_THAN) AND (user.email LIKE :email_ENDS_WITH)
                             ) AND (
-                                (user.id = :id) AND user_role_1.id BETWEEN :id_1 AND :id_2
+                                (user.id = :id_EXACT) AND user_role_1.id BETWEEN :id_BETWEEN_1 AND :id_BETWEEN_2
                             ) OR (
-                                (user_role_1.identifier = :identifier OR user_role_1.identifier = :identifier_1)
+                                (user_role_1.identifier = :identifier_EXACT OR user_role_1.identifier = :identifier_EXACT_1)
                                 OR (user_role_1.id IS NULL)
                             )
                         )`
