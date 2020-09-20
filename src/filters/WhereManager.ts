@@ -227,7 +227,9 @@ export class WhereManager {
         not: boolean;
         column: ColumnMetadata;
     }) {
-        const paramName = propCount ? propName + "_" + propCount : propName;
+        let paramName = `${propName}_${strategy}`;
+        if (propCount) paramName += "_" + propCount;
+
         if ("BETWEEN" === strategy) {
             // Quite specific case for BETWEEN strategy
             const whereOperator = (not ? "NOT " : "") + "BETWEEN";
