@@ -227,7 +227,7 @@ export class WhereManager {
         not: boolean;
         column: ColumnMetadata;
     }) {
-        let paramName = `${propName}_${strategy}`;
+        let paramName = `${propName}_${not ? "NOT_" : ""}${strategy}`;
         if (propCount) paramName += "_" + propCount;
 
         if ("BETWEEN" === strategy) {
