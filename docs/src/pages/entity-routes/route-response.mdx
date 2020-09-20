@@ -36,9 +36,9 @@ type RouteResponse = {
 ## @context
 
 -   `operation`/`entity` keys are always added and define the [`route scope`](/entity-routes/route-scope/)
--   On a `persist` [**operation kind**](/entity-routes/groups/definitions#operation-kind), either `create` or `update`,
+-   On a `persist` [**operation kind**](/entity-routes/groups/introduction#operation-kind), either `create` or `update`,
     the `validationErrors` key will be added and defaults to an empty array.
--   On a `read` [**operation kind**](/entity-routes/groups/definitions#operation-kind), either `list` or `details`, the
+-   On a `read` [**operation kind**](/entity-routes/groups/introduction#operation-kind), either `list` or `details`, the
     `totalItems`/`retrievedItems` keys will be added and defaults to empty arrays.
 -   The `error` key is only added when there is an error, it is populated with the error message caught.
 

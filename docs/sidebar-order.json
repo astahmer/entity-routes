@@ -10,7 +10,7 @@
                 { "name": "route-response" },
                 { "name": "route-scope" },
                 { "name": "operations" },
-                { "name": "groups", "routes": [{ "name": "definitions" }, { "name": "examples" }] },
+                { "name": "groups", "routes": [{ "name": "introduction" }, { "name": "examples" }] },
                 { "name": "subresources" },
                 { "name": "filters" },
                 {
@@ -18,7 +18,7 @@
                     "routes": [
                         { "name": "list" },
                         { "title": "@EntityRoute", "url": "/entity-routes/entity-router" },
-                        { "title": "@Groups", "url": "/entity-routes/groups/definitions" },
+                        { "title": "@Groups", "url": "/entity-routes/groups/introduction" },
                         { "title": "@Subresources", "url": "/entity-routes/subresources" },
                         { "name": "depends-on", "title": "@DependsOn", "meta": { "chiasse": "oui" } },
                         { "title": "@MaxDepth", "url": "/entity-routes/groups/max-depth" },

@@ -2,7 +2,7 @@
     "/entity-routes/introduction#maker/": ["`maker`", "`makers`"],
     "/entity-routes/route-scope/": ["`route scope`", "`route scopes`"],
     "/entity-routes/operations/": ["**operation**", "**operations**"],
-    "/entity-routes/groups/definitions": ["**groups**"],
+    "/entity-routes/groups/introduction": ["**groups**"],
     "/entity-routes/subresources/": ["**subresources**"],
     "/entity-routes/filters/": ["**filters**"],
     "/entity-routes/hooks/": ["**hooks**"],
