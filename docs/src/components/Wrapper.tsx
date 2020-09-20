@@ -72,7 +72,8 @@ type SidebarOrder = {
     url?: string;
     /** If you want to override some meta, this key will be merged with sidebar:child.meta */
     meta?: Record<string, any>;
-    /** Will replace */
+    /** Will hide that item from sidebar */
+    hidden?: boolean;
 };
 function getSidebarOrder(): SidebarOrder {
     try {
@@ -93,6 +94,7 @@ function orderTree({ tree, order }: { tree: DirectoryTree; order: SidebarOrder }
 
     // Re-order & add each children from sidebar-order.json
     order.routes.forEach((route) => {
+        if (route.hidden) return;
         // Find sidebar.json item from sidebar-order.json route.name
         const item = children.find((child) => equalWithoutExtension(child.name, route.name || ""));
 
@@ -119,10 +121,14 @@ function orderTree({ tree, order }: { tree: DirectoryTree; order: SidebarOrder }
         }
     });
 
-    // If there are tree.children omitted in sidebar-order.json, append them
+    // If there are tree.children omitted in sidebar-order.json, append them (unless hidden)
     if (children.length !== orderedTree.children.filter((child) => !(child as any).hasNoPage).length) {
         orderedTree.children.push(
-            ...children.filter((child) => !orderedTree.children.find((addedChild) => addedChild.name === child.name))
+            ...children.filter(
+                (child) =>
+                    !order.routes.find((route) => route.name === child.name)?.hidden &&
+                    !orderedTree.children.find((addedChild) => addedChild.name === child.name)
+            )
         );
     }
 
