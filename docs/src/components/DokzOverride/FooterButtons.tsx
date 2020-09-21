@@ -17,12 +17,14 @@ export const FooterButtons = ({ ...rest }) => {
     const { next: nextTree, previous: prevTree } = findSubtreeInPathByUrl(sidebarTree, pathname) || {};
 
     const [isPrevDir, isNextDir] = [prevTree?.children?.length, nextTree?.children?.length];
-    const [prev, next] = [isPrevDir ? prevTree.children[0] : prevTree, isNextDir ? nextTree.children[0] : nextTree];
+    const [prev, next] = [
+        isPrevDir ? prevTree.children[prevTree.children.length - 1] : prevTree,
+        isNextDir ? nextTree.children[0] : nextTree,
+    ];
     const [prevTitle, nextTitle] = [
         isPrevDir ? `${formatTitle(prevTree.name)}: ${prev.title}` : formatTitle(prev?.name || prev?.title || ""),
         isNextDir ? `${formatTitle(nextTree.name)}: ${next.title}` : formatTitle(next?.name || next?.title || ""),
     ];
-
     // TODO Update chakra-ui to 1.0
     // https://github.com/chakra-ui/chakra-ui/issues/798
     return (
