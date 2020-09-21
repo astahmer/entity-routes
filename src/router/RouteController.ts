@@ -55,7 +55,7 @@ export class RouteController<Entity extends GenericEntity> {
         requestContext: Pick<RequestContext<Entity>, "requestId" | "operation" | "values" | "subresourceRelations">,
         innerOptions: CreateUpdateOptions = {}
     ) {
-        const { operation = "create", values, subresourceRelations } = requestContext;
+        const { operation = "create", values, subresourceRelations, requestId } = requestContext;
         const subresourceRelation = last(subresourceRelations || []); // Should only contain 1 item at most
         const options = { ...this.options.defaultCreateUpdateOptions, ...(innerOptions || {}) };
 
@@ -109,7 +109,7 @@ export class RouteController<Entity extends GenericEntity> {
             options?.responseOperation ||
             (requestContext.operation === "create" ? "details" : requestContext.operation || "details");
         return this.getDetails(
-            { operation: responseOperation, entityId: result.id },
+            { operation: responseOperation, entityId: result.id, requestId },
             { shouldOnlyFlattenNested: true }
         );
     }
@@ -118,7 +118,7 @@ export class RouteController<Entity extends GenericEntity> {
         requestContext: Pick<RequestContext<Entity>, "requestId" | "operation" | "values" | "entityId">,
         innerOptions?: CreateUpdateOptions
     ) {
-        const { operation = "update", values, entityId } = requestContext;
+        const { operation = "update", values, entityId, requestId } = requestContext;
         const options = { ...this.options.defaultCreateUpdateOptions, ...(innerOptions || {}) };
 
         if (!values?.id) (values as Entity).id = entityId;
@@ -150,7 +150,7 @@ export class RouteController<Entity extends GenericEntity> {
             options?.responseOperation ||
             (requestContext.operation === "update" ? "details" : requestContext.operation || "details");
         return this.getDetails(
-            { operation: responseOperation, entityId: result.id },
+            { operation: responseOperation, entityId, requestId },
             { shouldOnlyFlattenNested: true }
         );
     }
