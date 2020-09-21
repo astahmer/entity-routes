@@ -54,7 +54,8 @@ export function registerGroupsDecorator<G extends GroupsMetadata>({
 
         // Is a computed property (method decorator)
         if (descriptor) {
-            propName = formatGroupsMethodName(propName, alias);
+            const isAccessor = Boolean(descriptor.get || descriptor.set);
+            propName = formatGroupsMethodName(propName, alias, isAccessor);
         }
 
         if (typeof groups === "string") {
@@ -105,6 +106,7 @@ export const GROUPS_METAKEY = Symbol("groups");
 export const GROUPS_OPERATIONS: GroupsOperation[] = ["create", "list", "details", "update"];
 export const COMPUTED_PREFIX = "_COMPUTED_";
 export const ALIAS_PREFIX = "_ALIAS_";
+export const ACCESSOR_PREFIX = "_ACCESSOR_";
 
 export type MetaKey = string | Symbol;
 export const getGroupsMetadata = <G extends GroupsMetadata = EntityGroupsMetadata>(
@@ -112,5 +114,7 @@ export const getGroupsMetadata = <G extends GroupsMetadata = EntityGroupsMetadat
     metaKey: MetaKey = GROUPS_METAKEY
 ) => Reflect.getOwnMetadata(metaKey, entity) as G;
 
-export const formatGroupsMethodName = (propName: string, alias?: string) =>
-    COMPUTED_PREFIX + propName + (alias ? ALIAS_PREFIX + alias : "");
+export const formatGroupsMethodName = (propName: string, alias?: string, isAccessor?: boolean) => {
+    const aliasSuffix = alias ? ALIAS_PREFIX + alias : "";
+    return isAccessor ? ACCESSOR_PREFIX + propName + aliasSuffix : COMPUTED_PREFIX + propName + aliasSuffix;
+};

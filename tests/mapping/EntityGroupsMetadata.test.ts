@@ -35,6 +35,11 @@ describe("EntityGroupsMetadata", () => {
         getIdentifier() {
             return `${this.id}_${this.role.title}_${this.name}`;
         }
+
+        @Groups("basic")
+        get entityIdentifier() {
+            return `${this.constructor.name}.${this.id}`;
+        }
     }
 
     @Entity()
@@ -56,6 +61,7 @@ describe("EntityGroupsMetadata", () => {
         expect(metadata.getExposedPropsOn("details", metadata.entityMeta)).toEqual([
             "articles",
             formatGroupsMethodName("getIdentifier", "identifier"),
+            formatGroupsMethodName("entityIdentifier", null, true),
             "name",
             "role",
         ]);

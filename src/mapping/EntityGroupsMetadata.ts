@@ -1,7 +1,7 @@
 import { EntityMetadata, getRepository } from "typeorm";
 
 import { GroupsMetadata, getInheritanceTree } from "./GroupsMetadata";
-import { RouteOperation, COMPUTED_PREFIX, MetaKey, getGroupsMetadata } from "@/decorators/Groups";
+import { RouteOperation, COMPUTED_PREFIX, MetaKey, getGroupsMetadata, ACCESSOR_PREFIX } from "@/decorators/Groups";
 import { combineUniqueValues } from "@/functions/array";
 
 export class EntityGroupsMetadata extends GroupsMetadata {
@@ -24,11 +24,13 @@ export class EntityGroupsMetadata extends GroupsMetadata {
      * Get exposed props that are primitives props, used in queryBuilder selects
      */
     getSelectProps(operation: RouteOperation, routeContext: EntityMetadata, withPrefix = true, prefix?: string) {
+        const relationNames = this.entityMeta.relations.map((rel) => rel.propertyName);
         return this.getExposedPropsOn(operation, routeContext)
             .filter(
                 (propName) =>
-                    propName.indexOf(COMPUTED_PREFIX) === -1 &&
-                    this.entityMeta.relations.map((rel) => rel.propertyName).indexOf(propName) === -1
+                    !propName.includes(COMPUTED_PREFIX) &&
+                    !propName.includes(ACCESSOR_PREFIX) &&
+                    !relationNames.includes(propName)
             )
             .map((propName) => (withPrefix ? (prefix || this.entityMeta.tableName) + "." : "") + propName);
     }
@@ -46,9 +48,7 @@ export class EntityGroupsMetadata extends GroupsMetadata {
      * Get exposed props that are computed props, used to retrieve themselves
      */
     getComputedProps(operation: RouteOperation, routeContext: EntityMetadata) {
-        return this.getExposedPropsOn(operation, routeContext).filter(
-            (propName) => propName.indexOf(COMPUTED_PREFIX) !== -1
-        );
+        return this.getExposedPropsOn(operation, routeContext).filter((propName) => propName.includes(COMPUTED_PREFIX));
     }
 
     /**

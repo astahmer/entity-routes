@@ -84,4 +84,34 @@ describe("@Groups", () => {
         const metadata = getGroupsMetadata(Employee2);
         expect(metadata.decoratedProps).toContain(formatGroupsMethodName("getFullname"));
     });
+
+    it("can be registered on accessor (getter/setter) without alias", () => {
+        class Employee3 {
+            firstName: string;
+            lastName: string;
+
+            @TestGroups("all")
+            get fullName() {
+                return this.firstName + " " + this.lastName;
+            }
+        }
+
+        const metadata = getGroupsMetadata(Employee3);
+        expect(metadata.decoratedProps).toContain(formatGroupsMethodName("fullName", null, true));
+    });
+
+    it("can be registered on accessor (getter/setter) with alias", () => {
+        class Employee4 {
+            firstName: string;
+            lastName: string;
+
+            @TestGroups("all", "name")
+            get fullName() {
+                return this.firstName + " " + this.lastName;
+            }
+        }
+
+        const metadata = getGroupsMetadata(Employee4);
+        expect(metadata.decoratedProps).toContain(formatGroupsMethodName("fullName", "name", true));
+    });
 });

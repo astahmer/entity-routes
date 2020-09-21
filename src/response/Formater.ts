@@ -1,7 +1,7 @@
 import { EntityMetadata, getRepository } from "typeorm";
 import Container, { Service } from "typedi";
 
-import { ALIAS_PREFIX, COMPUTED_PREFIX, RouteOperation } from "@/decorators/Groups";
+import { ACCESSOR_PREFIX, ALIAS_PREFIX, COMPUTED_PREFIX, RouteOperation } from "@/decorators/Groups";
 
 import { EntityRouteOptions, GenericEntity, getRouteSubresourcesMetadata } from "@/router/EntityRouter";
 import { lowerFirstLetter } from "@/functions/primitives";
@@ -218,9 +218,14 @@ export const makeComputedPropNameFromMethod = (computed: string) => {
  * @param computed method name prefixed with COMPUTED_PREFIX & ALIAS_PREFIX/alias if there is one
  */
 export const getComputedPropMethodAndKey = (computed: string) => {
-    const computedPropMethod = computed.replace(COMPUTED_PREFIX, "").split(ALIAS_PREFIX)[0];
+    const isAccessor = computed.includes(ACCESSOR_PREFIX);
+    const computedPropMethod = computed
+        .replace(COMPUTED_PREFIX, "")
+        .split(ALIAS_PREFIX)[0]
+        .replace(ACCESSOR_PREFIX, "");
     const alias = computed.split(ALIAS_PREFIX)[1];
-    const propKey = alias || makeComputedPropNameFromMethod(computedPropMethod);
+    const propKey = alias || (isAccessor ? computedPropMethod : makeComputedPropNameFromMethod(computedPropMethod));
+
     return { computedPropMethod, propKey };
 };
 
