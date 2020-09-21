@@ -44,12 +44,13 @@ decorators on your `entities` to describe how to validate them
 entity exposed properties, inferred from your `@Entity` `entities` and their [`@Groups`](/definitions#groups) decorated
 properties.
 
-## [Filters](/entity-route/filters)
+## [Filters](/entity-routes/filters/introduction)
 
-You can use list [**filters**](/entity-routes/filters/) to alter items returned with auto SQL generated conditions. We
-have two built-in powerful [**filters**](/entity-routes/filters/) for lists (Search/Pagination) (TODO docref) that
-should fit well for 99% use cases. But you can also make your own custom [**filters**](/entity-routes/filters/) if you
-find yourself in the 1%
+You can use list [**filters**](/entity-routes/filters/introduction) to alter items returned with auto SQL generated
+conditions. We have two built-in powerful [**filters**](/entity-routes/filters/introduction) for lists
+([Search](/internals/filters/search-filter)/[Pagination](/internals/filters/pagination-filter)) that should fit well for
+99% use cases. But you can also make your own custom [**filters**](/entity-routes/filters/introduction) if you find
+yourself in the 1%
 
 ## [Hooks](/entity-route/hooks)
 
