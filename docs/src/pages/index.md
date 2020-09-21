@@ -56,7 +56,7 @@ yourself in the 1%
 
 There are [**hooks**](/entity-routes/hooks/) available to intervene at any point in the process of a request handling.
 
-## Computed properties
+## [Computed properties](/entity-groups/groups/introduction#computed-property)
 
 You can have methods exposed as properties in your API responses. Those methods can be asynchronous and can also require
 other entity properties that are not exposed through [`@Groups`](/definitions#groups) and still be resolved with

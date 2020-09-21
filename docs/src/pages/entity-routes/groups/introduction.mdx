@@ -3,7 +3,9 @@ title: Groups
 sidebar_label: Introduction
 ---
 
-By using the [@Groups](/definitions#groups) decorator, you can expose the decorated property through one or more
+import { DocAlert } from "@/components";
+
+By using the [@Groups](/definitions#groups) decorator, you can expose entity properties through one or more
 [`route scopes`](/entity-routes/route-scope/).
 
 That also means that by default, there will be no properties exposed for your entities. This allows you to have
@@ -48,6 +50,12 @@ Or you can expose a property globally (for **any** entity [`route scope`](/entit
 @Groups(["create", "details"])
 ```
 
+<DocAlert status="warning">
+
+On a `persist` operation, any property not exposed through `@Groups` will be ignored.
+
+</DocAlert>
+
 There are also the [shortcuts](operations#shortcuts) `all` and `basic` that you can use directly, or use as a route
 scope value.
 
@@ -61,7 +69,7 @@ Below is a summary.
 | @Groups("all")                                             | All                                 | All                                      |
 | @Groups({ user: "all", article: ["list"], role: "basic"})  | User(all)/Article(list)/Role(basic) | All                                      |
 
-### Relations IRIs
+## Relations IRIs
 
 If you need to expose a nested property of a relation (single or collections), you can just add the same group on both
 the relation entity and the nested property wanted.
@@ -77,3 +85,104 @@ You can opt-out of using IRIs by setting the `useIris` key of [`EntityRouteOptio
 `false`.
 
 [See the example.](#iri)
+
+## Computed property
+
+You can expose methods that will be lazily called them after the entity they belong to has been retrieved.
+
+Prefixing your method's name by `get`|`is`|`has` and then using PascalCase will define the entity key under which the
+method's result will be set in the response. If you don't want to use one of these prefix, you can use the 2nd arg of
+the `@Groups` decorator to define an `alias` that will be used as entity key in `entity-routes` responses.
+
+A `computed property` can be asynchrone, in which case the response will end for the Promise to be done before sending
+the response. In case there are multiple async `computed properties`, they will be processed in parallel to keep things
+sane, but stil wait for all of them to be done.
+
+Currently, if `computed property` (both async & sync) somehow throws an error, the error is simply ignored. It is not
+recommended to abuse `computed properties` as it can make responses time slow, especially when working with collections.
+
+## Basic example
+
+```ts
+class Employee {
+    firstName: string;
+    lastName: string;
+    rights: string[];
+
+    @Groups("all")
+    getFullName() {
+        return this.firstName + " " + this.lastName;
+    }
+
+    @Groups("all", "isAdmin")
+    hasAdminRight() {
+        return this.rights.includes("admin");
+    }
+}
+```
+
+Here, the `getFullName` accessor will be exposed as `fullName` while the `hasAdminRight` will be displayed as `isAdmin`
+in responses.
+
+## Async example
+
+```ts
+class Employee {
+    firstName: string;
+    lastName: string;
+    rights: string[];
+
+    @Groups("all")
+    getFullName() {
+        return this.firstName + " " + this.lastName;
+    }
+
+    @Groups("all", "isAdmin")
+    hasAdminRight() {
+        return this.rights.includes("admin");
+    }
+}
+```
+
+## Accessor
+
+Accessors are the special methods
+[`get`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/get)/[`set`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/set).
+
+They are treated as properties even though they will not be used for SQL selection.
+
+<DocAlert status="info">
+
+Just like regular methods, you can use the 2nd arg of `@Groups` to define an `alias` if you want your getter to have
+another name in your `entity-routes` responses.
+
+</DocAlert>
+
+### Example
+
+Using almost the same entity/properties as the [`computed property` basic example](#basic-example).
+
+```ts
+class Employee {
+    firstName: string;
+    lastName: string;
+    rights: string[];
+
+    @Groups("all")
+    get fullName() {
+        return this.firstName + " " + this.lastName;
+    }
+
+    @Groups("all", "isAdmin")
+    get hasAdminRight() {
+        return this.rights.includes("admin");
+    }
+}
+```
+
+Here, the `fullName` accessor will also be exposed as `fullName` while the `hasAdminRight` will be displayed as
+`isAdmin` in responses.
+
+## DependsOn
+
+TODO
