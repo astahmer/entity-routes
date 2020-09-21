@@ -49,14 +49,22 @@ const NavTreeComponent = ({
         children.map((x) => {
             return <NavTreeComponent key={x.path || x.title} {...x} depth={depth + 1} activeRoute={activeRoute} />;
         });
+
+    function findActiveRouteRecursive(children: DirectoryTree[]) {
+        return !!children.find(
+            (tree) => tree.url === activeRoute || (tree.children ? findActiveRouteRecursive(tree.children) : false)
+        );
+    }
+
     if (isFolder && depth > 0) {
+        const isActive = findActiveRouteRecursive(children);
         return (
             <CollapsableTreeNode
                 path={path}
                 depth={depth}
                 title={formattedTitle}
                 subTree={subTree}
-                activeRoute={activeRoute}
+                isActive={isActive}
             />
         );
     }
@@ -83,8 +91,7 @@ const NavTreeComponent = ({
     );
 };
 
-function CollapsableTreeNode({ title, path, depth, subTree, activeRoute }) {
-    const isActive = activeRoute.includes(path.replace("src/pages", ""));
+function CollapsableTreeNode({ title, path, depth, subTree, isActive }) {
     const { onToggle, isOpen } = useDisclosure(isActive);
 
     return (
