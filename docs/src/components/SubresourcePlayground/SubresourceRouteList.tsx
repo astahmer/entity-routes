@@ -64,7 +64,7 @@ export function SubresourceRouteList() {
             <Flex direction="column">
                 {entitiesWithRoutes.map((entity, i) => (
                     <AccordionItem
-                        defaultIsOpen
+                        defaultIsOpen={false}
                         key={i}
                         borderTop={!i && "none"}
                         borderBottom={i === entitiesWithRoutes.length - 1 && "none"}
@@ -132,7 +132,7 @@ function SubresourceRoute({
     );
     const isDisabled = hasReachedMaxDepth || hasNoProperties || cantHaveNested || allSubRoutesAlreadyAdded;
 
-    // Dispaly correct warning based on disabled condition
+    // Display correct warning based on disabled condition
     const disabledWarning = isDisabled
         ? hasReachedMaxDepth
             ? maxDepthWarning(maxDepthInfos)
