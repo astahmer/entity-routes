@@ -6,7 +6,7 @@ import {
     getRouteMetadata,
     EntityRouter,
     GenericEntity,
-    EntityRouterFactoryOptions,
+    EntityRouterOptions,
 } from "@/router/EntityRouter";
 import { setEntityRouter } from "@/router/container";
 import { AnyFunction } from "@/utils-types";
@@ -79,7 +79,7 @@ export type MakeEntityRouters<T extends AnyFunction = any> = {
     /** The list of entities with EntityRoute metadata to make an EntityRouter for */
     entities: ObjectType<GenericEntity>[];
     /** Each EntityRouter will take its default options from this, this is deep merged with the defaultEntityRouteOptions */
-    options: EntityRouterFactoryOptions<T> & EntityRouteOptions;
+    options: EntityRouterOptions<T>;
 };
 
 /** Set "always" validator option to true when no groups are passed to validation decorators */

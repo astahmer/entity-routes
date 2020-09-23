@@ -2,7 +2,7 @@ import { Connection, DeleteResult, QueryRunner, Repository, getConnection } from
 import { Container } from "typedi";
 
 import { RouteOperation } from "@/decorators/Groups";
-import { GenericEntity, EntityRouteOptions } from "@/router/EntityRouter";
+import { GenericEntity, EntityRouter } from "@/router/EntityRouter";
 import { EntityErrorResponse } from "@/database/Persistor";
 import { SubresourceRelation } from "@/router/SubresourceManager";
 import { isType, isDev } from "@/functions/asserts";
@@ -27,7 +27,7 @@ export class MiddlewareMaker<Entity extends GenericEntity> {
     private connection: Connection;
     private controller: RouteController<Entity>;
 
-    constructor(private repository: Repository<Entity>, private options: EntityRouteOptions = {}) {
+    constructor(private repository: Repository<Entity>, private options: EntityRouter<Entity>["options"] = {}) {
         this.connection = getConnection();
         this.controller = new RouteController(repository, options);
     }

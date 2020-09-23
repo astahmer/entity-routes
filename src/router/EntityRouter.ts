@@ -1,6 +1,6 @@
 import { getRepository, ObjectType, Repository } from "typeorm";
 
-import { RouteOperation } from "@/decorators/Groups";
+import { GroupsOperation, RouteOperation } from "@/decorators/Groups";
 import { AbstractFilterConfig } from "@/filters/AbstractFilter";
 import { RouteSubresourcesMeta, SubresourceMaker } from "@/router/SubresourceManager";
 import { BridgeRouter, BridgeRouterRegisterFn } from "@/router/bridge/BridgeRouter";
@@ -26,6 +26,7 @@ export class EntityRouter<Entity extends GenericEntity> {
     // EntityRouter specifics
     private readonly repository: Repository<Entity>;
     private readonly options: EntityRouteConfig;
+    private readonly factoryOptions: EntityRouterFactoryOptions;
     private _router: BridgeRouter;
 
     get router() {
@@ -35,22 +36,26 @@ export class EntityRouter<Entity extends GenericEntity> {
     constructor(
         public readonly entity: ObjectType<Entity>,
         public readonly routeMetadata: RouteMetadata,
-        public readonly globalOptions: EntityRouterOptions
+        public readonly routerOptions: EntityRouterOptions
     ) {
+        // Split options
+        const { routerFactoryFn, routerRegisterFn, middlewareAdapter, ...globalOptions } = routerOptions;
+        this.factoryOptions = { routerFactoryFn, routerRegisterFn, middlewareAdapter };
+
         // EntityRouter specifics
         this.repository = getRepository(entity);
         this.options = deepMerge({}, globalOptions, this.routeMetadata.options);
 
         // Managers/services
-        this.subresourceMaker = new SubresourceMaker<Entity>(this.repository, this.routeMetadata, this.options as any);
+        this.subresourceMaker = new SubresourceMaker<Entity>(this.repository, this.routeMetadata, this.factoryOptions);
         this.middlewareMaker = new MiddlewareMaker<Entity>(this.repository, this.options);
     }
 
     /** Make a Router for each given operations (and their associated mapping route) for this entity and its subresources and return it */
     public makeRouter<T = any>() {
-        const routerFactory = this.globalOptions.routerFactoryFn;
-        const router = new BridgeRouter<T>(routerFactory, this.globalOptions.routerRegisterFn);
-        const mwAdapter = this.globalOptions.middlewareAdapter;
+        const routerFactory = this.factoryOptions.routerFactoryFn;
+        const router = new BridgeRouter<T>(routerFactory, this.factoryOptions.routerRegisterFn);
+        const mwAdapter = this.factoryOptions.middlewareAdapter;
 
         // Add restore route for soft deletion
         if (this.options.allowSoftDelete && this.routeMetadata.operations.includes("delete")) {
@@ -113,7 +118,7 @@ export class EntityRouter<Entity extends GenericEntity> {
     }
 
     private addRequestContextMwToAction(action: EntityRouteActionConfig): RouteActionConfig {
-        const mwAdapter = this.globalOptions.middlewareAdapter;
+        const mwAdapter = this.factoryOptions.middlewareAdapter;
         return {
             ...action,
             middlewares: [
@@ -172,7 +177,6 @@ export type EntityRouteActionConfig = Omit<RouteActionConfig, "middlewares"> &
     Pick<EntityRouteOptions, "beforeCtxMiddlewares" | "afterCtxMiddlewares"> &
     (RouteActionClassOptions | RouteActionFunctionOptions);
 
-// TODO Wrap props in ListDetailsOptions key
 export type EntityRouteOptions = {
     defaultMaxDepthOptions?: JoinAndSelectExposedPropsOptions;
     /** Default ListDetailsOptions, deep merged with defaultEntityRouteOptions */
@@ -190,9 +194,12 @@ export type EntityRouteOptions = {
     /** Middlewares to be pushed after requestContext middleware */
     afterCtxMiddlewares?: Function[];
 };
+export type EntityRouteScopedOptions = (operation: GroupsOperation) => EntityRouteOptions;
+export type WithEntityRouteScopedOptions = { scopedOptions?: EntityRouteScopedOptions };
 export type EntityRouteConfig = {
     /** Custom actions using current EntityRouter prefix/instance */
     actions?: EntityRouteActionConfig[];
-} & EntityRouteOptions;
+} & EntityRouteOptions &
+    WithEntityRouteScopedOptions;
 
-export type EntityRouterOptions = EntityRouterFactoryOptions & EntityRouteConfig;
+export type EntityRouterOptions<T extends AnyFunction<any> = any> = EntityRouterFactoryOptions<T> & EntityRouteConfig;
