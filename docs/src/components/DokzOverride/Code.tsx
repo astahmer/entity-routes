@@ -67,6 +67,7 @@ export function Code(props: CodeProps) {
                 preProps={{
                     paddingTop: collapsable ? "30px" : topLeft && "25px",
                     paddingBottom: hasBottomTxt && "30px",
+                    ...props.preProps,
                 }}
                 codeBlockIdentifier={identifier}
             />
