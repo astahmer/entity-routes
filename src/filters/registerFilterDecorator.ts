@@ -1,3 +1,4 @@
+import { deepMerge } from "@/functions";
 import { getRouteFiltersMeta, ROUTE_FILTERS_METAKEY, RouteFiltersMeta } from "@/router/EntityRouter";
 
 import { FilterProperty, AbstractFilterConfig, DefaultFilterOptions, FilterDefaultConfig } from "./AbstractFilter";
@@ -15,7 +16,7 @@ export function registerFilterDecorator<Options = DefaultFilterOptions>({
     const config: Partial<AbstractFilterConfig> = filtersMeta[defaultConfig.class.name] || defaultConfig;
 
     // Merge current/default with params
-    config.options = { ...defaultConfig.options, ...config.options, ...options };
+    config.options = deepMerge({}, defaultConfig.options, config.options, options);
     config.properties = [...new Set([...(config.properties || []), ...properties])];
 
     // Update filter

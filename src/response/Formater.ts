@@ -1,9 +1,9 @@
 import { EntityMetadata, getRepository } from "typeorm";
-import Container, { Service } from "typedi";
+import { Container, Service } from "typedi";
 
 import { ACCESSOR_PREFIX, ALIAS_PREFIX, COMPUTED_PREFIX, RouteOperation } from "@/decorators/Groups";
 
-import { EntityRouteOptions, GenericEntity, getRouteSubresourcesMetadata } from "@/router/EntityRouter";
+import { GenericEntity, getRouteSubresourcesMetadata } from "@/router/EntityRouter";
 import { lowerFirstLetter } from "@/functions/primitives";
 
 import { isEntity, isPrimitive } from "@/functions/asserts";
@@ -229,10 +229,61 @@ export const getComputedPropMethodAndKey = (computed: string) => {
     return { computedPropMethod, propKey };
 };
 
-export type FormaterOptions = Pick<
-    EntityRouteOptions,
-    "useIris" | "shouldEntityWithOnlyIdBeFlattenedToIri" | "shouldSetSubresourcesIriOnItem"
-> & { shouldOnlyFlattenNested?: boolean };
+export type FormaterOptions = {
+    /**
+     * If this & shouldEntityWithOnlyIdBeFlattenedToIri are both true
+     * Will only flatten the root entity properties
+     * @example
+     * shouldOnlyFlattenNested = true
+     * shouldEntityWithOnlyIdBeFlattenedToIri = false
+     * -> does nothing
+     *
+     * shouldOnlyFlattenNested = true
+     * shouldEntityWithOnlyIdBeFlattenedToIri = true
+     * ->
+     * {
+     *  name: "Alex",
+     *  role: "/api/roles/123", // This relation was flattened as IRI
+     * }
+     *
+     * shouldOnlyFlattenNested = true
+     * shouldEntityWithOnlyIdBeFlattenedToIri = true
+     * ->
+     * {
+     *  id: 123, // Even though the root entity only contains ID it was NOT flattened
+     * }
+     *
+     * shouldOnlyFlattenNested = false
+     * shouldEntityWithOnlyIdBeFlattenedToIri = true
+     * ->
+     * "/api/user/123"  // EVEN the root entity will be flattened as IRI
+     */
+    shouldOnlyFlattenNested?: boolean;
+    /**
+     * In case of a relation with no other mapped props (from groups) than id: will unwrap "relation { id }" to relation = id|iri
+     * @example
+     * shouldEntityWithOnlyIdBeFlattenedToIri = true
+     * ->
+     * {
+     *  name: "Alex",
+     *  role: "/api/roles/123", // This relation was flattened as IRI
+     * }
+     *
+     * shouldEntityWithOnlyIdBeFlattenedToIri = false
+     * ->
+     * {
+     *  name: "Alex",
+     *  role: {
+     *      id: 123, // this relation was NOT flattened as IRI|id
+     *  }
+     * }
+     */
+    shouldEntityWithOnlyIdBeFlattenedToIri?: boolean;
+    /** Should set subresource IRI for prop decorated with @Subresource */
+    shouldSetSubresourcesIriOnItem?: boolean;
+    /** Allow to opt-out of IRI's and directly return ids instead */
+    useIris?: boolean;
+};
 export type FormaterArgs<Entity extends GenericEntity = GenericEntity> = Required<
     Pick<RequestContext<Entity>, "operation">
 > & {

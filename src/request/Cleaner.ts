@@ -1,5 +1,5 @@
 import { EntityMetadata } from "typeorm";
-import Container, { Service } from "typedi";
+import { Container, Service } from "typedi";
 
 import { isType, isObject, isPrimitive, isDate } from "@/functions/asserts";
 import { Primitive } from "@/functions/primitives";

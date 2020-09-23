@@ -1,11 +1,11 @@
 import { EntityMetadata, SelectQueryBuilder } from "typeorm";
-import Container, { Service } from "typedi";
+import { Container, Service } from "typedi";
 
 import { MappingManager } from "@/mapping/MappingManager";
 import { AliasHandler } from "@/database/AliasHandler";
 import { Formater, FormaterOptions } from "@/response/Formater";
 import { EntityRouteOptions, GenericEntity } from "@/router/EntityRouter";
-import { RelationManager } from "@/database/RelationManager";
+import { JoinAndSelectExposedPropsOptions, RelationManager } from "@/database/RelationManager";
 import { RequestContext } from "@/router/MiddlewareMaker";
 
 @Service()
@@ -124,7 +124,8 @@ export class Reader {
     }
 }
 
-export type ReaderOptions = Pick<EntityRouteOptions, "shouldMaxDepthReturnRelationPropsId"> & FormaterOptions;
+export type ReaderOptions = Pick<JoinAndSelectExposedPropsOptions, "shouldMaxDepthReturnRelationPropsId"> &
+    FormaterOptions;
 
 export type GetCollectionArgs<Entity extends GenericEntity = GenericEntity> = {
     entityMetadata: EntityMetadata;

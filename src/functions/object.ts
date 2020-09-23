@@ -62,7 +62,8 @@ export const propEntries = <T extends object, K extends keyof T>(keys: K[]) => (
 
 export const getSelf = <T = any>(value: T) => value;
 
-export function deepMerge(...objects: object[]) {
+export function deepMerge<A, B, C, D, E>(obj1: A, obj2: B, obj3?: C, obj4?: D, obj5?: E): A & B & C & D & E;
+export function deepMerge<T extends Record<string, any>[]>(...objects: Partial<T>[]): Partial<T> {
     function deepMergeInner(target: object, source: object, options: DeepMergeOptions) {
         Object.keys(source).forEach((key: string) => {
             const targetValue = (target as any)[key];

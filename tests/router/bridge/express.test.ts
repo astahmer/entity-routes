@@ -67,13 +67,7 @@ describe("Express BridgeRouter adapter", () => {
         });
 
         const makeTest = (config: TestRequestConfig) => {
-            (config.only ? it.only : config.skip ? it.skip : it)(config.it, async () => {
-                try {
-                    await testRoute(client, config);
-                } catch (error) {
-                    console.error(error.message);
-                }
-            });
+            (config.only ? it.only : config.skip ? it.skip : it)(config.it, () => testRoute(client, config));
         };
 
         testRouteConfigs.forEach(makeTest);

@@ -4,7 +4,7 @@ import { Container } from "typedi/Container";
 import { getComputedPropMethodAndKey } from "@/response/Formater";
 import { AliasHandler } from "@/database/AliasHandler";
 import { RouteOperation } from "@/decorators/Groups";
-import { EntityRouteOptions, GenericEntity } from "@/router/EntityRouter";
+import { GenericEntity } from "@/router/EntityRouter";
 import { getDependsOnMetadata } from "@/decorators/DependsOn";
 import { MappingManager } from "@/mapping/MappingManager";
 import { SubresourceRelation } from "@/router/SubresourceManager";
@@ -301,10 +301,14 @@ export type IsRelationPropCircularArgs = {
     options?: IsRelationPropCircularOptions;
 };
 
-export type JoinAndSelectExposedPropsOptions = Pick<EntityRouteOptions, "shouldMaxDepthReturnRelationPropsId"> &
-    IsRelationPropCircularOptions;
+export type JoinAndSelectExposedPropsOptions = {
+    /** In case of max depth reached on a relation, should it at retrieve its id and then stop instead of just stopping ? */
+    shouldMaxDepthReturnRelationPropsId?: boolean;
+} & IsRelationPropCircularOptions;
 
-export type IsRelationPropCircularOptions = Pick<
-    EntityRouteOptions,
-    "defaultMaxDepthLvl" | "isMaxDepthEnabledByDefault"
->;
+export type IsRelationPropCircularOptions = {
+    /** Is max depth enabled by default on all entities for any request context for this router */
+    isMaxDepthEnabledByDefault?: boolean;
+    /** Default level of depth at which the nesting should stop for this router */
+    defaultMaxDepthLvl?: number;
+};

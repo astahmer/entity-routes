@@ -27,7 +27,11 @@ describe("koa BridgeRouter adapter", () => {
     it("makeKoaEntityRouters", async () => {
         const connection = await createTestConnection(entities);
 
-        const bridgeRouters = await makeKoaEntityRouters({ connection, entities });
+        const bridgeRouters = await makeKoaEntityRouters({
+            connection,
+            entities,
+            options: { defaultListDetailsOptions: { shouldSetSubresourcesIriOnItem: true } },
+        });
         const koaRouters = bridgeRouters.map((bridge) => bridge.instance);
 
         const routeNames = flatMapOnProp(
@@ -61,13 +65,7 @@ describe("koa BridgeRouter adapter", () => {
         });
 
         const makeTest = (config: TestRequestConfig) =>
-            (config.only ? it.only : config.skip ? it.skip : it)(config.it, async () => {
-                try {
-                    await testRoute(client, config);
-                } catch (error) {
-                    console.error(error.message);
-                }
-            });
+            (config.only ? it.only : config.skip ? it.skip : it)(config.it, () => testRoute(client, config));
         testRouteConfigs.forEach(makeTest);
     });
 

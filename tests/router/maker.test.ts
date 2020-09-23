@@ -1,6 +1,5 @@
 import { PrimaryGeneratedColumn, Entity, Column, ManyToOne, OneToOne, getConnection } from "typeorm";
 import { IsString, IsEmail, IsDate, getMetadataStorage } from "class-validator";
-import * as Router from "koa-router";
 
 import { createTestConnection, closeTestConnection } from "@@/tests/testConnection";
 import {
@@ -45,7 +44,10 @@ describe("maker", () => {
         endDate: Date;
     }
 
-    @EntityRoute({ path: "/people", operations: ["list"] }, { isMaxDepthEnabledByDefault: false })
+    @EntityRoute(
+        { path: "/people", operations: ["list"] },
+        { defaultMaxDepthOptions: { isMaxDepthEnabledByDefault: false } }
+    )
     @Entity()
     class User extends AbstractEntity {
         @IsString({ groups: ["user_create"] })

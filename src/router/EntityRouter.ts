@@ -13,9 +13,11 @@ import {
     RouteActionClassOptions,
 } from "@/router/actions";
 import { MiddlewareMaker, CRUD_ACTIONS } from "@/router/MiddlewareMaker";
-import { CType, AnyFunction } from "@/utils-types";
-import { CreateUpdateOptions } from "@/router/RouteController";
+import { AnyFunction } from "@/utils-types";
+import { CreateUpdateOptions, ListDetailsOptions } from "@/router/RouteController";
 import { HookSchema } from "@/request/hooks";
+import { JoinAndSelectExposedPropsOptions } from "@/database";
+import { deepMerge } from "@/functions";
 
 export class EntityRouter<Entity extends GenericEntity> {
     public readonly middlewareMaker: MiddlewareMaker<Entity>;
@@ -37,7 +39,7 @@ export class EntityRouter<Entity extends GenericEntity> {
     ) {
         // EntityRouter specifics
         this.repository = getRepository(entity);
-        this.options = { ...globalOptions, ...this.routeMetadata.options };
+        this.options = deepMerge({}, globalOptions, this.routeMetadata.options);
 
         // Managers/services
         this.subresourceMaker = new SubresourceMaker<Entity>(this.repository, this.routeMetadata, this.options as any);
@@ -172,26 +174,15 @@ export type EntityRouteActionConfig = Omit<RouteActionConfig, "middlewares"> &
 
 // TODO Wrap props in ListDetailsOptions key
 export type EntityRouteOptions = {
-    /** Is max depth enabled by default on all entities for any request context for this router */
-    isMaxDepthEnabledByDefault?: boolean;
-    /** Default level of depth at which the nesting should stop for this router */
-    defaultMaxDepthLvl?: number;
-    /** In case of max depth reached on a relation, should it at retrieve its id and then stop instead of just stopping ? */
-    shouldMaxDepthReturnRelationPropsId?: boolean;
-    /** Allow to opt-out of IRI's and directly return ids instead */
-    useIris?: boolean;
-    /** In case of a relation with no other mapped props (from groups) for a request: should it unwrap "relation { id }" to relation = id ? */
-    shouldEntityWithOnlyIdBeFlattenedToIri?: boolean;
-    /** Should set subresource IRI for prop decorated with @Subresource */
-    shouldSetSubresourcesIriOnItem?: boolean;
+    defaultMaxDepthOptions?: JoinAndSelectExposedPropsOptions;
+    /** Default ListDetailsOptions, deep merged with defaultEntityRouteOptions */
+    defaultListDetailsOptions?: ListDetailsOptions;
+    /** Default CreateUpdateOptions, deep merged with defaultEntityRouteOptions */
+    defaultCreateUpdateOptions?: CreateUpdateOptions;
     /** Default level of subresources max depth path */
     defaultSubresourceMaxDepthLvl?: number;
-    /** Default CreateUpdateOptions */
-    defaultCreateUpdateOptions?: CreateUpdateOptions;
     /** Allow soft deletion using TypeORM @DeleteDateColumn */
     allowSoftDelete?: boolean;
-    /** When true, list/details will also select softDeleted entities */
-    withDeleted?: boolean;
     /** Hook schema of custom functions to be run at specific operations in a request processing */
     hooks?: HookSchema;
     /** Middlewares to be pushed before requestContext middleware */

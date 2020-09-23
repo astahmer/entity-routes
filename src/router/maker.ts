@@ -10,6 +10,7 @@ import {
 } from "@/router/EntityRouter";
 import { setEntityRouter } from "@/router/container";
 import { AnyFunction } from "@/utils-types";
+import { deepMerge } from "@/functions";
 
 let connectionManager: ConnectionManager;
 
@@ -24,7 +25,7 @@ export async function makeEntityRouters<T extends AnyFunction = any>({
     entities,
     options,
 }: MakeEntityRouters<T>) {
-    options = { ...defaultEntityRouteOptions, ...options };
+    options = deepMerge({}, defaultEntityRouteOptions, options);
 
     // Init with existing connections
     connectionManager = getConnectionManager();
@@ -54,21 +55,30 @@ export async function makeEntityRouters<T extends AnyFunction = any>({
     return bridgeRouters;
 }
 
+/** The default options for every EntityRouter, unless overriden in the MakeEntityRouters["options"] key */
 export const defaultEntityRouteOptions: EntityRouteOptions = {
-    isMaxDepthEnabledByDefault: true,
-    defaultMaxDepthLvl: 2,
-    useIris: true,
-    shouldMaxDepthReturnRelationPropsId: true,
-    shouldEntityWithOnlyIdBeFlattenedToIri: true,
-    shouldSetSubresourcesIriOnItem: true,
+    defaultMaxDepthOptions: {
+        isMaxDepthEnabledByDefault: true,
+        defaultMaxDepthLvl: 2,
+    },
+    defaultListDetailsOptions: {
+        useIris: true,
+        shouldMaxDepthReturnRelationPropsId: true,
+        shouldEntityWithOnlyIdBeFlattenedToIri: true,
+        shouldSetSubresourcesIriOnItem: true,
+        withDeleted: false,
+    },
+    defaultCreateUpdateOptions: { shouldAutoReload: true, shouldFormatResult: true },
     defaultSubresourceMaxDepthLvl: 2,
     allowSoftDelete: false,
-    defaultCreateUpdateOptions: { shouldAutoReload: true, shouldFormatResult: true },
 };
 
 export type MakeEntityRouters<T extends AnyFunction = any> = {
+    /** TypeORM active connection for the EntityRouters */
     connection: Connection;
+    /** The list of entities with EntityRoute metadata to make an EntityRouter for */
     entities: ObjectType<GenericEntity>[];
+    /** Each EntityRouter will take its default options from this, this is deep merged with the defaultEntityRouteOptions */
     options: EntityRouterFactoryOptions<T> & EntityRouteOptions;
 };
 

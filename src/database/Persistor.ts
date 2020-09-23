@@ -7,6 +7,7 @@ import { ValidateItemOptions, EntityErrorResults, Validator } from "@/request/Va
 import { RequestContextMinimal } from "@/router/MiddlewareMaker";
 import { SubresourceRelation } from "@/router/SubresourceManager";
 import { EntityMapperMakeOptions } from "@/mapping/index";
+import { deepMerge } from "@/functions";
 
 @Service()
 export class Persistor {
@@ -41,7 +42,7 @@ export class Persistor {
         // Allow partially updating an entity
         const defaultValidatorOptions: Partial<ValidateItemOptions> =
             operation === "update" ? { skipMissingProperties: true } : {};
-        const validationOptions = { ...defaultValidatorOptions, ...validatorOptions, context: ctx };
+        const validationOptions = deepMerge({}, defaultValidatorOptions, validatorOptions, { context: ctx });
 
         await hooks?.beforeValidate?.({ requestId, options: validationOptions, item });
         const errors = await this.validator.validateItem(rootMetadata, item, validationOptions);

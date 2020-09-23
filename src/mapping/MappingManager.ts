@@ -1,12 +1,11 @@
 import { EntityMetadata, ObjectType } from "typeorm";
-import Container, { Service } from "typedi";
+import { Container, Service } from "typedi";
 
 import { RouteOperation, GROUPS_METAKEY } from "@/decorators/Groups";
 
-import { EntityRouteOptions } from "@/router/EntityRouter";
 import { GroupsMetadata, GroupsMetaByRoutes } from "@/mapping/GroupsMetadata";
 import { EntityGroupsMetadata } from "@/mapping/EntityGroupsMetadata";
-import { RelationManager } from "@/database/RelationManager";
+import { JoinAndSelectExposedPropsOptions, RelationManager } from "@/database/RelationManager";
 import { pluck } from "@/functions/array";
 import { get } from "@/functions/object";
 import { ObjectLiteral } from "@/utils-types";
@@ -231,7 +230,10 @@ export type MappingItem = {
 
 export type MappingResponse = Record<string, MappingItem>;
 
-export type EntityMapperOptions = Pick<EntityRouteOptions, "defaultMaxDepthLvl" | "isMaxDepthEnabledByDefault">;
+export type EntityMapperOptions = Pick<
+    JoinAndSelectExposedPropsOptions,
+    "defaultMaxDepthLvl" | "isMaxDepthEnabledByDefault"
+>;
 export type EntityMapperMakeOptions = EntityMapperOptions & {
     pretty?: boolean;
 };

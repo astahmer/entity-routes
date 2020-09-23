@@ -15,7 +15,7 @@ import { Formater, FormaterOptions } from "@/response/Formater";
 import { RouteOperation } from "@/decorators/index";
 import { last } from "@/functions/array";
 import { isRelationSingle } from "@/functions/entity";
-import { parseStringAsBoolean } from "@/functions/index";
+import { deepMerge, parseStringAsBoolean } from "@/functions/index";
 
 export class RouteController<Entity extends GenericEntity> {
     private filtersMeta: RouteFiltersMeta;
@@ -57,7 +57,7 @@ export class RouteController<Entity extends GenericEntity> {
     ) {
         const { operation = "create", values, subresourceRelations, requestId } = requestContext;
         const subresourceRelation = last(subresourceRelations || []); // Should only contain 1 item at most
-        const options = { ...this.options.defaultCreateUpdateOptions, ...(innerOptions || {}) };
+        const options = deepMerge({}, this.options.defaultCreateUpdateOptions, innerOptions || {});
 
         if (!subresourceRelation && !Object.keys(values).length) {
             return { error: "Body can't be empty on create operation" };
@@ -66,7 +66,7 @@ export class RouteController<Entity extends GenericEntity> {
         const result = await this.persistor.saveItem({
             ctx: { operation, values },
             rootMetadata: this.metadata,
-            mapperMakeOptions: { ...this.options, ...(options?.mapperMakeOptions || {}) },
+            mapperMakeOptions: deepMerge({}, this.options.defaultMaxDepthOptions, options?.mapperMakeOptions || {}),
             validatorOptions: options?.validatorOptions || {},
             subresourceRelation,
             hooks: this.options.hooks,
@@ -119,13 +119,13 @@ export class RouteController<Entity extends GenericEntity> {
         innerOptions?: CreateUpdateOptions
     ) {
         const { operation = "update", values, entityId, requestId } = requestContext;
-        const options = { ...this.options.defaultCreateUpdateOptions, ...(innerOptions || {}) };
+        const options = deepMerge({}, this.options.defaultCreateUpdateOptions, innerOptions || {});
 
         if (!values?.id) (values as Entity).id = entityId;
         const result = await this.persistor.saveItem({
             ctx: { operation, values },
             rootMetadata: this.metadata,
-            mapperMakeOptions: { ...this.options, ...(options?.mapperMakeOptions || {}) },
+            mapperMakeOptions: deepMerge({}, this.options.defaultMaxDepthOptions, options?.mapperMakeOptions || {}),
             validatorOptions: options?.validatorOptions || {},
             hooks: this.options.hooks,
         });
@@ -190,7 +190,15 @@ export class RouteController<Entity extends GenericEntity> {
             this.applyFilters(queryParams, qb, aliasHandler);
         }
 
-        const options = { ...this.options, ...innerOptions };
+        const options = deepMerge(
+            {},
+            {
+                shouldMaxDepthReturnRelationPropsId: this.options.defaultMaxDepthOptions
+                    ?.shouldMaxDepthReturnRelationPropsId,
+                ...this.options.defaultListDetailsOptions,
+            },
+            innerOptions
+        );
         const collectionResult = await this.reader.getCollection({
             entityMetadata: this.metadata,
             qb,
@@ -229,7 +237,15 @@ export class RouteController<Entity extends GenericEntity> {
             });
         }
 
-        const options = { ...this.options, ...innerOptions };
+        const options = deepMerge(
+            {},
+            {
+                shouldMaxDepthReturnRelationPropsId: this.options.defaultMaxDepthOptions
+                    ?.shouldMaxDepthReturnRelationPropsId,
+                ...this.options.defaultListDetailsOptions,
+            },
+            innerOptions
+        );
         const result = await this.reader.getItem<Entity>({
             entityMetadata: this.metadata,
             qb,
@@ -313,4 +329,7 @@ export type CreateUpdateOptions = Pick<SaveItemArgs<any>, "validatorOptions" | "
     formaterOptions?: FormaterOptions;
 };
 
-export type ListDetailsOptions = Pick<EntityRouteOptions, "withDeleted"> & ReaderOptions;
+export type ListDetailsOptions = {
+    /** When true, list/details will also select softDeleted entities */
+    withDeleted?: boolean;
+} & ReaderOptions;

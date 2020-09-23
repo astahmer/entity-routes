@@ -32,7 +32,7 @@ describe("@EntityRoute", () => {
     it("can provide options", () => {
         @EntityRoute(
             { operations: ["create", "list"] },
-            { defaultMaxDepthLvl: 3, shouldMaxDepthReturnRelationPropsId: false }
+            { defaultMaxDepthOptions: { defaultMaxDepthLvl: 3, shouldMaxDepthReturnRelationPropsId: false } }
         )
         class User {
             id: number;
@@ -42,7 +42,7 @@ describe("@EntityRoute", () => {
         expect(metadata).toEqual({
             path: "/" + User.name.toLowerCase(),
             operations: ["create", "list"],
-            options: { defaultMaxDepthLvl: 3, shouldMaxDepthReturnRelationPropsId: false },
+            options: { defaultMaxDepthOptions: { defaultMaxDepthLvl: 3, shouldMaxDepthReturnRelationPropsId: false } },
         });
     });
 });
