@@ -40,7 +40,7 @@ describe("RouteController - simple", () => {
     @Entity()
     class User extends AbstractEntity {
         @IsString()
-        @Groups(["create", "list"])
+        @Groups(["create", "list", "createScoped"])
         @Column()
         name: string;
 
@@ -428,6 +428,32 @@ describe("RouteController - simple", () => {
         // Since it was soft deleted only its deletedAt property should have been set/unset
         await ctrl.restore({ entityId: createResult.id });
         expect(await ctrl.getDetails({ entityId: createResult.id })).toEqual(createResult);
+    });
+
+    it("can override route options on specific operation with scoped options", async () => {
+        const beforePersist = jest.fn();
+        const repository = getRepository(User);
+        const ctrl = new RouteController(repository, {
+            ...routeOptions,
+            scopedOptions: (operation) =>
+                operation === "create" && {
+                    hooks: { beforePersist },
+                    defaultCreateUpdateOptions: { responseOperation: "createScoped" },
+                },
+        });
+
+        const createResult = (await ctrl.create({ values: { name: "Alex", birthDate: new Date() } })) as User;
+        const updateResult = (await ctrl.update({ entityId: createResult.id, values: { name: "Alex222" } })) as User;
+        const detailsResult = (await ctrl.getDetails({ entityId: createResult.id })) as User;
+
+        // Hook beforePersist (called for both create/update operation) will only exist for create operation
+        // thanks to the scoped options
+        expect(beforePersist).toHaveBeenCalledTimes(1);
+        // The birthDate is exposed on user.details route scope
+        expect(updateResult.birthDate).toBeDefined();
+        expect(updateResult).toEqualMessy(detailsResult);
+        // But it is undefined on the user.scopedCreate route scope
+        expect(createResult.birthDate).toBeUndefined();
     });
 });
 
