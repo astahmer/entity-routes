@@ -26,7 +26,7 @@ import { BasicDialog } from "../BasicDialog";
 import { SubresourcePlaygroundContext } from "./helpers";
 
 export function Toolbar({ onSubmit, onMaxDepthChange, generateRoutes }) {
-    const { entities, entityNames, addRoute, resetEntities, setEntities } = useContext(SubresourcePlaygroundContext);
+    const { entities, entityNames, addRoute, resetEntities } = useContext(SubresourcePlaygroundContext);
     const inputRef = useRef<HTMLInputElement>();
 
     const valueToCopy = useMemo(() => JSON.stringify(entities, null, 4), [entities]);

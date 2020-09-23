@@ -12,6 +12,7 @@ export const defaultEntity: Entity = {
     routes: [[]],
     canHaveNested: true,
     canBeNested: true,
+    shouldAllowCircular: false,
 };
 export type Entity = {
     maxDepths: Record<string, number>;
@@ -19,6 +20,7 @@ export type Entity = {
     routes: Array<string[]>;
     canHaveNested: boolean;
     canBeNested: boolean;
+    shouldAllowCircular: boolean;
 };
 export type Entities = Record<string, Entity>;
 

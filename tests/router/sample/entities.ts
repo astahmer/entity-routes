@@ -30,6 +30,9 @@ export class User extends AbstractEntity {
 
     @OneToMany(() => Comment, (comment) => comment.writer)
     comments: Comment[];
+
+    @OneToMany(() => Article, (article) => article.writers)
+    articlesWritten: User[];
 }
 
 @EntityRoute()
@@ -43,6 +46,9 @@ export class Article extends AbstractEntity {
 
     @OneToMany(() => Comment, (comment) => comment.article)
     comments: Comment[];
+
+    @OneToMany(() => User, (user) => user.articlesWritten)
+    writers: Comment[];
 }
 
 @EntityRoute()

@@ -10,10 +10,12 @@ import {
     prop,
     printBridgeRoute,
     ROUTE_SUBRESOURCES_METAKEY,
-    SubresourceOptions,
     EntityRoute,
     EntityRouterFactoryOptions,
     koaRouterFactory,
+    SubresourceOptions,
+    SubresourceMakerOptions,
+    EntityRouterOptions,
 } from "@/index";
 import { PrimaryGeneratedColumn, Entity, Column, ManyToOne, OneToMany, getRepository } from "typeorm";
 import { createTestConnection, closeTestConnection } from "@@/tests/testConnection";
@@ -25,7 +27,10 @@ describe("SubresourceManager", () => {
         routerRegisterFn: registerKoaRouteFromBridgeRoute,
         middlewareAdapter: koaMwAdapter,
     };
-    const defaultSubresourceOptions = { middlewareAdapter: koaMwAdapter, defaultSubresourceMaxDepthLvl: 2 };
+    const defaultSubresourcesOptions: SubresourceMakerOptions = {
+        defaultSubresourceMaxDepthLvl: 2,
+        shouldAllowCircular: false,
+    };
 
     class AbstractEntity {
         @PrimaryGeneratedColumn()
@@ -68,7 +73,7 @@ describe("SubresourceManager", () => {
         const repository = getRepository(User);
         const routeMeta = getRouteMetadata(User);
 
-        const manager = new SubresourceMaker(repository, routeMeta, { middlewareAdapter: koaMwAdapter });
+        const manager = new SubresourceMaker(repository, routeMeta, koaMwAdapter);
 
         const articleEntityRouter = new EntityRouter(Article, routeMeta, options);
         const entityRouters = getEntityRouters();
@@ -113,7 +118,7 @@ describe("SubresourceManager", () => {
         const repository = getRepository(User);
         const routeMeta = getRouteMetadata(User);
 
-        const manager = new SubresourceMaker(repository, routeMeta, defaultSubresourceOptions);
+        const manager = new SubresourceMaker(repository, routeMeta, koaMwAdapter);
 
         const entityRouters = getEntityRouters();
         const roleEntityRouter = new EntityRouter(Role, routeMeta, options);
@@ -156,6 +161,7 @@ describe("SubresourceManager", () => {
 
             registerSubresource(Article, User, "author");
             registerSubresource(Article, Comment, "comments");
+            registerSubresource(Article, User, "writers");
 
             registerSubresource(Upvote, User, "upvoter");
             registerSubresource(Upvote, Comment, "comment");
@@ -180,8 +186,8 @@ describe("SubresourceManager", () => {
 
             const router = new BridgeRouter(koaRouterFactory, registerKoaRouteFromBridgeRoute);
 
-            const manager = new SubresourceMaker(getRepository(User), getRouteMetadata(User), options);
-            manager.makeSubresourcesRoutes(router);
+            const maker = entityRouters[User.name].subresourceMaker;
+            maker.makeSubresourcesRoutes(router);
 
             const paths = router.routes.map(printBridgeRoute);
             const names = router.routes.map(prop("name"));
@@ -224,7 +230,7 @@ describe("SubresourceManager", () => {
             await createTestConnection(entities);
 
             const entityRouters = getEntityRouters();
-            const mergedOptions = { ...options, ...defaultSubresourceOptions };
+            const mergedOptions: EntityRouterOptions = { ...options, defaultSubresourcesOptions };
 
             entities.forEach((entity) => {
                 entityRouters[entity.name] = new EntityRouter(entity, getRouteMetadata(entity), mergedOptions);
@@ -232,12 +238,8 @@ describe("SubresourceManager", () => {
 
             const router = new BridgeRouter(koaRouterFactory, registerKoaRouteFromBridgeRoute);
 
-            const manager = new SubresourceMaker(
-                getRepository(User),
-                getRouteMetadata(User),
-                defaultSubresourceOptions
-            );
-            manager.makeSubresourcesRoutes(router);
+            const maker = entityRouters[User.name].subresourceMaker;
+            maker.makeSubresourcesRoutes(router);
 
             const paths = router.routes.map(printBridgeRoute);
             const names = router.routes.map(prop("name"));
@@ -302,12 +304,8 @@ describe("SubresourceManager", () => {
 
             const router = new BridgeRouter(koaRouterFactory, registerKoaRouteFromBridgeRoute);
 
-            const manager = new SubresourceMaker(
-                getRepository(User),
-                getRouteMetadata(User),
-                defaultSubresourceOptions
-            );
-            manager.makeSubresourcesRoutes(router);
+            const maker = entityRouters[User.name].subresourceMaker;
+            maker.makeSubresourcesRoutes(router);
 
             const paths = router.routes.map(printBridgeRoute);
             const names = router.routes.map(prop("name"));
@@ -374,12 +372,8 @@ describe("SubresourceManager", () => {
 
             const router = new BridgeRouter(koaRouterFactory, registerKoaRouteFromBridgeRoute);
 
-            const manager = new SubresourceMaker(
-                getRepository(User),
-                getRouteMetadata(User),
-                defaultSubresourceOptions
-            );
-            manager.makeSubresourcesRoutes(router);
+            const maker = entityRouters[User.name].subresourceMaker;
+            maker.makeSubresourcesRoutes(router);
 
             const paths = router.routes.map(printBridgeRoute);
             const names = router.routes.map(prop("name"));
@@ -438,12 +432,8 @@ describe("SubresourceManager", () => {
 
             const router = new BridgeRouter(koaRouterFactory, registerKoaRouteFromBridgeRoute);
 
-            const manager = new SubresourceMaker(
-                getRepository(User),
-                getRouteMetadata(User),
-                defaultSubresourceOptions
-            );
-            manager.makeSubresourcesRoutes(router);
+            const maker = entityRouters[User.name].subresourceMaker;
+            maker.makeSubresourcesRoutes(router);
 
             const paths = router.routes.map(printBridgeRoute);
             const names = router.routes.map(prop("name"));
@@ -474,6 +464,49 @@ describe("SubresourceManager", () => {
                 "user_comments_list",
                 "user_comments_delete",
                 "user_comments_upvotes_list",
+            ]);
+
+            return closeTestConnection();
+        });
+
+        it("generates nested subsources with circular if allowed", async () => {
+            registerSubresource(User, Article, "articles", { maxDepth: 3 });
+            registerSubresource(Article, User, "writers", { maxDepth: 3 });
+
+            await createTestConnection(entities);
+
+            const entityRouters = getEntityRouters();
+            const circularOptions = { shouldAllowCircular: true };
+
+            entities.forEach((entity) => {
+                entityRouters[entity.name] = new EntityRouter(entity, getRouteMetadata(entity), {
+                    ...options,
+                    defaultSubresourcesOptions: circularOptions,
+                });
+            });
+
+            const router = new BridgeRouter(koaRouterFactory, registerKoaRouteFromBridgeRoute);
+
+            const maker = entityRouters[User.name].subresourceMaker;
+            maker.makeSubresourcesRoutes(router);
+
+            const paths = router.routes.map(printBridgeRoute);
+            const names = router.routes.map(prop("name"));
+
+            expect(paths).toEqualMessy([
+                "/user/:UserId(\\d+)/articles : post",
+                "/user/:UserId(\\d+)/articles : get",
+                "/user/:UserId(\\d+)/articles/:id(\\d+) : delete",
+                "/user/:UserId(\\d+)/articles/writers : get",
+                "/user/:UserId(\\d+)/articles/writers/articles : get",
+            ]);
+
+            expect(names).toEqualMessy([
+                "user_articles_create",
+                "user_articles_list",
+                "user_articles_delete",
+                "user_articles_writers_list",
+                "user_articles_writers_articles_list",
             ]);
 
             return closeTestConnection();

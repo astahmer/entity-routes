@@ -112,15 +112,18 @@ function EntityPropList({ item }) {
             <Flex direction="column">
                 <BoolOption item={item} name="canHaveNested" />
                 <BoolOption item={item} name="canBeNested" />
+                <BoolOption item={item} name="shouldAllowCircular" />
             </Flex>
             <CheckboxGroup
                 defaultValue={entities[item].properties}
                 onChange={(value) => setProperties(item, value as string[])}
             >
                 <Stack direction="column" mb="4">
-                    {entityNames.map((entity, i) => (
-                        <EntityProp key={entity + i} {...{ item, setMaxDepth, entity, i }} />
-                    ))}
+                    {entityNames
+                        .filter((entity) => (!entities[item].shouldAllowCircular ? entity !== item : true))
+                        .map((entity, i) => (
+                            <EntityProp key={entity + i} {...{ item, setMaxDepth, entity, i }} />
+                        ))}
                 </Stack>
             </CheckboxGroup>
         </Stack>

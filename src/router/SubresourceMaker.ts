@@ -17,17 +17,14 @@ export class SubresourceMaker<Entity extends GenericEntity> {
     constructor(
         private repository: Repository<Entity>,
         private routeMetadata: RouteMetadata,
-        private options: SubresourceMakerOptions
+        private mwAdapter: EntityRouterOptions["middlewareAdapter"],
+        private options?: SubresourceMakerOptions
     ) {
         this.subresourcesMeta = getRouteSubresourcesMetadata(repository.metadata.target as Function);
     }
 
     get metadata() {
         return this.repository.metadata;
-    }
-
-    get mwAdapter() {
-        return this.options.middlewareAdapter;
     }
 
     /** Recursively add subresources routes for this entity */
@@ -49,17 +46,27 @@ export class SubresourceMaker<Entity extends GenericEntity> {
             if (!nestedEntityRoute) continue;
 
             const subresourceRelation = this.getSubresourceRelation(key);
-            const relationTableName = subresourceRelation.relation.inverseEntityMetadata.tableName;
-            const isCircular = parents?.entities.includes(relationTableName);
+            const relationMeta = subresourceRelation.relation.inverseEntityMetadata;
+            const relationTableName = relationMeta.tableName;
 
-            // Ensures that it is not making circular subresources routes
-            if (isCircular) continue;
+            // If this subresource relation is a parent subresource of the root entity
+            const isCircular = (parents?.entities || [])
+                .concat(parents?.rootMetadata.tableName)
+                .includes(relationTableName);
+
+            // Check for the relation EntityRouter subresources options
+            const relationEntityName = (relationMeta.target as Function).name;
+            const shouldAllowCircular =
+                entityRouters[relationEntityName]?.subresourceMaker.options?.shouldAllowCircular;
+
+            // Ensures that it is not making circular subresources routes if not allowed
+            if (isCircular && !shouldAllowCircular) continue;
 
             // Add one to also count root subresource
             const currentDepth = 1 + (parents ? parents.entities.length : 0);
 
             // Checks for every max depth of every subresources including this one
-            const currentMaxDepth = subresourceProp.maxDepth || this.options.defaultSubresourceMaxDepthLvl || 2;
+            const currentMaxDepth = subresourceProp.maxDepth || this.options?.defaultSubresourceMaxDepthLvl || 2;
             const maxDepths = (parents?.maxDepths || []).concat(currentMaxDepth);
             const relativeMaxDepths = maxDepths.map((maxDepth, depth) => maxDepth + depth);
             const hasReachedMaxDepth = relativeMaxDepths.some((maxDepth) => currentDepth > maxDepth);
@@ -67,7 +74,7 @@ export class SubresourceMaker<Entity extends GenericEntity> {
             if (hasReachedMaxDepth) continue;
 
             const basePath = this.getSubresourceBasePath(subresourceRelation.param, subresourceProp, parents?.path);
-            const chainedPath = parents && parents.path + "/" + formatRoutePath(subresourceProp.path);
+            const chainedPath = parents?.path + "/" + formatRoutePath(subresourceProp.path);
 
             const subresourceRelations = (parents?.subresourceRelations || []).concat(subresourceRelation);
             const entities = (parents?.entities || []).concat(relationTableName);
@@ -120,7 +127,13 @@ export class SubresourceMaker<Entity extends GenericEntity> {
             });
 
             const path = !parents ? basePath : chainedPath;
-            const updatedParents: ParentSubresources = { path, entities, maxDepths, subresourceRelations: relations };
+            const updatedParents: ParentSubresources = {
+                rootMetadata: parents?.rootMetadata || this.repository.metadata,
+                path,
+                entities,
+                maxDepths,
+                subresourceRelations: relations,
+            };
 
             // Recursively make subresources
             if (subresourceProp.canHaveNested) {
@@ -154,6 +167,7 @@ export class SubresourceMaker<Entity extends GenericEntity> {
 }
 
 type ParentSubresources = {
+    rootMetadata: EntityMetadata;
     entities: string[];
     path: string;
     maxDepths?: number[];
@@ -166,7 +180,12 @@ type GetSubresourcePathArg = {
     isSingle: boolean;
 };
 
-export type SubresourceMakerOptions = Pick<EntityRouterOptions, "middlewareAdapter" | "defaultSubresourceMaxDepthLvl">;
+export type SubresourceMakerOptions = {
+    /** Default level of subresources max depth path */
+    defaultSubresourceMaxDepthLvl?: number;
+    /** Allow circular subresource */
+    shouldAllowCircular?: boolean;
+};
 
 export function getSubresourceRelation<E extends Function>(
     parent: E,

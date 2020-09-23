@@ -69,7 +69,7 @@ export const defaultEntityRouteOptions: EntityRouteOptions = {
         withDeleted: false,
     },
     defaultCreateUpdateOptions: { shouldAutoReload: true, shouldFormatResult: true },
-    defaultSubresourceMaxDepthLvl: 2,
+    defaultSubresourcesOptions: { defaultSubresourceMaxDepthLvl: 2 },
     allowSoftDelete: false,
 };
 

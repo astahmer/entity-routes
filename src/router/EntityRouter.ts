@@ -2,7 +2,7 @@ import { getRepository, ObjectType, Repository } from "typeorm";
 
 import { GroupsOperation, RouteOperation } from "@/decorators/Groups";
 import { AbstractFilterConfig } from "@/filters/AbstractFilter";
-import { RouteSubresourcesMeta, SubresourceMaker } from "@/router/SubresourceMaker";
+import { RouteSubresourcesMeta, SubresourceMaker, SubresourceMakerOptions } from "@/router/SubresourceMaker";
 import { BridgeRouter, BridgeRouterRegisterFn } from "@/router/bridge/BridgeRouter";
 import { formatRouteName } from "@/functions/route";
 import {
@@ -47,7 +47,12 @@ export class EntityRouter<Entity extends GenericEntity> {
         this.options = deepMerge({}, globalOptions, this.routeMetadata.options);
 
         // Managers/services
-        this.subresourceMaker = new SubresourceMaker<Entity>(this.repository, this.routeMetadata, this.factoryOptions);
+        this.subresourceMaker = new SubresourceMaker<Entity>(
+            this.repository,
+            this.routeMetadata,
+            this.factoryOptions.middlewareAdapter,
+            this.options.defaultSubresourcesOptions
+        );
         this.middlewareMaker = new MiddlewareMaker<Entity>(this.repository, this.options);
     }
 
@@ -183,8 +188,8 @@ export type EntityRouteOptions = {
     defaultListDetailsOptions?: ListDetailsOptions;
     /** Default CreateUpdateOptions, deep merged with defaultEntityRouteOptions */
     defaultCreateUpdateOptions?: CreateUpdateOptions;
-    /** Default level of subresources max depth path */
-    defaultSubresourceMaxDepthLvl?: number;
+    /** Default subresources options, deep merged with defaultEntityRouteOptions */
+    defaultSubresourcesOptions?: SubresourceMakerOptions;
     /** Allow soft deletion using TypeORM @DeleteDateColumn */
     allowSoftDelete?: boolean;
     /** Hook schema of custom functions to be run at specific operations in a request processing */

@@ -90,10 +90,28 @@ maxDepth is independant from each other. If no max depth is defined, it will fal
 `defaultSubresourceMaxDepthLvl` of [`EntityRouteOptions`](/definitions#entityrouteoptions), and if somehow no
 `defaultSubresourceMaxDepthLvl` is defined, it will default to 2.
 
+### Circular
+
+Circular subresources are disabled by default. You can allow this behavior using the `allowCircular` key of
+[SubresourceOptions](/definitions#subresourceoptions).
+
+> Example: Let's say a `user` has `articles`, these `articles` have both a `writers` (linking back to the `User` entity)
+> and also have a `relatedArticles` subresources.
+
+By allowing circular subresources (and with the appropriates max depths configured), the route
+`GET:/users/articles/writers` would be generated.
+
 ## Playground
 
 Feel free to play with the playground below to experience how you can configure each subresource and see the route
 generation results.
+
+<DocAlert status="warning">
+
+This playground assumes that all subresources will be of the same kind (either collection or single), so that they can
+be chained indefinitely.
+
+</DocAlert>
 
 [Skip to next section.](#with-single-relations)
 
