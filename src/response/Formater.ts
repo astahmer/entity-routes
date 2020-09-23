@@ -9,7 +9,7 @@ import { lowerFirstLetter } from "@/functions/primitives";
 import { isEntity, isPrimitive } from "@/functions/asserts";
 import { MappingManager } from "@/mapping/MappingManager";
 import { RequestContext } from "@/router/MiddlewareMaker";
-import { idToIRI, isDev, deepSort } from "@/functions/index";
+import { idToIRI, isDev, deepSort, ComparatorFn } from "@/functions/index";
 import { isDate } from "class-validator";
 
 @Service()
@@ -42,7 +42,7 @@ export class Formater {
         await Promise.all(promises);
         // TODO Externalize computed prop setting since you can opt-out of response formating
 
-        return deepSort(clone);
+        return options.shouldSortItemKeys ? deepSort(clone, options.sortComparatorFn) : clone;
     }
 
     /**
@@ -283,6 +283,10 @@ export type FormaterOptions = {
     shouldSetSubresourcesIriOnItem?: boolean;
     /** Allow to opt-out of IRI's and directly return ids instead */
     useIris?: boolean;
+    /** Should deep sort response keys alphabetically or using custom comparator function */
+    shouldSortItemKeys?: boolean;
+    /** Allow passing a custom comparator function */
+    sortComparatorFn?: ComparatorFn;
 };
 export type FormaterArgs<Entity extends GenericEntity = GenericEntity> = Required<
     Pick<RequestContext<Entity>, "operation">
