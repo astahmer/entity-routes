@@ -23,8 +23,13 @@ export const SideNav = ({ tree, orderingFn, ...rest }: SideNavProps) => {
     return (
         <Box overflowY="auto" as="nav" aria-label="Main navigation" py="6" px="4" pr="6" {...rest}>
             <Box>
-                {tree.children.map((x) => (
-                    <NavTreeComponent hideDivider key={x.path || x.title} activeRoute={router.pathname} {...x} />
+                {tree.children.map((x, i) => (
+                    <NavTreeComponent
+                        hideDivider
+                        key={i + "" + (x.path || x.title)}
+                        activeRoute={router.pathname}
+                        {...x}
+                    />
                 ))}
             </Box>
         </Box>
@@ -46,8 +51,15 @@ const NavTreeComponent = ({
     const formattedTitle = meta ? meta.sidebar_label || meta.title : title || formatTitle(name || "");
     const subTree =
         children &&
-        children.map((x) => {
-            return <NavTreeComponent key={x.path || x.title} {...x} depth={depth + 1} activeRoute={activeRoute} />;
+        children.map((x, i) => {
+            return (
+                <NavTreeComponent
+                    key={i + "" + (x.path || x.title)}
+                    {...x}
+                    depth={depth + 1}
+                    activeRoute={activeRoute}
+                />
+            );
         });
 
     function findActiveRouteRecursive(children: DirectoryTree[]) {
