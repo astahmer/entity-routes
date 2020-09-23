@@ -12,7 +12,7 @@ import { RouteController } from "@/router/RouteController";
 import { QueryParams } from "@/filters/index";
 import { ContextAdapter, Middleware } from "@/router/bridge/ContextAdapter";
 import { parseStringAsBoolean } from "@/functions/primitives";
-import { DeepPartial, FunctionKeys, Unpacked } from "@/utils-types";
+import { DeepPartial, FunctionKeys, ObjectLiteral, Unpacked } from "@/utils-types";
 import { ContextWithState, addRequestContext, removeRequestContext } from "@/request";
 
 export class MiddlewareMaker<Entity extends GenericEntity> {
@@ -171,11 +171,7 @@ export type CrudAction = {
 };
 
 /** EntityRoute request context wrapping Koa's Context */
-export type RequestContext<
-    Entity extends GenericEntity = GenericEntity,
-    QP = QueryParams,
-    State = Record<string, any>
-> = {
+export type RequestContext<Entity extends GenericEntity = GenericEntity, QP = QueryParams, State = ObjectLiteral> = {
     /** Current request id */
     requestId?: string;
     /** Request context adapter */

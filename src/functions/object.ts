@@ -2,10 +2,10 @@ import { isObject, isDefined, isDate } from "@/functions/asserts";
 import { ObjectLiteral } from "@/utils-types";
 
 /** Sort object keys alphabetically */
-export const sortObjectByKeys = (obj: Record<any, any>) =>
+export const sortObjectByKeys = (obj: ObjectLiteral) =>
     Object.keys(obj)
         .sort()
-        .reduce((acc, key) => ((acc[key] = obj[key]), acc), {} as any);
+        .reduce((acc, key) => ((acc[key] = obj[key]), acc), {} as ObjectLiteral);
 
 /** Get 1st key of object */
 export const getObjectOnlyKey = (obj: object) => Object.keys(obj)[0];
@@ -63,21 +63,21 @@ export const propEntries = <T extends object, K extends keyof T>(keys: K[]) => (
 export const getSelf = <T = any>(value: T) => value;
 
 export function deepMerge<A, B, C, D, E>(obj1: A, obj2: B, obj3?: C, obj4?: D, obj5?: E): A & B & C & D & E;
-export function deepMerge<T extends Record<string, any>[]>(...objects: Partial<T>[]): Partial<T> {
-    function deepMergeInner(target: object, source: object, options: DeepMergeOptions) {
+export function deepMerge<T extends ObjectLiteral[]>(...objects: Partial<T>[]): Partial<T> {
+    function deepMergeInner(target: ObjectLiteral, source: ObjectLiteral, options: DeepMergeOptions) {
         Object.keys(source).forEach((key: string) => {
-            const targetValue = (target as any)[key];
-            const sourceValue = (source as any)[key];
+            const targetValue = target[key];
+            const sourceValue = source[key];
 
             if (Array.isArray(targetValue) && Array.isArray(sourceValue)) {
                 const sourceValues = options.withUniqueArrayValues
                     ? sourceValue.filter((value) => !targetValue.includes(value))
                     : sourceValue;
-                (target as any)[key] = targetValue.concat(sourceValues);
+                target[key] = targetValue.concat(sourceValues);
             } else if (isObject(targetValue) && isObject(sourceValue)) {
-                (target as any)[key] = deepMergeInner(Object.assign({}, targetValue), sourceValue, options);
+                target[key] = deepMergeInner(Object.assign({}, targetValue), sourceValue, options);
             } else {
-                (target as any)[key] = sourceValue;
+                target[key] = sourceValue;
             }
         });
 

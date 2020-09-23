@@ -37,7 +37,7 @@ export const makeKoaContextAdapter = (ctx: Context) => ({
         return (this as KCA).ctx.method;
     },
     get requestBody() {
-        return ((this as KCA).ctx.request as any).body;
+        return (this as KCA).ctx.request.body;
     },
     get params() {
         return (this as KCA).ctx.params;

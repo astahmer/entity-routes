@@ -14,7 +14,7 @@ export function makeRouterFromActions<Data extends object = object, T extends An
     data?: Data
 ) {
     const router =
-        "router" in config ? config.router : new BridgeRouter(config.routerFactoryFn, config.routerRegisterFn as any);
+        "router" in config ? config.router : new BridgeRouter(config.routerFactoryFn, config.routerRegisterFn);
 
     if (!config) {
         throw new Error(
