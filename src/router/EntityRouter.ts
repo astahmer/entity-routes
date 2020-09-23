@@ -2,7 +2,7 @@ import { getRepository, ObjectType, Repository } from "typeorm";
 
 import { GroupsOperation, RouteOperation } from "@/decorators/Groups";
 import { AbstractFilterConfig } from "@/filters/AbstractFilter";
-import { RouteSubresourcesMeta, SubresourceMaker } from "@/router/SubresourceManager";
+import { RouteSubresourcesMeta, SubresourceMaker } from "@/router/SubresourceMaker";
 import { BridgeRouter, BridgeRouterRegisterFn } from "@/router/bridge/BridgeRouter";
 import { formatRouteName } from "@/functions/route";
 import {

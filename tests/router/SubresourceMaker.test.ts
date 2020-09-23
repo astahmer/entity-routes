@@ -172,16 +172,15 @@ describe("SubresourceManager", () => {
             await createTestConnection(entities);
 
             const entityRouters = getEntityRouters();
-            const mergedOptions = { ...options, defaultSubresourceMaxDepthLvl: 99 };
 
             // Registering all EntityRouter
             entities.forEach((entity) => {
-                entityRouters[entity.name] = new EntityRouter(entity, getRouteMetadata(entity), mergedOptions);
+                entityRouters[entity.name] = new EntityRouter(entity, getRouteMetadata(entity), options);
             });
 
             const router = new BridgeRouter(koaRouterFactory, registerKoaRouteFromBridgeRoute);
 
-            const manager = new SubresourceMaker(getRepository(User), getRouteMetadata(User), mergedOptions);
+            const manager = new SubresourceMaker(getRepository(User), getRouteMetadata(User), options);
             manager.makeSubresourcesRoutes(router);
 
             const paths = router.routes.map(printBridgeRoute);
@@ -192,13 +191,10 @@ describe("SubresourceManager", () => {
                 "/user/:UserId(\\d+)/manager : get",
                 "/user/:UserId(\\d+)/manager : delete",
                 "/user/:UserId(\\d+)/manager/articles : get",
-                "/user/:UserId(\\d+)/manager/articles/comments : get",
-                "/user/:UserId(\\d+)/manager/articles/comments/upvotes : get",
                 "/user/:UserId(\\d+)/articles : post",
                 "/user/:UserId(\\d+)/articles : get",
                 "/user/:UserId(\\d+)/articles/:id(\\d+) : delete",
                 "/user/:UserId(\\d+)/articles/comments : get",
-                "/user/:UserId(\\d+)/articles/comments/upvotes : get",
                 "/user/:UserId(\\d+)/comments : post",
                 "/user/:UserId(\\d+)/comments : get",
                 "/user/:UserId(\\d+)/comments/:id(\\d+) : delete",
@@ -210,13 +206,10 @@ describe("SubresourceManager", () => {
                 "user_manager_details",
                 "user_manager_delete",
                 "user_manager_articles_list",
-                "user_manager_articles_comments_list",
-                "user_manager_articles_comments_upvotes_list",
                 "user_articles_create",
                 "user_articles_list",
                 "user_articles_delete",
                 "user_articles_comments_list",
-                "user_articles_comments_upvotes_list",
                 "user_comments_create",
                 "user_comments_list",
                 "user_comments_delete",

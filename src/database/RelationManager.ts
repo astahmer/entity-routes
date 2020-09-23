@@ -7,7 +7,7 @@ import { RouteOperation } from "@/decorators/Groups";
 import { GenericEntity } from "@/router/EntityRouter";
 import { getDependsOnMetadata } from "@/decorators/DependsOn";
 import { MappingManager } from "@/mapping/MappingManager";
-import { SubresourceRelation } from "@/router/SubresourceManager";
+import { SubresourceRelation } from "@/router/SubresourceMaker";
 import { Service } from "typedi";
 import { MaxDeptMetadata, getMaxDepthMetadata } from "@/decorators/MaxDepth";
 import { RelationMetadata } from "typeorm/metadata/RelationMetadata";

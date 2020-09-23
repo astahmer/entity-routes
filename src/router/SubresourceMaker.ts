@@ -2,12 +2,7 @@ import { Repository, EntityMetadata } from "typeorm";
 import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
 
 import { getEntityRouters } from "@/router/container";
-import {
-    getRouteSubresourcesMetadata,
-    RouteMetadata,
-    GenericEntity,
-    EntityRouterOptions,
-} from "../router/EntityRouter";
+import { getRouteSubresourcesMetadata, RouteMetadata, GenericEntity, EntityRouterOptions } from "./EntityRouter";
 import { BridgeRouter } from "@/router/bridge/BridgeRouter";
 import { CRUD_ACTIONS } from "@/router/MiddlewareMaker";
 import { formatRoutePath, formatRouteName } from "@/functions/route";

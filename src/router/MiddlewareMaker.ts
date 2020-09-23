@@ -4,7 +4,7 @@ import { Container } from "typedi";
 import { RouteOperation } from "@/decorators/Groups";
 import { GenericEntity, EntityRouter } from "@/router/EntityRouter";
 import { EntityErrorResponse } from "@/database/Persistor";
-import { SubresourceRelation } from "@/router/SubresourceManager";
+import { SubresourceRelation } from "@/router/SubresourceMaker";
 import { isType, isDev } from "@/functions/asserts";
 import { MappingManager } from "@/mapping/MappingManager";
 import { EntityErrorResults } from "@/request/Validator";

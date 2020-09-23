@@ -8,7 +8,7 @@ import { DeepPartial } from "@/utils-types";
 import { GenericEntity } from "../router/EntityRouter";
 import { RouteResponse, RouteControllerResult, RequestContext } from "../router/MiddlewareMaker";
 import { ListDetailsOptions } from "../router/RouteController";
-import { SubresourceRelation } from "../router/SubresourceManager";
+import { SubresourceRelation } from "../router/SubresourceMaker";
 
 export const hookNames = [
     "beforeHandle",

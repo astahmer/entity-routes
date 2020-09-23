@@ -5,7 +5,7 @@ import { GenericEntity, EntityRouteOptions } from "@/router/EntityRouter";
 import { Cleaner } from "@/request/Cleaner";
 import { ValidateItemOptions, EntityErrorResults, Validator } from "@/request/Validator";
 import { RequestContextMinimal } from "@/router/MiddlewareMaker";
-import { SubresourceRelation } from "@/router/SubresourceManager";
+import { SubresourceRelation } from "@/router/SubresourceMaker";
 import { EntityMapperMakeOptions } from "@/mapping/index";
 import { deepMerge } from "@/functions";
 
