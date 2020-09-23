@@ -2,11 +2,11 @@
 title: Route response
 ---
 
+import { DocAlert } from "@/components";
+
 Each `entity-routes` response will be formated using a template defined by the route
 [**operation**](/entity-routes/operations/) , either `list` or `details`. All responses will share the `@context` part
-nonetheless.
-
-Here the actual ts type ([`RouteResponse`](/definitions#routeresponse)) :
+nonetheless. Here the actual ts type ([`RouteResponse`](/definitions#routeresponse)) :
 
 ```ts
 type RouteResponse = {
@@ -68,24 +68,225 @@ formated.
 
 The formater process each response item/items and perform the following tasks :
 
--   Remove any object that is not another Entity (object that implements
-    [`GenericEntity`](/definitions/interfaces/genericentity)) or is not a Date
+-   [Remove any object that is not another Entity](#1-remove-any-object-that-is-not-another-entity) (object that
+    implements [`GenericEntity`](/definitions/interfaces/genericentity)) or is not a Date
 -   Flatten item with only id if needed (and if `shouldEntityWithOnlyIdBeFlattenedToIri` of
     [`EntityRouteOptions`](/definitions#entityrouteoptions) is true)
 -   [Set subresources IRI](/entity-routes/subresources#format-in-response) if item has any (and if
     `shouldSetSubresourcesIriOnItem` of [`EntityRouteOptions`](/definitions#entityrouteoptions) is true)
--   Add computed properties to this item
+-   Add **computed properties** to this item
 -   Sort item's property keys
-
--   TODO example Remove any object that is not another Entity (object that implements
--   TODO example shouldEntityWithOnlyIdBeFlattenedToIri
--   TODO example Add computed properties to this item
--   TODO example Sort item's property keys
 
 > By default, it is enabled since the [`defaultEntityRouteOptions`](/definitions#const-defaultentityrouteoptions) object
 > has a `defaultCreateUpdateOptions` key set to `{ shouldAutoReload: true, shouldFormatResult: true }`.
 
-## Examples responses
+### Examples
+
+_Below examples use these entities_
+
+```ts
+abstract class AbstractEntity {
+    @PrimaryGeneratedColumn()
+    id: number;
+
+    @Groups(["details"])
+    get repository() {
+        return getRepository(this.constructor.name);
+    }
+
+    @Groups(["details"])
+    getTableName() {
+        return this.repository.metadata.tableName;
+    }
+}
+
+@Entity()
+class Role extends AbstractEntity {
+    @Column()
+    identifier: string;
+}
+
+@Entity()
+class User extends AbstractEntity {
+    @Column()
+    name: string;
+
+    @ManyToOne(() => Role)
+    role: Role;
+}
+```
+
+### 1. Remove any object that is not another Entity
+
+Let's say you have a `User` entity such as :
+
+```ts
+@EntityRoute({ path: "/users", operation: ["details"] })
+@Entity()
+class User extends AbstractEntity {
+    @Column()
+    name: string;
+
+    @ManyToOne(() => Role)
+    role: Role;
+
+    @Groups(["details"])
+    get repository() {
+        return getRepository(this.constructor.name);
+    }
+
+    @Groups(["details"])
+    getTableName() {
+        return this.repository.metadata.tableName;
+    }
+}
+```
+
+-   The `repository` key will not be returned in response since it does not implement the `GenericEntity` interface.
+-   The `tableName` will be returned since it's just a string
+
+```json bottomLeft="GET:/users/1"
+{
+    "@context": {
+        "operation": "details",
+        "entity": "user"
+    },
+    "id": 1,
+    "name": "Alex",
+    "tableName": "user"
+}
+```
+
+### 2. Flatten item with only id if needed
+
+<DocAlert status="info">
+
+Enabled by default (see `defaultEntityRouteOptions`). You can opt-out of this behavior by setting the
+`shouldEntityWithOnlyIdBeFlattenedToIri` key of `EntityRouteOptions` to false.
+
+</DocAlert>
+
+Let's say you have a `Role` and a `User` entity such as :
+
+```ts {13}
+abstract class AbstractEntity {
+    @Groups("all")
+    @PrimaryGeneratedColumn()
+    id: number;
+}
+
+@Entity()
+class Role extends AbstractEntity {
+    @Column()
+    identifier: string;
+}
+
+@EntityRoute({ path: "/users", operation: ["details"] }, { shouldEntityWithOnlyIdBeFlattenedToIri: true })
+@Entity()
+class User extends AbstractEntity {
+    @Groups(["details"])
+    @Column()
+    name: string;
+
+    @Groups(["details"])
+    @ManyToOne(() => Role)
+    role: Role;
+}
+```
+
+> The `User`.id = 1 has a relation to the `Role`.id = 321.
+
+Since no properties except `id` is exposed on the `user.details` route scope :
+
+-   The `role` relation will be returned as an IRI.
+-   If you [opted-out of IRIs](/entity-routes/groups/introduction#relations-iris), then the `id` will be returned as is.
+
+```json bottomLeft="GET:/users/1"
+{
+    "@context": {
+        "operation": "details",
+        "entity": "user"
+    },
+    "id": 1,
+    "name": "Alex",
+    "role": "/api/role/321"
+    // or if do not use IRIs "role": 321
+}
+```
+
+### 3. Set subresources IRI
+
+<DocAlert status="info">
+
+Enabled by default (see `defaultEntityRouteOptions`). You can opt-out of this behavior by setting the
+`shouldSetSubresourcesIriOnItem` key of `EntityRouteOptions` to false.
+
+</DocAlert>
+
+```typescript {11}
+@EntityRoute()
+@Entity()
+class Article extends AbstractEntity {
+    @ManyToOne(() => User, (user) => user.articles)
+    author: User;
+
+    @Column()
+    title: string;
+}
+
+@EntityRoute({ path: "/users/", operations: ["list"] }, { shouldSetSubresourcesIriOnItem: true })
+@Entity()
+class User extends AbstractEntity {
+    @Groups({ user: ["create", "details"], article: ["list"] })
+    @Column()
+    name: string;
+
+    @Subresource(() => Article)
+    @OneToMany(() => Article, (article) => article.author)
+    articles: Article[];
+}
+```
+
+-   The `articles` property will be set to its IRI `/api/user/1/articles` (if not exposed through `@Groups`)
+
+```json {6} bottomLeft="GET:/users/1"
+{
+    "@context": {
+        "operation": "details",
+        "entity": "user"
+    },
+    "articles": "/api/users/1/articles",
+    "id": 1,
+    "name": "Alex"
+}
+```
+
+### 4. Sort item's property keys
+
+<DocAlert status="info">
+
+Enabled by default (see `defaultEntityRouteOptions`). You can opt-out of this behavior by setting the
+`shouldSortItemKeys` key of `EntityRouteOptions` to false.
+
+</DocAlert>
+
+```typescript {1}
+@EntityRoute({ path: "/users/", operations: ["list"] }, { shouldSortItemKeys: true })
+@Entity()
+class User extends AbstractEntity {
+    @Groups(["details"])
+    @Column()
+    name: string;
+
+    @Groups(["details"])
+    @OneToMany(() => Article, (article) => article.author)
+    articles: Article[];
+}
+```
+
+-   All responses keys will be sorted alphabetically, recursively through all nested entities as well
+
+## Basic responses examples
 
 ### Create/update
 

@@ -3,6 +3,7 @@
     "/entity-routes/route-scope/": ["`route scope`", "`route scopes`"],
     "/entity-routes/operations/": ["**operation**", "**operations**"],
     "/entity-routes/groups/introduction": ["**groups**"],
+    "/entity-groups/groups/introduction#computed-property": ["**computed properties**", "**computed property**"],
     "/entity-routes/subresources/": ["**subresources**"],
     "/entity-routes/filters/": ["**filters**"],
     "/entity-routes/hooks/": ["**hooks**"],

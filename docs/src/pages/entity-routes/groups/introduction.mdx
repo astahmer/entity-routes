@@ -84,7 +84,7 @@ On the other hand, if you need to retrieve a relation id but no nested property,
 You can opt-out of using IRIs by setting the `useIris` key of [`EntityRouteOptions`](/definitions#entityrouteoptions) to
 `false`.
 
-[See the example.](#iri)
+[See the example.](/entity-routes/groups/examples#iri)
 
 ## Computed property
 
@@ -94,14 +94,25 @@ Prefixing your method's name by `get`|`is`|`has` and then using PascalCase will 
 method's result will be set in the response. If you don't want to use one of these prefix, you can use the 2nd arg of
 the `@Groups` decorator to define an `alias` that will be used as entity key in `entity-routes` responses.
 
+### Asynchrone
+
 A `computed property` can be asynchrone, in which case the response will end for the Promise to be done before sending
 the response. In case there are multiple async `computed properties`, they will be processed in parallel to keep things
 sane, but stil wait for all of them to be done.
 
-Currently, if `computed property` (both async & sync) somehow throws an error, the error is simply ignored. It is not
-recommended to abuse `computed properties` as it can make responses time slow, especially when working with collections.
+> Currently, if `computed property` (both async & sync) somehow throws an error, the error is simply ignored. It is not
+> recommended to abuse `computed properties` as it can make responses time slow, especially when working with
+> collections.
 
-## Basic example
+### With dependencies
+
+There is one caveat though : What if your `computed property` depends on another property that is not exposed (through
+`@Groups`) ? You could always just decorate the properties you depend onto with a `@Groups`, but then you will end up
+having those properties returned in the response and you might not want that. That's what the [@DependsOn](#depends-on)
+decorator is for, selecting needed properties from the database table when the decorated computed property is exposed
+without returning them.
+
+### Basic example
 
 ```ts
 class Employee {
@@ -124,7 +135,7 @@ class Employee {
 Here, the `getFullName` accessor will be exposed as `fullName` while the `hasAdminRight` will be displayed as `isAdmin`
 in responses.
 
-## Async example
+### Async example
 
 ```ts
 class Employee {
@@ -144,7 +155,7 @@ class Employee {
 }
 ```
 
-## Accessor
+### Accessor
 
 Accessors are the special methods
 [`get`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/get)/[`set`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/set).
@@ -157,8 +168,6 @@ Just like regular methods, you can use the 2nd arg of `@Groups` to define an `al
 another name in your `entity-routes` responses.
 
 </DocAlert>
-
-### Example
 
 Using almost the same entity/properties as the [`computed property` basic example](#basic-example).
 
@@ -183,6 +192,6 @@ class Employee {
 Here, the `fullName` accessor will also be exposed as `fullName` while the `hasAdminRight` will be displayed as
 `isAdmin` in responses.
 
-## DependsOn
+### @DependsOn
 
 TODO

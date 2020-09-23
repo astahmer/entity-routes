@@ -92,13 +92,27 @@ maxDepth is independant from each other. If no max depth is defined, it will fal
 
 ## Playground
 
-Feel free to play with the playground below to experience how max depths works.
+Feel free to play with the playground below to experience how you can configure each subresource and see the route
+generation results.
 
-The routes are intentionnaly not all added initially, you can add them yourself by adding a route using the "+" button
-next to the entity name tags, and then selecting each subresource properties you want in your routes.
+[Skip to next section.](#with-single-relations)
 
-Or you can just click on "Generate all possible routes" and see each possibilities for the config defined above. You can
+> The routes are intentionnaly not all added initially, you can add them yourself by adding a route using the "+" button
+> next to the entity name tags, and then selecting each subresource properties you want in your routes.
+
+<DocAlert status="info">
+
+You can just click on "Generate all possible routes" and see each possibilities for the config defined above. You can
 also hover on the warning icon to see the reason why the subresource can not be nested further.
+
+</DocAlert>
+
+These are the possible reason why a subresource won't nest further :
+
+-   has reached max depth from a parent subresource
+-   last subresource has no nested subresources
+-   last subresource can't have nested subresources
+-   that route already exists
 
 <SubresourcePlayground />
 
@@ -138,12 +152,14 @@ The [`defaultEntityRouteOptions`](/definitions#const-defaultentityrouteoptions) 
 
 </DocAlert>
 
+### With subresource IRI
+
 Using the same example from above with User/Article, here's how that would look like :
 
 ```typescript
 @EntityRoute({ path: "/users", operations: CRUD_OPERATIONS }, { shouldSetSubresourcesIriOnItem: true })
 @Entity()
-export class User extends AbstractEntity {
+class User extends AbstractEntity {
     @Groups({ user: ["create", "details"], article: ["list"] })
     @Column()
     name: string;
@@ -155,7 +171,7 @@ export class User extends AbstractEntity {
 
 @EntityRoute()
 @Entity()
-export class Article extends AbstractEntity {
+class Article extends AbstractEntity {
     @ManyToOne(() => User, (user) => user.articles)
     author: User;
 
@@ -165,7 +181,7 @@ export class Article extends AbstractEntity {
 }
 ```
 
-Response on user details :
+The `articles` property will have its subresource IRI displayed in the responses :
 
 ```json {6} bottomLeft="GET:/users/1" bottomRight="The article property is an array of IRI"
 {
@@ -173,16 +189,21 @@ Response on user details :
         "operation": "details",
         "entity": "user"
     },
-    "articles": ["/api/users/1/articles"],
+    "articles": "/api/users/1/articles",
     "id": 1,
     "name": "Alex"
 }
 ```
 
-And if you exposed properties from that subresource relation (with [`@Groups`](/definitions#groups)):
+### With relation exposed
 
-```typescript {3} minimal
-class User {
+When exposing the `articles` property on `user.details`, the response will differ :
+
+```ts {5}
+// ...
+class User extends AbstractEntity {
+    // ...
+
     @Groups({ user: ["details"] })
     @Subresource(() => Article)
     @OneToMany(() => Article, (article) => article.author)
@@ -190,7 +211,43 @@ class User {
 }
 ```
 
-This is how the response would look like with `User.articles` exposed :
+```json {6} bottomLeft="GET:/users/1" bottomRight="The article property is now an array of article IRI"
+{
+    "@context": {
+        "operation": "details",
+        "entity": "user"
+    },
+    "articles": ["/api/articles/123"],
+    "id": 1,
+    "name": "Alex"
+}
+```
+
+### With nested property exposed
+
+And if you exposed properties from that subresource relation (with [`@Groups`](/definitions#groups)):
+
+```typescript {3,14}
+// ...
+class User {
+    @Groups({ user: ["details"] })
+    @Subresource(() => Article)
+    @OneToMany(() => Article, (article) => article.author)
+    articles: Article[];
+}
+
+// ...
+class Article extends AbstractEntity {
+    @ManyToOne(() => User, (user) => user.articles)
+    author: User;
+
+    @Groups({ user: ["details"] })
+    @Column()
+    title: string;
+}
+```
+
+This is how the response would look like with `User.articles.title` exposed :
 
 ```json {6-11} bottomLeft="GET:/users/1" bottomRight="The article property is an array of object with every nested properties of article exposed"
 {
@@ -200,7 +257,7 @@ This is how the response would look like with `User.articles` exposed :
     },
     "articles": [
         {
-            "id": 1,
+            "id": 123,
             "title": "First article"
         }
     ],
