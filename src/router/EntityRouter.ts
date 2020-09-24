@@ -199,8 +199,24 @@ export type EntityRouteOptions = {
     /** Middlewares to be pushed after requestContext middleware */
     afterCtxMiddlewares?: Function[];
 };
-export type EntityRouteScopedOptions = (operation: GroupsOperation) => EntityRouteOptions;
-export type WithEntityRouteScopedOptions = { scopedOptions?: EntityRouteScopedOptions };
+export type EntityRouteScopedHooks = Pick<
+    HookSchema,
+    | "beforeClean"
+    | "afterClean"
+    | "beforeValidate"
+    | "afterValidate"
+    | "beforePersist"
+    | "afterPersist"
+    | "beforeRead"
+    | "afterRead"
+>;
+export type EntityRouteScopedOptions = Pick<
+    EntityRouteOptions,
+    "defaultListDetailsOptions" | "defaultCreateUpdateOptions"
+> & { hooks?: EntityRouteScopedHooks };
+/** Allow overriding RouteController options on different operations */
+export type EntityRouteScopedOptionsFn = (operation: GroupsOperation) => EntityRouteScopedOptions;
+export type WithEntityRouteScopedOptions = { scopedOptions?: EntityRouteScopedOptionsFn };
 export type EntityRouteConfig = {
     /** Custom actions using current EntityRouter prefix/instance */
     actions?: EntityRouteActionConfig[];
