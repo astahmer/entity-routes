@@ -1,7 +1,7 @@
 import { Repository, SelectQueryBuilder, DeleteResult } from "typeorm";
 import { Container } from "typedi";
 
-import { getRouteFiltersMeta, RouteFiltersMeta, GenericEntity, EntityRouteOptions } from "@/router/EntityRouter";
+import { getRouteFiltersMeta, RouteFiltersMeta, GenericEntity } from "@/router/EntityRouter";
 import { AbstractFilter, AbstractFilterConfig, QueryParams } from "@/filters/AbstractFilter";
 import { EntityErrorResponse, Persistor, SaveItemArgs } from "@/database/Persistor";
 import { Reader, ReaderOptions } from "@/database/Reader";
@@ -10,12 +10,12 @@ import { AliasHandler } from "@/database/AliasHandler";
 import { isType } from "@/functions/asserts";
 import { RelationManager } from "@/database/RelationManager";
 import { fromEntries } from "@/functions/object";
-import { RequestContext, CollectionResult, MiddlewareMaker } from "@/router/MiddlewareMaker";
-import { Formater, FormaterOptions } from "@/response/Formater";
-import { GroupsOperation, RouteOperation } from "@/decorators/index";
+import { RequestContext, CollectionResult } from "@/router/MiddlewareMaker";
 import { last } from "@/functions/array";
 import { isRelationSingle } from "@/functions/entity";
 import { deepMerge, parseStringAsBoolean } from "@/functions/index";
+import { Handler } from "@/request/Handler";
+import { GroupsOperation } from "@/decorators/Groups";
 
 export class RouteController<Entity extends GenericEntity> {
     private filtersMeta: RouteFiltersMeta;
@@ -32,10 +32,6 @@ export class RouteController<Entity extends GenericEntity> {
         return Container.get(RelationManager);
     }
 
-    get formater() {
-        return Container.get(Formater);
-    }
-
     get metadata() {
         return this.repository.metadata;
     }
@@ -46,7 +42,7 @@ export class RouteController<Entity extends GenericEntity> {
 
     private cachedFilters: Record<string, AbstractFilter>;
 
-    constructor(private repository: Repository<Entity>, private options: MiddlewareMaker<Entity>["options"] = {}) {
+    constructor(private repository: Repository<Entity>, private options: Handler<Entity>["options"] = {}) {
         this.filtersMeta = getRouteFiltersMeta(repository.metadata.target as Function);
         this.cachedFilters = fromEntries(this.filters.map((config) => [config.class.name, this.makeFilter(config)]));
     }
@@ -56,9 +52,8 @@ export class RouteController<Entity extends GenericEntity> {
         innerOptions: CreateUpdateOptions = {}
     ) {
         const { operation = "create", values, subresourceRelations, requestId } = requestContext;
+        const options = deepMerge({}, this.options.defaultCreateUpdateOptions, innerOptions);
         const subresourceRelation = last(subresourceRelations || []); // Should only contain 1 item at most
-        const routeOptions = this.getOptionsFor(operation, "persist", innerOptions);
-        const options = routeOptions.defaultCreateUpdateOptions;
 
         if (!subresourceRelation && !Object.keys(values).length) {
             return { error: "Body can't be empty on create operation" };
@@ -70,7 +65,7 @@ export class RouteController<Entity extends GenericEntity> {
             mapperMakeOptions: options?.mapperMakeOptions || {},
             validatorOptions: options?.validatorOptions || {},
             subresourceRelation,
-            hooks: routeOptions.hooks,
+            hooks: this.options.hooks,
         });
 
         if (isType<EntityErrorResponse>(result, "hasValidationErrors" in result)) {
@@ -94,25 +89,14 @@ export class RouteController<Entity extends GenericEntity> {
 
         // TODO beforeReload hook ?
         if (!options?.shouldAutoReload) {
-            // TODO beforeFormat ?
-            const item = options?.shouldFormatResult
-                ? await this.formater.formatItem({
-                      item: result,
-                      operation,
-                      entityMetadata: this.metadata,
-                      options: options.formaterOptions,
-                  })
-                : result;
-            return item;
+            return result;
         }
+        (requestContext as any).wasAutoReloaded = true;
 
         const responseOperation =
             options?.responseOperation ||
             (requestContext.operation === "create" ? "details" : requestContext.operation || "details");
-        return this.getDetails(
-            { operation: responseOperation, entityId: result.id, requestId },
-            { shouldOnlyFlattenNested: true }
-        );
+        return this.getDetails({ operation: responseOperation, entityId: result.id, requestId });
     }
 
     public async update(
@@ -120,8 +104,7 @@ export class RouteController<Entity extends GenericEntity> {
         innerOptions?: CreateUpdateOptions
     ) {
         const { operation = "update", values, entityId, requestId } = requestContext;
-        const routeOptions = this.getOptionsFor(operation, "persist", innerOptions);
-        const options = routeOptions.defaultCreateUpdateOptions;
+        const options = deepMerge({}, this.options.defaultCreateUpdateOptions, innerOptions);
 
         if (!values?.id) (values as Entity).id = entityId;
         const result = await this.persistor.saveItem({
@@ -129,7 +112,7 @@ export class RouteController<Entity extends GenericEntity> {
             rootMetadata: this.metadata,
             mapperMakeOptions: options.mapperMakeOptions || {},
             validatorOptions: options?.validatorOptions || {},
-            hooks: routeOptions.hooks,
+            hooks: this.options.hooks,
         });
 
         if (isType<EntityErrorResponse>(result, "hasValidationErrors" in result)) {
@@ -137,24 +120,14 @@ export class RouteController<Entity extends GenericEntity> {
         }
 
         if (!options?.shouldAutoReload) {
-            const item = options?.shouldFormatResult
-                ? await this.formater.formatItem({
-                      item: result,
-                      operation,
-                      entityMetadata: this.metadata,
-                      options: options.formaterOptions,
-                  })
-                : result;
-            return item;
+            return result;
         }
+        (requestContext as any).wasAutoReloaded = true;
 
         const responseOperation =
             options?.responseOperation ||
             (requestContext.operation === "update" ? "details" : requestContext.operation || "details");
-        return this.getDetails(
-            { operation: responseOperation, entityId, requestId },
-            { shouldOnlyFlattenNested: true }
-        );
+        return this.getDetails({ operation: responseOperation, entityId, requestId });
     }
 
     /** Returns an entity with every mapped props (from groups) for a given id */
@@ -166,10 +139,11 @@ export class RouteController<Entity extends GenericEntity> {
         innerOptions?: ListDetailsOptions
     ) {
         const { requestId, operation = "list", queryParams = {}, subresourceRelations } = requestContext || {};
+        const options = deepMerge({}, this.options.defaultListDetailsOptions, innerOptions);
 
         const qb = this.repository.createQueryBuilder(this.metadata.tableName);
 
-        if (innerOptions?.withDeleted) qb.withDeleted();
+        if (options?.withDeleted) qb.withDeleted();
 
         // Apply a max item to retrieve
         qb.take(100);
@@ -192,16 +166,13 @@ export class RouteController<Entity extends GenericEntity> {
             this.applyFilters(queryParams, qb, aliasHandler);
         }
 
-        const routeOptions = this.getOptionsFor(operation, "read", innerOptions);
-        const options = routeOptions.defaultListDetailsOptions;
-
         const collectionResult = await this.reader.getCollection({
             entityMetadata: this.metadata,
             qb,
             aliasHandler,
             operation,
             options,
-            hooks: routeOptions.hooks,
+            hooks: this.options.hooks,
             requestId,
         });
 
@@ -214,10 +185,11 @@ export class RouteController<Entity extends GenericEntity> {
         innerOptions?: ListDetailsOptions
     ) {
         const { requestId, operation = "details", entityId, subresourceRelations } = ctx;
+        const options = deepMerge({}, this.options.defaultListDetailsOptions, innerOptions);
 
         const qb = this.repository.createQueryBuilder(this.metadata.tableName);
 
-        if (innerOptions?.withDeleted) qb.withDeleted();
+        if (options?.withDeleted) qb.withDeleted();
 
         const aliasHandler = new AliasHandler();
         if (subresourceRelations) {
@@ -233,8 +205,6 @@ export class RouteController<Entity extends GenericEntity> {
             });
         }
 
-        const routeOptions = this.getOptionsFor(operation, "read", innerOptions);
-        const options = routeOptions.defaultListDetailsOptions;
         const result = await this.reader.getItem<Entity>({
             entityMetadata: this.metadata,
             qb,
@@ -242,7 +212,7 @@ export class RouteController<Entity extends GenericEntity> {
             entityId,
             operation,
             options,
-            hooks: routeOptions.hooks,
+            hooks: this.options.hooks,
             requestId,
         });
 
@@ -309,40 +279,11 @@ export class RouteController<Entity extends GenericEntity> {
             this.cachedFilters[config.class.name].apply({ queryParams, qb, aliasHandler })
         );
     }
-
-    private getOptionsFor<K extends OperationKind>(
-        operation: GroupsOperation,
-        kind?: K,
-        innerOptions?: K extends "persist" ? CreateUpdateOptions : ListDetailsOptions
-    ) {
-        // Override route options with scoped options
-        const scopedOptions = this.options.scopedOptions?.(operation);
-        const options = deepMerge({}, this.options || {}, scopedOptions || {});
-
-        const isPersist = kind === "persist";
-        const operationKindOptions = isPersist
-            ? options.defaultCreateUpdateOptions
-            : ({
-                  shouldMaxDepthReturnRelationPropsId:
-                      options.defaultMaxDepthOptions?.shouldMaxDepthReturnRelationPropsId,
-                  ...options.defaultListDetailsOptions,
-              } as ReaderOptions);
-
-        // Override previous result with innerOptions
-        options[isPersist ? "defaultCreateUpdateOptions" : "defaultListDetailsOptions"] = deepMerge(
-            {},
-            operationKindOptions || {},
-            innerOptions || {}
-        );
-        return options;
-    }
 }
 
 export type CreateUpdateOptions = Pick<SaveItemArgs<any>, "validatorOptions" | "mapperMakeOptions"> & {
-    responseOperation?: RouteOperation;
+    responseOperation?: GroupsOperation;
     shouldAutoReload?: boolean;
-    shouldFormatResult?: boolean;
-    formaterOptions?: FormaterOptions;
 };
 
 export type ListDetailsOptions = {

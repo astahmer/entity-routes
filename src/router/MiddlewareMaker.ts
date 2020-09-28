@@ -1,11 +1,9 @@
-import { Connection, DeleteResult, QueryRunner, Repository, getConnection } from "typeorm";
+import { Connection, QueryRunner, Repository, getConnection } from "typeorm";
 import { Container } from "typedi";
 
 import { RouteOperation } from "@/decorators/Groups";
 import { GenericEntity, EntityRouter } from "@/router/EntityRouter";
-import { EntityErrorResponse } from "@/database/Persistor";
 import { SubresourceRelation } from "@/router/SubresourceMaker";
-import { isType, isDev } from "@/functions/asserts";
 import { MappingManager } from "@/mapping/MappingManager";
 import { EntityErrorResults } from "@/request/Validator";
 import { RouteController } from "@/router/RouteController";
@@ -13,8 +11,12 @@ import { QueryParams } from "@/filters/index";
 import { ContextAdapter, Middleware } from "@/router/bridge/ContextAdapter";
 import { parseStringAsBoolean } from "@/functions/primitives";
 import { DeepPartial, FunctionKeys, ObjectLiteral, Unpacked } from "@/utils-types";
-import { ContextWithState, addRequestContext, removeRequestContext } from "@/request";
+import { ContextWithState, removeRequestContext } from "@/request";
+import { Writer } from "@/response/Writer";
+import { makeRequestContext } from "@/request/Context";
+import { Handler } from "@/request/Handler";
 
+// TODO tests
 export class MiddlewareMaker<Entity extends GenericEntity> {
     get mappingManager() {
         return Container.get(MappingManager);
@@ -25,36 +27,19 @@ export class MiddlewareMaker<Entity extends GenericEntity> {
     }
 
     private connection: Connection;
-    private controller: RouteController<Entity>;
+    private handler: Handler<Entity>;
+    private writer: Writer<Entity>;
 
     constructor(private repository: Repository<Entity>, private options: EntityRouter<Entity>["options"] = {}) {
         this.connection = getConnection();
-        this.controller = new RouteController(repository, options);
+        this.handler = new Handler(repository, options);
+        this.writer = new Writer(repository, options);
     }
 
-    public makeRequestContextMiddleware(
-        operation: RouteOperation,
-        subresourceRelations?: SubresourceRelation[]
-    ): Middleware {
-        return async (ctx, next) => {
-            addRequestContext(ctx as ContextWithState);
-
-            if (subresourceRelations?.length) {
-                subresourceRelations[0].id = parseInt(ctx.params[subresourceRelations[0].param]);
-            }
-
-            const { requestId } = ctx.state;
-            const requestContext: RequestContext<Entity> = {
-                requestId,
-                ctx,
-                operation,
-                isUpdateOrCreate: ctx.requestBody && (ctx.method === "POST" || ctx.method === "PUT"),
-                queryParams: ctx.query || {},
-                subresourceRelations,
-            };
-
-            if (ctx.params.id) requestContext.entityId = parseInt(ctx.params.id);
-            if (requestContext.isUpdateOrCreate) requestContext.values = ctx.requestBody;
+    /** Attach the requestContext to the ctx.state / queryRunner */
+    public makeRequestContextMiddleware(args: MakeRequestContextMwArgs): Middleware {
+        return async (ctx: ContextWithState, next) => {
+            const requestContext = makeRequestContext<Entity>(args, ctx);
 
             // Create query runner to retrieve requestContext in subscribers
             const queryRunner = this.connection.createQueryRunner();
@@ -70,64 +55,30 @@ export class MiddlewareMaker<Entity extends GenericEntity> {
     }
 
     /** Returns the response method on a given operation for this entity */
-    public makeResponseMiddleware(operation: string): Middleware {
-        return async (ctx, next) => {
-            const { requestContext = {} as RequestContext<Entity>, requestId } = ctx.state as RequestState<Entity>;
+    public makeResponseMiddleware(): Middleware {
+        return async (ctx: ContextWithState, next) => {
+            const result = await this.handler.getResult(ctx);
+            const response = await this.writer.makeResponse(ctx, result);
 
-            const method = CRUD_ACTIONS[operation].method;
-            let response: RouteResponse = {
-                "@context": {
-                    operation,
-                    entity: this.metadata.tableName,
-                },
-            };
-            if (requestContext.isUpdateOrCreate) response["@context"].validationErrors = null;
-
-            let result;
-            try {
-                result = await this.controller[method]({ requestId, operation, ...requestContext });
-
-                if (isType<EntityErrorResponse>(result, "hasValidationErrors" in result)) {
-                    response["@context"].validationErrors = result.errors;
-                    ctx.status = 400;
-                } else if ("error" in result) {
-                    response["@context"].error = result.error;
-                    ctx.status = 400;
-                }
-
-                if (isType<CollectionResult<Entity>>(result, operation === "list")) {
-                    response["@context"].retrievedItems = result.items.length;
-                    response["@context"].totalItems = result.totalItems;
-                    response.items = result.items;
-                } else if (isType<DeleteResult>(result, "raw" in result)) {
-                    response.deleted = result.affected ? requestContext.entityId : null;
-                } else {
-                    response = { ...response, ...result };
-                }
-            } catch (error) {
-                response["@context"].error = isDev() ? error.message : "Bad request";
-                isDev() && console.error(error);
-                ctx.status = 400;
-            }
-
-            const ref = { ctx: ctx as ContextWithState, response, result };
+            const ref = { ctx, response, result };
             await this.options.hooks?.beforeRespond?.(ref);
 
             ctx.status = 200;
             ctx.responseBody = ref.response;
 
             await this.options.hooks?.afterRespond?.(ref);
-            next();
+            return next();
         };
     }
 
+    /** Release queryRunner / remove requestContext from store */
     public makeEndResponseMiddleware(): Middleware {
-        return async (ctx) => {
+        return async (ctx: ContextWithState) => {
             if (!ctx.state.queryRunner.isReleased) {
                 await ctx.state.queryRunner.release();
             }
 
-            await this.options.hooks?.afterHandle?.(ctx as ContextWithState);
+            await this.options.hooks?.afterHandle?.(ctx);
 
             removeRequestContext(ctx.state.requestId);
         };
@@ -148,6 +99,8 @@ export class MiddlewareMaker<Entity extends GenericEntity> {
         };
     }
 }
+
+export type MakeRequestContextMwArgs = { operation: RouteOperation; subresourceRelations?: SubresourceRelation[] };
 
 export type CrudActions = Omit<Record<RouteOperation | "delete", CrudAction>, "all">;
 
@@ -188,6 +141,8 @@ export type RequestContext<Entity extends GenericEntity = GenericEntity, QP = Qu
     queryParams?: QP;
     /** Custom operation for a custom action */
     operation?: RouteOperation;
+    /** Was entity re-fetched after a persist operation ? */
+    wasAutoReloaded?: boolean;
 };
 export type RequestContextMinimal<Entity extends GenericEntity = GenericEntity> = Pick<
     RequestContext<Entity>,

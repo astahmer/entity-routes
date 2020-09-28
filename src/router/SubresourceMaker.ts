@@ -105,11 +105,11 @@ export class SubresourceMaker<Entity extends GenericEntity> {
                 // Skip list operation on XToOne & details operation on XToMany
                 if (isSingle ? operation === "list" : operation === "details") return;
 
-                const requestContextMw = nestedEntityRoute.middlewareMaker.makeRequestContextMiddleware(
+                const requestContextMw = nestedEntityRoute.middlewareMaker.makeRequestContextMiddleware({
                     operation,
-                    relations
-                );
-                const responseMw = nestedEntityRoute.middlewareMaker.makeResponseMiddleware(operation);
+                    subresourceRelations: relations,
+                });
+                const responseMw = nestedEntityRoute.middlewareMaker.makeResponseMiddleware();
                 const endResponseMw = nestedEntityRoute.middlewareMaker.makeEndResponseMiddleware();
 
                 const path = !parents

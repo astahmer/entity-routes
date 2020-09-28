@@ -18,6 +18,7 @@ import { CreateUpdateOptions, ListDetailsOptions } from "@/router/RouteControlle
 import { HookSchema } from "@/request/hooks";
 import { JoinAndSelectExposedPropsOptions } from "@/database";
 import { deepMerge } from "@/functions";
+import { WriterOptions } from "@/response";
 
 export class EntityRouter<Entity extends GenericEntity> {
     public readonly middlewareMaker: MiddlewareMaker<Entity>;
@@ -75,8 +76,8 @@ export class EntityRouter<Entity extends GenericEntity> {
             const path = (this.routeMetadata.path + CRUD_ACTIONS[operation].path).toLowerCase();
             const name = formatRouteName(this.repository.metadata.tableName, operation);
 
-            const requestContextMw = this.middlewareMaker.makeRequestContextMiddleware(operation);
-            const responseMw = this.middlewareMaker.makeResponseMiddleware(operation);
+            const requestContextMw = this.middlewareMaker.makeRequestContextMiddleware({ operation });
+            const responseMw = this.middlewareMaker.makeResponseMiddleware();
             const endResponseMw = this.middlewareMaker.makeEndResponseMiddleware();
 
             router.register({
@@ -128,7 +129,7 @@ export class EntityRouter<Entity extends GenericEntity> {
             ...action,
             middlewares: [
                 ...(action.beforeCtxMiddlewares || []),
-                mwAdapter(this.middlewareMaker.makeRequestContextMiddleware(action.operation)),
+                mwAdapter(this.middlewareMaker.makeRequestContextMiddleware({ operation: action.operation })),
                 ...(action.afterCtxMiddlewares || []),
             ],
         };
@@ -190,6 +191,8 @@ export type EntityRouteOptions = {
     defaultCreateUpdateOptions?: CreateUpdateOptions;
     /** Default subresources options, deep merged with defaultEntityRouteOptions */
     defaultSubresourcesOptions?: SubresourceMakerOptions;
+    /** Default subresources options, deep merged with defaultEntityRouteOptions */
+    defaultWriterOptions?: WriterOptions;
     /** Allow soft deletion using TypeORM @DeleteDateColumn */
     allowSoftDelete?: boolean;
     /** Hook schema of custom functions to be run at specific operations in a request processing */
@@ -199,21 +202,10 @@ export type EntityRouteOptions = {
     /** Middlewares to be pushed after requestContext middleware */
     afterCtxMiddlewares?: Function[];
 };
-export type EntityRouteScopedHooks = Pick<
-    HookSchema,
-    | "beforeClean"
-    | "afterClean"
-    | "beforeValidate"
-    | "afterValidate"
-    | "beforePersist"
-    | "afterPersist"
-    | "beforeRead"
-    | "afterRead"
->;
 export type EntityRouteScopedOptions = Pick<
     EntityRouteOptions,
     "defaultListDetailsOptions" | "defaultCreateUpdateOptions"
-> & { hooks?: EntityRouteScopedHooks };
+>;
 /** Allow overriding RouteController options on different operations */
 export type EntityRouteScopedOptionsFn = (operation: GroupsOperation) => EntityRouteScopedOptions;
 export type WithEntityRouteScopedOptions = { scopedOptions?: EntityRouteScopedOptionsFn };

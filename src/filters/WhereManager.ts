@@ -45,7 +45,7 @@ export class WhereManager {
     }
 
     /**
-     * Returns where strategy formatted as a valid keyof StrategyType
+     * Returns where strategy formated as a valid keyof StrategyType
      * @example
      * strategyRaw = "startsWith" -> return "STARTS_WITH"
      * strategyRaw = "STARTS_WITH" -> return "STARTS_WITH" // untouched

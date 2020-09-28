@@ -88,29 +88,6 @@ describe("RouteController - simple", () => {
             });
         });
 
-        it("inserts item & format result", async () => {
-            const repository = getRepository(User);
-            const ctrl = new RouteController(repository, { defaultCreateUpdateOptions: { shouldFormatResult: true } });
-
-            const birthDate = new Date();
-            const values = {
-                name: "Alex",
-                birthDate,
-                role: { identifier: "ADM", name: "Admin" },
-            };
-
-            const result = (await ctrl.create({ values })) as User; // actually is just ObjectLiteral with structure of User
-            expect(result.constructor).toBe(Object);
-            expect(result.role.constructor).toBe(Object);
-            expect(result).toEqual({
-                birthDate,
-                deletedAt: null,
-                id: 1,
-                name: "Alex",
-                role: { deletedAt: null, id: 1, identifier: "ADM", name: "Admin" },
-            });
-        });
-
         it("inserts item & auto reload it using getDetails", async () => {
             const repository = getRepository(User);
             const ctrl = new RouteController(repository, routeOptions);
@@ -176,26 +153,6 @@ describe("RouteController - simple", () => {
             })) as User;
 
             expect(updateResult.constructor).toBe(User);
-            expect(updateResult).toEqual({ deletedAt: null, id: 1, role: 1 });
-        });
-
-        it("updates item & format result", async () => {
-            const roleRepository = getRepository(Role);
-            const roleCtrl = new RouteController(roleRepository, routeOptions);
-            const modRole = await roleCtrl.create({ values: { identifier: "MOD", name: "Moderator" } });
-
-            const userRepository = getRepository(User);
-            const userCtrl = new RouteController(userRepository, {
-                defaultCreateUpdateOptions: { shouldFormatResult: true },
-            });
-
-            const birthDate = new Date();
-            const createResult = await userCtrl.create({ values: { name: "Alex", birthDate } });
-            const updateResult = (await userCtrl.update({
-                values: { id: (createResult as User).id, role: (modRole as Role).id as any },
-            })) as User; // actually is just ObjectLiteral with structure of User
-
-            expect(updateResult.constructor).toBe(Object);
             expect(updateResult).toEqual({ deletedAt: null, id: 1, role: 1 });
         });
 
@@ -430,14 +387,15 @@ describe("RouteController - simple", () => {
         expect(await ctrl.getDetails({ entityId: createResult.id })).toEqual(createResult);
     });
 
-    it("can override route options on specific operation with scoped options", async () => {
-        const beforePersist = jest.fn();
+    // TODO Move to Handler.test
+    // TODO Restore Formater.test & split it
+    // TODO Doc response handling
+    it.skip("can override route options on specific operation with scoped options", async () => {
         const repository = getRepository(User);
         const ctrl = new RouteController(repository, {
             ...routeOptions,
             scopedOptions: (operation) =>
                 operation === "create" && {
-                    hooks: { beforePersist },
                     defaultCreateUpdateOptions: { responseOperation: "createScoped" },
                 },
         });
@@ -446,13 +404,11 @@ describe("RouteController - simple", () => {
         const updateResult = (await ctrl.update({ entityId: createResult.id, values: { name: "Alex222" } })) as User;
         const detailsResult = (await ctrl.getDetails({ entityId: createResult.id })) as User;
 
-        // Hook beforePersist (called for both create/update operation) will only exist for create operation
-        // thanks to the scoped options
-        expect(beforePersist).toHaveBeenCalledTimes(1);
         // The birthDate is exposed on user.details route scope
         expect(updateResult.birthDate).toBeDefined();
         expect(updateResult).toEqualMessy(detailsResult);
         // But it is undefined on the user.scopedCreate route scope
+        // since the responseOperation was customized on the "create" operation using scopedOptions
         expect(createResult.birthDate).toBeUndefined();
     });
 });

@@ -1,7 +1,7 @@
 import { SelectQueryBuilder, EntityMetadata } from "typeorm";
 import { Container } from "typedi/Container";
 
-import { getComputedPropMethodAndKey } from "@/response/Formater";
+import { getComputedPropMethodAndKey } from "@/response/functions/setComputedPropsOnItem";
 import { AliasHandler } from "@/database/AliasHandler";
 import { RouteOperation } from "@/decorators/Groups";
 import { GenericEntity } from "@/router/EntityRouter";

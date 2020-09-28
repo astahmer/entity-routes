@@ -28,7 +28,7 @@ describe("MiddlewareMaker", () => {
         const repository = getRepository(User);
         const manager = new MiddlewareMaker(repository);
 
-        const mw = manager.makeRequestContextMiddleware("list");
+        const mw = manager.makeRequestContextMiddleware({ operation: "list" });
         const ctx = makeTestCtx<RequestState<User>>({ query: { id: "123" } });
         const nextSpy = jest.fn();
         const req = mw(ctx, nextSpy);
@@ -46,8 +46,11 @@ describe("MiddlewareMaker", () => {
         const repository = getRepository(User);
         const manager = new MiddlewareMaker(repository);
 
-        const mw = manager.makeResponseMiddleware("list");
-        const ctx = makeTestCtx<RequestState<User>>({ query: { id: "123" } });
+        const mw = manager.makeResponseMiddleware();
+        const ctx = makeTestCtx<RequestState<User>>({
+            query: { id: "123" },
+            state: { requestContext: { operation: "list" } },
+        });
         const noop = async () => {};
 
         await mw(ctx, noop);

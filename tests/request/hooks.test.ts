@@ -67,7 +67,7 @@ describe("hooks", () => {
         });
 
         const manager = new MiddlewareMaker(getRepository(User), { hooks: { beforeHandle } });
-        const mw = manager.makeRequestContextMiddleware("list");
+        const mw = manager.makeRequestContextMiddleware({ operation: "list" });
 
         await mw(
             makeTestCtx<RequestState>({ query: { id: "123" } }),

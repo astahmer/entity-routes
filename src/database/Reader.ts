@@ -3,7 +3,6 @@ import { Container, Service } from "typedi";
 
 import { MappingManager } from "@/mapping/MappingManager";
 import { AliasHandler } from "@/database/AliasHandler";
-import { Formater, FormaterOptions } from "@/response/Formater";
 import { EntityRouteOptions, GenericEntity } from "@/router/EntityRouter";
 import { JoinAndSelectExposedPropsOptions, RelationManager } from "@/database/RelationManager";
 import { RequestContext } from "@/router/MiddlewareMaker";
@@ -18,10 +17,6 @@ export class Reader {
         return Container.get(RelationManager);
     }
 
-    get formater() {
-        return Container.get(Formater);
-    }
-
     /** Retrieve collection of entities with only exposed props (from groups) */
     public async getCollection<Entity extends GenericEntity>({
         entityMetadata,
@@ -31,7 +26,7 @@ export class Reader {
         options = {},
         hooks,
         requestId,
-    }: GetCollectionArgs): Promise<[Entity[], number]> {
+    }: GetCollectionArgs<Entity>): Promise<[Entity[], number]> {
         const selectProps = this.mappingManager.getSelectProps(entityMetadata, operation, entityMetadata, true);
 
         qb.select(selectProps);
@@ -56,16 +51,10 @@ export class Reader {
 
         await hooks?.beforeRead?.({ requestId, options });
         const results = await qb.getManyAndCount();
-        const ref = { results }; // Pass an object with results key editable with afterRead hook if needed
+        const ref = { results }; // Pass an object with results key editable by afterRead hook if needed
         await hooks?.afterRead?.({ requestId, ref });
 
-        const items = await Promise.all(
-            ref.results[0].map(
-                (item) => this.formater.formatItem({ item, operation, entityMetadata, options }) as Promise<Entity>
-            )
-        );
-
-        return [items, ref.results[1]];
+        return ref.results;
     }
 
     /** Retrieve a specific entity with only exposed props (from groups) */
@@ -107,10 +96,9 @@ export class Reader {
         });
 
         // TODO use getRawOne + marshal-ts instead of typeorm class-transformer ?
-        // or make a JIT (de)serializer from mapping on "context.operation" ?
         await hooks?.beforeRead?.({ requestId, options });
         const result = await qb.getOne();
-        const ref = { result }; // Pass an object with result key editable with afterRead hook if needed
+        const ref = { result }; // Pass an object with result key editable by afterRead hook if needed
         await hooks?.afterRead?.({ requestId, ref });
 
         // Item doesn't exist
@@ -118,14 +106,11 @@ export class Reader {
             throw new Error("Not found.");
         }
 
-        const item = await this.formater.formatItem({ item: ref.result, operation, entityMetadata, options });
-
-        return item;
+        return ref.result;
     }
 }
 
-export type ReaderOptions = Pick<JoinAndSelectExposedPropsOptions, "shouldMaxDepthReturnRelationPropsId"> &
-    FormaterOptions;
+export type ReaderOptions = Pick<JoinAndSelectExposedPropsOptions, "shouldMaxDepthReturnRelationPropsId">;
 
 export type GetCollectionArgs<Entity extends GenericEntity = GenericEntity> = {
     entityMetadata: EntityMetadata;

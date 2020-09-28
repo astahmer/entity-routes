@@ -34,7 +34,7 @@ export type MockContext<State extends object = object> = {
     params: Record<string, string | number>;
     request: { body: any };
     query: QueryParams;
-    state: State;
+    state: Partial<State>;
     status: number;
     body: any;
 } & Context;

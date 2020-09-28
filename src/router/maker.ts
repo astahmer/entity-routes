@@ -57,18 +57,15 @@ export async function makeEntityRouters<T extends AnyFunction = any>({
 
 /** The default options for every EntityRouter, unless overriden in the MakeEntityRouters["options"] key */
 export const defaultEntityRouteOptions: EntityRouteOptions = {
-    defaultMaxDepthOptions: {
-        isMaxDepthEnabledByDefault: true,
-        defaultMaxDepthLvl: 2,
-    },
-    defaultListDetailsOptions: {
+    defaultMaxDepthOptions: { isMaxDepthEnabledByDefault: true, defaultMaxDepthLvl: 2 },
+    defaultListDetailsOptions: { shouldMaxDepthReturnRelationPropsId: true, withDeleted: false },
+    defaultWriterOptions: {
         useIris: true,
-        shouldMaxDepthReturnRelationPropsId: true,
         shouldEntityWithOnlyIdBeFlattenedToIri: true,
         shouldSetSubresourcesIriOnItem: true,
-        withDeleted: false,
+        shouldSetComputedPropsOnItem: true,
     },
-    defaultCreateUpdateOptions: { shouldAutoReload: true, shouldFormatResult: true },
+    defaultCreateUpdateOptions: { shouldAutoReload: true },
     defaultSubresourcesOptions: { defaultSubresourceMaxDepthLvl: 2 },
     allowSoftDelete: false,
 };

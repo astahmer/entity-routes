@@ -6,7 +6,7 @@ import { PrimitiveValue } from "@/functions/index";
 export type ObjectLiteral = Record<string, any>;
 export type PartialRecord<K extends keyof any, T> = Partial<Record<K, T>>;
 export type Props<T extends GenericEntity> = NonFunctionKeys<T>;
-export type Decorator = (target: Object | Function, propName?: string) => void;
+export type AnyDecorator = (target: Object | Function, propName?: string) => void;
 export type CType<T = any> = new (...args: any[]) => T;
 export type AnyFunction<T = any> = (...args: any[]) => T;
 export type SubType<Base, Condition> = Pick<Base, AllowedNames<Base, Condition>>;

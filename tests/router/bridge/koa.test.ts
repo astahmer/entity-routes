@@ -30,7 +30,7 @@ describe("koa BridgeRouter adapter", () => {
         const bridgeRouters = await makeKoaEntityRouters({
             connection,
             entities,
-            options: { defaultListDetailsOptions: { shouldSetSubresourcesIriOnItem: true } },
+            options: { defaultWriterOptions: { shouldSetSubresourcesIriOnItem: true } },
         });
         const koaRouters = bridgeRouters.map((bridge) => bridge.instance);
 
