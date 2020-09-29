@@ -1,33 +1,17 @@
-import { Column, Entity, getRepository, PrimaryGeneratedColumn } from "typeorm";
+import { getRepository } from "typeorm";
 
-import { Groups, makeEntity, Writer } from "@/index";
+import { makeEntity, Writer } from "@/index";
 import { closeTestConnection, createTestConnection, makeReqCtxWithState } from "@@/tests/testConnection";
+import { Article, Comment, Role, ThingWithComputed, User } from "./functions/sample/entities";
 
 describe("Writer", () => {
-    class AbstractEntity {
-        @Groups("all")
-        @PrimaryGeneratedColumn()
-        id: number;
-    }
-
-    @Entity()
-    class User extends AbstractEntity {
-        @Groups(["create", "list", "createScoped"])
-        @Column()
-        name: string;
-
-        @Groups(["create", "update", "details"])
-        @Column()
-        birthDate: Date;
-    }
-
-    beforeAll(() => createTestConnection([User]));
+    beforeAll(() => createTestConnection([User, Role, Article, Comment, ThingWithComputed]));
     afterAll(closeTestConnection);
 
     it("makeResponse", async () => {
         const writer = new Writer(getRepository(User));
 
-        const result = makeEntity(User, { id: 1, name: "Alex", birthDate: new Date() });
+        const result = makeEntity(User, { id: 1, name: "Alex" });
         const ctx = makeReqCtxWithState({ operation: "details" });
 
         const response = await writer.makeResponse(ctx, result);
@@ -38,11 +22,35 @@ describe("Writer", () => {
     });
 
     it("fromItem", async () => {
-        //
+        const writer = new Writer(getRepository(User));
+
+        const item = makeEntity(User, { id: 1, name: "Alex" });
+        const {
+            state: { requestContext },
+        } = makeReqCtxWithState({ operation: "details" });
+
+        const clone = await writer.fromItem({ item, requestContext });
+        expect(item).toEqual(clone);
     });
 
-    it("fromItem - allow skipping defaults decorators", async () => {
-        //
+    it("fromItem - allow using defaults decorators", async () => {
+        const writer = new Writer(getRepository(User), {
+            defaultWriterOptions: {
+                shouldSetComputedPropsOnItem: true,
+                shouldSetSubresourcesIriOnItem: true,
+                shouldEntityWithOnlyIdBeFlattenedToIri: true,
+                useIris: true,
+            },
+        });
+
+        const item = makeEntity(User, { id: 1, name: "Alex" });
+        const {
+            state: { requestContext },
+        } = makeReqCtxWithState({ operation: "details" });
+
+        const clone = await writer.fromItem({ item, requestContext });
+        const entity = makeEntity(User, { ...item, identifier: "1_Alex", comments: "/api/user/1/comments" } as any);
+        expect(clone).toEqual(entity);
     });
 
     it("fromItem - allow passing custom decorators", async () => {

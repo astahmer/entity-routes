@@ -52,6 +52,9 @@ export async function setComputedPropsOnItem<Entity extends GenericEntity>({
     const computedProps = mappingManager
         .getComputedProps(rootMetadata, data.operation, itemMetadata)
         .map((computed) => getComputedPropMethodAndKey(computed));
+
+    if (!computedProps.length) return;
+
     const results = await Promise.all(
         computedProps.map((computed) => item[computed.computedPropMethod as keyof Entity]())
     );

@@ -208,17 +208,20 @@ export type RouteResponse<
 > = (T extends "item" ? Partial<Entity> : {}) & {
     "@context": (T extends "collection"
         ? {
-              /** Total number of items found for this request */ totalItems?: number;
+              /** Total number of items found for this request */
+              totalItems?: number;
               /** Number of items retrieved for this request */
               retrievedItems?: number;
           }
         : T extends "error"
         ? {
-              /** Global response error */ error?: string;
+              /** Global response error */
+              error?: string;
           }
         : T extends "persist"
         ? {
-              /** Entity validation errors */ validationErrors?: EntityErrorResults;
+              /** Entity validation errors */
+              validationErrors?: EntityErrorResults;
           }
         : {}) & {
         /** Current route operation */

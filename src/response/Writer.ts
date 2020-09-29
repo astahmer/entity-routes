@@ -41,7 +41,7 @@ export class Writer<Entity extends GenericEntity> {
     ) {}
 
     /** Apply default & custom route decorators on item */
-    async fromItem({ item, requestContext, innerOptions }: FromItemArgs<Entity>) {
+    async fromItem({ item: baseItem, requestContext, innerOptions }: FromItemArgs<Entity>) {
         const { decorators, ...options } = innerOptions || this.options || {};
         const operation = requestContext.operation;
         const flattenItemOptions = {
@@ -51,11 +51,12 @@ export class Writer<Entity extends GenericEntity> {
         };
         const decorate = this.makeDecoratorFor.bind(this);
 
-        // Shortcuts for readability
+        // Computed props use baseItem to have access to entity methods
+        // (whereas item passed after flattenItem decorator would be a simple Object)
         const withComputedProps =
-            options.shouldSetComputedPropsOnItem &&
-            ((item: any) => decorate(setComputedPropsOnItem, { operation }, item));
+            options.shouldSetComputedPropsOnItem && (() => decorate(setComputedPropsOnItem, { operation }, baseItem));
         const withSubresourcesIris =
+            options.useIris &&
             options.shouldSetSubresourcesIriOnItem &&
             ((item: any) => decorate(setSubresourcesIriOnItem, { operation, useIris: options.useIris }, item));
 
@@ -81,7 +82,7 @@ export class Writer<Entity extends GenericEntity> {
 
         // And finally combining defaults with customs
         const decorateFn = pipe(defaultDecorateFn, customDecorateFn);
-        const clone = await decorateFn(item);
+        const clone = await decorateFn(baseItem);
 
         // TODO test
         options.shouldSortItemKeys ? deepSort(clone, options.sortComparatorFn) : clone;
