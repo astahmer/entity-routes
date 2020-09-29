@@ -91,7 +91,7 @@ describe("MiddlewareMaker", () => {
     });
 
     // TODO Doc response handling
-    it.only("makeResponseMiddleware - can override route options on specific operation with scoped options", async () => {
+    it("makeResponseMiddleware - can override route options on specific operation with scoped options", async () => {
         jest.spyOn(console, "warn").mockImplementation(() => {});
         const routeOptions: EntityRouteOptions = { defaultCreateUpdateOptions: { shouldAutoReload: true } };
         const repository = getRepository(User);

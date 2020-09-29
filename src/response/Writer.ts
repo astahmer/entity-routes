@@ -5,9 +5,9 @@ import { EntityErrorResponse } from "@/database/Persistor";
 import { isDev, isObject, isType } from "@/functions/asserts";
 import { GenericEntity } from "@/router/EntityRouter";
 import { RouteController } from "@/router/RouteController";
-import { CollectionResult, RequestContext, RequestState, RouteResponse } from "@/router/MiddlewareMaker";
+import { CollectionResult, RequestContext, RouteResponse } from "@/router/MiddlewareMaker";
 import { ContextWithState, EntityRouteState } from "@/request";
-import { Context, RouteControllerResult } from "@/router";
+import { Context, ResponseTypeFromCtxWithOperation, ResponseTypeFromOperation, RouteControllerResult } from "@/router";
 import { DecorateFn, Decorator } from "@/response/Decorator";
 import {
     setComputedPropsOnItem,
@@ -18,6 +18,7 @@ import {
 import { ObjectLiteral } from "@/utils-types";
 import { pipe } from "@/functions/utils";
 import { ComparatorFn, deepSort } from "@/functions/object";
+import { GroupsOperation } from "@/decorators";
 
 // TODO tests
 /** Write response from result & decorators */
@@ -39,22 +40,9 @@ export class Writer<Entity extends GenericEntity> {
         private routeOptions: RouteController<Entity>["options"] = {}
     ) {}
 
-    makeDecoratorFor<Fn = DecorateFn, Data = Fn extends DecorateFn<any, infer Data> ? Data : ObjectLiteral>(
-        decorateFn: Fn,
-        data: Data,
-        item: Entity
-    ) {
-        return this.decorator.decorateItem({
-            rootItem: item,
-            rootMetadata: this.repository.metadata,
-            data: data as any,
-            decorateFn,
-        });
-    }
-
     /** Apply default & custom route decorators on item */
     async fromItem({ item, requestContext, innerOptions }: FromItemArgs<Entity>) {
-        const options = innerOptions || this.options || {};
+        const { decorators, ...options } = innerOptions || this.options || {};
         const operation = requestContext.operation;
         const flattenItemOptions = {
             operation,
@@ -81,10 +69,19 @@ export class Writer<Entity extends GenericEntity> {
         );
 
         // Either with flatten or directly entities
-        const decorateFn = options.shouldEntityWithOnlyIdBeFlattenedToIri ? decorateWithFlatten : decorateEntities;
-        const clone = await decorateFn(item);
+        const defaultDecorateFn = options.shouldEntityWithOnlyIdBeFlattenedToIri
+            ? decorateWithFlatten
+            : decorateEntities;
 
-        // TODO Decorate: custom
+        // Adding custom decorators
+        const customDecorators = (decorators || []).map((fn) => (item: any) =>
+            decorate(fn, { requestContext, options }, item)
+        );
+        const customDecorateFn = pipe(...customDecorators);
+
+        // And finally combining defaults with customs
+        const decorateFn = pipe(defaultDecorateFn, customDecorateFn);
+        const clone = await decorateFn(item);
 
         // TODO test
         options.shouldSortItemKeys ? deepSort(clone, options.sortComparatorFn) : clone;
@@ -92,29 +89,35 @@ export class Writer<Entity extends GenericEntity> {
         return clone;
     }
 
-    /** Apply the same process for each item for that collection */
+    /** Apply the same process for each item of a collection */
     fromCollection({ items, requestContext, innerOptions }: FromCollectionArgs<Entity>) {
         return items.map((item) => this.fromItem({ item, requestContext, innerOptions }));
     }
 
-    async makeResponse(ctx: ContextWithState, result: RouteControllerResult, options?: WriterOptions) {
-        const { requestContext = {} as RequestContext<Entity> } = ctx.state as RequestState<Entity>;
-        const operation = requestContext?.operation;
+    /** Returns a RouteResponse made from a RouteController method result */
+    async makeResponse<Ctx extends ContextWithState = ContextWithState>(
+        ctx: Ctx,
+        result: RouteControllerResult,
+        options?: WriterOptions
+    ): Promise<RouteResponse<ResponseTypeFromCtxWithOperation<Ctx>, Entity>> {
+        const { requestContext } = ctx.state;
+        const operation = requestContext.operation;
 
-        let response: RouteResponse = { "@context": { operation, entity: this.metadata.tableName } };
+        let response = this.getBaseResponse(operation);
         if (isType<RouteResponse<"persist">>(response, requestContext.isUpdateOrCreate))
             response["@context"].validationErrors = null;
         const args = { result, response, ctx, requestContext, options };
+        await this.handleResult(args);
 
-        try {
-            await this.handleResult(args);
-        } catch (error) {
-            (args.response as RouteResponse<"error">)["@context"].error = isDev() ? error.message : "Bad request";
-            isDev() && console.error(error);
-            ctx.status = 500;
-        }
+        return args.response as any;
+    }
 
-        return args.response;
+    /** Get most basic response template */
+    getBaseResponse<O extends GroupsOperation>(operation: O) {
+        return ({ "@context": { operation, entity: this.metadata.tableName } } as any) as RouteResponse<
+            ResponseTypeFromOperation<O>,
+            Entity
+        >;
     }
 
     /** Add keys depending on the route scope & result */
@@ -153,9 +156,23 @@ export class Writer<Entity extends GenericEntity> {
             args.response = { ...response, ...item };
         }
     }
+
+    /** Returns a Decorator instance with given function with data & rootMetadata */
+    private makeDecoratorFor<Fn = DecorateFn, Data = Fn extends DecorateFn<any, infer Data> ? Data : ObjectLiteral>(
+        decorateFn: Fn,
+        data: Data,
+        item: Entity
+    ) {
+        return this.decorator.decorateItem({
+            rootItem: item,
+            rootMetadata: this.repository.metadata,
+            data: data as any,
+            decorateFn,
+        });
+    }
 }
 
-export type WriterOptions = BaseFlattenItemOptions & {
+export type WriterOptions<Entity extends GenericEntity = GenericEntity> = BaseFlattenItemOptions & {
     /** Allow to opt-out of IRI's and directly return ids instead */
     useIris?: boolean;
     /** Should set subresource IRI for prop decorated with @Subresource */
@@ -166,6 +183,8 @@ export type WriterOptions = BaseFlattenItemOptions & {
     shouldSortItemKeys?: boolean;
     /** Allow passing a custom comparator function */
     sortComparatorFn?: ComparatorFn;
+    /** Custom decorators applied on each items recursively, receiving both requestContext & writerOptions as data */
+    decorators?: DecorateFn<Entity, { requestContext: RequestContext; options: Omit<WriterOptions, "decorators"> }>[];
 };
 
 export type FromCollectionArgs<Entity extends GenericEntity = GenericEntity> = {

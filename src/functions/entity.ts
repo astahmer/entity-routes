@@ -1,9 +1,10 @@
 import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
 import { EntityMetadata } from "typeorm";
-import { getRouteMetadata } from "@/router/EntityRouter";
+import { GenericEntity, getRouteMetadata } from "@/router/EntityRouter";
 import { getEntityRouters } from "@/router/container";
 import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
 import { formatRoutePath } from "@/functions/route";
+import { CType, Props } from "@/utils-types";
 
 export const iriRegex = new RegExp(/\/api\/(\w+)\//g, "i");
 export function formatIriToId<B extends Boolean>(iri: string, asInt?: B): B extends true ? number : string;
@@ -27,6 +28,7 @@ export const isIriValidForProperty = (iri: string, column: ColumnMetadata) => {
     return sameAsRouteName || sameAsTableName;
 };
 
+export type IdToIRIOptions = { useClassNameAsEntrypoint: boolean };
 export function idToIRI(entityMeta: EntityMetadata, id: string | number, options?: IdToIRIOptions) {
     const routeMetadata = getRouteMetadata(entityMeta.target as Function);
     if (!routeMetadata || options?.useClassNameAsEntrypoint) {
@@ -38,4 +40,20 @@ export function idToIRI(entityMeta: EntityMetadata, id: string | number, options
 
 export const isRelationSingle = (relation: RelationMetadata) => relation.isOneToOne || relation.isManyToOne;
 
-export type IdToIRIOptions = { useClassNameAsEntrypoint: boolean };
+export const makeEntityFromEntries = <Entity extends GenericEntity = GenericEntity>(
+    entity: CType<Entity>,
+    entries: [keyof Entity, Entity[keyof Entity]][]
+) => {
+    const item = new entity();
+    entries.forEach(([key, value]) => (item[key] = value));
+    return item;
+};
+export const makeEntity = <Entity extends GenericEntity = GenericEntity>(
+    entity: CType<Entity>,
+    record: Partial<{ [Key in Props<Entity>]: Entity[Key] }>
+) => {
+    const item = new entity();
+    const entries = Object.entries(record);
+    entries.forEach(([key, value]) => (item[key as keyof Entity] = value as Entity[keyof Entity]));
+    return item;
+};
