@@ -386,31 +386,6 @@ describe("RouteController - simple", () => {
         await ctrl.restore({ entityId: createResult.id });
         expect(await ctrl.getDetails({ entityId: createResult.id })).toEqual(createResult);
     });
-
-    // TODO Move to Handler.test
-    // TODO Restore Formater.test & split it
-    // TODO Doc response handling
-    it.skip("can override route options on specific operation with scoped options", async () => {
-        const repository = getRepository(User);
-        const ctrl = new RouteController(repository, {
-            ...routeOptions,
-            scopedOptions: (operation) =>
-                operation === "create" && {
-                    defaultCreateUpdateOptions: { responseOperation: "createScoped" },
-                },
-        });
-
-        const createResult = (await ctrl.create({ values: { name: "Alex", birthDate: new Date() } })) as User;
-        const updateResult = (await ctrl.update({ entityId: createResult.id, values: { name: "Alex222" } })) as User;
-        const detailsResult = (await ctrl.getDetails({ entityId: createResult.id })) as User;
-
-        // The birthDate is exposed on user.details route scope
-        expect(updateResult.birthDate).toBeDefined();
-        expect(updateResult).toEqualMessy(detailsResult);
-        // But it is undefined on the user.scopedCreate route scope
-        // since the responseOperation was customized on the "create" operation using scopedOptions
-        expect(createResult.birthDate).toBeUndefined();
-    });
 });
 
 describe("RouteController - subresources", () => {

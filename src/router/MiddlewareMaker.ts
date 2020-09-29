@@ -16,7 +16,6 @@ import { Writer } from "@/response/Writer";
 import { makeRequestContext } from "@/request/Context";
 import { Handler } from "@/request/Handler";
 
-// TODO tests
 export class MiddlewareMaker<Entity extends GenericEntity> {
     get mappingManager() {
         return Container.get(MappingManager);

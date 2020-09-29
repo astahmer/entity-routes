@@ -17,7 +17,6 @@ export class Decorator {
 
     /** Return a decorated clone of item */
     public async decorateItem<Entity extends GenericEntity = GenericEntity, Fn = DecorateFn>({
-        clone: initialClone,
         rootItem,
         rootMetadata,
         data,
@@ -29,7 +28,6 @@ export class Decorator {
         const clone = this.recursiveDecorateItem<Entity>({
             item: rootItem,
             rootMetadata,
-            clone: initialClone,
             data,
             decorateFn: decorateFn as any,
             promises,
@@ -46,7 +44,6 @@ export class Decorator {
     private recursiveDecorateItem<Entity extends GenericEntity>({
         item,
         rootMetadata,
-        clone,
         data,
         decorateFn,
         promises,
@@ -60,18 +57,21 @@ export class Decorator {
         }
 
         // If clone is null that means we are at item's root
-        const cloneRef = { ref: clone || {} };
+        const cloneRef: { ref: any } = { ref: {} };
 
         // Wrap in promise and keep looping through items rather than wait for it to complete
         // = make parallel calls rather than sequentials
-        const makePromise = (args: {
+        const makePromise = ({
+            cloneRef,
+            nestedItem,
+            itemMetadata,
+            isRoot,
+        }: {
             cloneRef: { ref: any };
             nestedItem: Entity;
-            nestedClone: any;
             itemMetadata: EntityMetadata;
             isRoot?: boolean;
         }): Promise<void> => {
-            const { nestedItem, itemMetadata, isRoot } = args;
             return new Promise((resolve) =>
                 // Wrap in promise in case the decorateFn is not async
                 new Promise((res) =>
@@ -79,7 +79,7 @@ export class Decorator {
                         decorateFn({
                             rootMetadata,
                             data,
-                            clone: args.nestedClone,
+                            clone: cloneRef.ref,
                             cloneRef,
                             item: nestedItem,
                             itemMetadata,
@@ -109,7 +109,6 @@ export class Decorator {
                             makePromise({
                                 cloneRef: nestedCloneRef,
                                 nestedItem: prop[i],
-                                nestedClone: nestedCloneRef.ref,
                                 itemMetadata: getRepository(prop[i].constructor.name).metadata,
                             })
                         );
@@ -128,20 +127,20 @@ export class Decorator {
 
                 cloneRef.ref[key] = propArray;
             } else if (isEntity(prop)) {
+                const nestedCloneRef = { ref: {} };
                 try {
                     promises.push(
                         makePromise({
-                            cloneRef,
-                            nestedItem: item,
-                            nestedClone: cloneRef.ref,
-                            itemMetadata: getRepository(item.constructor.name).metadata,
+                            cloneRef: nestedCloneRef,
+                            nestedItem: prop as Entity,
+                            itemMetadata: getRepository(prop.constructor.name).metadata,
                         })
                     );
                 } catch (error) {}
 
                 cloneRef.ref[key] = this.recursiveDecorateItem({
                     item: prop,
-                    clone: cloneRef.ref,
+                    clone: nestedCloneRef.ref,
                     data,
                     rootMetadata,
                     promises,
@@ -152,9 +151,7 @@ export class Decorator {
             }
         }
 
-        promises.push(
-            makePromise({ cloneRef, nestedItem: item, nestedClone: cloneRef.ref, itemMetadata: entityMetadata, isRoot })
-        );
+        promises.push(makePromise({ cloneRef, nestedItem: item, itemMetadata: entityMetadata, isRoot }));
 
         return cloneRef.ref;
     }

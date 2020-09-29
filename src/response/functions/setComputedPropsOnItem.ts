@@ -40,7 +40,6 @@ export const getComputedPropMethodAndKey = (computed: string) => {
     return { computedPropMethod, propKey };
 };
 
-// TODO test
 /** Get/set item computed props if any */
 export async function setComputedPropsOnItem<Entity extends GenericEntity>({
     rootMetadata,

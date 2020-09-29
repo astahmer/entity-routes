@@ -1,18 +1,20 @@
 import { Container } from "typedi";
+import { DeleteResult, Repository } from "typeorm";
 
 import { EntityErrorResponse } from "@/database/Persistor";
 import { isDev, isObject, isType } from "@/functions/asserts";
-import { MappingManager } from "@/mapping/MappingManager";
-import { DeleteResult, Repository } from "typeorm";
 import { GenericEntity } from "@/router/EntityRouter";
 import { RouteController } from "@/router/RouteController";
 import { CollectionResult, RequestContext, RequestState, RouteResponse } from "@/router/MiddlewareMaker";
 import { ContextWithState, EntityRouteState } from "@/request";
 import { Context, RouteControllerResult } from "@/router";
-import { DecorateFn, Decorator } from "./Decorator";
-import { setComputedPropsOnItem } from "./functions/setComputedPropsOnItem";
-import { setSubresourcesIriOnItem } from "./functions/setSubresourcesIriOnItem";
-import { BaseFlattenItemOptions, flattenItem, FlattenItemOptions } from "./functions/flattenItem";
+import { DecorateFn, Decorator } from "@/response/Decorator";
+import {
+    setComputedPropsOnItem,
+    setSubresourcesIriOnItem,
+    BaseFlattenItemOptions,
+    flattenItem,
+} from "@/response//functions";
 import { ObjectLiteral } from "@/utils-types";
 import { pipe } from "@/functions/utils";
 import { ComparatorFn, deepSort } from "@/functions/object";
@@ -24,15 +26,18 @@ export class Writer<Entity extends GenericEntity> {
         return this.repository.metadata;
     }
 
-    get mappingManager() {
-        return Container.get(MappingManager);
-    }
-
     get decorator() {
         return Container.get(Decorator);
     }
 
-    constructor(private repository: Repository<Entity>, private options: RouteController<Entity>["options"] = {}) {}
+    get options() {
+        return this.routeOptions.defaultWriterOptions;
+    }
+
+    constructor(
+        private repository: Repository<Entity>,
+        private routeOptions: RouteController<Entity>["options"] = {}
+    ) {}
 
     makeDecoratorFor<Fn = DecorateFn, Data = Fn extends DecorateFn<any, infer Data> ? Data : ObjectLiteral>(
         decorateFn: Fn,
@@ -52,23 +57,23 @@ export class Writer<Entity extends GenericEntity> {
         // TODO Decorate: custom
 
         const operation = requestContext.operation;
-        const options = this.options.defaultWriterOptions;
         const flattenItemOptions = {
             operation,
-            ...options,
-            shouldOnlyFlattenNested: options?.shouldOnlyFlattenNested ?? requestContext.wasAutoReloaded,
+            ...this.options,
+            shouldOnlyFlattenNested: this.options?.shouldOnlyFlattenNested ?? requestContext.wasAutoReloaded,
         };
         const decorate = this.makeDecoratorFor.bind(this);
 
+        //
+        const withComputedProps =
+            this.options.shouldSetComputedPropsOnItem &&
+            ((item: any) => decorate(setComputedPropsOnItem, { operation }, item));
+        const withSubresourcesIris =
+            this.options.shouldSetSubresourcesIriOnItem &&
+            ((item: any) => decorate(setSubresourcesIriOnItem, { operation, useIris: this.options?.useIris }, item));
+
         // Decorator called only on objects item (!= flattened IRI/id)
-        const decorateEntities = pipe(
-            ...[
-                options.shouldSetComputedPropsOnItem &&
-                    ((item: any) => decorate(setComputedPropsOnItem, { operation }, item)),
-                options.shouldSetSubresourcesIriOnItem &&
-                    ((item: any) => decorate(setSubresourcesIriOnItem, { operation, useIris: options?.useIris }, item)),
-            ].filter(Boolean)
-        );
+        const decorateEntities = pipe(...[withComputedProps, withSubresourcesIris].filter(Boolean));
 
         // Flatten item and then decorate entity if not flattened
         const decorateWithFlatten = pipe(
@@ -77,11 +82,11 @@ export class Writer<Entity extends GenericEntity> {
         );
 
         // Either with flatten or directly entities
-        const decorateFn = options.shouldEntityWithOnlyIdBeFlattenedToIri ? decorateWithFlatten : decorateEntities;
+        const decorateFn = this.options.shouldEntityWithOnlyIdBeFlattenedToIri ? decorateWithFlatten : decorateEntities;
         const clone = await decorateFn(baseItem);
 
         // TODO test
-        options.shouldSortItemKeys ? deepSort(clone, options.sortComparatorFn) : clone;
+        this.options.shouldSortItemKeys ? deepSort(clone, this.options.sortComparatorFn) : clone;
 
         return clone;
     }

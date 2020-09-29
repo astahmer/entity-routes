@@ -5,7 +5,6 @@ import { CRUD_ACTIONS, GenericEntity, MiddlewareMaker, RouteController } from "@
 import { Repository } from "typeorm";
 import { ContextWithState } from "./store";
 
-// TODO tests
 /** Handle request and return the appropriate RouteController[method] result  */
 export class Handler<Entity extends GenericEntity> {
     get metadata() {

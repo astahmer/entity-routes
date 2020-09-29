@@ -1,5 +1,5 @@
 import { Connection, createConnection, getConnection } from "typeorm";
-import { QueryParams, Context, deepMerge } from "@/index";
+import { QueryParams, Context, deepMerge, RequestContextWithState, RequestState } from "@/index";
 
 let connection: Connection;
 
@@ -30,6 +30,8 @@ export const makeTestCtx = <State extends object>(ctx?: Partial<MockContext<Stat
         body: undefined as any,
     }) as MockContext<State>;
 
+export const makeReqCtxWithState = (requestContext: RequestContextWithState) =>
+    makeTestCtx<RequestState>({ state: { requestContext } });
 export type MockContext<State extends object = object> = {
     params: Record<string, string | number>;
     request: { body: any };

@@ -3,7 +3,6 @@ import { GenericEntity, getRouteSubresourcesMetadata } from "@/router/EntityRout
 import { DecorateFnArgs } from "../Decorator";
 import { WriterOptions } from "../Writer";
 
-// TODO test
 /** For each item's subresources, add their corresponding IRIs to this item */
 export function setSubresourcesIriOnItem<Entity extends GenericEntity>({
     item,

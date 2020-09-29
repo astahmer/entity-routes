@@ -8,7 +8,6 @@ import { RequestContext } from "@/router";
 import { DecorateFnArgs } from "../Decorator";
 import { WriterOptions } from "../Writer";
 
-// TODO test
 /** Flatten item with only id/iri if needed */
 export function flattenItem<Entity extends GenericEntity>(args: DecorateFnArgs<Entity, FlattenItemOptions>) {
     const { item, itemMetadata, rootMetadata, data, cloneRef } = args;
