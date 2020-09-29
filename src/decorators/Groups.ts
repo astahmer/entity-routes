@@ -89,7 +89,8 @@ export const CRUD_OPERATIONS: RouteDefaultOperation[] = ["create", "list", "deta
 export type RouteDefaultOperation = "create" | "list" | "details" | "update" | "delete";
 export type RouteOperation = RouteDefaultOperation | string;
 
-export type GroupsOperation = "create" | "list" | "details" | "update" | string;
+export type GroupsDefaultOperation = "create" | "list" | "details" | "update";
+export type GroupsOperation = GroupsDefaultOperation | string;
 export type GroupsOperationOrShortcuts = GroupsOperation[] | "all" | "basic";
 export type GroupsDecoratorArg = Record<string, GroupsOperationOrShortcuts>;
 
