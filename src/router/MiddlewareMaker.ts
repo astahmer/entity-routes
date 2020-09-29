@@ -1,7 +1,7 @@
 import { Connection, QueryRunner, Repository, getConnection } from "typeorm";
 import { Container } from "typedi";
 
-import { RouteOperation } from "@/decorators/Groups";
+import { GroupsDefaultOperation, GroupsOperation, RouteOperation } from "@/decorators/Groups";
 import { GenericEntity, EntityRouter } from "@/router/EntityRouter";
 import { SubresourceRelation } from "@/router/SubresourceMaker";
 import { MappingManager } from "@/mapping/MappingManager";
@@ -138,8 +138,13 @@ export type CrudAction = {
     method?: FunctionKeys<RouteController<any>>;
 };
 
-/** EntityRoute request context wrapping Koa's Context */
-export type RequestContext<Entity extends GenericEntity = GenericEntity, QP = QueryParams, State = ObjectLiteral> = {
+/** EntityRoute request context wrapping Context */
+export type RequestContext<
+    Entity extends GenericEntity = GenericEntity,
+    Operation extends GroupsOperation = GroupsOperation,
+    QP = QueryParams,
+    State = ObjectLiteral
+> = {
     /** Current request id */
     requestId?: string;
     /** Request context adapter */
@@ -154,8 +159,8 @@ export type RequestContext<Entity extends GenericEntity = GenericEntity, QP = Qu
     values?: DeepPartial<Entity>;
     /** Request query params */
     queryParams?: QP;
-    /** Custom operation for a custom action */
-    operation?: RouteOperation;
+    /** Current route scope operation */
+    operation?: Operation;
     /** Was entity re-fetched after a persist operation ? */
     wasAutoReloaded?: boolean;
 };
@@ -164,10 +169,13 @@ export type RequestContextMinimal<Entity extends GenericEntity = GenericEntity> 
     "requestId" | "operation" | "values"
 >;
 
-/** Custom state to pass to Koa's Context */
-export type RequestState<Entity extends GenericEntity = GenericEntity> = {
+/** Custom state to pass to Context */
+export type RequestState<
+    Entity extends GenericEntity = GenericEntity,
+    Operation extends GroupsOperation = GroupsOperation
+> = {
     requestId: string;
-    requestContext: RequestContext<Entity>;
+    requestContext: RequestContext<Entity, Operation>;
     queryRunner: QueryRunner;
 };
 
@@ -228,6 +236,24 @@ export type RouteResponse<
           }
         : {});
 
+export type ResponseTypeFromOperation<O> = O extends GroupsDefaultOperation
+    ? O extends "details"
+        ? "item"
+        : O extends "list"
+        ? "collection"
+        : O extends "create" | "update"
+        ? "persist"
+        : any
+    : any;
+export type ResponseTypeFromCtxWithOperation<Ctx extends ContextWithState> = Ctx extends {
+    state: {
+        requestContext: {
+            operation?: infer O;
+        };
+    };
+}
+    ? ResponseTypeFromOperation<O>
+    : never;
 /** Return type of EntityRoute.getList */
 export type CollectionResult<Entity extends GenericEntity> = {
     items: Entity[];

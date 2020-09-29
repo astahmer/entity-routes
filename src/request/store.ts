@@ -4,6 +4,8 @@ import { ObjectLiteral } from "typeorm";
 import { Context } from "@/router/bridge/ContextAdapter";
 import { RequestContext, RequestState } from "@/router/MiddlewareMaker";
 import { QueryParams } from "@/filters/AbstractFilter";
+import { GenericEntity } from "@/router";
+import { GroupsOperation } from "@/decorators/Groups";
 
 /** Map<uuid/ContextAdapter> for each request, last until request is done and then gets removed from the Map */
 const requestStore = new Map<string, ContextWithState>();
@@ -25,6 +27,15 @@ export const removeRequestContext = (key: string) => requestStore.delete(key);
 /** Get request ContextAdapter from its unique key */
 export const getRequestContext = (key: string) => requestStore.get(key);
 
-export type EntityRouteState = ObjectLiteral & RequestState;
-export type ContextWithState = Context<any, EntityRouteState>;
-export type RequestContextWithState = RequestContext<any, QueryParams, EntityRouteState>;
+export type EntityRouteState<
+    Entity extends GenericEntity = GenericEntity,
+    Operation extends GroupsOperation = GroupsOperation
+> = ObjectLiteral & RequestState<Entity, Operation>;
+export type ContextWithState<
+    Entity extends GenericEntity = GenericEntity,
+    Operation extends GroupsOperation = GroupsOperation
+> = Context<any, EntityRouteState<Entity, Operation>>;
+export type RequestContextWithState<
+    Entity extends GenericEntity = GenericEntity,
+    Operation extends GroupsOperation = GroupsOperation
+> = RequestContext<any, Operation, QueryParams, EntityRouteState<Entity, Operation>>;
