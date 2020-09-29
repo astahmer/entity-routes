@@ -112,7 +112,9 @@ export class Decorator {
                                 itemMetadata: getRepository(prop[i].constructor.name).metadata,
                             })
                         );
-                    } catch (error) {}
+                    } catch (error) {
+                        // getRepository threw an error since it couldn't get a repo from constructor.name
+                    }
                     propArray.push(
                         this.recursiveDecorateItem({
                             item: prop[i],
@@ -136,7 +138,9 @@ export class Decorator {
                             itemMetadata: getRepository(prop.constructor.name).metadata,
                         })
                     );
-                } catch (error) {}
+                } catch (error) {
+                    // getRepository threw an error since it couldn't get a repo from constructor.name
+                }
 
                 cloneRef.ref[key] = this.recursiveDecorateItem({
                     item: prop,

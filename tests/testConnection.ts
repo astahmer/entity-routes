@@ -6,7 +6,9 @@ let connection: Connection;
 export async function createTestConnection(entities: Function[]) {
     try {
         getConnection()?.isConnected && (await closeTestConnection());
-    } catch (error) {}
+    } catch (error) {
+        // getRepository threw an error since it couldn't get a repo from constructor.name
+    }
     connection = await createConnection({
         type: "sqljs",
         entities,
