@@ -15,7 +15,7 @@ import { ContextWithState, removeRequestContext } from "@/request";
 import { Writer } from "@/response/Writer";
 import { makeRequestContext } from "@/request/Context";
 import { Handler } from "@/request/Handler";
-import { deepMerge } from "@/functions";
+import { deepMerge, isDev } from "@/functions";
 
 export class MiddlewareMaker<Entity extends GenericEntity> {
     get mappingManager() {
@@ -63,13 +63,22 @@ export class MiddlewareMaker<Entity extends GenericEntity> {
             const scopedOptions = this.options.scopedOptions?.(operation);
             const options = deepMerge({}, this.options || {}, scopedOptions || {});
 
-            const result = await this.handler.getResult(ctx, options);
-            const response = await this.writer.makeResponse(ctx, result, options.defaultWriterOptions);
+            let result, response;
+            try {
+                result = await this.handler.getResult(ctx, options);
+            } catch (error) {
+                // On controller unhandled error
+                response = this.writer.getBaseResponse(operation);
+                (response as RouteResponse<"error">)["@context"].error = isDev() ? error.message : "Bad request";
+                isDev() && console.error(error);
+            }
+
+            response = await this.writer.makeResponse(ctx, result, options.defaultWriterOptions);
 
             const ref = { ctx, response, result };
             await this.options.hooks?.beforeRespond?.(ref);
 
-            ctx.status = 200;
+            ctx.status = "error" in response["@context"] ? 500 : 200;
             ctx.responseBody = ref.response;
 
             await this.options.hooks?.afterRespond?.(ref);
