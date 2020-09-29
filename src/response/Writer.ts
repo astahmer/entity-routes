@@ -53,24 +53,23 @@ export class Writer<Entity extends GenericEntity> {
     }
 
     /** Apply default & custom route decorators on item */
-    async fromItem(baseItem: Entity, requestContext: RequestContext) {
-        // TODO Decorate: custom
-
+    async fromItem({ item, requestContext, innerOptions }: FromItemArgs<Entity>) {
+        const options = innerOptions || this.options || {};
         const operation = requestContext.operation;
         const flattenItemOptions = {
             operation,
-            ...this.options,
-            shouldOnlyFlattenNested: this.options?.shouldOnlyFlattenNested ?? requestContext.wasAutoReloaded,
+            ...options,
+            shouldOnlyFlattenNested: options.shouldOnlyFlattenNested ?? requestContext.wasAutoReloaded,
         };
         const decorate = this.makeDecoratorFor.bind(this);
 
-        //
+        // Shortcuts for readability
         const withComputedProps =
-            this.options.shouldSetComputedPropsOnItem &&
+            options.shouldSetComputedPropsOnItem &&
             ((item: any) => decorate(setComputedPropsOnItem, { operation }, item));
         const withSubresourcesIris =
-            this.options.shouldSetSubresourcesIriOnItem &&
-            ((item: any) => decorate(setSubresourcesIriOnItem, { operation, useIris: this.options?.useIris }, item));
+            options.shouldSetSubresourcesIriOnItem &&
+            ((item: any) => decorate(setSubresourcesIriOnItem, { operation, useIris: options.useIris }, item));
 
         // Decorator called only on objects item (!= flattened IRI/id)
         const decorateEntities = pipe(...[withComputedProps, withSubresourcesIris].filter(Boolean));
@@ -82,32 +81,35 @@ export class Writer<Entity extends GenericEntity> {
         );
 
         // Either with flatten or directly entities
-        const decorateFn = this.options.shouldEntityWithOnlyIdBeFlattenedToIri ? decorateWithFlatten : decorateEntities;
-        const clone = await decorateFn(baseItem);
+        const decorateFn = options.shouldEntityWithOnlyIdBeFlattenedToIri ? decorateWithFlatten : decorateEntities;
+        const clone = await decorateFn(item);
+
+        // TODO Decorate: custom
 
         // TODO test
-        this.options.shouldSortItemKeys ? deepSort(clone, this.options.sortComparatorFn) : clone;
+        options.shouldSortItemKeys ? deepSort(clone, options.sortComparatorFn) : clone;
 
         return clone;
     }
 
     /** Apply the same process for each item for that collection */
-    fromCollection(items: Entity[], requestContext: RequestContext) {
-        return items.map((item) => this.fromItem(item, requestContext));
+    fromCollection({ items, requestContext, innerOptions }: FromCollectionArgs<Entity>) {
+        return items.map((item) => this.fromItem({ item, requestContext, innerOptions }));
     }
 
-    async makeResponse(ctx: ContextWithState, result: RouteControllerResult) {
+    async makeResponse(ctx: ContextWithState, result: RouteControllerResult, options?: WriterOptions) {
         const { requestContext = {} as RequestContext<Entity> } = ctx.state as RequestState<Entity>;
         const operation = requestContext?.operation;
 
         let response: RouteResponse = { "@context": { operation, entity: this.metadata.tableName } };
-        if (requestContext.isUpdateOrCreate) response["@context"].validationErrors = null;
-        const args = { result, response, ctx, requestContext };
+        if (isType<RouteResponse<"persist">>(response, requestContext.isUpdateOrCreate))
+            response["@context"].validationErrors = null;
+        const args = { result, response, ctx, requestContext, options };
 
         try {
             await this.handleResult(args);
         } catch (error) {
-            args.response["@context"].error = isDev() ? error.message : "Bad request";
+            (args.response as RouteResponse<"error">)["@context"].error = isDev() ? error.message : "Bad request";
             isDev() && console.error(error);
             ctx.status = 500;
         }
@@ -121,27 +123,33 @@ export class Writer<Entity extends GenericEntity> {
         response: RouteResponse;
         ctx: Context<any, EntityRouteState>;
         requestContext: RequestContext<Entity>;
+        options?: WriterOptions;
     }) {
         const { result, response, ctx, requestContext } = args;
         const { operation, entityId } = requestContext || {};
 
         if (isType<EntityErrorResponse>(result, "hasValidationErrors" in result)) {
-            response["@context"].validationErrors = result.errors;
+            (response as RouteResponse<"persist">)["@context"].validationErrors = result.errors;
             ctx.status = 400;
         } else if ("error" in result) {
-            response["@context"].error = result.error;
+            (response as RouteResponse<"error">)["@context"].error = result.error;
             ctx.status = 400;
         }
 
         if (isType<DeleteResult>(result, "raw" in result)) {
-            response.deleted = result.affected ? entityId : null;
-        } else if (isType<CollectionResult<Entity>>(result, operation === "list")) {
+            (response as RouteResponse<"delete">).deleted = result.affected ? entityId : null;
+        } else if (
+            isType<CollectionResult<Entity>>(result, operation === "list") &&
+            isType<RouteResponse<"collection">>(response, true)
+        ) {
             response["@context"].retrievedItems = result.items.length;
             response["@context"].totalItems = result.totalItems;
-            const items = await Promise.all(this.fromCollection(result.items, requestContext));
+            const items = await Promise.all(
+                this.fromCollection({ items: result.items, requestContext, innerOptions: args.options })
+            );
             response.items = items;
         } else if (isType<Entity>(result, ["details", "create", "update"].includes(operation))) {
-            const item = await this.fromItem(result, requestContext);
+            const item = await this.fromItem({ item: result, requestContext, innerOptions: args.options });
             args.response = { ...response, ...item };
         }
     }
@@ -158,4 +166,13 @@ export type WriterOptions = BaseFlattenItemOptions & {
     shouldSortItemKeys?: boolean;
     /** Allow passing a custom comparator function */
     sortComparatorFn?: ComparatorFn;
+};
+
+export type FromCollectionArgs<Entity extends GenericEntity = GenericEntity> = {
+    items: Entity[];
+    requestContext: RequestContext;
+    innerOptions?: WriterOptions;
+};
+export type FromItemArgs<Entity extends GenericEntity = GenericEntity> = Omit<FromCollectionArgs, "items"> & {
+    item: Entity;
 };

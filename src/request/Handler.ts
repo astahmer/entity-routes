@@ -1,7 +1,12 @@
-import { ReaderOptions } from "@/database";
 import { GroupsOperation } from "@/decorators";
-import { deepMerge } from "@/functions/object";
-import { CRUD_ACTIONS, GenericEntity, MiddlewareMaker, RouteController } from "@/router";
+import {
+    CRUD_ACTIONS,
+    EntityRouteOptions,
+    GenericEntity,
+    ListDetailsOptions,
+    MiddlewareMaker,
+    RouteController,
+} from "@/router";
 import { Repository } from "typeorm";
 import { ContextWithState } from "./store";
 
@@ -17,25 +22,23 @@ export class Handler<Entity extends GenericEntity> {
         this.controller = new RouteController(repository, options);
     }
 
-    async getResult(ctx: ContextWithState) {
+    async getResult(ctx: ContextWithState, innerOptions?: EntityRouteOptions) {
         const { requestContext = {} } = ctx.state;
         const operation = requestContext.operation;
 
-        // Override controller inner options with scoped options
-        const scopedOptions = this.options.scopedOptions?.(operation);
-        const options = deepMerge({}, this.options || {}, scopedOptions || {});
+        const options = innerOptions || this.options;
+        const ctrlOptions = this.getControllerInnerOptions(operation, options);
 
-        const innerOptions = isPersist(operation)
+        return this.controller[CRUD_ACTIONS[operation].method](requestContext, ctrlOptions as any);
+    }
+
+    private getControllerInnerOptions(operation: string, options: EntityRouteOptions) {
+        // Override controller inner options with scoped options
+        return isPersist(operation)
             ? options.defaultCreateUpdateOptions
             : isRead(operation)
-            ? ({
-                  shouldMaxDepthReturnRelationPropsId:
-                      options.defaultMaxDepthOptions?.shouldMaxDepthReturnRelationPropsId,
-                  ...options.defaultListDetailsOptions,
-              } as ReaderOptions)
+            ? ({ ...options.defaultListDetailsOptions, ...options.defaultMaxDepthOptions } as ListDetailsOptions)
             : undefined;
-
-        return this.controller[CRUD_ACTIONS[operation].method](requestContext, innerOptions as any);
     }
 }
 

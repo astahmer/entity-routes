@@ -5,10 +5,10 @@ import { ValidateItemOptions, EntityErrorResults } from "@/request/Validator";
 import { CleanerArgs } from "@/request/Cleaner";
 import { DeepPartial } from "@/utils-types";
 
-import { GenericEntity } from "../router/EntityRouter";
-import { RouteResponse, RouteControllerResult, RequestContext } from "../router/MiddlewareMaker";
-import { ListDetailsOptions } from "../router/RouteController";
-import { SubresourceRelation } from "../router/SubresourceMaker";
+import { GenericEntity } from "@/router/EntityRouter";
+import { RouteResponse, RouteControllerResult, RequestContext } from "@/router/MiddlewareMaker";
+import { ReaderOptions } from "@/database";
+import { SubresourceRelation } from "@/router/SubresourceMaker";
 
 export const hookNames = [
     "beforeHandle",
@@ -107,7 +107,7 @@ export type HookFnOnAfterPersistArgs = WithRequestId & { result: GenericEntity }
 export type HookFnAfterPersist = HookFn<HookFnOnAfterPersistArgs>;
 
 // Read
-export type HookFnOnBeforeReadArgs = WithRequestId & { options: ListDetailsOptions };
+export type HookFnOnBeforeReadArgs = WithRequestId & { options: ReaderOptions };
 export type HookFnBeforeRead = HookFn<HookFnOnBeforeReadArgs>;
 export type HookFnAfterReadResultRef = { ref: { result?: GenericEntity; results?: [GenericEntity[], number] } };
 export type HookFnOnAfterReadArgs = WithRequestId & HookFnAfterReadResultRef;

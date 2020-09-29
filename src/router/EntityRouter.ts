@@ -204,7 +204,7 @@ export type EntityRouteOptions = {
 };
 export type EntityRouteScopedOptions = Pick<
     EntityRouteOptions,
-    "defaultListDetailsOptions" | "defaultCreateUpdateOptions"
+    "defaultListDetailsOptions" | "defaultCreateUpdateOptions" | "defaultWriterOptions"
 >;
 /** Allow overriding RouteController options on different operations */
 export type EntityRouteScopedOptionsFn = (operation: GroupsOperation) => EntityRouteScopedOptions;

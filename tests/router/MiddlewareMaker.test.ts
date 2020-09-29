@@ -1,6 +1,6 @@
 import { PrimaryGeneratedColumn, Column, Entity, getRepository, getConnection } from "typeorm";
-import { MiddlewareMaker, RequestState, Groups, ENTITY_META_SYMBOL } from "@/index";
-import { createTestConnection, closeTestConnection, makeTestCtx } from "@@/tests/testConnection";
+import { MiddlewareMaker, RequestState, Groups, ENTITY_META_SYMBOL, EntityRouteOptions, RouteResponse } from "@/index";
+import { createTestConnection, closeTestConnection, makeTestCtx, makeReqCtxWithState } from "@@/tests/testConnection";
 
 describe("MiddlewareMaker", () => {
     class AbstractEntity {
@@ -11,11 +11,11 @@ describe("MiddlewareMaker", () => {
 
     @Entity()
     class User extends AbstractEntity {
-        @Groups(["list"])
+        @Groups(["create", "list", "createScoped"])
         @Column()
         name: string;
 
-        @Groups(["details"])
+        @Groups(["create", "update", "details"])
         @Column()
         birthDate: Date;
     }
@@ -26,9 +26,9 @@ describe("MiddlewareMaker", () => {
     it("makeRequestContextMiddleware", async () => {
         const connection = getConnection();
         const repository = getRepository(User);
-        const manager = new MiddlewareMaker(repository);
+        const maker = new MiddlewareMaker(repository);
 
-        const mw = manager.makeRequestContextMiddleware({ operation: "list" });
+        const mw = maker.makeRequestContextMiddleware({ operation: "list" });
         const ctx = makeTestCtx<RequestState<User>>({ query: { id: "123" } });
         const nextSpy = jest.fn();
         const req = mw(ctx, nextSpy);
@@ -44,9 +44,9 @@ describe("MiddlewareMaker", () => {
 
     it("makeResponseMiddleware", async () => {
         const repository = getRepository(User);
-        const manager = new MiddlewareMaker(repository);
+        const maker = new MiddlewareMaker(repository);
 
-        const mw = manager.makeResponseMiddleware();
+        const mw = maker.makeResponseMiddleware();
         const ctx = makeTestCtx<RequestState<User>>({
             query: { id: "123" },
             state: { requestContext: { operation: "list" } },
@@ -69,9 +69,9 @@ describe("MiddlewareMaker", () => {
 
     it("makeRouteMappingMiddleware", async () => {
         const repository = getRepository(User);
-        const manager = new MiddlewareMaker(repository);
+        const maker = new MiddlewareMaker(repository);
 
-        const mw = manager.makeRouteMappingMiddleware("list");
+        const mw = maker.makeRouteMappingMiddleware("list");
         const ctx = makeTestCtx<RequestState<User>>();
         const noop = async () => {};
 
@@ -88,5 +88,54 @@ describe("MiddlewareMaker", () => {
             },
         });
         expect(ctx.responseBody.routeMapping[ENTITY_META_SYMBOL]).toBe(repository.metadata);
+    });
+
+    // TODO Doc response handling
+    it.only("makeResponseMiddleware - can override route options on specific operation with scoped options", async () => {
+        jest.spyOn(console, "warn").mockImplementation(() => {});
+        const routeOptions: EntityRouteOptions = { defaultCreateUpdateOptions: { shouldAutoReload: true } };
+        const repository = getRepository(User);
+
+        const options = {
+            ...routeOptions,
+            scopedOptions: (operation: string) =>
+                operation === "create" && {
+                    defaultCreateUpdateOptions: { responseOperation: "createScoped" },
+                },
+        };
+
+        const maker = new MiddlewareMaker(repository, options);
+        const mw = maker.makeResponseMiddleware();
+        const noop = async () => {};
+
+        const createCtx = makeReqCtxWithState({ operation: "create", values: { name: "Alex", birthDate: new Date() } });
+        await mw(createCtx as any, noop);
+        const createResult = createCtx.responseBody as RouteResponse<"item", User>;
+
+        const updateCtx = makeReqCtxWithState({
+            operation: "update",
+            entityId: createResult.id,
+            values: { name: "Alex222" },
+        });
+        await mw(updateCtx as any, noop);
+        const updateResult = updateCtx.responseBody as RouteResponse<"item", User>;
+
+        const detailsCtx = makeReqCtxWithState({ operation: "details", entityId: createResult.id });
+        await mw(detailsCtx as any, noop);
+        const detailsResult = detailsCtx.responseBody as RouteResponse<"item", User>;
+        // Overriding operation to test equality for everything else
+        const detailsResultWithUpdateOperation = {
+            ...detailsResult,
+            "@context": { ...detailsResult["@context"], operation: "update" },
+        };
+
+        // The birthDate is exposed on user.details route scope, while the name is NOT
+        expect(updateResult.birthDate).toBeDefined();
+        expect(updateResult.name).toBeUndefined();
+        expect(updateResult).toEqualMessy(detailsResultWithUpdateOperation);
+        // But birthDate is undefined / the name IS exposed on the user.createScoped route scope
+        // since the responseOperation was customized on the "create" operation using scopedOptions
+        expect(createResult.name).toBeDefined();
+        expect(createResult.birthDate).toBeUndefined();
     });
 });

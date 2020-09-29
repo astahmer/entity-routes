@@ -15,6 +15,7 @@ import { ContextWithState, removeRequestContext } from "@/request";
 import { Writer } from "@/response/Writer";
 import { makeRequestContext } from "@/request/Context";
 import { Handler } from "@/request/Handler";
+import { deepMerge } from "@/functions";
 
 export class MiddlewareMaker<Entity extends GenericEntity> {
     get mappingManager() {
@@ -56,8 +57,14 @@ export class MiddlewareMaker<Entity extends GenericEntity> {
     /** Returns the response method on a given operation for this entity */
     public makeResponseMiddleware(): Middleware {
         return async (ctx: ContextWithState, next) => {
-            const result = await this.handler.getResult(ctx);
-            const response = await this.writer.makeResponse(ctx, result);
+            const operation = ctx.state.requestContext.operation;
+
+            // Override route options with scoped options if any
+            const scopedOptions = this.options.scopedOptions?.(operation);
+            const options = deepMerge({}, this.options || {}, scopedOptions || {});
+
+            const result = await this.handler.getResult(ctx, options);
+            const response = await this.writer.makeResponse(ctx, result, options.defaultWriterOptions);
 
             const ref = { ctx, response, result };
             await this.options.hooks?.beforeRespond?.(ref);
@@ -155,7 +162,7 @@ export type RequestState<Entity extends GenericEntity = GenericEntity> = {
     queryRunner: QueryRunner;
 };
 
-export type RouteResponse = {
+export type GenericRouteResponse = {
     "@context": {
         /** Current route operation */
         operation: string;
@@ -177,6 +184,40 @@ export type RouteResponse = {
     /** Entity props */
     [k: string]: any;
 };
+export type RouteResponseType = "item" | "collection" | "error" | "persist" | "delete";
+export type RouteResponse<
+    T extends RouteResponseType = any,
+    Entity extends GenericEntity = GenericEntity
+> = (T extends "item" ? Partial<Entity> : {}) & {
+    "@context": (T extends "collection"
+        ? {
+              /** Total number of items found for this request */ totalItems?: number;
+              /** Number of items retrieved for this request */
+              retrievedItems?: number;
+          }
+        : T extends "error"
+        ? {
+              /** Global response error */ error?: string;
+          }
+        : T extends "persist"
+        ? {
+              /** Entity validation errors */ validationErrors?: EntityErrorResults;
+          }
+        : {}) & {
+        /** Current route operation */
+        operation: string;
+        /** Current entity's route */
+        entity: string;
+    };
+} & (T extends "collection"
+        ? {
+              /** List of entities */ items?: Partial<Entity>[];
+          }
+        : T extends "delete"
+        ? {
+              /** deleted entity id */ deleted?: any;
+          }
+        : {});
 
 /** Return type of EntityRoute.getList */
 export type CollectionResult<Entity extends GenericEntity> = {

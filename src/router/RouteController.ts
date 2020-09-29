@@ -88,10 +88,8 @@ export class RouteController<Entity extends GenericEntity> {
         }
 
         // TODO beforeReload hook ?
-        if (!options?.shouldAutoReload) {
-            return result;
-        }
-        (requestContext as any).wasAutoReloaded = true;
+        if (!options?.shouldAutoReload) return result;
+        (requestContext as RequestContext).wasAutoReloaded = true;
 
         const responseOperation =
             options?.responseOperation ||
@@ -119,10 +117,8 @@ export class RouteController<Entity extends GenericEntity> {
             return result;
         }
 
-        if (!options?.shouldAutoReload) {
-            return result;
-        }
-        (requestContext as any).wasAutoReloaded = true;
+        if (!options?.shouldAutoReload) return result;
+        (requestContext as RequestContext).wasAutoReloaded = true;
 
         const responseOperation =
             options?.responseOperation ||
