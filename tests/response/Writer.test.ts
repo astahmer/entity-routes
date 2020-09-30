@@ -38,7 +38,7 @@ describe("Writer", () => {
             defaultWriterOptions: {
                 shouldSetComputedPropsOnItem: true,
                 shouldSetSubresourcesIriOnItem: true,
-                shouldEntityWithOnlyIdBeFlattenedToIri: true,
+                shouldEntityWithOnlyIdBeFlattened: true,
                 useIris: true,
             },
         });

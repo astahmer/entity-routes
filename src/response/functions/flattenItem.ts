@@ -14,7 +14,7 @@ export function flattenItem<Entity extends GenericEntity>(args: DecorateFnArgs<E
     const mappingManager = Container.get(MappingManager);
     const computedProps = mappingManager.getComputedProps(rootMetadata, data.operation, itemMetadata);
     const shouldFlatten =
-        data.shouldEntityWithOnlyIdBeFlattenedToIri &&
+        data.shouldEntityWithOnlyIdBeFlattened &&
         isEntity(item) &&
         Object.keys(item).length === 1 &&
         !computedProps.length &&
@@ -27,15 +27,15 @@ export function flattenItem<Entity extends GenericEntity>(args: DecorateFnArgs<E
 
 export type BaseFlattenItemOptions = {
     /**
-     * If this & shouldEntityWithOnlyIdBeFlattenedToIri are both true
+     * If this & shouldEntityWithOnlyIdBeFlattened are both true
      * Will only flatten the root entity properties
      * @example
      * shouldOnlyFlattenNested = true
-     * shouldEntityWithOnlyIdBeFlattenedToIri = false
+     * shouldEntityWithOnlyIdBeFlattened = false
      * -> does nothing
      *
      * shouldOnlyFlattenNested = true
-     * shouldEntityWithOnlyIdBeFlattenedToIri = true
+     * shouldEntityWithOnlyIdBeFlattened = true
      * ->
      * {
      *  name: "Alex",
@@ -43,14 +43,14 @@ export type BaseFlattenItemOptions = {
      * }
      *
      * shouldOnlyFlattenNested = true
-     * shouldEntityWithOnlyIdBeFlattenedToIri = true
+     * shouldEntityWithOnlyIdBeFlattened = true
      * ->
      * {
      *  id: 123, // Even though the root entity only contains ID it was NOT flattened
      * }
      *
      * shouldOnlyFlattenNested = false
-     * shouldEntityWithOnlyIdBeFlattenedToIri = true
+     * shouldEntityWithOnlyIdBeFlattened = true
      * ->
      * "/api/user/123"  // EVEN the root entity will be flattened as IRI
      */
@@ -58,14 +58,14 @@ export type BaseFlattenItemOptions = {
     /**
      * In case of a relation with no other mapped props (from groups) than id: will unwrap "relation { id }" to relation = id|iri
      * @example
-     * shouldEntityWithOnlyIdBeFlattenedToIri = true
+     * shouldEntityWithOnlyIdBeFlattened = true
      * ->
      * {
      *  name: "Alex",
      *  role: "/api/roles/123", // This relation was flattened as IRI
      * }
      *
-     * shouldEntityWithOnlyIdBeFlattenedToIri = false
+     * shouldEntityWithOnlyIdBeFlattened = false
      * ->
      * {
      *  name: "Alex",
@@ -74,7 +74,7 @@ export type BaseFlattenItemOptions = {
      *  }
      * }
      */
-    shouldEntityWithOnlyIdBeFlattenedToIri?: boolean;
+    shouldEntityWithOnlyIdBeFlattened?: boolean;
 };
 
 export type FlattenItemOptions = Pick<RequestContext, "operation"> &

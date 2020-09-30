@@ -70,9 +70,7 @@ export class Writer<Entity extends GenericEntity> {
         );
 
         // Either with flatten or directly entities
-        const defaultDecorateFn = options.shouldEntityWithOnlyIdBeFlattenedToIri
-            ? decorateWithFlatten
-            : decorateEntities;
+        const defaultDecorateFn = options.shouldEntityWithOnlyIdBeFlattened ? decorateWithFlatten : decorateEntities;
 
         // Adding custom decorators
         const customDecorators = (decorators || []).map((fn) => (item: any) =>

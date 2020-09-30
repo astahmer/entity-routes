@@ -16,7 +16,7 @@ describe("Decorator > flattenItem", () => {
         const formatedWithFlatIri = await decorator.decorateItem({
             rootItem: item,
             rootMetadata,
-            data: { operation: "details", shouldEntityWithOnlyIdBeFlattenedToIri: true, useIris: true },
+            data: { operation: "details", shouldEntityWithOnlyIdBeFlattened: true, useIris: true },
             decorateFn: flattenItem,
         });
         expect(formatedWithFlatIri.articles).toEqual(["/api/article/1", "/api/article/2"]);
@@ -28,7 +28,7 @@ describe("Decorator > flattenItem", () => {
         const formatedWithFlatIri = await decorator.decorateItem({
             rootItem: item,
             rootMetadata,
-            data: { operation: "details", shouldEntityWithOnlyIdBeFlattenedToIri: true },
+            data: { operation: "details", shouldEntityWithOnlyIdBeFlattened: true },
             decorateFn: flattenItem,
         });
 
@@ -81,7 +81,7 @@ describe("Decorator > flattenItem", () => {
         const item = new Article();
         item.id = 123;
 
-        const data = { operation: "details", shouldEntityWithOnlyIdBeFlattenedToIri: true, useIris: true };
+        const data = { operation: "details", shouldEntityWithOnlyIdBeFlattened: true, useIris: true };
         const args = { rootItem: item, rootMetadata, data, decorateFn: flattenItem };
 
         const flattenedResult = await decorator.decorateItem(args);

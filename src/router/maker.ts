@@ -61,7 +61,7 @@ export const defaultEntityRouteOptions: EntityRouteOptions = {
     defaultListDetailsOptions: { shouldMaxDepthReturnRelationPropsId: true, withDeleted: false },
     defaultWriterOptions: {
         useIris: true,
-        shouldEntityWithOnlyIdBeFlattenedToIri: true,
+        shouldEntityWithOnlyIdBeFlattened: true,
         shouldSetSubresourcesIriOnItem: true,
         shouldSetComputedPropsOnItem: true,
     },
