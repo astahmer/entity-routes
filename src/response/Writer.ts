@@ -81,11 +81,9 @@ export class Writer<Entity extends GenericEntity> {
         // And finally combining defaults with customs
         const decorateFn = pipe(defaultDecorateFn, customDecorateFn);
         const clone = await decorateFn(baseItem);
+        const item = options.shouldSortItemKeys ? deepSort(clone, options.sortComparatorFn) : clone;
 
-        // TODO test
-        options.shouldSortItemKeys ? deepSort(clone, options.sortComparatorFn) : clone;
-
-        return clone;
+        return item;
     }
 
     /** Apply the same process for each item of a collection */
@@ -171,6 +169,7 @@ export class Writer<Entity extends GenericEntity> {
     }
 }
 
+export type CustomDecoratorFnArgs = { requestContext: RequestContext; options: Omit<WriterOptions, "decorators"> };
 export type WriterOptions<Entity extends GenericEntity = GenericEntity> = BaseFlattenItemOptions & {
     /** Allow to opt-out of IRI's and directly return ids instead */
     useIris?: boolean;
@@ -183,7 +182,7 @@ export type WriterOptions<Entity extends GenericEntity = GenericEntity> = BaseFl
     /** Allow passing a custom comparator function */
     sortComparatorFn?: ComparatorFn;
     /** Custom decorators applied on each items recursively, receiving both requestContext & writerOptions as data */
-    decorators?: DecorateFn<Entity, { requestContext: RequestContext; options: Omit<WriterOptions, "decorators"> }>[];
+    decorators?: DecorateFn<Entity, CustomDecoratorFnArgs>[];
 };
 
 export type FromCollectionArgs<Entity extends GenericEntity = GenericEntity> = {

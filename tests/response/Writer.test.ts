@@ -1,6 +1,6 @@
 import { getRepository } from "typeorm";
 
-import { makeEntity, Writer } from "@/index";
+import { CustomDecoratorFnArgs, DecorateFn, makeEntity, Writer, WriterOptions } from "@/index";
 import { closeTestConnection, createTestConnection, makeReqCtxWithState } from "@@/tests/testConnection";
 import { Article, Comment, Role, ThingWithComputed, User } from "./functions/sample/entities";
 
@@ -54,10 +54,79 @@ describe("Writer", () => {
     });
 
     it("fromItem - allow passing custom decorators", async () => {
-        //
+        const writer = new Writer(getRepository(User));
+
+        const item = makeEntity(User, { id: 1, name: "Alex" });
+        const {
+            state: { requestContext },
+        } = makeReqCtxWithState({ operation: "details" });
+
+        const decoratorFn: DecorateFn<any, CustomDecoratorFnArgs> = ({
+            clone,
+            item,
+            rootMetadata,
+            itemMetadata,
+            data,
+            isRoot,
+        }) => {
+            clone.abc = "123";
+            clone.operation = data.requestContext.operation;
+            clone.rootEntity = rootMetadata.tableName;
+            clone.entity = itemMetadata.tableName;
+            clone.isRoot = isRoot;
+            clone.isItemUser = item.constructor.name === itemMetadata.targetName;
+        };
+        const customDecorator = jest.fn(decoratorFn);
+        const innerOptions: WriterOptions = { decorators: [customDecorator] };
+        const clone = await writer.fromItem({ item, requestContext, innerOptions });
+
+        expect(clone).toEqual({
+            id: 1,
+            name: "Alex",
+            abc: "123",
+            operation: "details",
+            rootEntity: "user",
+            entity: "user",
+            isItemUser: true,
+            isRoot: true,
+        });
     });
 
-    it("fromItem - allow deep sorting response", async () => {
-        //
+    it("fromItem - allow sorting clone keys", async () => {
+        const writer = new Writer(getRepository(User));
+
+        const item = makeEntity(User, { id: 1, name: "Alex" });
+        const {
+            state: { requestContext },
+        } = makeReqCtxWithState({ operation: "details" });
+
+        const decoratorFn: DecorateFn<any, CustomDecoratorFnArgs> = ({
+            clone,
+            item,
+            rootMetadata,
+            itemMetadata,
+            data,
+            isRoot,
+        }) => {
+            clone.abc = "123";
+            clone.operation = data.requestContext.operation;
+            clone.rootEntity = rootMetadata.tableName;
+            clone.entity = itemMetadata.tableName;
+            clone.isRoot = isRoot;
+            clone.isItemUser = item.constructor.name === itemMetadata.targetName;
+        };
+        const customDecorator = jest.fn(decoratorFn);
+        const innerOptions: WriterOptions = { decorators: [customDecorator], shouldSortItemKeys: false };
+        const cloneKeys = ["id", "name", "abc", "operation", "rootEntity", "entity", "isRoot", "isItemUser"];
+
+        const clone = await writer.fromItem({ item, requestContext, innerOptions });
+        const cloneWithSortedKeys = await writer.fromItem({
+            item,
+            requestContext,
+            innerOptions: { ...innerOptions, shouldSortItemKeys: true },
+        });
+
+        expect(Object.keys(clone)).toEqual(cloneKeys);
+        expect(Object.keys(cloneWithSortedKeys)).toEqual(cloneKeys.sort());
     });
 });
