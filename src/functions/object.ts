@@ -25,11 +25,11 @@ export const setNestedKey = (obj: ObjectLiteral, path: string | string[], value:
     return setNestedKey(obj[path[0]], path.slice(1), value);
 };
 
-export function fromEntries<T = ObjectLiteral>(iterable: Iterable<any>): T {
+export function fromEntries<K extends string, V>(iterable: [K, V][]): Record<K, V> {
     return [...iterable].reduce((obj, [key, val]) => {
         obj[key] = val;
         return obj;
-    }, {});
+    }, {} as Record<K, V>);
 }
 
 /**

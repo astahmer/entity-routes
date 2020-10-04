@@ -7,7 +7,7 @@ import { BridgeRouter } from "@/router/bridge/BridgeRouter";
 import { CRUD_ACTIONS } from "@/router/MiddlewareMaker";
 import { formatRoutePath, formatRouteName } from "@/functions/route";
 import { ObjectOrCollectionKeys } from "@/utils-types";
-import { prop } from "@/functions/object";
+import { pick, prop } from "@/functions/object";
 import { last } from "@/functions/array";
 import { isRelationSingle } from "@/functions/entity";
 
@@ -100,6 +100,8 @@ export class SubresourceMaker<Entity extends GenericEntity> {
             const operations = !parents
                 ? subresourceProp.operations
                 : subresourceProp.operations.filter((op) => nestedSubresourceOperations.includes(op));
+
+            const subresources = relations.map((rel) => ({ ...rel, ...pick(subresourceProp, ["path"]) }));
             // Generates endpoint for each operation
             operations.forEach((operation) => {
                 // Skip list operation on XToOne & details operation on XToMany
@@ -123,6 +125,8 @@ export class SubresourceMaker<Entity extends GenericEntity> {
                     name,
                     methods: [CRUD_ACTIONS[operation].verb],
                     middlewares: [requestContextMw, responseMw, endResponseMw].map(this.mwAdapter),
+                    subresources,
+                    operation,
                 });
             });
 

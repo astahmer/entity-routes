@@ -2,6 +2,7 @@ export type PrimitiveValue = string | number | boolean;
 export type Primitive = PrimitiveValue | Array<PrimitiveValue>;
 
 export const lowerFirstLetter = (str: string) => str.charAt(0).toLowerCase() + str.slice(1);
+export const upperFirstLetter = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
 
 export const truthyRegex = /^(true|1)$/i;
 export const falsyRegex = /^(false|0)$/i;
