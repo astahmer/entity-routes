@@ -37,7 +37,13 @@ export function makeRouterFromActions<Data extends object = object, T extends An
             customActionMw = item.handler;
         }
 
-        router.register({ path, name, methods: [verb], middlewares: [...(middlewares || []), customActionMw] });
+        router.register({
+            path,
+            name,
+            methods: [verb],
+            operation,
+            middlewares: [...(middlewares || []), customActionMw],
+        });
     });
 
     return router;

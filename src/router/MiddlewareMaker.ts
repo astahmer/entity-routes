@@ -13,7 +13,7 @@ import { parseStringAsBoolean } from "@/functions/primitives";
 import { DeepPartial, FunctionKeys, ObjectLiteral, Unpacked } from "@/utils-types";
 import { ContextWithState, removeRequestContext } from "@/request";
 import { Writer } from "@/response/Writer";
-import { makeRequestContext } from "@/request/Context";
+import { makeRequestContext } from "@/request/context";
 import { Handler } from "@/request/Handler";
 import { deepMerge, isDev } from "@/functions";
 
@@ -202,26 +202,27 @@ export type GenericRouteResponse = {
     [k: string]: any;
 };
 export type RouteResponseType = "item" | "collection" | "error" | "persist" | "delete";
-export type RouteResponse<
-    T extends RouteResponseType = any,
-    Entity extends GenericEntity = GenericEntity
-> = (T extends "item" ? Partial<Entity> : {}) & {
+export type RouteResponse<T extends RouteResponseType = any, Entity extends GenericEntity = GenericEntity> = (T extends
+    | "item"
+    | "persist"
+    ? Partial<Entity>
+    : {}) & {
     "@context": (T extends "collection"
         ? {
               /** Total number of items found for this request */
               totalItems?: number;
               /** Number of items retrieved for this request */
-              retrievedItems?: number;
+              retrievedItems: number;
           }
         : T extends "error"
         ? {
               /** Global response error */
-              error?: string;
+              error: string;
           }
         : T extends "persist"
         ? {
               /** Entity validation errors */
-              validationErrors?: EntityErrorResults;
+              validationErrors: EntityErrorResults;
           }
         : {}) & {
         /** Current route operation */
@@ -231,11 +232,13 @@ export type RouteResponse<
     };
 } & (T extends "collection"
         ? {
-              /** List of entities */ items?: Partial<Entity>[];
+              /** List of entities */
+              items: Partial<Entity>[];
           }
         : T extends "delete"
         ? {
-              /** deleted entity id */ deleted?: any;
+              /** deleted entity id */
+              deleted: any;
           }
         : {});
 

@@ -42,7 +42,7 @@ export class Writer<Entity extends GenericEntity> {
 
     /** Apply default & custom route decorators on item */
     async fromItem({ item: baseItem, requestContext, innerOptions }: FromItemArgs<Entity>) {
-        const { decorators, ...options } = innerOptions || this.options || {};
+        const { decorators, ...options } = (innerOptions || this.options || {}) as WriterOptions;
         const operation = requestContext.operation;
         const flattenItemOptions = {
             operation,

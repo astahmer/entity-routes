@@ -1,0 +1,1248 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`OpenAPI exportRoutesAsOpenApi 1`] = `
+"openapi: 3.0.0
+info:
+  title: title
+  version: 1.0.0
+  description: entity-routes OpenAPI spec
+paths:
+  /role:
+    post:
+      description: role_create
+      responses:
+        \\"200\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                properties:
+                  id:
+                    type: string
+                  logo:
+                    properties:
+                      id:
+                        type: string
+                  title:
+                    type: string
+        \\"500\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: \\"#/components/schemas/BaseErrorRouteResponseSchema\\"
+    parameters: []
+    get:
+      description: role_list
+      responses:
+        \\"200\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                properties:
+                  id:
+                    type: string
+                  logo:
+                    properties:
+                      id:
+                        type: string
+                      url:
+                        type: string
+                  title:
+                    type: string
+        \\"500\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: \\"#/components/schemas/BaseErrorRouteResponseSchema\\"
+  /role/mapping:
+    post:
+      description: role_create_mapping
+      responses:
+        \\"200\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                properties:
+                  id:
+                    type: string
+                  logo:
+                    properties:
+                      id:
+                        type: string
+                  title:
+                    type: string
+        \\"500\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: \\"#/components/schemas/BaseErrorRouteResponseSchema\\"
+    parameters: []
+    get:
+      description: role_list_mapping
+      responses:
+        \\"200\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                properties:
+                  id:
+                    type: string
+                  logo:
+                    properties:
+                      id:
+                        type: string
+                      url:
+                        type: string
+                  title:
+                    type: string
+        \\"500\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: \\"#/components/schemas/BaseErrorRouteResponseSchema\\"
+  \\"/role/{id}\\":
+    get:
+      description: role_details
+      responses:
+        \\"200\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                properties:
+                  id:
+                    type: string
+                  logo:
+                    properties:
+                      id:
+                        type: string
+                      url:
+                        type: string
+                  title:
+                    type: string
+        \\"500\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: \\"#/components/schemas/BaseErrorRouteResponseSchema\\"
+    parameters:
+      - $ref: \\"#/components/parameters/EntityId\\"
+    put:
+      description: role_update
+      responses:
+        \\"200\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                properties:
+                  id:
+                    type: string
+                  logo:
+                    properties:
+                      id:
+                        type: string
+                  title:
+                    type: string
+        \\"500\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: \\"#/components/schemas/BaseErrorRouteResponseSchema\\"
+    delete:
+      description: role_delete
+      responses:
+        \\"200\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: \\"#/components/schemas/BaseDeleteRouteResponseSchema\\"
+        \\"500\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: \\"#/components/schemas/BaseErrorRouteResponseSchema\\"
+  \\"/role/{id}/mapping\\":
+    get:
+      description: role_details_mapping
+      responses:
+        \\"200\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                properties:
+                  id:
+                    type: string
+                  logo:
+                    properties:
+                      id:
+                        type: string
+                      url:
+                        type: string
+                  title:
+                    type: string
+        \\"500\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: \\"#/components/schemas/BaseErrorRouteResponseSchema\\"
+    parameters:
+      - $ref: \\"#/components/parameters/EntityId\\"
+    put:
+      description: role_update_mapping
+      responses:
+        \\"200\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                properties:
+                  id:
+                    type: string
+                  logo:
+                    properties:
+                      id:
+                        type: string
+                  title:
+                    type: string
+        \\"500\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: \\"#/components/schemas/BaseErrorRouteResponseSchema\\"
+  \\"/role/{RoleId}/users\\":
+    post:
+      description: role_users_create
+      responses:
+        \\"200\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                properties:
+                  avatar:
+                    properties:
+                      id:
+                        type: string
+                  id:
+                    type: string
+                  name:
+                    type: string
+        \\"500\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: \\"#/components/schemas/BaseErrorRouteResponseSchema\\"
+    parameters:
+      - $ref: \\"#/components/parameters/RoleId\\"
+    get:
+      description: role_users_list
+      responses:
+        \\"200\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                properties:
+                  avatar:
+                    properties:
+                      id:
+                        type: string
+                      url:
+                        type: string
+                  id:
+                    type: string
+                  name:
+                    type: string
+        \\"500\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: \\"#/components/schemas/BaseErrorRouteResponseSchema\\"
+  \\"/role/{RoleId}/users/{id}\\":
+    delete:
+      description: role_users_delete
+      responses:
+        \\"200\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: \\"#/components/schemas/BaseDeleteRouteResponseSchema\\"
+        \\"500\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: \\"#/components/schemas/BaseErrorRouteResponseSchema\\"
+    parameters:
+      - $ref: \\"#/components/parameters/RoleId\\"
+      - $ref: \\"#/components/parameters/EntityId\\"
+  \\"/role/{RoleId}/users/articles\\":
+    get:
+      description: role_users_articles_list
+      responses:
+        \\"200\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                properties:
+                  author:
+                    properties:
+                      avatar:
+                        properties:
+                          id:
+                            type: string
+                          url:
+                            type: string
+                      id:
+                        type: string
+                      name:
+                        type: string
+                  id:
+                    type: string
+                  title:
+                    type: string
+        \\"500\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: \\"#/components/schemas/BaseErrorRouteResponseSchema\\"
+    parameters:
+      - $ref: \\"#/components/parameters/RoleId\\"
+  /user:
+    post:
+      description: user_create
+      responses:
+        \\"200\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                properties:
+                  avatar:
+                    properties:
+                      id:
+                        type: string
+                  id:
+                    type: string
+                  name:
+                    type: string
+        \\"500\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: \\"#/components/schemas/BaseErrorRouteResponseSchema\\"
+    parameters: []
+    get:
+      description: user_list
+      responses:
+        \\"200\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                properties:
+                  avatar:
+                    properties:
+                      id:
+                        type: string
+                      url:
+                        type: string
+                  id:
+                    type: string
+                  name:
+                    type: string
+        \\"500\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: \\"#/components/schemas/BaseErrorRouteResponseSchema\\"
+  /user/mapping:
+    post:
+      description: user_create_mapping
+      responses:
+        \\"200\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                properties:
+                  avatar:
+                    properties:
+                      id:
+                        type: string
+                  id:
+                    type: string
+                  name:
+                    type: string
+        \\"500\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: \\"#/components/schemas/BaseErrorRouteResponseSchema\\"
+    parameters: []
+    get:
+      description: user_list_mapping
+      responses:
+        \\"200\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                properties:
+                  avatar:
+                    properties:
+                      id:
+                        type: string
+                      url:
+                        type: string
+                  id:
+                    type: string
+                  name:
+                    type: string
+        \\"500\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: \\"#/components/schemas/BaseErrorRouteResponseSchema\\"
+  \\"/user/{id}\\":
+    get:
+      description: user_details
+      responses:
+        \\"200\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                properties:
+                  avatar:
+                    properties:
+                      id:
+                        type: string
+                      url:
+                        type: string
+                  id:
+                    type: string
+                  name:
+                    type: string
+                  roles:
+                    properties:
+                      id:
+                        type: string
+        \\"500\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: \\"#/components/schemas/BaseErrorRouteResponseSchema\\"
+    parameters:
+      - $ref: \\"#/components/parameters/EntityId\\"
+    put:
+      description: user_update
+      responses:
+        \\"200\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                properties:
+                  avatar:
+                    properties:
+                      id:
+                        type: string
+                  id:
+                    type: string
+                  name:
+                    type: string
+        \\"500\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: \\"#/components/schemas/BaseErrorRouteResponseSchema\\"
+    delete:
+      description: user_delete
+      responses:
+        \\"200\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: \\"#/components/schemas/BaseDeleteRouteResponseSchema\\"
+        \\"500\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: \\"#/components/schemas/BaseErrorRouteResponseSchema\\"
+  \\"/user/{id}/mapping\\":
+    get:
+      description: user_details_mapping
+      responses:
+        \\"200\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                properties:
+                  avatar:
+                    properties:
+                      id:
+                        type: string
+                      url:
+                        type: string
+                  id:
+                    type: string
+                  name:
+                    type: string
+                  roles:
+                    properties:
+                      id:
+                        type: string
+        \\"500\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: \\"#/components/schemas/BaseErrorRouteResponseSchema\\"
+    parameters:
+      - $ref: \\"#/components/parameters/EntityId\\"
+    put:
+      description: user_update_mapping
+      responses:
+        \\"200\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                properties:
+                  avatar:
+                    properties:
+                      id:
+                        type: string
+                  id:
+                    type: string
+                  name:
+                    type: string
+        \\"500\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: \\"#/components/schemas/BaseErrorRouteResponseSchema\\"
+  \\"/user/{UserId}/articles\\":
+    post:
+      description: user_articles_create
+      responses:
+        \\"200\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                properties:
+                  author:
+                    properties:
+                      id:
+                        type: string
+                  id:
+                    type: string
+                  title:
+                    type: string
+        \\"500\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: \\"#/components/schemas/BaseErrorRouteResponseSchema\\"
+    parameters:
+      - $ref: \\"#/components/parameters/UserId\\"
+    get:
+      description: user_articles_list
+      responses:
+        \\"200\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                properties:
+                  author:
+                    properties:
+                      avatar:
+                        properties:
+                          id:
+                            type: string
+                          url:
+                            type: string
+                      id:
+                        type: string
+                      name:
+                        type: string
+                  id:
+                    type: string
+                  title:
+                    type: string
+        \\"500\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: \\"#/components/schemas/BaseErrorRouteResponseSchema\\"
+  \\"/user/{UserId}/articles/{id}\\":
+    delete:
+      description: user_articles_delete
+      responses:
+        \\"200\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: \\"#/components/schemas/BaseDeleteRouteResponseSchema\\"
+        \\"500\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: \\"#/components/schemas/BaseErrorRouteResponseSchema\\"
+    parameters:
+      - $ref: \\"#/components/parameters/UserId\\"
+      - $ref: \\"#/components/parameters/EntityId\\"
+  \\"/user/{UserId}/articles/comments\\":
+    get:
+      description: user_articles_comments_list
+      responses:
+        \\"200\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                properties:
+                  id:
+                    type: string
+                  message:
+                    type: string
+                  upvotes:
+                    properties:
+                      id:
+                        type: string
+                      reaction:
+                        properties:
+                          id:
+                            type: string
+                          url:
+                            type: string
+        \\"500\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: \\"#/components/schemas/BaseErrorRouteResponseSchema\\"
+    parameters:
+      - $ref: \\"#/components/parameters/UserId\\"
+  \\"/user/{UserId}/roles\\":
+    post:
+      description: user_roles_create
+      responses:
+        \\"200\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                properties:
+                  id:
+                    type: string
+                  logo:
+                    properties:
+                      id:
+                        type: string
+                  title:
+                    type: string
+        \\"500\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: \\"#/components/schemas/BaseErrorRouteResponseSchema\\"
+    parameters:
+      - $ref: \\"#/components/parameters/UserId\\"
+    get:
+      description: user_roles_list
+      responses:
+        \\"200\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                properties:
+                  id:
+                    type: string
+                  logo:
+                    properties:
+                      id:
+                        type: string
+                      url:
+                        type: string
+                  title:
+                    type: string
+        \\"500\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: \\"#/components/schemas/BaseErrorRouteResponseSchema\\"
+  \\"/user/{UserId}/roles/{id}\\":
+    delete:
+      description: user_roles_delete
+      responses:
+        \\"200\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: \\"#/components/schemas/BaseDeleteRouteResponseSchema\\"
+        \\"500\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: \\"#/components/schemas/BaseErrorRouteResponseSchema\\"
+    parameters:
+      - $ref: \\"#/components/parameters/UserId\\"
+      - $ref: \\"#/components/parameters/EntityId\\"
+  /article:
+    post:
+      description: article_create
+      responses:
+        \\"200\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                properties:
+                  author:
+                    properties:
+                      id:
+                        type: string
+                  id:
+                    type: string
+                  title:
+                    type: string
+        \\"500\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: \\"#/components/schemas/BaseErrorRouteResponseSchema\\"
+    parameters: []
+    get:
+      description: article_list
+      responses:
+        \\"200\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                properties:
+                  author:
+                    properties:
+                      avatar:
+                        properties:
+                          id:
+                            type: string
+                          url:
+                            type: string
+                      id:
+                        type: string
+                      name:
+                        type: string
+                  id:
+                    type: string
+                  title:
+                    type: string
+        \\"500\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: \\"#/components/schemas/BaseErrorRouteResponseSchema\\"
+  /article/mapping:
+    post:
+      description: article_create_mapping
+      responses:
+        \\"200\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                properties:
+                  author:
+                    properties:
+                      id:
+                        type: string
+                  id:
+                    type: string
+                  title:
+                    type: string
+        \\"500\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: \\"#/components/schemas/BaseErrorRouteResponseSchema\\"
+    parameters: []
+    get:
+      description: article_list_mapping
+      responses:
+        \\"200\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                properties:
+                  author:
+                    properties:
+                      avatar:
+                        properties:
+                          id:
+                            type: string
+                          url:
+                            type: string
+                      id:
+                        type: string
+                      name:
+                        type: string
+                  id:
+                    type: string
+                  title:
+                    type: string
+        \\"500\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: \\"#/components/schemas/BaseErrorRouteResponseSchema\\"
+  \\"/article/{id}\\":
+    get:
+      description: article_details
+      responses:
+        \\"200\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                properties:
+                  author:
+                    properties:
+                      avatar:
+                        properties:
+                          id:
+                            type: string
+                          url:
+                            type: string
+                      id:
+                        type: string
+                      name:
+                        type: string
+                  id:
+                    type: string
+                  title:
+                    type: string
+        \\"500\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: \\"#/components/schemas/BaseErrorRouteResponseSchema\\"
+    parameters:
+      - $ref: \\"#/components/parameters/EntityId\\"
+    put:
+      description: article_update
+      responses:
+        \\"200\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                properties:
+                  id:
+                    type: string
+                  title:
+                    type: string
+        \\"500\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: \\"#/components/schemas/BaseErrorRouteResponseSchema\\"
+    delete:
+      description: article_delete
+      responses:
+        \\"200\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: \\"#/components/schemas/BaseDeleteRouteResponseSchema\\"
+        \\"500\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: \\"#/components/schemas/BaseErrorRouteResponseSchema\\"
+  \\"/article/{id}/mapping\\":
+    get:
+      description: article_details_mapping
+      responses:
+        \\"200\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                properties:
+                  author:
+                    properties:
+                      avatar:
+                        properties:
+                          id:
+                            type: string
+                          url:
+                            type: string
+                      id:
+                        type: string
+                      name:
+                        type: string
+                  id:
+                    type: string
+                  title:
+                    type: string
+        \\"500\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: \\"#/components/schemas/BaseErrorRouteResponseSchema\\"
+    parameters:
+      - $ref: \\"#/components/parameters/EntityId\\"
+    put:
+      description: article_update_mapping
+      responses:
+        \\"200\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                properties:
+                  id:
+                    type: string
+                  title:
+                    type: string
+        \\"500\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: \\"#/components/schemas/BaseErrorRouteResponseSchema\\"
+  \\"/article/{ArticleId}/comments\\":
+    post:
+      description: article_comments_create
+      responses:
+        \\"200\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                properties:
+                  id:
+                    type: string
+                  message:
+                    type: string
+        \\"500\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: \\"#/components/schemas/BaseErrorRouteResponseSchema\\"
+    parameters:
+      - $ref: \\"#/components/parameters/ArticleId\\"
+    get:
+      description: article_comments_list
+      responses:
+        \\"200\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                properties:
+                  id:
+                    type: string
+                  message:
+                    type: string
+                  upvotes:
+                    properties:
+                      id:
+                        type: string
+                      reaction:
+                        properties:
+                          id:
+                            type: string
+                          url:
+                            type: string
+        \\"500\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: \\"#/components/schemas/BaseErrorRouteResponseSchema\\"
+  \\"/article/{ArticleId}/comments/{id}\\":
+    delete:
+      description: article_comments_delete
+      responses:
+        \\"200\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: \\"#/components/schemas/BaseDeleteRouteResponseSchema\\"
+        \\"500\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: \\"#/components/schemas/BaseErrorRouteResponseSchema\\"
+    parameters:
+      - $ref: \\"#/components/parameters/ArticleId\\"
+      - $ref: \\"#/components/parameters/EntityId\\"
+  \\"/comment/{id}\\":
+    put:
+      description: comment_update
+      responses:
+        \\"200\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                properties:
+                  id:
+                    type: string
+        \\"500\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: \\"#/components/schemas/BaseErrorRouteResponseSchema\\"
+    parameters:
+      - $ref: \\"#/components/parameters/EntityId\\"
+    delete:
+      description: comment_delete
+      responses:
+        \\"200\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: \\"#/components/schemas/BaseDeleteRouteResponseSchema\\"
+        \\"500\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: \\"#/components/schemas/BaseErrorRouteResponseSchema\\"
+  \\"/comment/{id}/mapping\\":
+    put:
+      description: comment_update_mapping
+      responses:
+        \\"200\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                properties:
+                  id:
+                    type: string
+        \\"500\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: \\"#/components/schemas/BaseErrorRouteResponseSchema\\"
+    parameters:
+      - $ref: \\"#/components/parameters/EntityId\\"
+  \\"/upvote/{id}\\":
+    delete:
+      description: upvote_delete
+      responses:
+        \\"200\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: \\"#/components/schemas/BaseDeleteRouteResponseSchema\\"
+        \\"500\\":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: \\"#/components/schemas/BaseErrorRouteResponseSchema\\"
+    parameters:
+      - $ref: \\"#/components/parameters/EntityId\\"
+components:
+  schemas:
+    BaseRouteContext:
+      type: object
+      required:
+        - entity
+        - operation
+      properties:
+        entity:
+          type: string
+        operation:
+          type: string
+    CollectionRouteContext:
+      allOf:
+        - $ref: \\"#/components/schemas/BaseRouteContext\\"
+      type: object
+      required:
+        - retrievedItems
+      properties:
+        totalItems:
+          type: integer
+        retrievedItems:
+          type: integer
+    PersistRouteContext:
+      allOf:
+        - $ref: \\"#/components/schemas/BaseRouteContext\\"
+      type: object
+      required:
+        - validationErrors
+      properties:
+        validationErrors:
+          $ref: \\"#/components/schemas/EntityErrorResults\\"
+    ErrorRouteContext:
+      allOf:
+        - $ref: \\"#/components/schemas/BaseRouteContext\\"
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+    EntityErrorResults:
+      type: object
+      additionalProperties:
+        type: array
+        items:
+          $ref: \\"#/components/schemas/EntityError\\"
+    EntityError:
+      type: object
+      properties:
+        currentPath:
+          type: string
+        property:
+          type: string
+        constraints:
+          additionalProperties:
+            type: string
+    BaseRouteResponseSchema:
+      type: object
+      required:
+        - \\"@context\\"
+      properties:
+        \\"@context\\":
+          $ref: \\"#/components/schemas/BaseRouteContext\\"
+    BaseItemRouteResponseSchema:
+      type: object
+      allOf:
+        - $ref: \\"#/components/schemas/BaseRouteResponseSchema\\"
+    BaseCollectionRouteResponseSchema:
+      type: object
+      properties:
+        \\"@context\\":
+          $ref: \\"#/components/schemas/CollectionRouteContext\\"
+    BasePersistRouteResponseSchema:
+      type: object
+      properties:
+        \\"@context\\":
+          $ref: \\"#/components/schemas/PersistRouteContext\\"
+    BaseErrorRouteResponseSchema:
+      type: object
+      properties:
+        \\"@context\\":
+          $ref: \\"#/components/schemas/ErrorRouteContext\\"
+    BaseDeleteRouteResponseSchema:
+      type: object
+      allOf:
+        - $ref: \\"#/components/schemas/BaseRouteResponseSchema\\"
+      properties:
+        deleted:
+          title: TypeORM.DeleteResult
+  responses:
+    BaseRouteResponse:
+      description: OK
+      content:
+        application/json:
+          schema:
+            $ref: \\"#/components/schemas/BaseRouteResponseSchema\\"
+    ErrorRouteResponse:
+      description: Response error.
+      content:
+        application/json:
+          schema:
+            $ref: \\"#/components/schemas/BaseErrorRouteResponseSchema\\"
+  parameters:
+    RoleId:
+      name: RoleId
+      in: path
+      required: true
+      schema:
+        type: integer
+    UserId:
+      name: UserId
+      in: path
+      required: true
+      schema:
+        type: integer
+    ArticleId:
+      name: ArticleId
+      in: path
+      required: true
+      schema:
+        type: integer
+    EntityId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+      description: Current entity route id
+  examples: {}
+  requestBodies: {}
+  headers: {}
+  securitySchemes: {}
+  links: {}
+  callbacks: {}
+tags: []
+servers: []
+"
+`;

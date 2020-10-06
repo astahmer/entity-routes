@@ -84,6 +84,7 @@ export class EntityRouter<Entity extends GenericEntity> {
                 path,
                 name,
                 methods: [verb],
+                operation,
                 middlewares: [
                     ...(this.options.beforeCtxMiddlewares || []),
                     mwAdapter(requestContextMw),
@@ -103,6 +104,7 @@ export class EntityRouter<Entity extends GenericEntity> {
                 path: path + "/mapping",
                 name: name + "_mapping",
                 methods: [verb],
+                operation,
                 middlewares: [mwAdapter(mappingMethod)],
             });
         }

@@ -19,11 +19,11 @@ export class MappingManager {
     }
 
     /** Make the mapping object for this entity on a given operation */
-    public make(
+    public make<O extends EntityMapperMakeOptions = EntityMapperMakeOptions>(
         rootMetadata: EntityMetadata,
         operation: RouteOperation,
-        options: EntityMapperMakeOptions = {}
-    ): MappingItem | ObjectLiteral {
+        options: O = {} as any
+    ): O extends { pretty: true } ? ObjectLiteral : MappingItem {
         const mapping = this.getMappingFor(
             rootMetadata,
             {},
@@ -33,7 +33,7 @@ export class MappingManager {
             rootMetadata.tableName,
             options
         );
-        return options.pretty ? this.prettify(mapping) : mapping;
+        return options.pretty ? (this.prettify(mapping) as ObjectLiteral) : (mapping as any);
     }
 
     /**

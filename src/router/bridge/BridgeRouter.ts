@@ -2,6 +2,8 @@ import { isDev } from "@/functions/asserts";
 import { AnyFunction } from "@/utils-types";
 import { RouteVerb } from "@/router/MiddlewareMaker";
 import { areSameRoutes } from "@/functions/route";
+import { SubresourceRelation } from "../SubresourceMaker";
+import { RouteOperation } from "@/decorators";
 
 export class BridgeRouter<T = any> {
     readonly instance: T;
@@ -28,6 +30,8 @@ export type BridgeRouterRoute<Mw = Function> = {
     path: string;
     methods: RouteVerb[];
     middlewares: Mw[];
+    operation?: RouteOperation;
+    subresources?: Array<SubresourceRelation & { path: string }>;
 };
 export type BridgeRouterRegisterFn<T = any> = (instance: T, route: BridgeRouterRoute) => any;
 
