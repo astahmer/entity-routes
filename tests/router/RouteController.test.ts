@@ -1,4 +1,12 @@
-import { Groups, RouteController, Search, Subresource, getSubresourceRelation, EntityRouteOptions } from "@/index";
+import {
+    Groups,
+    RouteController,
+    Search,
+    Subresource,
+    getSubresourceRelation,
+    EntityRouteOptions,
+    pick,
+} from "@/index";
 import {
     PrimaryGeneratedColumn,
     Entity,
@@ -443,7 +451,7 @@ describe("RouteController - subresources", () => {
         @Column()
         title: string;
 
-        @Groups({ article: ["details", "list"] })
+        @Groups({ article: ["details", "list"], comment: ["details", "list"] })
         @ManyToOne(() => User, (user) => user.articles)
         author: User;
 
@@ -454,9 +462,11 @@ describe("RouteController - subresources", () => {
 
     @Entity()
     class Comment extends AbstractEntity {
+        @Groups({ comment: "basic" })
         @Column()
         message: string;
 
+        @Groups({ comment: ["details", "list"] })
         @ManyToOne(() => Article, (article) => article.comments)
         article: User;
     }
@@ -595,7 +605,6 @@ describe("RouteController - subresources", () => {
         });
     });
 
-    // TODO Nested subresources
     describe("getList", () => {
         it("auto joins from parent subresource", async () => {
             const userRepository = getRepository(User);
@@ -612,6 +621,7 @@ describe("RouteController - subresources", () => {
             const subresourceRelations = [subresourceRelation];
             await articleCtrl.create({ values, subresourceRelations });
 
+            // Equivalent to GET:/users/1/articles
             const result = await articleCtrl.getList({ subresourceRelations });
             expect(result).toEqual({
                 items: [{ id: 1, title: values.title, author: { id: userResult.id } }],
@@ -619,8 +629,54 @@ describe("RouteController - subresources", () => {
             });
         });
 
-        it("auto add joins from multiple parent subresources", () => {
-            return; // TODO
+        it("auto add joins from multiple parent subresources", async () => {
+            const userRepository = getRepository(User);
+            const userCtrl = new RouteController(userRepository, routeOptions);
+            const userResult = (await userCtrl.create({
+                values: { id: 777, name: "Alex", email: "alex@mail.com" },
+            })) as User;
+
+            // Creating an article for user 777
+            const articleRepository = getRepository(Article);
+            const articleCtrl = new RouteController(articleRepository, routeOptions);
+
+            const articleValues = { title: "Join article on user 777" };
+            const articleSubresourceRelation = getSubresourceRelation(User, getRepository(User).metadata, "articles");
+            articleSubresourceRelation.id = userResult.id;
+
+            const articleResult = (await articleCtrl.create({
+                values: articleValues,
+                subresourceRelations: [articleSubresourceRelation],
+            })) as Article;
+
+            // Creating a comment for article 1
+            const commentRepository = getRepository(Comment);
+            const commentCtrl = new RouteController(commentRepository, routeOptions);
+
+            const commentValues = { message: "Join comment on article 1" };
+            const commentSubresourceRelation = getSubresourceRelation(
+                Article,
+                getRepository(Article).metadata,
+                "comments"
+            );
+            commentSubresourceRelation.id = articleResult.id;
+
+            const commentResult = await commentCtrl.create({
+                values: commentValues,
+                subresourceRelations: [commentSubresourceRelation],
+            });
+
+            // Equivalent to GET:/users/777/articles/comments
+            const result = await commentCtrl.getList({
+                subresourceRelations: [
+                    articleSubresourceRelation,
+                    { param: null, ...pick(commentSubresourceRelation, ["relation", "propertyName"]) },
+                ],
+            });
+            expect(result).toEqual({
+                items: [commentResult],
+                totalItems: 1,
+            });
         });
     });
 
