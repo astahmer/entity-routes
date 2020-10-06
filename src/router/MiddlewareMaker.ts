@@ -13,7 +13,7 @@ import { parseStringAsBoolean } from "@/functions/primitives";
 import { DeepPartial, FunctionKeys, ObjectLiteral, Unpacked } from "@/utils-types";
 import { ContextWithState, removeRequestContext } from "@/request";
 import { Writer } from "@/response/Writer";
-import { makeRequestContext } from "@/request/Context";
+import { makeRequestContext } from "@/request/context";
 import { Handler } from "@/request/Handler";
 import { deepMerge, isDev } from "@/functions";
 
