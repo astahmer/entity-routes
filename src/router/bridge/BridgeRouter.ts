@@ -30,7 +30,7 @@ export type BridgeRouterRoute<Mw = Function> = {
     path: string;
     methods: RouteVerb[];
     middlewares: Mw[];
-    operation: RouteOperation;
+    operation?: RouteOperation;
     subresources?: Array<SubresourceRelation & { path: string }>;
 };
 export type BridgeRouterRegisterFn<T = any> = (instance: T, route: BridgeRouterRoute) => any;

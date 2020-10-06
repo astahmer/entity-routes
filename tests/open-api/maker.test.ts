@@ -3,7 +3,6 @@ import { makeOpenApiBuilderFrom, makeOpenApi } from "@/open-api";
 import { setupKoaApp } from "@@/tests/router/bridge/koaSetup";
 import { closeTestConnection } from "@@/tests/testConnection";
 
-import { promises as fs } from "fs";
 import { getOpenApiTestEntities } from "../mapping/sample/entities";
 
 describe("OpenAPI", () => {
@@ -20,13 +19,9 @@ describe("OpenAPI", () => {
     });
 
     it("exportRoutesAsOpenApi", async () => {
-        const path = require("path");
-        const root = process.cwd();
-        const filePath = path.join(root, "openApi.yaml");
-
         const openApi = makeOpenApi();
         const builder = makeOpenApiBuilderFrom(openApi);
         const spec = builder.getSpecAsYaml();
-        await fs.writeFile(filePath, spec);
+        expect(spec).toMatchSnapshot();
     });
 });
