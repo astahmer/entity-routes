@@ -56,7 +56,6 @@ export class Decorator {
             return item;
         }
 
-        // If clone is null that means we are at item's root
         const cloneRef: { ref: any } = { ref: {} };
 
         // Wrap in promise and keep looping through items rather than wait for it to complete
@@ -94,31 +93,17 @@ export class Decorator {
                     })
             );
         };
+
         for (key in item) {
             prop = item[key as keyof Entity];
             // TODO allow custom if (from options) ?
             if (Array.isArray(prop) && !this.mappingManager.isPropSimple(entityMetadata, key)) {
                 const propArray: Entity[] = [];
                 let i = 0;
-                let nestedClone;
                 for (i; i < prop.length; i++) {
-                    nestedClone = {};
-                    const nestedCloneRef = { ref: nestedClone };
-                    try {
-                        promises.push(
-                            makePromise({
-                                cloneRef: nestedCloneRef,
-                                nestedItem: prop[i],
-                                itemMetadata: getRepository(prop[i].constructor.name).metadata,
-                            })
-                        );
-                    } catch (error) {
-                        // getRepository threw an error since it couldn't get a repo from constructor.name
-                    }
                     propArray.push(
                         this.recursiveDecorateItem({
                             item: prop[i],
-                            clone: nestedCloneRef.ref,
                             data,
                             rootMetadata,
                             promises,
@@ -129,22 +114,8 @@ export class Decorator {
 
                 cloneRef.ref[key] = propArray;
             } else if (isEntity(prop)) {
-                const nestedCloneRef = { ref: {} };
-                try {
-                    promises.push(
-                        makePromise({
-                            cloneRef: nestedCloneRef,
-                            nestedItem: prop as Entity,
-                            itemMetadata: getRepository(prop.constructor.name).metadata,
-                        })
-                    );
-                } catch (error) {
-                    // getRepository threw an error since it couldn't get a repo from constructor.name
-                }
-
                 cloneRef.ref[key] = this.recursiveDecorateItem({
                     item: prop,
-                    clone: nestedCloneRef.ref,
                     data,
                     rootMetadata,
                     promises,
@@ -163,7 +134,7 @@ export class Decorator {
 
 type RecursiveDecorateItemArgs<Entity extends GenericEntity> = Omit<
     DecorateFnArgs<Entity>,
-    "itemMetadata" | "cloneRef"
+    "itemMetadata" | "clone" | "cloneRef"
 > &
     Pick<DecorateItemArgs<Entity>, "decorateFn"> & {
         promises: Promise<any>[];
