@@ -20,7 +20,6 @@ import { pipe } from "@/functions/utils";
 import { ComparatorFn, deepSort } from "@/functions/object";
 import { GroupsOperation } from "@/decorators";
 
-// TODO tests
 /** Write response from result & decorators */
 export class Writer<Entity extends GenericEntity> {
     get metadata() {

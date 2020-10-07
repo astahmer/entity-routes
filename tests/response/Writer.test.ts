@@ -2,10 +2,12 @@ import { getRepository } from "typeorm";
 
 import { CustomDecoratorFnArgs, DecorateFn, makeEntity, Writer, WriterOptions } from "@/index";
 import { closeTestConnection, createTestConnection, makeReqCtxWithState } from "@@/tests/testConnection";
-import { Article, Comment, Role, ThingWithComputed, User } from "./functions/sample/entities";
+import { getWriterTestEntities, User } from "./functions/sample/entities";
 
 describe("Writer", () => {
-    beforeAll(() => createTestConnection([User, Role, Article, Comment, ThingWithComputed]));
+    const entities = getWriterTestEntities();
+
+    beforeAll(() => createTestConnection(entities));
     afterAll(closeTestConnection);
 
     it("makeResponse", async () => {

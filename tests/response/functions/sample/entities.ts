@@ -1,7 +1,9 @@
 import { PrimaryGeneratedColumn, Entity, Column, ManyToOne, OneToMany } from "typeorm";
 import { DependsOn, Groups, Subresource } from "@/decorators";
 
-export class AbstractEntity {
+export const getWriterTestEntities = () => [User, Role, Article, Comment, ThingWithComputed];
+
+class AbstractEntity {
     @Groups(["list", "details"])
     @PrimaryGeneratedColumn()
     id: number;
