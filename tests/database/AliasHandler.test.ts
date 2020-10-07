@@ -9,9 +9,18 @@ describe("AliasHandler", () => {
     }
 
     @Entity()
+    class Config extends AbstractEntity {
+        @Column()
+        label: string;
+    }
+
+    @Entity()
     class Role extends AbstractEntity {
         @Column()
         title: string;
+
+        @ManyToOne(() => Config)
+        config: Config;
     }
 
     @Entity()
@@ -23,7 +32,7 @@ describe("AliasHandler", () => {
         role: Role;
     }
 
-    beforeAll(() => createTestConnection([Role, User]));
+    beforeAll(() => createTestConnection([Role, User, Config]));
     afterAll(closeTestConnection);
 
     it("generate", () => {
@@ -48,9 +57,48 @@ describe("AliasHandler", () => {
         expect(manager.aliases).toEqual({ "user.role": 2 });
     });
 
-    // TODO
-    // it("isJoinAlreadyMade", () => {});
+    it("isJoinAlreadyMade", () => {
+        const qb = getRepository(User).createQueryBuilder("user");
+        const handler = new AliasHandler();
 
-    // TODO
-    // it("getAliasForRelation", () => {});
+        const userRoleRelation = getRepository(User).metadata.relations.find((rel) => rel.propertyName === "role");
+        const roleConfigRelation = getRepository(Role).metadata.relations.find((rel) => rel.propertyName === "config");
+
+        qb.leftJoin("user.role", "user_role");
+
+        expect(handler.isJoinAlreadyMade(qb, userRoleRelation)).toBeDefined();
+        expect(handler.isJoinAlreadyMade(qb, roleConfigRelation)).toBeUndefined();
+    });
+
+    it("isJoinAlreadyMade - using prevAlias", () => {
+        const qb = getRepository(User).createQueryBuilder("user");
+        const handler = new AliasHandler();
+
+        const roleConfigRelation = getRepository(Role).metadata.relations.find((rel) => rel.propertyName === "config");
+
+        qb.leftJoin("user.role", "user_role");
+        qb.leftJoin("user_role.config", "user_role_config");
+
+        expect(handler.isJoinAlreadyMade(qb, roleConfigRelation, "user_role")).toBeDefined();
+    });
+
+    it("getAliasForRelation", () => {
+        const qb = getRepository(User).createQueryBuilder("user");
+        const handler = new AliasHandler();
+
+        const userRoleRelation = getRepository(User).metadata.relations.find((rel) => rel.propertyName === "role");
+
+        // It generates an alias and then returns the same alias when asked again with the same parameters
+        expect(Object.keys(handler.aliases).length).toBe(0);
+        const firstAlias = handler.getAliasForRelation(qb, userRoleRelation);
+        expect(firstAlias.isJoinAlreadyMade).toBeUndefined();
+        expect(firstAlias.alias).toEqual("user_role_1");
+
+        qb.leftJoin("user.role", "user_role");
+
+        const secondAlias = handler.getAliasForRelation(qb, userRoleRelation);
+        expect(Object.keys(handler.aliases).length).toBe(1);
+        expect(secondAlias.isJoinAlreadyMade).toBeDefined();
+        expect(secondAlias.alias).toEqual("user_role_1");
+    });
 });

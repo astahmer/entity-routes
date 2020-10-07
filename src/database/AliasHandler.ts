@@ -18,10 +18,11 @@ export class AliasHandler {
     }
 
     public getPropertyLastAlias(entityTableName: string, propName: string) {
-        return entityTableName + "_" + propName + "_" + this.aliases[this.getAliasKey(entityTableName, propName)];
+        const lastAlias = this.aliases[this.getAliasKey(entityTableName, propName)];
+        return entityTableName + "_" + propName + (lastAlias ? "_" + lastAlias : "");
     }
 
-    public isJoinAlreadyMade(qb: SelectQueryBuilder<any>, relation: RelationMetadata, prevAlias: string) {
+    public isJoinAlreadyMade(qb: SelectQueryBuilder<any>, relation: RelationMetadata, prevAlias?: string) {
         const entityOrProperty = `${prevAlias || relation.entityMetadata.tableName}.${relation.propertyName}`;
         const join = qb.expressionMap.joinAttributes.find((join) => join.entityOrProperty === entityOrProperty);
         return join;
