@@ -1,5 +1,6 @@
 import { PrimaryGeneratedColumn, Entity, Column, ManyToOne, OneToMany } from "typeorm";
 import { DependsOn, Groups, Subresource } from "@/decorators";
+import { makeEntity } from "@/index";
 
 export const getWriterTestEntities = () => [User, Role, Article, Comment, ThingWithComputed];
 
@@ -89,23 +90,16 @@ export class Comment extends AbstractEntity {
 }
 
 export const makeItem = () => {
-    const item = new User();
-    item.id = 1;
-    item.name = "Alex";
-    item.email = "email@test.com";
+    const role = makeEntity(Role, { id: 1, title: "Admin", startDate: new Date() });
+    const article1 = makeEntity(Article, { id: 1 });
+    const article2 = makeEntity(Article, { id: 2 });
+    const item = makeEntity(User, {
+        id: 1,
+        name: "Alex",
+        email: "email@test.com",
+        role,
+        articles: [article1, article2],
+    });
 
-    const role = new Role();
-    role.id = 1;
-    role.title = "Admin";
-    role.startDate = new Date();
-
-    const article1 = new Article();
-    article1.id = 1;
-
-    const article2 = new Article();
-    article2.id = 2;
-
-    item.role = role;
-    item.articles = [article1, article2];
     return item;
 };
