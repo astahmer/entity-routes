@@ -1,11 +1,10 @@
+import { createContext, useMemo } from "react";
 import { Stack } from "@chakra-ui/core";
 import { MDXComponents } from "dokz";
-import React, { createContext, useMemo } from "react";
 import { reset } from "@/functions/codeBlocks";
 
 // Dokz override
 import { DirectoryTree } from "dokz/dist/components/support";
-// import { Wrapper as DokzWrapper } from "dokz/dist/components/Wrapper";
 import { DokzWrapper, getMdxSidebarTree } from "./DokzOverride";
 import { useRouteChanged } from "@/functions/useRouteChanged";
 
@@ -127,7 +126,7 @@ function orderTree({ tree, order }: { tree: DirectoryTree; order: SidebarOrder }
             ...children.filter(
                 (child) =>
                     !order.routes.find((route) => route.name === child.name)?.hidden &&
-                    !orderedTree.children.find((addedChild) => addedChild.name === child.name)
+                    !orderedTree.children.find((addedChild) => equalWithoutExtension(addedChild.name, child.name))
             )
         );
     }
