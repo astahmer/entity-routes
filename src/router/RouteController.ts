@@ -117,6 +117,7 @@ export class RouteController<Entity extends GenericEntity> {
             return result;
         }
 
+        // TODO beforeReload hook ?
         if (!options?.shouldAutoReload) return result;
         (requestContext as RequestContext).wasAutoReloaded = true;
 
