@@ -4,7 +4,7 @@ import { css, Global } from "@emotion/core";
 import { FloatingTableOfContents, TableOfContentsContext, useDokzConfig } from "dokz";
 import { DirectoryTree, globalStyles } from "dokz/dist/components/support";
 import { PropagatedThemeProvider } from "dokz/dist/components/Wrapper";
-// import { FooterButtons } from "dokz/dist/components/FooterButtons";
+
 import { SideNav } from "./SideNav";
 import { useContext } from "react";
 import { WrapperContext } from "../Wrapper";
@@ -81,7 +81,6 @@ export function DokzWrapper(props) {
                             // fontWeight='500'
                             // left={0}
                             tree={sidebarTree}
-                            orderingFn={props.orderingFn}
                             // height='100%'
                             width={SIDENAV_W}
                             display={["none", null, "block"]}

@@ -100,7 +100,7 @@ function orderTree({ tree, order }: { tree: DirectoryTree; order: SidebarOrder }
         const { routes, ...rest } = route;
         // Shallow merge item/route except for meta that is also shallow merged
         const itemMeta = (item || {}).meta;
-        const meta = itemMeta && route.meta && { ...itemMeta, ...route.meta };
+        const meta = (itemMeta || route.meta) && { ...itemMeta, ...route.meta };
         const merged = { ...item, ...rest, meta } as DirectoryTree;
 
         // If route has child, re-order them

@@ -208,7 +208,6 @@ export function extractMeta<T = Record<string, string>>(string: string): Partial
     let isProcessingKey = true;
     let isProcessingValue = false;
 
-    // ="Every entity should extend this interface" chiasse="abc" pisse oui="abc"
     const setNewMetaKey = () => {
         metas[current.key] = "";
         isProcessingKey = false;

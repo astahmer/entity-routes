@@ -10,7 +10,10 @@
                 { "name": "route-response" },
                 { "name": "route-scope" },
                 { "name": "operations" },
-                { "name": "groups", "routes": [{ "name": "introduction" }, { "name": "examples" }] },
+                {
+                    "name": "groups",
+                    "routes": [{ "name": "introduction" }, { "name": "computed-property" }, { "name": "examples" }]
+                },
                 { "name": "subresources" },
                 {
                     "name": "filters",
@@ -23,12 +26,13 @@
                 },
                 {
                     "name": "decorators",
+                    "meta": { "defaultOpened": false },
                     "routes": [
                         { "name": "list" },
                         { "title": "@EntityRoute", "url": "/entity-routes/entity-router" },
                         { "title": "@Groups", "url": "/entity-routes/groups/introduction" },
                         { "title": "@Subresources", "url": "/entity-routes/subresources" },
-                        { "name": "depends-on", "title": "@DependsOn", "meta": { "chiasse": "oui" } },
+                        { "name": "depends-on", "title": "@DependsOn" },
                         { "title": "@MaxDepth", "url": "/entity-routes/groups/max-depth" },
                         { "title": "@Search", "url": "/entity-routes/filters/search" },
                         { "title": "@Pagination", "url": "/entity-routes/filters/pagination" },
@@ -43,6 +47,6 @@
         },
         { "name": "internals", "hidden": true },
         { "name": "compatibility" },
-        { "name": "definitions", "routes": [{ "name": "index.md" }] }
+        { "name": "definitions", "meta": { "childrenDefaultOpened": false }, "routes": [{ "name": "index.md" }] }
     ]
 }
