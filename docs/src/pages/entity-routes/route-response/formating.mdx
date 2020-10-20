@@ -16,9 +16,9 @@ These are the defaults `decorator functions` that will be used when enabled in
 
 | Function                 | Description                                                                                      | WriterOptions's key               | Default enabled |
 | ------------------------ | ------------------------------------------------------------------------------------------------ | --------------------------------- | --------------- |
-| setComputedPropsOnItem   | Add [**computed properties**](/entity-groups/groups/introduction#computed-property) to this item | shouldEntityWithOnlyIdBeFlattened | Default enabled |
-| setSubresourcesIriOnItem | [Set subresources IRI](/entity-routes/subresources#format-in-response)                           | aa                                | Default enabled |
-| flattenItem              | Flatten item with only id if needed                                                              | shouldEntityWithOnlyIdBeFlattened | Default enabled |
+| setComputedPropsOnItem   | Add [**computed properties**](/entity-groups/groups/introduction#computed-property) to this item | shouldSetComputedPropsOnItem      | true            |
+| setSubresourcesIriOnItem | [Set subresources IRI](/entity-routes/subresources#format-in-response)                           | shouldSetSubresourcesIriOnItem    | true            |
+| flattenItem              | Flatten item with only id if needed                                                              | shouldEntityWithOnlyIdBeFlattened | true            |
 
 The Writer also performs the following tasks :
 
@@ -131,7 +131,10 @@ class Role extends AbstractEntity {
     identifier: string;
 }
 
-@EntityRoute({ path: "/users", operation: ["details"] }, { shouldEntityWithOnlyIdBeFlattened: true })
+@EntityRoute(
+    { path: "/users", operation: ["details"] },
+    { defaultWriterOptions: { shouldEntityWithOnlyIdBeFlattened: true } }
+)
 @Entity()
 class User extends AbstractEntity {
     @Groups(["details"])
@@ -160,7 +163,7 @@ Since no properties except `id` is exposed on the `user.details` route scope :
     "id": 1,
     "name": "Alex",
     "role": "/api/role/321"
-    // or if do not use IRIs "role": 321
+    // or if not using IRIs "role": 321
 }
 ```
 
@@ -169,7 +172,7 @@ Since no properties except `id` is exposed on the `user.details` route scope :
 <DocAlert status="info">
 
 Enabled by default (see [`defaultEntityRouteOptions`](/definitions#const-defaultentityrouteoptions)). You can opt-out of
-this behavior by setting the `shouldSetSubresourcesIriOnItem` key of
+this behavior by setting the `defaultWriterOptions`.`shouldSetSubresourcesIriOnItem` key of
 [`EntityRouteOptions`](/definitions#entityrouteoptions) to false.
 
 </DocAlert>
@@ -185,7 +188,10 @@ class Article extends AbstractEntity {
     title: string;
 }
 
-@EntityRoute({ path: "/users/", operations: ["list"] }, { shouldSetSubresourcesIriOnItem: true })
+@EntityRoute(
+    { path: "/users/", operations: ["list"] },
+    { defaultWriterOptions: { shouldSetSubresourcesIriOnItem: true } }
+)
 @Entity()
 class User extends AbstractEntity {
     @Groups({ user: ["create", "details"], article: ["list"] })
@@ -218,13 +224,13 @@ class User extends AbstractEntity {
 <DocAlert status="info">
 
 Enabled by default (see [`defaultEntityRouteOptions`](/definitions#const-defaultentityrouteoptions)). You can opt-out of
-this behavior by setting the `shouldSortItemKeys` key of [`EntityRouteOptions`](/definitions#entityrouteoptions) to
-false.
+this behavior by setting the `defaultWriterOptions`.`shouldSortItemKeys` key of
+[`EntityRouteOptions`](/definitions#entityrouteoptions) to false.
 
 </DocAlert>
 
 ```typescript {1}
-@EntityRoute({ path: "/users/", operations: ["list"] }, { shouldSortItemKeys: true })
+@EntityRoute({ path: "/users/", operations: ["list"] }, { defaultWriterOptions: { shouldSortItemKeys: true } })
 @Entity()
 class User extends AbstractEntity {
     @Groups(["details"])
