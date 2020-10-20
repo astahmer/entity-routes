@@ -130,26 +130,23 @@ Here are the options available :
 
 ```typescript collapsable
 type EntityRouteOptions = {
-    /** Is max depth enabled by default on all entities for any request context for this router */
-    isMaxDepthEnabledByDefault?: boolean;
-    /** Default level of depth at which the nesting should stop for this router */
-    defaultMaxDepthLvl?: number;
-    /** In case of max depth reached on a relation, should it at retrieve its id and then stop instead of just stopping ? */
-    shouldMaxDepthReturnRelationPropsId?: boolean;
-    /** In case of a relation with no other mapped props (from groups) for a request: should it unwrap "relation { id }" to relation = id ? */
-    shouldEntityWithOnlyIdBeFlattenedToIri?: boolean;
-    /** Should set subresource IRI for prop decorated with @Subresource */
-    shouldSetSubresourcesIriOnItem?: boolean;
-    /** Default level of subresources max depth path */
-    defaultSubresourceMaxDepthLvl?: number;
-    /** Default CreateUpdateOptions */
+    defaultMaxDepthOptions?: JoinAndSelectExposedPropsOptions;
+    /** Default ListDetailsOptions, deep merged with defaultEntityRouteOptions */
+    defaultListDetailsOptions?: ListDetailsOptions;
+    /** Default CreateUpdateOptions, deep merged with defaultEntityRouteOptions */
     defaultCreateUpdateOptions?: CreateUpdateOptions;
+    /** Default subresources options, deep merged with defaultEntityRouteOptions */
+    defaultSubresourcesOptions?: SubresourceMakerOptions;
+    /** Default subresources options, deep merged with defaultEntityRouteOptions */
+    defaultWriterOptions?: WriterOptions;
     /** Allow soft deletion using TypeORM @DeleteDateColumn */
     allowSoftDelete?: boolean;
-    /** When true, list/details will also select softDeleted entities */
-    withDeleted?: boolean;
     /** Hook schema of custom functions to be run at specific operations in a request processing */
     hooks?: HookSchema;
+    /** Middlewares to be pushed before requestContext middleware */
+    beforeCtxMiddlewares?: Function[];
+    /** Middlewares to be pushed after requestContext middleware */
+    afterCtxMiddlewares?: Function[];
 };
 ```
 

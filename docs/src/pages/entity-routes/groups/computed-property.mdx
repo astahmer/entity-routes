@@ -8,9 +8,10 @@ import { DocAlert } from "@/components";
 
 You can expose methods that will be lazily called them after the entity they belong to has been retrieved.
 
-Prefixing your method's name by `get`|`is`|`has` and then using PascalCase will define the entity key under which the
-method's result will be set in the response. If you don't want to use one of these prefix, you can use the 2nd arg of
-the `@Groups` decorator to define an `alias` that will be used as entity key in `entity-routes` responses.
+Prefixing your method's name by [`get`](/definitions#get)|`is`|`has` and then using PascalCase will define the entity
+key under which the method's result will be set in the response. If you don't want to use one of these prefix, you can
+use the 2nd arg of the [`@Groups`](/definitions#groups) decorator to define an `alias` that will be used as entity key
+in `entity-routes` responses.
 
 ### Asynchrone
 
@@ -25,10 +26,10 @@ sane, but stil wait for all of them to be done.
 ### With dependencies
 
 There is one caveat though : What if your `computed property` depends on another property that is not exposed (through
-`@Groups`) ? You could always just decorate the properties you depend onto with a `@Groups`, but then you will end up
-having those properties returned in the response and you might not want that. That's what the [@DependsOn](#depends-on)
-decorator is for, selecting needed properties from the database table when the decorated computed property is exposed
-without returning them.
+[`@Groups`](/definitions#groups)) ? You could always just decorate the properties you depend onto with a
+[`@Groups`](/definitions#groups), but then you will end up having those properties returned in the response and you
+might not want that. That's what the [@DependsOn](#depends-on) decorator is for, selecting needed properties from the
+database table when the decorated computed property is exposed without returning them.
 
 ### Basic example
 
@@ -82,8 +83,8 @@ They are treated as properties even though they will not be used for SQL selecti
 
 <DocAlert status="info">
 
-Just like regular methods, you can use the 2nd arg of `@Groups` to define an `alias` if you want your getter to have
-another name in your `entity-routes` responses.
+Just like regular methods, you can use the 2nd arg of [`@Groups`](/definitions#groups) to define an `alias` if you want
+your getter to have another name in your `entity-routes` responses.
 
 </DocAlert>
 

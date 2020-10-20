@@ -6,6 +6,8 @@ const consola = require("consola");
 const externalLinkRegex = /\[\w+\]\(\w+\/\w+\)/g;
 const indexLinkRegex = /\[\w+\]\((..\/)?index#(\w+|-)+\)/g;
 
+const DEFINITIONS_INDEX_FILE = "index.md";
+
 export async function replaceTypedocLinks({ fromPath, prefix }) {
     consola.info("Fixing typedoc links");
     try {
@@ -30,19 +32,19 @@ export async function replaceTypedocLinks({ fromPath, prefix }) {
         });
         // Prepend /definitions to links
         await replace({
-            files: fromPath + "/index.md",
+            files: fromPath + "/" + DEFINITIONS_INDEX_FILE,
             from: externalLinkRegex,
             to: (match) => match.slice(0, match.indexOf("(")) + `(${prefix}/` + match.slice(match.indexOf("(") + 1),
         });
         // Replace index# to /definitions# from links
         await replace({
-            files: fromPath + "/index.md",
+            files: fromPath + "/" + DEFINITIONS_INDEX_FILE,
             from: indexLinkRegex,
             to: (match) => match.replace("index#", `${prefix}#`),
         });
-        // Remove breadcrumb & h2 from /definitions/index
+        // Remove breadcrumb & h2 from /definitions/DEFINITIONS_INDEX_FILE
         await replace({
-            files: fromPath + "/index.md",
+            files: fromPath + "/" + DEFINITIONS_INDEX_FILE,
             from: ["[@astahmer/entity-routes](index)", "## Index"],
             to: "",
         });

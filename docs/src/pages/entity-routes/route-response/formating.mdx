@@ -4,23 +4,29 @@ title: Formating
 
 import { DocAlert } from "@/components";
 
-Response are formated using the [`Formater`](/definitions/classes/formater), itself called in the `getDetails`/`getList`
+Response are formated using the [`Writer`](/definitions/classes/writer), itself called in the `getDetails`/`getList`
 methods of [`RouteController`](/definitions/classes/routecontroller). That means auto-reloaded entities are also
-formated.
+formated
 
-The formater process each response item/items and perform the following tasks :
+The writer process each response item/items and call every [`Decorator`](/definitions/classes/decorator) functions that
+are registered.
 
+These are the defaults `decorator functions` that will be used when enabled in
+[`WriterOptions`](/definitions#writeroptions) :
+
+| Function                 | Description                                                                                      | WriterOptions's key               | Default enabled |
+| ------------------------ | ------------------------------------------------------------------------------------------------ | --------------------------------- | --------------- |
+| setComputedPropsOnItem   | Add [**computed properties**](/entity-groups/groups/introduction#computed-property) to this item | shouldEntityWithOnlyIdBeFlattened | Default enabled |
+| setSubresourcesIriOnItem | [Set subresources IRI](/entity-routes/subresources#format-in-response)                           | aa                                | Default enabled |
+| flattenItem              | Flatten item with only id if needed                                                              | shouldEntityWithOnlyIdBeFlattened | Default enabled |
+
+The Writer also performs the following tasks :
+
+-   Sort item's property keys (if `shouldSortItemKeys` is true), can pass a custom `sortComparatorFn`, defaults to
+    `sort()`
 -   [Remove any object that is not another Entity](#1-remove-any-object-that-is-not-another-entity) (object that
     implements [`GenericEntity`](/definitions/interfaces/genericentity)) or is not a Date
--   Flatten item with only id if needed (and if `shouldEntityWithOnlyIdBeFlattenedToIri` of
-    [`EntityRouteOptions`](/definitions#entityrouteoptions) is true)
--   [Set subresources IRI](/entity-routes/subresources#format-in-response) if item has any (and if
-    `shouldSetSubresourcesIriOnItem` of [`EntityRouteOptions`](/definitions#entityrouteoptions) is true)
--   Add **computed properties** to this item
--   Sort item's property keys
-
-> By default, it is enabled since the [`defaultEntityRouteOptions`](/definitions#const-defaultentityrouteoptions) object
-> has a `defaultCreateUpdateOptions` key set to `{ shouldAutoReload: true, shouldFormatResult: true }`.
+-   Can opt-in/out IRI's usage with the `useIris` option
 
 ## Examples
 
@@ -84,7 +90,8 @@ class User extends AbstractEntity {
 }
 ```
 
--   The `repository` key will not be returned in response since it does not implement the `GenericEntity` interface.
+-   The `repository` key will not be returned in response since it does not implement the
+    [`GenericEntity`](/definitions/interfaces/genericentity) interface.
 -   The `tableName` will be returned since it's just a string
 
 ```json bottomLeft="GET:/users/1"
@@ -103,8 +110,9 @@ class User extends AbstractEntity {
 
 <DocAlert status="info">
 
-Enabled by default (see `defaultEntityRouteOptions`). You can opt-out of this behavior by setting the
-`shouldEntityWithOnlyIdBeFlattenedToIri` key of `EntityRouteOptions` to false.
+Enabled by default (see [`defaultEntityRouteOptions`](/definitions#const-defaultentityrouteoptions)). You can opt-out of
+this behavior by setting the `shouldEntityWithOnlyIdBeFlattened` key of
+[`EntityRouteOptions`](/definitions#entityrouteoptions) to false.
 
 </DocAlert>
 
@@ -123,7 +131,7 @@ class Role extends AbstractEntity {
     identifier: string;
 }
 
-@EntityRoute({ path: "/users", operation: ["details"] }, { shouldEntityWithOnlyIdBeFlattenedToIri: true })
+@EntityRoute({ path: "/users", operation: ["details"] }, { shouldEntityWithOnlyIdBeFlattened: true })
 @Entity()
 class User extends AbstractEntity {
     @Groups(["details"])
@@ -160,8 +168,9 @@ Since no properties except `id` is exposed on the `user.details` route scope :
 
 <DocAlert status="info">
 
-Enabled by default (see `defaultEntityRouteOptions`). You can opt-out of this behavior by setting the
-`shouldSetSubresourcesIriOnItem` key of `EntityRouteOptions` to false.
+Enabled by default (see [`defaultEntityRouteOptions`](/definitions#const-defaultentityrouteoptions)). You can opt-out of
+this behavior by setting the `shouldSetSubresourcesIriOnItem` key of
+[`EntityRouteOptions`](/definitions#entityrouteoptions) to false.
 
 </DocAlert>
 
@@ -189,7 +198,8 @@ class User extends AbstractEntity {
 }
 ```
 
--   The `articles` property will be set to its IRI `/api/user/1/articles` (if not exposed through `@Groups`)
+-   The `articles` property will be set to its IRI `/api/user/1/articles` (if not exposed through
+    [`@Groups`](/definitions#groups))
 
 ```json {6} bottomLeft="GET:/users/1"
 {
@@ -207,8 +217,9 @@ class User extends AbstractEntity {
 
 <DocAlert status="info">
 
-Enabled by default (see `defaultEntityRouteOptions`). You can opt-out of this behavior by setting the
-`shouldSortItemKeys` key of `EntityRouteOptions` to false.
+Enabled by default (see [`defaultEntityRouteOptions`](/definitions#const-defaultentityrouteoptions)). You can opt-out of
+this behavior by setting the `shouldSortItemKeys` key of [`EntityRouteOptions`](/definitions#entityrouteoptions) to
+false.
 
 </DocAlert>
 
