@@ -1,0 +1,34 @@
+---
+title: Playground
+---
+
+import { DocAlert, SubresourcePlayground } from "@/components";
+
+Feel free to play with the playground below to experience how you can configure each subresource and see the route
+generation results.
+
+<DocAlert status="warning">
+
+This playground assumes that all subresources will be of the same kind (either collection or single), so that they can
+be chained indefinitely.
+
+</DocAlert>
+
+> The routes are intentionnaly not all added initially, you can add them yourself by adding a route using the "+" button
+> next to the entity name tags, and then selecting each subresource properties you want in your routes.
+
+<DocAlert status="info">
+
+You can just click on "Generate all possible routes" and see each possibilities for the config defined above. You can
+also hover on the warning icon to see the reason why the subresource can not be nested further.
+
+</DocAlert>
+
+These are the possible reason why a subresource won't nest further :
+
+-   has reached max depth from a parent subresource
+-   last subresource has no nested subresources
+-   last subresource can't have nested subresources
+-   that route already exists
+
+<SubresourcePlayground />

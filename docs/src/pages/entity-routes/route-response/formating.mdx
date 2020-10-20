@@ -1,66 +1,8 @@
 ---
-title: Route response
+title: Formating
 ---
 
 import { DocAlert } from "@/components";
-
-Each `entity-routes` response will be formated using a template defined by the route
-[**operation**](/entity-routes/operations/) , either `list` or `details`. All responses will share the `@context` part
-nonetheless. Here the actual ts type ([`RouteResponse`](/definitions#routeresponse)) :
-
-```ts
-type RouteResponse = {
-    "@context": {
-        /** Current route operation */
-        operation: string;
-        /** Current entity's route */
-        entity: string;
-        /** Total number of items found for this request */
-        totalItems?: number;
-        /** Number of items retrieved for this request */
-        retrievedItems?: number;
-        /** Entity validation errors */
-        validationErrors?: EntityErrorResults;
-        /** Global response error */
-        error?: string;
-    };
-    /** List of entities */
-    items?: any[];
-    /** deleted entity id */
-    deleted?: any;
-    /** Entity props */
-    [k: string]: any;
-};
-```
-
-## @context
-
--   `operation`/`entity` keys are always added and define the [`route scope`](/entity-routes/route-scope/)
--   On a `persist` [**operation kind**](/entity-routes/groups/introduction#operation-kind), either `create` or `update`,
-    the `validationErrors` key will be added and defaults to an empty array.
--   On a `read` [**operation kind**](/entity-routes/groups/introduction#operation-kind), either `list` or `details`, the
-    `totalItems`/`retrievedItems` keys will be added and defaults to empty arrays.
--   The `error` key is only added when there is an error, it is populated with the error message caught.
-
-## Auto reload
-
-You can avoid making another request on the entity `details` route (`GET:/xxx/123`) to get the latest recorded state
-after an entity was persisted using auto-reloading.
-
-On `persist` operations (`create`/`update`), after the entity was successfully saved, it can be auto-reloaded using the
-`shouldAutoReload` key of the [`CreateUpdateOptions`](/definitions#createupdateoptions) object, passed to the
-`create`/`update` methods of [`RouteController`](/definitions/classes/routecontroller).
-
-When an entity is auto-reloaded, it is read from the database using the `getDetails` method of
-[`RouteController`](/definitions/classes/routecontroller), so that the response is returned the exact same way as if it
-was requested through the `details` route (`GET:/xxx/123`). The [**operation**](/entity-routes/operations/) used is
-either defined explictly by using the `responseOperation` key of the
-[`CreateUpdateOptions`](/definitions#createupdateoptions) object, or defaults to `details` elsewise.
-
-> By default, it is enabled since the [`defaultEntityRouteOptions`](/definitions#const-defaultentityrouteoptions) object
-> has a `defaultCreateUpdateOptions` key set to `{ shouldAutoReload: true, shouldFormatResult: true }`.
-
-## Format
 
 Response are formated using the [`Formater`](/definitions/classes/formater), itself called in the `getDetails`/`getList`
 methods of [`RouteController`](/definitions/classes/routecontroller). That means auto-reloaded entities are also
@@ -80,7 +22,7 @@ The formater process each response item/items and perform the following tasks :
 > By default, it is enabled since the [`defaultEntityRouteOptions`](/definitions#const-defaultentityrouteoptions) object
 > has a `defaultCreateUpdateOptions` key set to `{ shouldAutoReload: true, shouldFormatResult: true }`.
 
-### Examples
+## Examples
 
 _Below examples use these entities_
 
@@ -285,48 +227,3 @@ class User extends AbstractEntity {
 ```
 
 -   All responses keys will be sorted alphabetically, recursively through all nested entities as well
-
-## Basic responses examples
-
-### Create/update
-
-```json bottomLeft="POST:/users/"
-{
-    "@context": {
-        "operation": "create",
-        "entity": "user",
-        "validationErrors": null
-    },
-    "articles": [],
-    "id": 1,
-    "name": "Alex"
-}
-```
-
-### List
-
-```json bottomLeft="GET:/users/"
-{
-    "@context": {
-        "operation": "list",
-        "entity": "user",
-        "retrievedItems": 1,
-        "totalItems": 1
-    },
-    "items": ["/api/users/1"]
-}
-```
-
-### Details
-
-```json bottomLeft="GET:/users/1"
-{
-    "@context": {
-        "operation": "details",
-        "entity": "user"
-    },
-    "articles": [],
-    "id": 1,
-    "name": "Alex"
-}
-```
