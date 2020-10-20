@@ -24,6 +24,8 @@ export type CodePropsMetaString = {
     left?: boolean;
     slug?: string;
     withoutLang?: boolean;
+    minimal?: boolean;
+    notMinimal?: boolean;
 };
 
 export function Code(props: CodeProps) {
@@ -131,7 +133,7 @@ export const DokzCode = ({ children, className, isOpen, preProps, ...rest }) => 
 
     const shouldHighlightLine = calculateLinesToHighlight(rest.metastring);
     const lineCount = code.split("\n").length;
-    const isShort = lineCount <= 5;
+    const isShort = lineCount <= 5 && !rest.notMinimal;
     const isMinimal = language === "json" || rest.minimal;
 
     return (

@@ -2,4 +2,174 @@
 title: Making a custom ContextAdapter
 ---
 
-TODO
+import { Tabs, TabList, TabPanels, Tab, TabPanel } from "@chakra-ui/core";
+
+So, you got a middleware-based Node layer that is neither Koa/Express and you want to be able to use entity-routes ?
+That can be done in 4 steps.
+
+### 1. MiddlewareAdapter
+
+You need to make a MiddlewareAdapter and pass everything you want/need in your "context". Here is how Koa/Express
+middleware adapters are implemented :
+
+```typescript
+type AnyMiddlewareAdapter = (mw: Function) => (...args: any) => any;
+
+const expressMiddlewareAdapter = (mw: Function) => (req, res, next) => mw(makeExpressContextAdapter(req, res), next);
+const koaMiddleareAdapter = (mw: Function) => (ctx: Context, next: Next) => mw(makeKoaContextAdapter(ctx), next);
+```
+
+### 2. ContextAdapter factory
+
+Then you need to make the context adapter factory using the parameters you passed previously. Here is how context
+adapter factory are implemented for Koa/Express :
+
+<Tabs>
+  <TabList>
+    <Tab>Koa</Tab>
+    <Tab>Express</Tab>
+  </TabList>
+
+  <TabPanels>
+    <TabPanel>
+
+```typescript
+export type KoaContextAdapter = ContextAdapter & { ctx: Context };
+
+export const makeKoaContextAdapter = (ctx: Context) =>
+    ({
+        ctx,
+        req: ctx.req,
+        res: ctx.res,
+        get method() {
+            return this.ctx.method;
+        },
+        get requestBody() {
+            return this.ctx.request.body;
+        },
+        get params() {
+            return this.ctx.params;
+        },
+        get query() {
+            return this.ctx.query;
+        },
+        get state() {
+            return this.ctx.state;
+        },
+        get responseBody() {
+            return this.ctx.body;
+        },
+        set responseBody(value) {
+            this.ctx.body = value;
+        },
+        get status() {
+            return this.ctx.status;
+        },
+        set status(value) {
+            this.ctx.status = value;
+        },
+    } as KoaContextAdapter);
+```
+
+</TabPanel>
+<TabPanel>
+
+```typescript
+export type ExpressContextAdapter = ContextAdapter & { req: Request; res: Response };
+
+export const makeExpressContextAdapter = (req: Request, res: Response) =>
+    ({
+        req,
+        res,
+        get method() {
+            return this.req.method;
+        },
+        get requestBody() {
+            return this.req.body;
+        },
+        get params() {
+            return this.req.params;
+        },
+        get query() {
+            return this.req.query;
+        },
+        get state() {
+            return this.res.locals;
+        },
+        get responseBody() {
+            return this.res.locals.responseBody;
+        },
+        set responseBody(value: any) {
+            this.res.locals.responseBody = value;
+            this.res.send(value).end();
+        },
+        get status() {
+            return this.res.statusCode;
+        },
+        set status(value) {
+            this.res.status(value);
+        },
+    } as ExpressContextAdapter);
+```
+
+</TabPanel>
+</TabPanels>
+</Tabs>
+
+### 3. routerRegisterFn
+
+You must define a routerRegisterFn, which register a BridgeRoute to a XXX route in XXX router, where XXX can be
+Koa/Express, etc.
+
+<Tabs>
+  <TabList>
+    <Tab>Koa</Tab>
+    <Tab>Express</Tab>
+  </TabList>
+
+  <TabPanels>
+    <TabPanel>
+
+```typescript
+import { Middleware } from "koa";
+import * as Router from "koa-router";
+
+export function registerKoaRouteFromBridgeRoute(instance: Router, route: BridgeRouterRoute<Middleware>) {
+    instance.register(route.path, route.methods, route.middlewares, { name: route.name });
+}
+```
+
+</TabPanel>
+<TabPanel>
+
+```typescript notMinimal
+import { Router, RequestHandler } from "express";
+
+export function registerExpressRouteFromBridgeRoute(instance: Router, route: BridgeRouterRoute<RequestHandler>) {
+    route.methods.forEach((verb) => instance[verb](route.path, route.middlewares));
+}
+```
+
+</TabPanel>
+</TabPanels>
+</Tabs>
+
+### 4. makeXXXEntityRouters
+
+Finally, you can put these together and make your own makeXXXEntityRouters :
+
+```typescript
+export async function makeExpressEntityRouters(
+    args: Omit<MakeEntityRouters, "options"> & { options?: EntityRouteOptions }
+) {
+    return makeEntityRouters({
+        ...args,
+        options: {
+            ...args.options,
+            routerFactoryFn: Router,
+            routerRegisterFn: registerExpressRouteFromBridgeRoute,
+            middlewareAdapter: (mw: Function) => (req, res, next) => mw(makeExpressContextAdapter(req, res), next),
+        },
+    });
+}
+```

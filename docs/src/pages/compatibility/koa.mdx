@@ -2,4 +2,25 @@
 title: Koa
 ---
 
-TODO
+```typescript {10,15}
+import { AddressInfo } from "net";
+import * as Koa from "koa";
+import * as bodyParser from "koa-bodyparser";
+import { Connection } from "typeorm";
+import { makeKoaEntityRouters } from "@astahmer/entity-routes";
+
+export async function setupKoaApp(connection: Connection) {
+    const entities = connection.entityMetadatas.map((meta) => meta.target) as Function[];
+
+    const bridgeRouters = await makeKoaEntityRouters({ connection, entities, options });
+    const app = new Koa();
+    app.use(bodyParser());
+
+    // Register all routes on koa server
+    bridgeRouters.forEach((router) => app.use(router.instance.routes()));
+
+    const server = app.listen(); // random port
+    const baseURL = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+    return { baseURL, server };
+}
+```
