@@ -69,15 +69,14 @@ const NavTreeComponent = ({
         const isRouteActive = findActiveRouteRecursive(children);
         // If folder.meta.defaultOpened = false OR if a parent folder.meta.childrenDefaultOpened = false
         // Then collapse children initially
-        const defaultOpened =
-            meta.defaultOpened === false || parentDefaultOpened === false ? false : isRouteActive || depth < 2;
+        const defaultOpened = (meta.defaultOpened === false || parentDefaultOpened === false) && isRouteActive;
         return (
             <CollapsableTreeNode
                 depth={depth}
                 title={formattedTitle}
                 subTree={subTree}
                 isActive={isRouteActive}
-                defaultOpened={defaultOpened || isRouteActive}
+                defaultOpened={defaultOpened}
             />
         );
     }
