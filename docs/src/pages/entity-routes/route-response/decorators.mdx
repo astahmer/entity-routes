@@ -1,0 +1,93 @@
+---
+title: Decorator functions
+---
+
+## What problem does it solve ?
+
+When you need to dynamically add attributes to your entity properties recursively (which means **computed properties**
+can't meet your needs), maybe depending on the metadata, a concrete example of that case are
+[subresources IRIs](/entity-routes/subresources/introduction#format-in-response).
+
+## How
+
+Decorator functions recursively traverse an item to decorate it.
+
+> Each decorator function is added to the pipe of the `Writer`.`fromItem` function.
+
+They get access to `DecorateFnArgs`, among them there is the current item metadata & a clone/ref to update in any way an
+item's property (or even completely re-assign the item to another type).
+
+A decorator function can be async and therefore will be awaited before passing the updated item to the next decorator
+function.
+
+> You can pass any custom data to the decorator function under the `DecorateFnArgs`.`data` key.
+
+## Usage
+
+[Feel free to check the tests for more use-cases here.](tests/response/Decorator.test.ts)
+
+With these entities :
+
+```ts
+// Shortened entity with only relevant parts
+class User extends AbstractEntity {
+    name: string;
+    email: string;
+    role: Role;
+    articles: Article[];
+}
+
+const user = new User();
+user.name = "Alex";
+user.email = "email@test.com";
+
+const role = new Role();
+// [...]
+user.role = role;
+
+const article1 = new Article();
+// [...]
+const article2 = new Article();
+// [...]
+user.articles = [article1, article2];
+```
+
+A very simple decorator function :
+
+```ts
+const data = { abc: 123, test: "just testing" };
+
+const decorateFn: DecorateFn<User, typeof data> = (args) => {
+    args.clone.testProp = "added_prop";
+    for (const key in args.data) {
+        args.clone[key] = args.data[key as keyof typeof data];
+    }
+};
+const decorated = await decorator.decorateItem({
+    rootItem: user,
+    rootMetadata: getRepository(User).metadata,
+    data,
+    decorateFn,
+});
+```
+
+The result could look like this :
+
+```json
+{
+    "id": 1,
+    "name": "Alex",
+    "email": "email@test.com",
+    "role": {
+        "id": 1,
+        "title": "Admin",
+        "startDate": "2020-10-21T09:15:39.100Z",
+        "testProp": "added_prop"
+    },
+    "articles": [
+        { "id": 1, "testProp": "added_prop" },
+        { "id": 2, "testProp": "added_prop" }
+    ],
+    "testProp": "added_prop"
+}
+```
