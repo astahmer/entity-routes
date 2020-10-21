@@ -1,5 +1,5 @@
-import { ROUTE_METAKEY, EntityRouteConfig } from "@/router/EntityRouter";
 import { RouteDefaultOperation } from "@/decorators/Groups";
+import { ROUTE_METAKEY, EntityRouteConfig } from "@/router/EntityRouter";
 
 /**
  * @example

@@ -17,7 +17,7 @@ import {
     DeleteDateColumn,
     UpdateResult,
 } from "typeorm";
-import { createTestConnection, closeTestConnection } from "@@/tests/testConnection";
+import { createTestConnection, closeTestConnection } from "@@/testConnection";
 import { IsString, IsDate, IsEmail } from "class-validator";
 import { Container } from "typedi";
 

@@ -1,7 +1,7 @@
-import { SearchFilterOptions, getSearchFilterDefaultConfig } from "@/filters/SearchFilter";
 import { FilterProperty } from "@/filters/AbstractFilter";
-import { registerFilterDecorator } from "@/filters/registerFilterDecorator";
+import { SearchFilterOptions, getSearchFilterDefaultConfig } from "@/filters/SearchFilter";
 import { StrategyType } from "@/filters/WhereManager";
+import { registerFilterDecorator } from "@/filters/registerFilterDecorator";
 import { isType } from "@/index";
 
 /**

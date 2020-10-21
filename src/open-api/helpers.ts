@@ -1,8 +1,9 @@
 import { SchemaObject } from "openapi3-ts";
 import { ColumnType } from "typeorm";
-import { RouteResponseType } from "@/router";
+
 import { RouteOperation } from "@/decorators";
 import { upperFirstLetter } from "@/functions/primitives";
+import { RouteResponseType } from "@/router";
 
 const idParamType = "(\\d+)";
 

@@ -1,6 +1,7 @@
-import { ObjectType, getConnectionManager, Connection, ConnectionManager } from "typeorm";
 import { getMetadataStorage } from "class-validator";
+import { ObjectType, getConnectionManager, Connection, ConnectionManager } from "typeorm";
 
+import { deepMerge } from "@/functions";
 import {
     EntityRouteOptions,
     getRouteMetadata,
@@ -10,7 +11,6 @@ import {
 } from "@/router/EntityRouter";
 import { setEntityRouter } from "@/router/container";
 import { AnyFunction } from "@/utils-types";
-import { deepMerge } from "@/functions";
 
 let connectionManager: ConnectionManager;
 

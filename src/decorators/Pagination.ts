@@ -1,5 +1,5 @@
-import { PaginationFilterOptions, getPaginationFilterDefaultConfig, OrderDirection } from "@/filters/PaginationFilter";
 import { FilterProperty } from "@/filters/AbstractFilter";
+import { PaginationFilterOptions, getPaginationFilterDefaultConfig, OrderDirection } from "@/filters/PaginationFilter";
 import { registerFilterDecorator } from "@/filters/registerFilterDecorator";
 
 /**

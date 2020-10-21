@@ -1,6 +1,6 @@
 import { PrimaryGeneratedColumn, Entity, Column, ManyToOne, getRepository, OneToMany } from "typeorm";
 import { Validator, RequestContext } from "@/index";
-import { createTestConnection, closeTestConnection } from "@@/tests/testConnection";
+import { createTestConnection, closeTestConnection } from "@@/testConnection";
 import { Container } from "typedi";
 import { IsString, IsEmail, IsDate, registerDecorator, ValidationArguments } from "class-validator";
 import { registerEntityDecorator } from "@astahmer/entity-validator";

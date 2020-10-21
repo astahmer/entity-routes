@@ -1,5 +1,6 @@
 import { idToIRI } from "@/functions/entity";
 import { GenericEntity, getRouteSubresourcesMetadata } from "@/router/EntityRouter";
+
 import { DecorateFnArgs } from "../Decorator";
 import { WriterOptions } from "../Writer";
 

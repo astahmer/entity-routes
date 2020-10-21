@@ -2,7 +2,7 @@ import { PrimaryGeneratedColumn, Entity, Column, ManyToOne } from "typeorm";
 import { IsString, IsEmail, IsDate } from "class-validator";
 import * as Router from "koa-router";
 
-import { createTestConnection, closeTestConnection } from "@@/tests/testConnection";
+import { createTestConnection, closeTestConnection } from "@@/testConnection";
 import {
     EntityRoute,
     getEntityRouters,

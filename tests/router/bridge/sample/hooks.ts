@@ -1,3 +1,7 @@
+import { AxiosRequestConfig } from "axios";
+
+import { closeTestConnection } from "@@/testConnection";
+
 import {
     RouteDefaultOperation,
     HookSchema,
@@ -6,8 +10,6 @@ import {
     fromEntries,
     CRUD_OPERATIONS,
 } from "@/index";
-import { AxiosRequestConfig } from "axios";
-import { closeTestConnection } from "@@/tests/testConnection";
 
 // An object of hooks name called for each operation
 type HooksCalled = Record<RouteDefaultOperation, string[]>;

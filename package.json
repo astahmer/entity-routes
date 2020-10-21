@@ -46,6 +46,7 @@
         "@babel/core": "^7.10.5",
         "@babel/plugin-proposal-optional-chaining": "^7.10.3",
         "@babel/preset-env": "^7.10.4",
+        "@trivago/prettier-plugin-sort-imports": "^1.2.0",
         "@types/body-parser": "^1.19.0",
         "@types/jest": "^26.0.3",
         "@types/koa": "^2.11.3",

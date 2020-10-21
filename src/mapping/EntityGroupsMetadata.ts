@@ -1,8 +1,9 @@
 import { EntityMetadata, getRepository } from "typeorm";
 
-import { GroupsMetadata, getInheritanceTree } from "./GroupsMetadata";
 import { RouteOperation, COMPUTED_PREFIX, MetaKey, getGroupsMetadata, ACCESSOR_PREFIX } from "@/decorators/Groups";
 import { combineUniqueValues } from "@/functions/array";
+
+import { GroupsMetadata, getInheritanceTree } from "./GroupsMetadata";
 
 export class EntityGroupsMetadata extends GroupsMetadata {
     /** EntityMetadata associated with the class */

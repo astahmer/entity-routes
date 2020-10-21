@@ -1,5 +1,5 @@
 import { PrimaryGeneratedColumn, Entity, Column, getRepository } from "typeorm";
-import { createTestConnection, closeTestConnection, makeTestCtx } from "@@/tests/testConnection";
+import { createTestConnection, closeTestConnection, makeTestCtx } from "@@/testConnection";
 import {
     MiddlewareMaker,
     Groups,
@@ -21,7 +21,7 @@ import {
     HookFnAfterRead,
     HookFnOnRespond,
 } from "@/index";
-import { setupKoaApp } from "@@/tests/router/bridge/koaSetup";
+import { setupKoaApp } from "@@/router/bridge/koaSetup";
 import { IsEmail } from "class-validator";
 import { Container } from "typedi";
 

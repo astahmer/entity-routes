@@ -1,6 +1,6 @@
+import { isEqualArrays } from "@/functions/array";
 import { Primitive } from "@/functions/primitives";
 import { BridgeRouterRoute } from "@/router/bridge/BridgeRouter";
-import { isEqualArrays } from "@/functions/array";
 
 export const formatRoutePath = (path: string) => (path[0] === "/" ? path.slice(1) : path);
 

@@ -1,7 +1,7 @@
 import { MappingManager, MappingItem, ENTITY_META_SYMBOL } from "@/mapping/MappingManager";
 import { Container } from "typedi";
 import { Entity, Column, getRepository, ManyToOne, PrimaryGeneratedColumn, OneToMany, EntityMetadata } from "typeorm";
-import { createTestConnection, closeTestConnection } from "@@/tests/testConnection";
+import { createTestConnection, closeTestConnection } from "@@/testConnection";
 import { EntityGroupsMetadata, Groups, GROUPS_METAKEY, Subresource } from "@/index";
 
 describe("MappingManager", () => {

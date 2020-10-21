@@ -1,6 +1,6 @@
 import { PrimaryGeneratedColumn, Entity, Column, ManyToOne, getRepository } from "typeorm";
 import { AliasHandler } from "@/index";
-import { createTestConnection, closeTestConnection } from "@@/tests/testConnection";
+import { createTestConnection, closeTestConnection } from "@@/testConnection";
 
 describe("AliasHandler", () => {
     class AbstractEntity {

@@ -1,5 +1,13 @@
-import { Brackets, WhereExpression } from "typeorm";
 import { Container } from "typedi";
+import { Brackets, WhereExpression } from "typeorm";
+
+import { RelationManager } from "@/database/RelationManager";
+import { StrategyType, WhereManager } from "@/filters/WhereManager";
+import { sortBy } from "@/functions/array";
+import { isDefined, isWhereType } from "@/functions/asserts";
+import { formatIriToId, isIriValidForProperty } from "@/functions/entity";
+import { setNestedKey, sortObjectByKeys, get } from "@/functions/object";
+import { ObjectLiteral } from "@/utils-types";
 
 import {
     AbstractFilter,
@@ -12,13 +20,6 @@ import {
     WhereMethod,
     WhereType,
 } from "./AbstractFilter";
-import { isDefined, isWhereType } from "@/functions/asserts";
-import { setNestedKey, sortObjectByKeys, get } from "@/functions/object";
-import { formatIriToId, isIriValidForProperty } from "@/functions/entity";
-import { RelationManager } from "@/database/RelationManager";
-import { StrategyType, WhereManager } from "@/filters/WhereManager";
-import { sortBy } from "@/functions/array";
-import { ObjectLiteral } from "@/utils-types";
 
 /** Add a/multiple where clause on any (deep?) properties of the decorated entity  */
 export class SearchFilter extends AbstractFilter<SearchFilterOptions, StrategyType> {

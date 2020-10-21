@@ -1,7 +1,8 @@
 import { ObjectType } from "typeorm";
 
-import { GenericEntity } from "./router/EntityRouter";
 import { PrimitiveValue } from "@/functions/index";
+
+import { GenericEntity } from "./router/EntityRouter";
 
 export type ObjectLiteral = Record<string, any>;
 export type PartialRecord<K extends keyof any, T> = Partial<Record<K, T>>;

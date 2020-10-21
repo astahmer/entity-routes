@@ -1,6 +1,6 @@
 import { PrimaryGeneratedColumn, Entity, Column, ManyToOne, getRepository, OneToMany } from "typeorm";
 import { Groups, DependsOn, Cleaner, MappingManager, isAnyItemPropMapped, MappingItem } from "@/index";
-import { createTestConnection, closeTestConnection } from "@@/tests/testConnection";
+import { createTestConnection, closeTestConnection } from "@@/testConnection";
 import { Container } from "typedi";
 
 describe("Cleaner", () => {

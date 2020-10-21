@@ -1,10 +1,11 @@
-import * as Router from "koa-router";
 import { Middleware, Context, Next } from "koa";
-import { BridgeRouterRoute, printBridgeRoute } from "@/router/bridge/BridgeRouter";
-import { MakeEntityRouters, makeEntityRouters } from "@/router/maker";
-import { EntityRouteOptions } from "@/router/EntityRouter";
-import { ContextAdapter } from "@/router/bridge/ContextAdapter";
+import * as Router from "koa-router";
+
 import { QueryParams } from "@/filters/index";
+import { EntityRouteOptions } from "@/router/EntityRouter";
+import { BridgeRouterRoute, printBridgeRoute } from "@/router/bridge/BridgeRouter";
+import { ContextAdapter } from "@/router/bridge/ContextAdapter";
+import { MakeEntityRouters, makeEntityRouters } from "@/router/maker";
 
 export function registerKoaRouteFromBridgeRoute(instance: Router, route: BridgeRouterRoute<Middleware>) {
     instance.register(route.path, route.methods, route.middlewares, { name: route.name });

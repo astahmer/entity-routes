@@ -1,11 +1,11 @@
 import { EntityMetadata } from "typeorm";
 
 import { RouteOperation } from "@/decorators/Groups";
-import { RouteMetadata, EntityRouterFactoryOptions } from "@/router/EntityRouter";
-import { BridgeRouter } from "@/router/bridge/BridgeRouter";
-import { CrudAction } from "@/router/MiddlewareMaker";
-import { formatRouteName } from "@/functions/route";
 import { isType } from "@/functions/asserts";
+import { formatRouteName } from "@/functions/route";
+import { RouteMetadata, EntityRouterFactoryOptions } from "@/router/EntityRouter";
+import { CrudAction } from "@/router/MiddlewareMaker";
+import { BridgeRouter } from "@/router/bridge/BridgeRouter";
 import { AnyFunction } from "@/utils-types";
 
 export function makeRouterFromActions<Data extends object = object, T extends AnyFunction = any>(

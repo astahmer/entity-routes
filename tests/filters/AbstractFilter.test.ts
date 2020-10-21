@@ -5,9 +5,9 @@ import {
     RouteFiltersMeta,
     GetPropMetaAtPathOptions,
 } from "@/index";
-import { createTestConnection, closeTestConnection } from "@@/tests/testConnection";
-import { Cache, CacheFilter, CacheFilterOptions } from "@@/tests/filters/sample/CacheFilter";
-import { GroupBy, GroupByFilter } from "@@/tests/filters/sample/GroupByFilter";
+import { createTestConnection, closeTestConnection } from "@@/testConnection";
+import { Cache, CacheFilter, CacheFilterOptions } from "@@/filters/sample/CacheFilter";
+import { GroupBy, GroupByFilter } from "@@/filters/sample/GroupByFilter";
 import { getRepository, Entity, PrimaryGeneratedColumn, Column, ManyToOne, EntityMetadata, Repository } from "typeorm";
 import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
 import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";

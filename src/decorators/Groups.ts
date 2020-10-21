@@ -1,7 +1,7 @@
 import { EntityMetadata } from "typeorm";
 
-import { GroupsMetadata } from "@/mapping/GroupsMetadata";
 import { EntityGroupsMetadata } from "@/mapping/EntityGroupsMetadata";
+import { GroupsMetadata } from "@/mapping/GroupsMetadata";
 import { PartialRecord } from "@/utils-types";
 
 /**

@@ -1,7 +1,7 @@
 import { PrimaryGeneratedColumn, Entity, Column, ManyToOne, OneToOne, getConnection } from "typeorm";
 import { IsString, IsEmail, IsDate, getMetadataStorage } from "class-validator";
 
-import { createTestConnection, closeTestConnection } from "@@/tests/testConnection";
+import { createTestConnection, closeTestConnection } from "@@/testConnection";
 import {
     EntityRoute,
     makeEntityRouters,

@@ -9,7 +9,7 @@ import {
     OneToMany,
 } from "typeorm";
 import { Groups, AliasHandler, RelationManager, DependsOn, Subresource, getSubresourceRelation } from "@/index";
-import { createTestConnection, closeTestConnection } from "@@/tests/testConnection";
+import { createTestConnection, closeTestConnection } from "@@/testConnection";
 import { Container } from "typedi";
 
 describe("RelationManager", () => {

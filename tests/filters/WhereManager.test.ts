@@ -8,7 +8,7 @@ import {
     DAY,
     COMPARISON_OPERATOR,
 } from "@/index";
-import { createTestConnection, closeTestConnection } from "@@/tests/testConnection";
+import { createTestConnection, closeTestConnection } from "@@/testConnection";
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, getRepository, EntityMetadata, Repository } from "typeorm";
 import { Container } from "typedi/Container";
 

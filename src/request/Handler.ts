@@ -1,3 +1,5 @@
+import { Repository } from "typeorm";
+
 import { GroupsOperation } from "@/decorators";
 import {
     CRUD_ACTIONS,
@@ -7,7 +9,7 @@ import {
     MiddlewareMaker,
     RouteController,
 } from "@/router";
-import { Repository } from "typeorm";
+
 import { ContextWithState } from "./store";
 
 /** Handle request and return the appropriate RouteController[method] result  */

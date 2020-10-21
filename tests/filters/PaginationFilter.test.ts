@@ -7,7 +7,7 @@ import {
     AliasHandler,
     OrderBy,
 } from "@/index";
-import { createTestConnection, closeTestConnection } from "@@/tests/testConnection";
+import { createTestConnection, closeTestConnection } from "@@/testConnection";
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, getRepository } from "typeorm";
 
 class AbstractEntity {

@@ -1,8 +1,10 @@
 import axios from "axios";
-import { AddressInfo } from "net";
 import * as Koa from "koa";
 import * as bodyParser from "koa-bodyparser";
-import { createTestConnection } from "@@/tests/testConnection";
+import { AddressInfo } from "net";
+
+import { createTestConnection } from "@@/testConnection";
+
 import { makeKoaEntityRouters, EntityRouteOptions } from "@/index";
 
 export async function setupKoaApp(entities: Function[], options?: EntityRouteOptions) {

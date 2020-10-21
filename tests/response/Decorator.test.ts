@@ -1,8 +1,10 @@
 import { Container } from "typedi";
 import { getRepository } from "typeorm";
+
+import { getWriterTestEntities, User, makeItem } from "@@/response/functions/sample/entities";
+import { createTestConnection, closeTestConnection } from "@@/testConnection";
+
 import { DecorateFn, DecorateFnArgs, Decorator, wait } from "@/index";
-import { createTestConnection, closeTestConnection } from "@@/tests/testConnection";
-import { getWriterTestEntities, User, makeItem } from "@@/tests/response/functions/sample/entities";
 
 describe("Decorator", () => {
     const entities = getWriterTestEntities();

@@ -1,5 +1,9 @@
-import { SelectQueryBuilder } from "typeorm";
 import { Container } from "typedi";
+import { SelectQueryBuilder } from "typeorm";
+
+import { AliasHandler } from "@/database/AliasHandler";
+import { RelationManager } from "@/database/RelationManager";
+import { OrderByOptions } from "@/decorators/Pagination";
 
 import {
     AbstractFilter,
@@ -9,9 +13,6 @@ import {
     QueryParams,
     QueryParamValue,
 } from "./AbstractFilter";
-import { AliasHandler } from "@/database/AliasHandler";
-import { RelationManager } from "@/database/RelationManager";
-import { OrderByOptions } from "@/decorators/Pagination";
 
 export class PaginationFilter extends AbstractFilter<PaginationFilterOptions> {
     get relationManager() {

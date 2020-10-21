@@ -1,6 +1,6 @@
 import { PrimaryGeneratedColumn, Column, Entity, getRepository, getConnection } from "typeorm";
 import { MiddlewareMaker, RequestState, Groups, ENTITY_META_SYMBOL, EntityRouteOptions, RouteResponse } from "@/index";
-import { createTestConnection, closeTestConnection, makeTestCtx, makeReqCtxWithState } from "@@/tests/testConnection";
+import { createTestConnection, closeTestConnection, makeTestCtx, makeReqCtxWithState } from "@@/testConnection";
 
 describe("MiddlewareMaker", () => {
     class AbstractEntity {

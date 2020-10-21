@@ -1,5 +1,5 @@
-import { PrimitiveValue } from "@/functions/primitives";
 import { get, getSelf } from "@/functions/object";
+import { PrimitiveValue } from "@/functions/primitives";
 
 /** Split an array in chunk of given size */
 export const chunk = <T = any>(arr: T[], size: number): T[] =>

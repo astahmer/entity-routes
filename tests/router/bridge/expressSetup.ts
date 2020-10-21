@@ -1,8 +1,10 @@
 import axios from "axios";
-import { AddressInfo } from "net";
-import * as express from "express";
 import * as bodyParser from "body-parser";
-import { createTestConnection } from "@@/tests/testConnection";
+import * as express from "express";
+import { AddressInfo } from "net";
+
+import { createTestConnection } from "@@/testConnection";
+
 import { makeExpressEntityRouters, EntityRouteOptions } from "@/index";
 
 export async function setupExpressApp(entities: Function[], options?: EntityRouteOptions) {

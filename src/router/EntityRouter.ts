@@ -1,10 +1,15 @@
 import { getRepository, ObjectType, Repository } from "typeorm";
 
+import { JoinAndSelectExposedPropsOptions } from "@/database";
 import { GroupsOperation, RouteOperation } from "@/decorators/Groups";
 import { AbstractFilterConfig } from "@/filters/AbstractFilter";
-import { RouteSubresourcesMeta, SubresourceMaker, SubresourceMakerOptions } from "@/router/SubresourceMaker";
-import { BridgeRouter, BridgeRouterRegisterFn } from "@/router/bridge/BridgeRouter";
+import { deepMerge } from "@/functions";
 import { formatRouteName } from "@/functions/route";
+import { HookSchema } from "@/request/hooks";
+import { WriterOptions } from "@/response";
+import { MiddlewareMaker, CRUD_ACTIONS } from "@/router/MiddlewareMaker";
+import { CreateUpdateOptions, ListDetailsOptions } from "@/router/RouteController";
+import { RouteSubresourcesMeta, SubresourceMaker, SubresourceMakerOptions } from "@/router/SubresourceMaker";
 import {
     RouteActionConstructorData,
     RouteActionConfig,
@@ -12,13 +17,8 @@ import {
     RouteActionFunctionOptions,
     RouteActionClassOptions,
 } from "@/router/actions";
-import { MiddlewareMaker, CRUD_ACTIONS } from "@/router/MiddlewareMaker";
+import { BridgeRouter, BridgeRouterRegisterFn } from "@/router/bridge/BridgeRouter";
 import { AnyFunction } from "@/utils-types";
-import { CreateUpdateOptions, ListDetailsOptions } from "@/router/RouteController";
-import { HookSchema } from "@/request/hooks";
-import { JoinAndSelectExposedPropsOptions } from "@/database";
-import { deepMerge } from "@/functions";
-import { WriterOptions } from "@/response";
 
 export class EntityRouter<Entity extends GenericEntity> {
     public readonly middlewareMaker: MiddlewareMaker<Entity>;

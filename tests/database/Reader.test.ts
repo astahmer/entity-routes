@@ -1,7 +1,7 @@
 import { Container } from "typedi";
 import { Reader, Persistor, Groups, AliasHandler } from "@/index";
 import { PrimaryGeneratedColumn, Entity, Column, ManyToOne, getRepository } from "typeorm";
-import { createTestConnection, closeTestConnection } from "@@/tests/testConnection";
+import { createTestConnection, closeTestConnection } from "@@/testConnection";
 import { IsEmail } from "class-validator";
 
 describe("Reader", () => {

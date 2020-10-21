@@ -18,8 +18,8 @@ import {
     EntityRouterOptions,
 } from "@/index";
 import { PrimaryGeneratedColumn, Entity, Column, ManyToOne, OneToMany, getRepository } from "typeorm";
-import { createTestConnection, closeTestConnection } from "@@/tests/testConnection";
-import { User, Manager, Article, Comment, Upvote } from "@@/tests/router/sample/entities";
+import { createTestConnection, closeTestConnection } from "@@/testConnection";
+import { User, Manager, Article, Comment, Upvote } from "@@/router/sample/entities";
 
 describe("SubresourceManager", () => {
     const options: EntityRouterFactoryOptions = {

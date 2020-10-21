@@ -1,9 +1,12 @@
 {
+    "parser": "babel-ts",
     "printWidth": 120,
     "tabWidth": 4,
     "arrowParens": "always",
     "useTabs": false,
     "semi": true,
     "singleQuote": false,
-    "trailingComma": "es5"
+    "trailingComma": "es5",
+    "importOrder": ["^@@/(.*)$", "^@/(.*)$", "^[./]"],
+    "importOrderSeparation": true
 }

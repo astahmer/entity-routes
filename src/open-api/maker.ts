@@ -1,4 +1,3 @@
-import { Container } from "typedi";
 import {
     OpenAPIObject,
     OpenApiBuilder,
@@ -9,6 +8,8 @@ import {
     PathItemObject,
     SchemaObject,
 } from "openapi3-ts";
+import { Container } from "typedi";
+
 import {
     deepMerge,
     MappingManager,
@@ -19,6 +20,7 @@ import {
     fromEntries,
     sortObjectByKeys,
 } from "@/index";
+
 import { addComponentsReferences } from "./baseReferences";
 import {
     getOpenApiPath,
