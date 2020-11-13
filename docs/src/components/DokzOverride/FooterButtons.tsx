@@ -1,30 +1,23 @@
 import { useContext } from "react";
 import NextLink from "next/link";
-import { useRouter } from "next/router";
 
 import { Box, Flex, Stack } from "@chakra-ui/core";
 import { css } from "@emotion/core";
 
-import { DirectoryTree, formatTitle } from "dokz/dist/components/support";
 import { Arrow } from "dokz/dist/components/icons";
 import { WrapperContext } from "../Wrapper";
+import { removeMdxExt } from "@/functions/sidebar";
 
 // https://github.com/remorses/dokz/blob/7c642491cfce83b5d9a17f486c7b954dae640299/dokz/src/components/FooterButtons.tsx
 export const FooterButtons = ({ ...rest }) => {
-    const router = useRouter();
-    const pathname = router?.pathname || "";
-    const { sidebarTree } = useContext(WrapperContext);
-    const { next: nextTree, previous: prevTree } = findSubtreeInPathByUrl(sidebarTree, pathname) || {};
+    const { next: nextTree, previous: prevTree } = useContext(WrapperContext);
 
     const [isPrevDir, isNextDir] = [prevTree?.children?.length, nextTree?.children?.length];
     const [prev, next] = [
         isPrevDir ? prevTree.children[prevTree.children.length - 1] : prevTree,
         isNextDir ? nextTree.children[0] : nextTree,
     ];
-    const [prevTitle, nextTitle] = [
-        isPrevDir ? `${formatTitle(prevTree.name)}: ${prev.title}` : formatTitle(prev?.name || prev?.title || ""),
-        isNextDir ? `${formatTitle(nextTree.name)}: ${next.title}` : formatTitle(next?.name || next?.title || ""),
-    ];
+    const [prevTitle, nextTitle] = [removeMdxExt(prev?.meta?.title || ""), removeMdxExt(next?.meta?.title || "")];
     // TODO Update chakra-ui to 1.0
     // https://github.com/chakra-ui/chakra-ui/issues/798
     return (
@@ -71,29 +64,3 @@ const Button = ({ href = "", title, type, ...rest }) => {
         </NextLink>
     );
 };
-
-export function findSubtreeInPathByUrl(
-    tree: DirectoryTree,
-    url: string,
-    parent?: DirectoryTree,
-    parentIndex?: number
-): { current?: DirectoryTree; previous?: DirectoryTree; next?: DirectoryTree } {
-    if (!tree?.children?.length) {
-        return null;
-    }
-    for (let i = 0; i < tree.children.length; i++) {
-        let child = tree.children[i];
-        if (child.url === url) {
-            // console.log({ child, tree, parent });
-            return {
-                previous: tree.children[i - 1] || parent?.children[parentIndex - 1],
-                current: tree,
-                next: tree.children[i + 1] || parent?.children[parentIndex + 1],
-            };
-        }
-        let found = findSubtreeInPathByUrl(child, url, tree, i);
-        if (found) {
-            return found;
-        }
-    }
-}

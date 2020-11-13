@@ -1,11 +1,11 @@
 import { Box, Collapse, Divider, Stack, useDisclosure } from "@chakra-ui/core";
-import { DirectoryTree, formatTitle } from "dokz/dist/components/support";
 import { SideNavProps as DokzSideNavProps } from "dokz/dist/components/SideNav";
 
 import { CollapseDown } from "./CollapseDown";
 import { CollapseRight } from "./CollapseRight";
 import { ComponentLink } from "dokz/dist/components/NavLink";
 import { useRouter } from "next/router";
+import { DirectoryTree, MDX_EXTENSION_REGEX } from "@/functions/sidebar";
 
 // Modified version of SideNav taken from source directly at
 // https://github.com/remorses/dokz/blob/61f9ddbbc923c2b287de86f8ec6e482b8afd4846/dokz/src/components/SideNav.tsx
@@ -23,7 +23,7 @@ export const SideNav = ({ tree, ...rest }: DokzSideNavProps) => {
                 {tree.children.map((x, i) => (
                     <NavTreeComponent
                         hideDivider
-                        key={i + "" + (x.path || x.title)}
+                        key={i + "" + (x.path || x.url)}
                         activeRoute={router.pathname}
                         {...x}
                     />
@@ -33,23 +33,26 @@ export const SideNav = ({ tree, ...rest }: DokzSideNavProps) => {
     );
 };
 
+const formatTitle = (name: string) =>
+    capitalizeFirstLetter(name.replace(/_/g, " ").replace(/-/g, " ").replace(MDX_EXTENSION_REGEX, ""));
+const capitalizeFirstLetter = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
+
 const NavTreeComponent = ({
     name = "",
     children,
     depth = 0,
     hideDivider = false,
     url = "",
-    title = "",
     meta = {},
     activeRoute,
     parentDefaultOpened,
 }: DirectoryTree & { depth?: number; hideDivider?: boolean; activeRoute: string; parentDefaultOpened?: boolean }) => {
     const isFolder = !url;
-    const formattedTitle = meta.sidebar_label || meta.title || title || formatTitle(name || "");
+    const formattedTitle = meta.sidebar_label || meta.title || formatTitle(name);
     const subTree = children?.map((x, i) => {
         return (
             <NavTreeComponent
-                key={i + "" + (x.path || x.title)}
+                key={i + "" + (x.path || x.url)}
                 {...x}
                 depth={depth + 1}
                 activeRoute={activeRoute}
@@ -68,8 +71,10 @@ const NavTreeComponent = ({
     if (isFolder && depth > 0) {
         const isRouteActive = findActiveRouteRecursive(children);
         // If folder.meta.defaultOpened = false OR if a parent folder.meta.childrenDefaultOpened = false
-        // Then collapse children initially
-        const defaultOpened = (meta.defaultOpened === false || parentDefaultOpened === false) && isRouteActive;
+        // Then collapse (close) children initially
+        const defaultClosed = meta.defaultOpened === false || parentDefaultOpened === false;
+        // TODO localStorage
+        const defaultOpened = defaultClosed ? false : isRouteActive;
         return (
             <CollapsableTreeNode
                 depth={depth}

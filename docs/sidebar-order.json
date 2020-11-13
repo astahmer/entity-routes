@@ -1,6 +1,6 @@
 {
     "routes": [
-        { "name": "index.md", "title": "Features" },
+        { "name": "index.md" },
         { "name": "getting-started" },
         {
             "name": "entity-routes",
@@ -27,7 +27,7 @@
                         { "name": "introduction" },
                         { "name": "search", "url": "/internals/filters/search-filter" },
                         { "name": "pagination", "url": "/internals/filters/pagination-filter" },
-                        { "name": "custom-filter", "title": "Making a custom fitler" }
+                        { "name": "custom-filter" }
                     ]
                 },
                 {
@@ -35,14 +35,14 @@
                     "meta": { "defaultOpened": false },
                     "routes": [
                         { "name": "list" },
-                        { "title": "@EntityRoute", "url": "/entity-routes/entity-router" },
-                        { "title": "@Groups", "url": "/entity-routes/groups/introduction" },
-                        { "title": "@Subresources", "url": "/entity-routes/subresources" },
-                        { "name": "depends-on", "title": "@DependsOn" },
-                        { "title": "@MaxDepth", "url": "/entity-routes/groups/max-depth" },
-                        { "title": "@Search", "url": "/entity-routes/filters/search" },
-                        { "title": "@Pagination", "url": "/entity-routes/filters/pagination" },
-                        { "title": "@OrderBy", "url": "/entity-routes/filters/pagination#order-by" }
+                        { "url": "/entity-routes/entity-router", "meta": { "title": "@EntityRoute" } },
+                        { "url": "/entity-routes/groups/introduction", "meta": { "title": "@Groups" } },
+                        { "url": "/entity-routes/subresources", "meta": { "title": "@Subresources" } },
+                        { "name": "depends-on" },
+                        { "url": "/entity-routes/groups/max-depth", "meta": { "title": "@MaxDepth" } },
+                        { "url": "/entity-routes/filters/search", "meta": { "title": "@Search" } },
+                        { "url": "/entity-routes/filters/pagination", "meta": { "title": "@Pagination" } },
+                        { "url": "/entity-routes/filters/pagination#order-by", "meta": { "title": "@OrderBy" } }
                     ]
                 },
                 { "name": "request-context" },
@@ -51,7 +51,7 @@
                 { "name": "request-lifecycle" }
             ]
         },
-        { "name": "internals", "hidden": true },
+        { "name": "internals", "meta": { "hidden": true } },
         { "name": "compatibility" },
         { "name": "definitions", "meta": { "childrenDefaultOpened": false }, "routes": [{ "name": "index.md" }] }
     ]

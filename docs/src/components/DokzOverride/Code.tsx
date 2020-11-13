@@ -74,38 +74,17 @@ export function Code(props: CodeProps) {
                 codeBlockIdentifier={identifier}
             />
             {topLeft && (
-                <Box
-                    className="dokz hiddenInPrint"
-                    opacity={0.7}
-                    fontSize="0.8em"
-                    position="absolute"
-                    left="10px"
-                    top="5px"
-                >
+                <Box className="dokz" opacity={0.7} fontSize="0.8em" position="absolute" left="10px" top="5px">
                     {topLeft}
                 </Box>
             )}
             {bottomLeft && (
-                <Box
-                    className="dokz hiddenInPrint"
-                    opacity={0.8}
-                    fontSize="0.9em"
-                    position="absolute"
-                    left="10px"
-                    bottom="5px"
-                >
+                <Box className="dokz" opacity={0.8} fontSize="0.9em" position="absolute" left="10px" bottom="5px">
                     {bottomLeft}
                 </Box>
             )}
             {bottomRight && (
-                <Box
-                    className="dokz hiddenInPrint"
-                    opacity={0.6}
-                    fontSize="0.7em"
-                    position="absolute"
-                    right="10px"
-                    bottom="8px"
-                >
+                <Box className="dokz" opacity={0.6} fontSize="0.7em" position="absolute" right="10px" bottom="8px">
                     {bottomRight}
                 </Box>
             )}
@@ -159,7 +138,7 @@ export const DokzCode = ({ children, className, isOpen, preProps, ...rest }) => 
                             spacing={2}
                             direction="row"
                             alignItems="center"
-                            className="dokz hiddenInPrint"
+                            className="dokz"
                             position="absolute"
                             top={!isShort && "8px"}
                             bottom={isShort && "-20px"}
