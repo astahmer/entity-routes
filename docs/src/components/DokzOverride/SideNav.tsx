@@ -1,15 +1,12 @@
-import { Box, Collapse, Divider, Stack, useDisclosure } from "@chakra-ui/core";
-import { SideNavProps as DokzSideNavProps } from "dokz/dist/components/SideNav";
+import { Box, BoxProps, Collapse, Divider, Stack, useDisclosure } from "@chakra-ui/core";
 
 import { CollapseDown } from "./CollapseDown";
 import { CollapseRight } from "./CollapseRight";
-import { ComponentLink } from "dokz/dist/components/NavLink";
 import { useRouter } from "next/router";
 import { DirectoryTree, MDX_EXTENSION_REGEX } from "@/functions/sidebar";
+import { ComponentLink } from "./NavLink";
 
-// Modified version of SideNav taken from source directly at
-// https://github.com/remorses/dokz/blob/61f9ddbbc923c2b287de86f8ec6e482b8afd4846/dokz/src/components/SideNav.tsx
-export const SideNav = ({ tree, ...rest }: DokzSideNavProps) => {
+export const SideNav = ({ tree, ...rest }: { tree: DirectoryTree } & BoxProps) => {
     const router = useRouter();
 
     if (!tree) {

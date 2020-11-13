@@ -21,7 +21,7 @@ import {
     Stack,
     Textarea,
 } from "@chakra-ui/core";
-import React, { useRef, useState, useContext, useMemo } from "react";
+import { useRef, useState, useContext, useMemo } from "react";
 import { BasicDialog } from "../BasicDialog";
 import { SubresourcePlaygroundContext } from "./helpers";
 

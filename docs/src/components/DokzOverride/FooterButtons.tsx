@@ -4,11 +4,10 @@ import NextLink from "next/link";
 import { Box, Flex, Stack } from "@chakra-ui/core";
 import { css } from "@emotion/core";
 
-import { Arrow } from "dokz/dist/components/icons";
 import { WrapperContext } from "../Wrapper";
 import { removeMdxExt } from "@/functions/sidebar";
+import { Arrow } from "./icons";
 
-// https://github.com/remorses/dokz/blob/7c642491cfce83b5d9a17f486c7b954dae640299/dokz/src/components/FooterButtons.tsx
 export const FooterButtons = ({ ...rest }) => {
     const { next: nextTree, previous: prevTree } = useContext(WrapperContext);
 

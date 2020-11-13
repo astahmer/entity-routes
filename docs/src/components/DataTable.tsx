@@ -1,4 +1,4 @@
-import { MDXComponents } from "dokz";
+import MDXComponents from "@/components/DokzOverride/mdx";
 import { BoxProps } from "@chakra-ui/core";
 import { Table } from "./Table";
 

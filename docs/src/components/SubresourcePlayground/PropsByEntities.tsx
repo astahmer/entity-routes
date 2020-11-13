@@ -15,7 +15,7 @@ import {
     Flex,
     CheckboxGroup,
 } from "@chakra-ui/core";
-import React, { useContext, ChangeEvent } from "react";
+import { useContext, ChangeEvent } from "react";
 import { SubresourcePlaygroundContext } from "./helpers";
 
 export function PropsByEntities() {

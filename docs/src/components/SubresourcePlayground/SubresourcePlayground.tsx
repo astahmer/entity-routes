@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { Stack, Divider } from "@chakra-ui/core";
 import {
     Entities,

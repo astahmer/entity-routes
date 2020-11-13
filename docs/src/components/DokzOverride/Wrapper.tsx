@@ -1,24 +1,21 @@
-import { useColorMode, theme, Box, CSSReset, Stack, Flex } from "@chakra-ui/core";
-import { css, Global } from "@emotion/core";
+/** @jsx jsx */
+import { useColorMode, theme, Box, CSSReset, Stack, Flex, useTheme, ThemeProvider } from "@chakra-ui/core";
+import { css, Global, jsx } from "@emotion/core";
 
-import { useDokzConfig } from "dokz";
-import { DirectoryTree, globalStyles } from "dokz/dist/components/support";
-import { PropagatedThemeProvider } from "dokz/dist/components/Wrapper";
-
+import { useLayoutConfig } from "@/components/LayoutProvider";
 import { SideNav } from "./SideNav";
 import { PropsWithChildren, useContext } from "react";
 import { WrapperContext } from "../Wrapper";
 import { FooterButtons } from "./FooterButtons";
 import NavBar from "./NavBar";
 import { TableOfContents } from "./TableOfContents";
+import { DirectoryTree } from "@/functions/sidebar";
+import { useMemo } from "react";
 
 const SIDENAV_W = 280;
 const TABLE_OF_C_W = 200;
-
 const NAVBAR_H = 62;
 
-// Modified version of Wrapper taken from source directly at
-// https://github.com/remorses/dokz/blob/7c642491cf/dokz/src/components/Wrapper.tsx
 export function DokzWrapper({ children, currentItem }: PropsWithChildren<{ currentItem: DirectoryTree }>) {
     const {
         footer,
@@ -29,7 +26,7 @@ export function DokzWrapper({ children, currentItem }: PropsWithChildren<{ curre
         fontSize,
         fontWeight,
         fontFamily,
-    } = useDokzConfig();
+    } = useLayoutConfig();
     const { sidebarTree, tableOfContentsItems } = useContext(WrapperContext);
     const { colorMode } = useColorMode();
     return (
@@ -130,3 +127,37 @@ export function DokzWrapper({ children, currentItem }: PropsWithChildren<{ curre
         </PropagatedThemeProvider>
     );
 }
+
+export function PropagatedThemeProvider({ theme, children }) {
+    const existingTheme = useTheme();
+    // console.log({ existingTheme: existingTheme.sizes })
+    const merged = useMemo(() => ({ ...existingTheme, ...theme }), [theme, existingTheme]);
+    return <ThemeProvider theme={merged}>{children}</ThemeProvider>;
+}
+
+export const globalStyles = css`
+    * {
+        box-sizing: border-box;
+    }
+    html {
+        height: 100%;
+    }
+    #__next {
+        min-height: 100%;
+        overflow-x: hidden;
+    }
+    body {
+        height: 100%;
+        overflow: auto;
+        scroll-behavior: smooth;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        text-rendering: optimizeLegibility;
+    }
+    ul.dokz {
+        list-style-type: none;
+    }
+    .dokz.mainContent {
+        -webkit-overflow-scrolling: touch;
+    }
+`;

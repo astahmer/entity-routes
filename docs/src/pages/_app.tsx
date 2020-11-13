@@ -1,10 +1,13 @@
-import { DokzProvider, GithubLink, ColorModeSwitch, Link, MDXComponents } from "dokz";
-import React, { Fragment } from "react";
+import { Fragment } from "react";
 import Head from "next/head";
 
 import { Code, Table, Wrapper } from "@/components";
 import { Divider } from "@chakra-ui/core";
 import { ListItem } from "@/components/DokzOverride/ListItem";
+import { ColorModeSwitch, GithubLink } from "@/components/DokzOverride/NavBar";
+import MDXComponents from "@/components/DokzOverride/mdx";
+import { Link } from "@/components/DokzOverride/Link";
+import { LayoutProvider } from "@/components/LayoutProvider";
 
 export default function App(props) {
     const { Component, pageProps } = props;
@@ -17,7 +20,7 @@ export default function App(props) {
                     key="google-font-Fira"
                 />
             </Head>
-            <DokzProvider
+            <LayoutProvider
                 headerLogo={
                     <Link href="/">
                         <img src="/logo-full.png" style={{ opacity: 0.8 }} width="200px" />
@@ -28,8 +31,6 @@ export default function App(props) {
                     <GithubLink key="0" url="https://github.com/astahmer/entity-routes" />,
                     <ColorModeSwitch key="1" />,
                 ]}
-                githubUrl="astahmer/entity-routes/docs"
-                branch="main"
                 initialColorMode="dark"
                 maxPageWidth="1350px"
                 mdxComponents={{
@@ -52,7 +53,7 @@ export default function App(props) {
                 }}
             >
                 <Component {...pageProps} />
-            </DokzProvider>
+            </LayoutProvider>
         </Fragment>
     );
 }

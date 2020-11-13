@@ -1,9 +1,9 @@
 import { Box } from "@chakra-ui/core";
-import { useDokzConfig } from "dokz";
-import React, { Children, isValidElement, cloneElement } from "react";
+import { useLayoutConfig } from "@/components/LayoutProvider";
+import { Children, isValidElement, cloneElement } from "react";
 
 export function ListItem({ isOdd, isOrdered, children, ...props }) {
-    const { listItemIcon, listItemIconEmpty } = useDokzConfig();
+    const { listItemIcon, listItemIconEmpty } = useLayoutConfig();
     const listIcon = isOrdered ? (
         <Box display="inline-block" />
     ) : (

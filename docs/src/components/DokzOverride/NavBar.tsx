@@ -1,7 +1,7 @@
 /** @jsx jsx */
 import { Box, Flex, IconButton, useColorMode, PseudoBox, Stack } from "@chakra-ui/core";
 import { jsx } from "@emotion/core";
-import { useDokzConfig } from "dokz";
+import { useLayoutConfig } from "@/components/LayoutProvider";
 import { DiGithubBadge } from "react-icons/di";
 import MobileNav from "./MobileNav";
 
@@ -43,7 +43,7 @@ export const ColorModeSwitch = ({ ...rest }) => {
 const NavBar = ({ logo, tree = null as any, items: navs, ...props }) => {
     const { colorMode } = useColorMode();
     const bg = { light: "white", dark: "gray.800" };
-    const { maxPageWidth } = useDokzConfig();
+    const { maxPageWidth } = useLayoutConfig();
     return (
         <Stack
             bg={bg[colorMode]}

@@ -16,7 +16,7 @@ import {
     IconButton,
     Stack,
 } from "@chakra-ui/core";
-import React, { useContext } from "react";
+import { useContext } from "react";
 import {
     SubresourcePlaygroundContext,
     setValueAt,

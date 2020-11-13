@@ -1,12 +1,12 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/core";
-import { useDokzConfig } from "dokz";
+import { useLayoutConfig } from "@/components/LayoutProvider";
 import { ReactNode, useState, useRef } from "react";
 import { Box, Collapse, Switch, Flex, Text, useColorMode, useClipboard, BoxProps, Stack, Link } from "@chakra-ui/core";
-import { CopyButton } from "dokz/dist/components/Code";
 import Highlight, { defaultProps } from "prism-react-renderer";
 import rangeParser from "parse-numeric-range";
 import { getIndex, increment } from "@/functions/codeBlocks";
+import { FiCheck, FiCopy } from "react-icons/fi";
 
 export type CodeProps = {
     className: string;
@@ -98,13 +98,11 @@ export function Code(props: CodeProps) {
     );
 }
 
-// Directly taken from https://github.com/remorses/dokz/blob/375f3ab217/dokz/src/components/Code.tsx
-// Replaced codeblock Box with Collapse & pass isOpen/startingHeight
 const langRegex = /language-/;
 export const DokzCode = ({ children, className, isOpen, preProps, ...rest }) => {
     // console.log({rest, live})
     const { colorMode } = useColorMode();
-    let { prismTheme } = useDokzConfig();
+    let { prismTheme } = useLayoutConfig();
 
     const code = typeof children === "string" ? children.trim() : "";
     const language = className && className.replace(langRegex, "");
@@ -244,6 +242,23 @@ export function extractMeta<T = Record<string, string>>(string: string): Partial
 
     return metas;
 }
+
+export const CopyButton = (props) => {
+    const { hasCopied } = props;
+    return (
+        <Box
+            cursor="pointer"
+            m="0"
+            style={{
+                strokeWidth: "2px",
+            }}
+            opacity={0.7}
+            size="1em"
+            as={hasCopied ? FiCheck : FiCopy}
+            {...props}
+        />
+    );
+};
 
 // Taken from https://prince.dev/highlight-with-react
 const RE = /{([\d,-]+)}/;

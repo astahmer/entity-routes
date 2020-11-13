@@ -1,12 +1,10 @@
 import { createContext, useMemo } from "react";
 import { Stack } from "@chakra-ui/core";
-import { MDXComponents } from "dokz";
-import { reset } from "@/functions/codeBlocks";
+import MDXComponents from "@/components/DokzOverride/mdx";
 import GithubSlugger from "github-slugger";
 
 // Dokz override
 import { DokzWrapper, TableOfContentItem } from "./DokzOverride";
-import { useRouteChanged } from "@/functions/useRouteChanged";
 import { useRouter } from "next/router";
 import {
     defaultSidebarTree,
@@ -34,16 +32,6 @@ export const Wrapper = ({ children, meta: { tableOfContents } }) => {
     const hasTitle = meta.title && !meta.withoutH1;
 
     // TODO Gtag manager ?
-    // On route change, reset code block count & scroll to top if no anchor used
-    useRouteChanged({
-        onStart: reset,
-        onComplete: () => {
-            if (window.location.hash) return;
-            document.body.style.scrollBehavior = "auto";
-            document.body.scrollTo({ top: 0, left: 0, behavior: "auto" });
-            document.body.style.scrollBehavior = "smooth";
-        },
-    });
 
     return (
         <WrapperContext.Provider value={{ sidebarTree, tableOfContentsItems: tableOfContents, ...sidebarItemData }}>
