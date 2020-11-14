@@ -1,4 +1,4 @@
-import { Link as Link_, LinkProps as LinkProps_, useColorMode } from "@chakra-ui/core";
+import { Link as Link_, LinkProps as LinkProps_, useColorMode } from "@chakra-ui/react";
 
 export type LinkProps = LinkProps_;
 
@@ -16,7 +16,6 @@ export const Link = ({ children, ...props }: LinkProps) => {
             borderBottom="2px solid"
             borderColor="transparent"
             py="0.2em"
-            // isTruncated
             transition="border-color 0.2s ease-in-out 0s"
             _hover={{
                 borderColor: "currentColor",

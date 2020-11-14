@@ -1,11 +1,8 @@
-/** @jsx jsx */
-import { jsx } from "@emotion/core";
 import { useLayoutConfig } from "@/components/LayoutProvider";
-import { ReactNode, useState, useRef } from "react";
-import { Box, Collapse, Switch, Flex, Text, useColorMode, useClipboard, BoxProps, Stack, Link } from "@chakra-ui/core";
+import { ReactNode, useState, useRef, useEffect } from "react";
+import { Box, Collapse, Switch, Flex, Text, useColorMode, useClipboard, BoxProps, Stack, Link } from "@chakra-ui/react";
 import Highlight, { defaultProps } from "prism-react-renderer";
 import rangeParser from "parse-numeric-range";
-import { getIndex, increment } from "@/functions/codeBlocks";
 import { FiCheck, FiCopy } from "react-icons/fi";
 
 export type CodeProps = {
@@ -40,10 +37,12 @@ export function Code(props: CodeProps) {
     const index = useRef(getIndex());
     const identifier = `code-${slug || index.current}` + (withoutLang ? "" : `-${language}`);
 
-    // Only increment code count on first render (not in useEffect so that it works in SSR) and if no custom slug used
-    if (!slug && getIndex() === index.current) {
-        increment();
-    }
+    useEffect(() => {
+        // Only increment code count on first render & if no custom slug used
+        if (!slug && getIndex() === index.current) {
+            increment();
+        }
+    }, []);
 
     return (
         <Box position="relative" id={identifier} css={{ "&:hover a": { opacity: 1 } }}>
@@ -74,17 +73,17 @@ export function Code(props: CodeProps) {
                 codeBlockIdentifier={identifier}
             />
             {topLeft && (
-                <Box className="dokz" opacity={0.7} fontSize="0.8em" position="absolute" left="10px" top="5px">
+                <Box opacity={0.7} fontSize="0.8em" position="absolute" left="10px" top="5px">
                     {topLeft}
                 </Box>
             )}
             {bottomLeft && (
-                <Box className="dokz" opacity={0.8} fontSize="0.9em" position="absolute" left="10px" bottom="5px">
+                <Box opacity={0.8} fontSize="0.9em" position="absolute" left="10px" bottom="5px">
                     {bottomLeft}
                 </Box>
             )}
             {bottomRight && (
-                <Box className="dokz" opacity={0.6} fontSize="0.7em" position="absolute" right="10px" bottom="8px">
+                <Box opacity={0.6} fontSize="0.7em" position="absolute" right="10px" bottom="8px">
                     {bottomRight}
                 </Box>
             )}
@@ -117,64 +116,59 @@ export const DokzCode = ({ children, className, isOpen, preProps, ...rest }) => 
         <Box position="relative" mb={isShort && "10px"}>
             <Highlight {...defaultProps} theme={prismTheme[colorMode]} code={code} language={language}>
                 {({ className, style, tokens, getLineProps, getTokenProps }) => (
-                    <Collapse
+                    <Box
                         p={!isShort && !isMinimal ? "20px" : "10px"}
-                        // pt='30px'
                         borderRadius="8px"
                         as="pre"
                         fontSize="0.85em"
-                        className={"dokz codeContainer " + className}
+                        className={"codeContainer " + className}
                         style={{ ...style }}
-                        // boxShadow='0 0 10px 20px rgba(0,0,0,0.01)'
                         shadow="sm"
                         overflowX="auto"
                         {...preProps}
-                        isOpen={isOpen}
-                        startingHeight={100}
                     >
-                        <Stack
-                            spacing={2}
-                            direction="row"
-                            alignItems="center"
-                            className="dokz"
-                            position="absolute"
-                            top={!isShort && "8px"}
-                            bottom={isShort && "-20px"}
-                            right="10px"
-                        >
-                            <Box opacity={0.6} fontSize="0.9em">
-                                {language}
-                            </Box>
-                            <CopyButton onClick={onCopy} hasCopied={hasCopied} />
-                        </Stack>
-                        {tokens.map((line, i) => (
-                            <Box
-                                key={i}
-                                {...getLineProps({ line, key: i })}
-                                bg={shouldHighlightLine(i) && "gray.600"}
-                                width="fit-content"
-                                id={`${rest.codeBlockIdentifier}-line-${i + 1}`}
+                        <Collapse in={isOpen} startingHeight={100}>
+                            <Stack
+                                spacing={2}
+                                direction="row"
+                                alignItems="center"
+                                position="absolute"
+                                top={!isShort ? "8px" : "-20px"}
+                                right="10px"
                             >
-                                <Link
-                                    display="inline-block"
-                                    // position='absolute'
-                                    textAlign="right"
-                                    w={!isShort ? "40px" : "20px"}
-                                    opacity={0.4}
-                                    pr={!isShort ? "30px" : "15px"}
-                                    aria-label="anchor"
-                                    as="a"
-                                    href={`#${rest.codeBlockIdentifier}-line-${i + 1}`}
-                                    userSelect="none"
+                                <Box opacity={0.6} fontSize="0.9em">
+                                    {language}
+                                </Box>
+                                <CopyButton onClick={onCopy} hasCopied={hasCopied} />
+                            </Stack>
+                            {tokens.map((line, i) => (
+                                <Box
+                                    key={i}
+                                    {...getLineProps({ line, key: i })}
+                                    bg={shouldHighlightLine(i) && "gray.600"}
+                                    width="fit-content"
+                                    id={`${rest.codeBlockIdentifier}-line-${i + 1}`}
                                 >
-                                    {i + 1}
-                                </Link>
-                                {line.map((token, key) => (
-                                    <span key={key} {...getTokenProps({ token, key })} />
-                                ))}
-                            </Box>
-                        ))}
-                    </Collapse>
+                                    <Link
+                                        display="inline-block"
+                                        textAlign="right"
+                                        w={!isShort ? "40px" : "20px"}
+                                        opacity={0.4}
+                                        pr={!isShort ? "30px" : "15px"}
+                                        aria-label="anchor"
+                                        as="a"
+                                        href={`#${rest.codeBlockIdentifier}-line-${i + 1}`}
+                                        userSelect="none"
+                                    >
+                                        {i + 1}
+                                    </Link>
+                                    {line.map((token, key) => (
+                                        <span key={key} {...getTokenProps({ token, key })} />
+                                    ))}
+                                </Box>
+                            ))}
+                        </Collapse>
+                    </Box>
                 )}
             </Highlight>
         </Box>
@@ -243,8 +237,7 @@ export function extractMeta<T = Record<string, string>>(string: string): Partial
     return metas;
 }
 
-export const CopyButton = (props) => {
-    const { hasCopied } = props;
+export const CopyButton = ({ hasCopied }: { hasCopied: boolean } & BoxProps) => {
     return (
         <Box
             cursor="pointer"
@@ -255,7 +248,6 @@ export const CopyButton = (props) => {
             opacity={0.7}
             size="1em"
             as={hasCopied ? FiCheck : FiCopy}
-            {...props}
         />
     );
 };
@@ -271,3 +263,8 @@ export const calculateLinesToHighlight = (meta) => {
         return () => false;
     }
 };
+
+let current = 0;
+const getIndex = () => current;
+const increment = () => current++;
+export const resetCodeBlockCount = () => (current = 0);

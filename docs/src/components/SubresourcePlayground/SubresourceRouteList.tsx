@@ -1,8 +1,9 @@
+import { DeleteIcon } from "@chakra-ui/icons";
 import {
     Accordion,
     Flex,
     AccordionItem,
-    AccordionHeader,
+    AccordionButton,
     Box,
     AccordionIcon,
     AccordionPanel,
@@ -15,7 +16,7 @@ import {
     MenuItem,
     IconButton,
     Stack,
-} from "@chakra-ui/core";
+} from "@chakra-ui/react";
 import { useContext } from "react";
 import {
     SubresourcePlaygroundContext,
@@ -69,12 +70,12 @@ export function SubresourceRouteList() {
                         borderTop={!i && "none"}
                         borderBottom={i === entitiesWithRoutes.length - 1 && "none"}
                     >
-                        <AccordionHeader>
+                        <AccordionButton>
                             <Box flex="1" textAlign="left">
                                 {entity} routes
                             </Box>
                             <AccordionIcon />
-                        </AccordionHeader>
+                        </AccordionButton>
                         <AccordionPanel pb={1}>
                             {entities[entity].routes.map((route, routeIndex) => (
                                 <SubresourceRoute
@@ -214,7 +215,7 @@ function SubresourceRoute({
                 <IconButton
                     variant="ghost"
                     aria-label={removeSubresourceLabel}
-                    icon="delete"
+                    icon={<DeleteIcon />}
                     size="xs"
                     onClick={() => removeLastSubresource(entity, routeIndex)}
                 />

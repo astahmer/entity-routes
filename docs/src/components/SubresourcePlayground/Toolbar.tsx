@@ -20,7 +20,8 @@ import {
     NumberInputStepper,
     Stack,
     Textarea,
-} from "@chakra-ui/core";
+} from "@chakra-ui/react";
+import { CheckIcon } from "@chakra-ui/icons";
 import { useRef, useState, useContext, useMemo } from "react";
 import { BasicDialog } from "../BasicDialog";
 import { SubresourcePlaygroundContext } from "./helpers";
@@ -53,7 +54,13 @@ export function Toolbar({ onSubmit, onMaxDepthChange, generateRoutes }) {
                         maxWidth={300}
                     />
                     <InputRightAddon padding="0">
-                        <IconButton variant="ghost" aria-label="Add new entity" icon="check" size="sm" type="submit" />
+                        <IconButton
+                            variant="ghost"
+                            aria-label="Add new entity"
+                            icon={<CheckIcon />}
+                            size="sm"
+                            type="submit"
+                        />
                     </InputRightAddon>
                 </InputGroup>
                 <Stack direction="row">
@@ -122,7 +129,7 @@ function ImportDialog({ onSave }) {
                 {...{ isOpen, onClose }}
                 title="Import JSON"
                 actions={
-                    <Button variantColor="blue" mr={3} onClick={handleSave}>
+                    <Button colorScheme="blue" mr={3} onClick={handleSave}>
                         Save
                     </Button>
                 }

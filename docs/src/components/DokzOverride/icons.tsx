@@ -1,29 +1,15 @@
+import { createIcon } from "@chakra-ui/react";
+
 export const Arrow = (props) => {
     return (
-        <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="currentColor"
-            style={{ display: "inline-block", verticalAlign: "middle" }}
-            viewBox="0 0 512 512"
-            {...props}
-        >
+        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 512 512" {...props}>
             <path d="M322.7,128.4L423,233.4c6,5.8,9,13.7,9,22.4c0,8.7-3,16.5-9,22.4L322.7,383.6c-11.9,12.5-31.3,12.5-43.2,0&#10;&#9;c-11.9-12.5-11.9-32.7,0-45.2l48.2-50.4h-217C93.7,288,80,273.7,80,256c0-17.7,13.7-32,30.6-32h217l-48.2-50.4&#10;&#9;c-11.9-12.5-11.9-32.7,0-45.2C291.4,115.9,310.7,115.9,322.7,128.4z" />
         </svg>
     );
 };
 export const ArrowEmpty = (props) => {
     return (
-        <svg
-            viewBox="0 0 556 412"
-            version="1.1"
-            xmlns="http://www.w3.org/2000/svg"
-            style={{
-                display: "inline-block",
-                verticalAlign: "middle",
-                padding: "2px",
-            }}
-            {...props}
-        >
+        <svg viewBox="0 0 556 412" version="1.1" xmlns="http://www.w3.org/2000/svg" {...props}>
             <g id="Artboard" stroke="none" strokeWidth="1" fill="none" fill-rule="evenodd">
                 <g id="right" transform="translate(26.000000, 39.000000)" fill="currentColor" fill-rule="nonzero">
                     <path
@@ -35,3 +21,17 @@ export const ArrowEmpty = (props) => {
         </svg>
     );
 };
+
+export const CollapseRight = createIcon({
+    displayName: "CollapseRight",
+    viewBox: "0 0 5 8",
+    d:
+        "M0 0.724246C0 0.111374 0.681914 -0.223425 1.13107 0.168926L4.66916 3.25957C5.11028 3.6449 5.11028 4.3551 4.66916 4.74043L1.13107 7.83107C0.681913 8.22342 0 7.88863 0 7.27575V0.724246Z",
+});
+
+export const CollapseDown = createIcon({
+    displayName: "CollapseDown",
+    viewBox: "0 0 8 6",
+    d:
+        "M7.27575 0.5C7.88863 0.5 8.22342 1.18191 7.83107 1.63107L4.74043 5.16916C4.3551 5.61028 3.6449 5.61028 3.25957 5.16916L0.168926 1.63107C-0.223425 1.18191 0.111375 0.5 0.724247 0.5L7.27575 0.5Z",
+});

@@ -1,5 +1,5 @@
 import MDXComponents from "@/components/DokzOverride/mdx";
-import { BoxProps } from "@chakra-ui/core";
+import { BoxProps } from "@chakra-ui/react";
 import { Table } from "./Table";
 
 export type DataTableProps = { columns: string[]; rows: string[][] } & BoxProps;

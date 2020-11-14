@@ -1,8 +1,8 @@
 import { DirectoryTree } from "@/functions/sidebar";
-import { Flex, Box, Link, FlexProps } from "@chakra-ui/core";
+import { Flex, Box, Link, FlexProps } from "@chakra-ui/react";
+import { LAYOUT_SIZES } from "./Wrapper";
 
 // TODO TableOfContents Quick links (View source / See test file/folder), both from page meta
-const NAVBAR_H = 62;
 
 export type TableOfContentsProps = { items: TableOfContentItem[]; currentItem: DirectoryTree } & FlexProps;
 export function TableOfContents({ items = [], currentItem, ...rest }: TableOfContentsProps) {
@@ -12,7 +12,7 @@ export function TableOfContents({ items = [], currentItem, ...rest }: TableOfCon
             direction="column"
             pl="20px"
             width="200px"
-            maxHeight={`calc(100vh - ${NAVBAR_H}px)`}
+            maxHeight={`calc(100vh - ${LAYOUT_SIZES.NAVBAR_H}px)`}
             overflowY="auto"
             lineHeight="2.2em"
             whiteSpace="nowrap"

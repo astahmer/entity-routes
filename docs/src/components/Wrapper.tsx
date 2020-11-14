@@ -1,5 +1,5 @@
 import { createContext, useMemo } from "react";
-import { Stack } from "@chakra-ui/core";
+import { Stack } from "@chakra-ui/react";
 import MDXComponents from "@/components/DokzOverride/mdx";
 import GithubSlugger from "github-slugger";
 
@@ -37,7 +37,6 @@ export const Wrapper = ({ children, meta: { tableOfContents } }) => {
         <WrapperContext.Provider value={{ sidebarTree, tableOfContentsItems: tableOfContents, ...sidebarItemData }}>
             <DokzWrapper currentItem={currentItem}>
                 <Stack spacing={6} fontSize={[16, 16, 16, 16, 17]} shouldWrapChildren>
-                    {/* Add h1 to every page based on name(dokz)/title(typedoc) */}
                     {hasTitle && <MDXComponents.h1 id={currentItem.meta.slug}>{meta.title}</MDXComponents.h1>}
                     {children}
                 </Stack>

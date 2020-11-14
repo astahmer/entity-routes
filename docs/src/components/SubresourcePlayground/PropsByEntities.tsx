@@ -1,3 +1,4 @@
+import { AddIcon } from "@chakra-ui/icons";
 import {
     Stack,
     Grid,
@@ -14,7 +15,7 @@ import {
     IconButton,
     Flex,
     CheckboxGroup,
-} from "@chakra-ui/core";
+} from "@chakra-ui/react";
 import { useContext, ChangeEvent } from "react";
 import { SubresourcePlaygroundContext } from "./helpers";
 
@@ -49,7 +50,7 @@ function BoolOption({ item, name }) {
 function EntityName({ item }) {
     const { removeEntity } = useContext(SubresourcePlaygroundContext);
     return (
-        <Tag size="sm" rounded="full" variant="solid" variantColor="cyan">
+        <Tag size="sm" rounded="full" variant="solid" colorScheme="cyan">
             <TagLabel> {item}</TagLabel>
             <TagCloseButton onClick={() => removeEntity(item)} />
         </Tag>
@@ -67,10 +68,10 @@ function EntityProp({ item, entity, setMaxDepth }) {
             </Checkbox>
             {entities[item].properties.includes(entity) && (
                 <Editable placeholder="Max depth" defaultValue={entities[item].maxDepths[entity] as any}>
-                    {({ isEditing, onRequestEdit }) => (
+                    {({ isEditing, onEdit }) => (
                         <>
                             {!isEditing && entities[item].maxDepths[entity] && (
-                                <span onClick={onRequestEdit}>Max depth: </span>
+                                <span onClick={onEdit}>Max depth: </span>
                             )}
                             <EditablePreview />
                             <EditableInput
@@ -102,7 +103,7 @@ function EntityPropList({ item }) {
                     <IconButton
                         variant="ghost"
                         aria-label={`Add ${item} route`}
-                        icon="add"
+                        icon={<AddIcon />}
                         size="xs"
                         onClick={() => addRoute(item)}
                     />

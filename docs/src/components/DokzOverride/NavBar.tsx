@@ -1,12 +1,11 @@
-/** @jsx jsx */
-import { Box, Flex, IconButton, useColorMode, PseudoBox, Stack } from "@chakra-ui/core";
-import { jsx } from "@emotion/core";
+import { Box, Flex, IconButton, useColorMode, Stack } from "@chakra-ui/react";
 import { useLayoutConfig } from "@/components/LayoutProvider";
 import { DiGithubBadge } from "react-icons/di";
 import MobileNav from "./MobileNav";
+import { MoonIcon, SunIcon } from "@chakra-ui/icons";
 
 export const GithubLink = ({ url = "", ...rest }: any) => (
-    <PseudoBox
+    <Box
         as="a"
         href={url}
         rel="noopener noreferrer"
@@ -15,13 +14,11 @@ export const GithubLink = ({ url = "", ...rest }: any) => (
         outline="0"
         transition="all 0.2s"
         borderRadius="md"
-        _focus={{
-            boxShadow: "outline",
-        }}
+        _focus={{ boxShadow: "outline" }}
         {...rest}
     >
-        <Box as={DiGithubBadge} size="8" color="current" />
-    </PseudoBox>
+        <Box as={DiGithubBadge} width="8" height="8" color="current" />
+    </Box>
 );
 
 export const ColorModeSwitch = ({ ...rest }) => {
@@ -30,11 +27,10 @@ export const ColorModeSwitch = ({ ...rest }) => {
         <IconButton
             variant="ghost"
             color="current"
-            // ml='2'
             fontSize="20px"
             aria-label={`Switch to ${colorMode === "light" ? "dark" : "light"} mode`}
             onClick={toggleColorMode}
-            icon={colorMode === "light" ? "moon" : "sun"}
+            icon={colorMode === "light" ? <MoonIcon /> : <SunIcon />}
             {...rest}
         />
     );
@@ -45,7 +41,7 @@ const NavBar = ({ logo, tree = null as any, items: navs, ...props }) => {
     const bg = { light: "white", dark: "gray.800" };
     const { maxPageWidth } = useLayoutConfig();
     return (
-        <Stack
+        <Flex
             bg={bg[colorMode]}
             zIndex={4}
             borderBottomWidth="1px"
@@ -54,13 +50,7 @@ const NavBar = ({ logo, tree = null as any, items: navs, ...props }) => {
             alignItems="center"
             {...props}
         >
-            <Stack
-                maxWidth={maxPageWidth}
-                as="header"
-                width="full"
-                // height='60px'
-                justify="center"
-            >
+            <Flex direction="column" maxWidth={maxPageWidth} as="header" width="full" justify="center">
                 <Flex px="2" size="100%" align="center" justify="space-between">
                     <Flex align="center" mr={5}>
                         {logo}
@@ -69,7 +59,7 @@ const NavBar = ({ logo, tree = null as any, items: navs, ...props }) => {
                         {Array.isArray(navs) ? (
                             <Stack direction="row" spacing="20px">
                                 {navs.map((x, i) => (
-                                    <Stack
+                                    <Flex
                                         key={i}
                                         fontSize="text"
                                         alignItems="center"
@@ -77,7 +67,7 @@ const NavBar = ({ logo, tree = null as any, items: navs, ...props }) => {
                                         fontWeight="medium"
                                     >
                                         {x}
-                                    </Stack>
+                                    </Flex>
                                 ))}
                             </Stack>
                         ) : (
@@ -86,8 +76,8 @@ const NavBar = ({ logo, tree = null as any, items: navs, ...props }) => {
                         {tree && <MobileNav tree={tree} />}
                     </Flex>
                 </Flex>
-            </Stack>
-        </Stack>
+            </Flex>
+        </Flex>
     );
 };
 

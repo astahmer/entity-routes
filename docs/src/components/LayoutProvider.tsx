@@ -1,24 +1,23 @@
 import { MDXProvider } from "@mdx-js/react";
 import { createContext, useContext, ReactNode, ComponentType } from "react";
 import MDXComponents from "@/components/DokzOverride/mdx";
-import { ColorModeProvider, Box } from "@chakra-ui/core";
+import { Box, ChakraProvider, css } from "@chakra-ui/react";
 import { ColorModeSwitch } from "@/components/DokzOverride/NavBar";
 
 import { PrismTheme } from "prism-react-renderer";
-// import lightTheme from 'prism-react-renderer/themes/nightOwlLight'
 import darkPrismTheme from "prism-react-renderer/themes/oceanicNext";
 
-import { reset } from "@/functions/codeBlocks";
+import { resetCodeBlockCount } from "@/components/DokzOverride/Code";
 import { useRouteChanged } from "@/functions/useRouteChanged";
 import { Arrow, ArrowEmpty } from "./DokzOverride/icons";
 
 export function LayoutProvider({ children, ...rest }: LayoutProviderProps) {
     const ctx = { ...defaultLayoutContext, ...rest };
-    const { mdxComponents: userMDXComponents = {}, initialColorMode } = ctx;
+    const { mdxComponents: userMDXComponents = {} } = ctx;
 
     // On route change, reset code block count & scroll to top if no anchor used
     useRouteChanged({
-        onStart: reset,
+        onStart: resetCodeBlockCount,
         onComplete: () => {
             if (window.location.hash) return;
             document.body.style.scrollBehavior = "auto";
@@ -28,11 +27,15 @@ export function LayoutProvider({ children, ...rest }: LayoutProviderProps) {
     });
 
     return (
-        // TODO merge configs
         <LayoutContext.Provider value={ctx}>
-            <ColorModeProvider value={initialColorMode}>
-                <MDXProvider components={{ ...MDXComponents, ...userMDXComponents }}>{children}</MDXProvider>
-            </ColorModeProvider>
+            <MDXProvider components={{ ...MDXComponents, ...userMDXComponents }}>
+                <ChakraProvider>
+                    {children}
+                    <style jsx global>
+                        {globalStyles}
+                    </style>
+                </ChakraProvider>
+            </MDXProvider>
         </LayoutContext.Provider>
     );
 }
@@ -47,7 +50,6 @@ const defaultDarkPrismTheme = {
 
 export const defaultLayoutContext: LayoutProviderProps = {
     maxPageWidth: "1600px",
-    initialColorMode: "light",
     headTitlePrefix: "",
     headerLogo: (
         <Box fontWeight="medium" fontSize="32px">
@@ -94,8 +96,6 @@ export type LayoutProviderProps = {
     prismTheme?: { dark: PrismTheme; light: PrismTheme };
     /* The max-width of the page container, defaults to '1600px' */
     maxPageWidth?: string;
-    /* The initial color mode */
-    initialColorMode?: "dark" | "light";
     /* The color of the page text */
     bodyColor?: { dark: string; light: string };
     /* The color of the heading elements */
@@ -103,3 +103,27 @@ export type LayoutProviderProps = {
     /* The font family */
     fontFamily?: string;
 };
+
+export const globalStyles = css`
+    * {
+        box-sizing: border-box;
+    }
+    html {
+        height: 100%;
+    }
+    #__next {
+        min-height: 100%;
+        overflow-x: hidden;
+    }
+    body {
+        height: 100%;
+        overflow: auto;
+        scroll-behavior: smooth;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        text-rendering: optimizeLegibility;
+    }
+    .overflowScrollingTouch {
+        -webkit-overflow-scrolling: touch;
+    }
+`;

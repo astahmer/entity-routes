@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Stack, Divider } from "@chakra-ui/core";
+import { Stack, Divider } from "@chakra-ui/react";
 import {
     Entities,
     makeRecordFromKeys,

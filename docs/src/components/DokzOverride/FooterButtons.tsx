@@ -1,8 +1,8 @@
 import { useContext } from "react";
 import NextLink from "next/link";
 
-import { Box, Flex, Stack } from "@chakra-ui/core";
-import { css } from "@emotion/core";
+import { Box, Flex, Icon, Stack } from "@chakra-ui/react";
+import { css } from "@emotion/react";
 
 import { WrapperContext } from "../Wrapper";
 import { removeMdxExt } from "@/functions/sidebar";
@@ -17,8 +17,6 @@ export const FooterButtons = ({ ...rest }) => {
         isNextDir ? nextTree.children[0] : nextTree,
     ];
     const [prevTitle, nextTitle] = [removeMdxExt(prev?.meta?.title || ""), removeMdxExt(next?.meta?.title || "")];
-    // TODO Update chakra-ui to 1.0
-    // https://github.com/chakra-ui/chakra-ui/issues/798
     return (
         <Flex direction={["column", null, "row"]} justifyContent="space-between" {...rest}>
             {prev?.url ? (
@@ -32,31 +30,26 @@ export const FooterButtons = ({ ...rest }) => {
 };
 
 const Button = ({ href = "", title, type, ...rest }) => {
-    const arrow = <Box transform={type === "next" ? "none" : "scale(-1, 1)"} size="1.2em" as={Arrow} />;
+    const arrow = <Box transform={type === "next" ? "none" : "scale(-1, 1)"} width="1.2em" height="1.2em" as={Arrow} />;
     return (
         <NextLink href={href} passHref>
             <Stack
-                align={type === "next" ? "flex-end" : "flex-start"}
                 spacing="2"
+                align={type === "next" ? "flex-end" : "flex-start"}
                 shadow="sm"
                 borderWidth="1px"
                 borderRadius="md"
-                px="6"
-                py="4"
+                padding="1rem 1.5rem"
                 as="a"
                 fontWeight="medium"
                 transition="box-shadow 0.3s"
-                css={css`
-                    :hover {
-                        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-                    }
-                `}
+                _hover={{ boxShadow: "0 0 20px rgba(0, 0, 0, 0.1)" }}
                 {...rest}
             >
                 <Stack direction="row" align="center" spacing="2" opacity={0.4}>
-                    {type == "prev" && arrow}
+                    {type === "prev" && arrow}
                     <Box fontWeight="600">{type === "next" ? "Next" : "Prev"}</Box>
-                    {type == "next" && arrow}
+                    {type === "next" && arrow}
                 </Stack>
                 <Box isTruncated>{title}</Box>
             </Stack>

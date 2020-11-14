@@ -7,11 +7,14 @@ import {
     ModalCloseButton,
     ModalBody,
     ModalFooter,
-    IModal,
-} from "@chakra-ui/core";
+    ModalProps,
+} from "@chakra-ui/react";
 import { ReactNode } from "react";
 
-export type BasicDialogProps = Pick<IModal, "children" | "isOpen" | "onClose"> & { title: string; actions?: ReactNode };
+export type BasicDialogProps = Pick<ModalProps, "children" | "isOpen" | "onClose"> & {
+    title: string;
+    actions?: ReactNode;
+};
 
 export function BasicDialog({ children, isOpen, onClose, title, actions }: BasicDialogProps) {
     return (

@@ -1,4 +1,4 @@
-import { Alert, AlertIcon, AlertProps } from "@chakra-ui/core";
+import { Alert, AlertIcon, AlertProps } from "@chakra-ui/react";
 import { PropsWithChildren } from "react";
 
 export function DocAlert({ children, ...props }: PropsWithChildren<AlertProps>) {

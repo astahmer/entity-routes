@@ -1,8 +1,7 @@
-import { Drawer, DrawerBody, IconButton, useDisclosure, DrawerOverlay, DrawerContent, Box } from "@chakra-ui/core";
+import { Drawer, DrawerBody, IconButton, useDisclosure, DrawerOverlay, DrawerContent, Box } from "@chakra-ui/react";
 import { MdDehaze } from "react-icons/md";
-// Use overriden SideNav
 import { SideNav } from "./SideNav";
-import { useRouteChanged } from "../../functions/useRouteChanged";
+import { useRouteChanged } from "@/functions/useRouteChanged";
 
 export const MobileNav = (props) => {
     const { isOpen, onToggle, onClose } = useDisclosure();
@@ -15,7 +14,7 @@ export const MobileNav = (props) => {
                 aria-label="Navigation Menu"
                 fontSize="30px"
                 variant="ghost"
-                icon={MdDehaze}
+                icon={<MdDehaze />}
                 onClick={onToggle}
                 marginRight="-16px"
             />

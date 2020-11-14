@@ -1,10 +1,9 @@
-import { Box, BoxProps, Collapse, Divider, Stack, useDisclosure } from "@chakra-ui/core";
+import { Box, BoxProps, Collapse, Divider, Flex, useDisclosure } from "@chakra-ui/react";
 
-import { CollapseDown } from "./CollapseDown";
-import { CollapseRight } from "./CollapseRight";
 import { useRouter } from "next/router";
 import { DirectoryTree, MDX_EXTENSION_REGEX } from "@/functions/sidebar";
 import { ComponentLink } from "./NavLink";
+import { CollapseDown, CollapseRight } from "./icons";
 
 export const SideNav = ({ tree, ...rest }: { tree: DirectoryTree } & BoxProps) => {
     const router = useRouter();
@@ -78,7 +77,7 @@ const NavTreeComponent = ({
                 title={formattedTitle}
                 subTree={subTree}
                 isActive={isRouteActive}
-                defaultOpened={defaultOpened}
+                defaultIsOpen={defaultOpened}
             />
         );
     }
@@ -86,7 +85,7 @@ const NavTreeComponent = ({
     // Root folders
     if (isFolder) {
         return (
-            <Stack spacing="0px">
+            <Flex direction="column">
                 <Box my="0.2em">
                     {!hideDivider && <Divider />}
                     <Box py="0.2em" pt="1.4em" my="0.2em" fontSize="1.1em" fontWeight="semibold">
@@ -94,24 +93,24 @@ const NavTreeComponent = ({
                     </Box>
                 </Box>
                 {subTree}
-            </Stack>
+            </Flex>
         );
     }
     return (
-        <Stack spacing="0px">
+        <Flex direction="column">
             <ComponentLink opacity={0.8} py="0.2em" my="0.2em" href={url} isTruncated>
                 {formattedTitle}
             </ComponentLink>
             {subTree}
-        </Stack>
+        </Flex>
     );
 };
 
-function CollapsableTreeNode({ title, depth, subTree, isActive, defaultOpened }) {
-    const { onToggle, isOpen } = useDisclosure(defaultOpened);
+function CollapsableTreeNode({ title, depth, subTree, isActive, defaultIsOpen }) {
+    const { onToggle, isOpen } = useDisclosure({ defaultIsOpen });
 
     return (
-        <Stack spacing="0px">
+        <Flex direction="column">
             <Box
                 display="flex"
                 alignItems="center"
@@ -123,24 +122,29 @@ function CollapsableTreeNode({ title, depth, subTree, isActive, defaultOpened })
             >
                 <Box
                     mr="0.4em"
-                    size="0.6em"
+                    width="0.6em"
+                    height="0.6em"
                     opacity={0.6}
                     display="inline-block"
                     as={isOpen ? CollapseDown : CollapseRight}
                 />
                 {title}
             </Box>
-            <Collapse isOpen={isOpen} pl={depth * 20 + "px"} position="relative">
-                <Box
-                    position="absolute"
-                    left="5px"
-                    height="100%"
-                    border="1px solid"
-                    borderColor="gray.400"
-                    opacity={0.1}
-                />
-                {subTree}
-            </Collapse>
-        </Stack>
+            <Box>
+                <Collapse in={isOpen} startingHeight={1}>
+                    <Box pl={depth * 20 + "px"} position="relative">
+                        <Box
+                            position="absolute"
+                            left="5px"
+                            height="100%"
+                            border="1px solid"
+                            borderColor="gray.400"
+                            opacity={0.1}
+                        />
+                        {subTree}
+                    </Box>
+                </Collapse>
+            </Box>
+        </Flex>
     );
 }

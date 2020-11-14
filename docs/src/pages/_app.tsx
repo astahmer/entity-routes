@@ -2,8 +2,7 @@ import { Fragment } from "react";
 import Head from "next/head";
 
 import { Code, Table, Wrapper } from "@/components";
-import { Divider } from "@chakra-ui/core";
-import { ListItem } from "@/components/DokzOverride/ListItem";
+import { Divider } from "@chakra-ui/react";
 import { ColorModeSwitch, GithubLink } from "@/components/DokzOverride/NavBar";
 import MDXComponents from "@/components/DokzOverride/mdx";
 import { Link } from "@/components/DokzOverride/Link";
@@ -31,7 +30,6 @@ export default function App(props) {
                     <GithubLink key="0" url="https://github.com/astahmer/entity-routes" />,
                     <ColorModeSwitch key="1" />,
                 ]}
-                initialColorMode="dark"
                 maxPageWidth="1350px"
                 mdxComponents={{
                     code: Code,
@@ -49,7 +47,6 @@ export default function App(props) {
                             <MDXComponents.h2 {...props} />
                         </>
                     ),
-                    li: (props) => <ListItem {...props} />,
                 }}
             >
                 <Component {...pageProps} />

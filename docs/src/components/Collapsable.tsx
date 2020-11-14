@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Collapse, Button, Flex, Box } from "@chakra-ui/core";
+import { Collapse, Button, Flex, Box } from "@chakra-ui/react";
 
 export function Collapsable({ children, collapse, button, btnLabel, suffix = "" }) {
     const [show, setShow] = useState(false);
@@ -9,7 +9,7 @@ export function Collapsable({ children, collapse, button, btnLabel, suffix = "" 
     return (
         <>
             <Box mb={!show ? "1em" : "-0.5em"}>
-                <Collapse startingHeight={20} {...collapse} isOpen={show}>
+                <Collapse startingHeight={20} {...collapse} in={show}>
                     {children}
                 </Collapse>
             </Box>
