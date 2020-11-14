@@ -6,7 +6,7 @@ import { LAYOUT_SIZES } from "./Wrapper";
 
 export type TableOfContentsProps = { items: TableOfContentItem[]; currentItem: DirectoryTree } & FlexProps;
 export function TableOfContents({ items = [], currentItem, ...rest }: TableOfContentsProps) {
-    const tocTitle = { lvl: 1, slug: currentItem.meta.slug, content: currentItem.meta.title };
+    const tocTitle = { lvl: 1, slug: currentItem.meta.slug, title: currentItem.meta.title };
     return (
         <Flex
             direction="column"
@@ -29,14 +29,14 @@ export function TableOfContents({ items = [], currentItem, ...rest }: TableOfCon
 export type TableOfContentItem = {
     lvl: number;
     slug: string;
-    content: string;
+    title: string;
 };
 
 const baseW = 20;
-function TocItem({ lvl, content, slug }: TableOfContentItem) {
+function TocItem({ lvl, title, slug }: TableOfContentItem) {
     return (
         <Box ml={baseW * (lvl - 2) + "px"}>
-            <Link href={"#" + slug}>{content}</Link>
+            <Link href={"#" + slug}>{title}</Link>
         </Box>
     );
 }
