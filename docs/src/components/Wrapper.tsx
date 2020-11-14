@@ -1,6 +1,6 @@
 import { createContext, useMemo } from "react";
 import { Stack } from "@chakra-ui/react";
-import MDXComponents from "@/components/layout/mdx";
+import MDXComponents from "@/components/mdx";
 import GithubSlugger from "github-slugger";
 
 // Dokz override

@@ -1,11 +1,10 @@
 import { Fragment } from "react";
 import Head from "next/head";
 
-import { Code, Wrapper } from "@/components";
 import { Divider } from "@chakra-ui/react";
+import { Wrapper } from "@/components";
 import { ColorModeSwitch, GithubLink } from "@/components/layout/NavBar";
-import MDXComponents from "@/components/layout/mdx";
-import { Link } from "@/components/layout/Link";
+import MDXComponents from "@/components/mdx";
 import { LayoutProvider } from "@/components/LayoutProvider";
 
 export default function App(props) {
@@ -21,18 +20,17 @@ export default function App(props) {
             </Head>
             <LayoutProvider
                 headerLogo={
-                    <Link href="/">
+                    <MDXComponents.a href="/">
                         <img src="/logo-full.png" style={{ opacity: 0.8 }} width="200px" />
-                    </Link>
+                    </MDXComponents.a>
                 }
                 headerItems={[
-                    <Link href="/">Docs</Link>,
+                    <MDXComponents.a href="/">Docs</MDXComponents.a>,
                     <GithubLink key="0" url="https://github.com/astahmer/entity-routes" />,
                     <ColorModeSwitch key="1" />,
                 ]}
                 maxPageWidth="1350px"
                 mdxComponents={{
-                    code: Code,
                     wrapper: Wrapper,
                     h2: (props) => (
                         <>

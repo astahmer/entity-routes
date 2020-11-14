@@ -1,7 +1,5 @@
-export * from "./Code";
 export * from "./FooterButtons";
 export * from "./icons";
-export * from "./Link";
 export * from "./MobileNav";
 export * from "./NavBar";
 export * from "./NavLink";

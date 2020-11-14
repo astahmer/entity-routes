@@ -17,9 +17,7 @@ export const Link = ({ children, ...props }: LinkProps) => {
             borderColor="transparent"
             py="0.2em"
             transition="border-color 0.2s ease-in-out 0s"
-            _hover={{
-                borderColor: "currentColor",
-            }}
+            _hover={{ borderColor: "currentColor" }}
             {...props}
         >
             {children}
