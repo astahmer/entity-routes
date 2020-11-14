@@ -2,7 +2,6 @@
 title: Route Scope
 ---
 
-import { DocAlert } from "@/components";
 import { Tabs, TabList, TabPanels, Tab, TabPanel } from "@chakra-ui/react";
 
 Let's start by defining what we call a **route scope**.
@@ -34,11 +33,11 @@ These are the routes generated from the [Quick start example](../getting-started
 | GET    | /users/:UserId(\d+)/articles          | Article | list      | article.list        |
 | DELETE | /users/:UserId(\d+)/articles/:id(\d+) | Article | delete    | article.delete      |
 
-<DocAlert status="info">
+<Info>
 
 The route main entity for subresources routes is its relation entity, here it is `Article` and not `User`.
 
-</DocAlert>
+</Info>
 
 ### Subresources
 
@@ -79,12 +78,12 @@ it describes is used.
 
 This mapping route will give you the response schema expected on the actual route it describes.
 
-<DocAlert status="info" mt="20px">
+<Info mt="20px">
 
 There is a `pretty` query parameter (`?pretty=true`) available to make it less verbose, it makes mapping look kind of
 like a GraphQL request body, as you can see below.
 
-</DocAlert>
+</Info>
 
 <Tabs>
   <TabList>

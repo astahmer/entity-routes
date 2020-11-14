@@ -2,7 +2,6 @@
 title: Middlewares
 ---
 
-import { DocAlert } from "@/components";
 import { Tabs, TabList, TabPanels, Tab, TabPanel } from "@chakra-ui/react";
 
 Middlewares are functions that process the request, chained one by one, which make them very easy to re-use. Using
@@ -13,12 +12,12 @@ A middleware has access to the [`req`](https://nodejs.org/api/http.html#http_cla
 [Node http module](https://nodejs.org/api/http.html). If using `afterCtxMiddlewares`, you also get access to the route
 [`RequestContext`](/definitions#requestcontext).
 
-<DocAlert status="info">
+<Info>
 
 Learn more about them from [Koa's documentation](https://github.com/koajs/koa) or from
 [Express's documentation](https://expressjs.com/en/guide/using-middleware.html)
 
-</DocAlert>
+</Info>
 
 ## Usage
 

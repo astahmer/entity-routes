@@ -2,8 +2,6 @@
 title: SearchFilter
 ---
 
-import { DocAlert } from "@/components";
-
 The [`SearchFilter`](/definitions/classes/searchfilter) allows you to filter efficiently a list of items with several
 [common SQL operators](#strategies) (such as `=`, `IN`, `EXISTS`, `LIKE`, etc) using
 [readable query parameter keys](#basic-usage). You can filter on [nested relations/properties](#relations) with
@@ -43,31 +41,18 @@ TODO
 
 ## Good to know
 
-<DocAlert status="info">
-
-You can filter on the same property using different strategies in the same request.
-
-</DocAlert>
-
-<DocAlert status="info">
-
-You can filter on multiple values by passing comma-separated values. Those values will be trimmed.
-[More details.](#multiple-values)
-
-</DocAlert>
-
-<DocAlert status="info">
-
-Filtering on a relation will implicitly filter on its `id`. [More details.](#relations)
-
-</DocAlert>
-
-<DocAlert status="info">
-
-The `defaultWhereStrategy` applied (if no options are passed) is the `EXACT` [`StrategyType`](#strategies).
-[More details.](#default-config).
-
-</DocAlert>
+<Flex direction="column">
+    <Info>You can filter on the same property using different strategies in the same request.</Info>
+    <Info>
+        You can filter on multiple values by passing comma-separated values. Those values will be trimmed.[More
+        details.](#multiple-values)
+    </Info>
+    <Info>Filtering on a relation will implicitly filter on its `id`. [More details.](#relations)</Info>
+    <Info>
+        The `defaultWhereStrategy` applied (if no options are passed) is the `EXACT` [`StrategyType`](#strategies).[More
+        details.](#default-config).
+    </Info>
+</Flex>
 
 ## Basic Usage
 
@@ -144,20 +129,18 @@ If you need to filter on the same [`FilterProperty`](/definitions#filterproperty
 value. Then each of these values will be trimmed and then wrapped in the same SQL condition with a `OR` conditions for
 each value.
 
-<DocAlert status="info">
+<Info>
+    Passing an array of values to a query parameter with the strategy `EXACT` will be the same as using the `IN`
+    strategy. Conversely, if you use the `NOT` operator by appending a `!` to the query parameter key, the `EXACT` with
+    multiple values will end up with the same results as a `NOT IN`.
+</Info>
 
-Passing an array of values to a query parameter with the strategy `EXACT` will be the same as using the `IN` strategy.
-Conversely, if you use the `NOT` operator by appending a `!` to the query parameter key, the `EXACT` with multiple
-values will end up with the same results as a `NOT IN`.
-
-</DocAlert>
-
-<DocAlert status="info">
+<Info>
 
 `BETWEEN_STRICT` is the only strategy that always requires exactly 2 values. Example: `{ "id><": "3, 8" }` or
 `{ "role.id;betweenStrict": "3, 8" }`
 
-</DocAlert>
+</Info>
 
 ## Relations
 
@@ -280,12 +263,11 @@ the same conditions you want to nest.
 You can chain them indefinitely and add as much nested conditions as you want. It is recommended to use names that makes
 sense to make the query parameter key almost readable like an english sentence.
 
-<DocAlert status="info">
-
+<Info>
 You can omit the `and` operator, though you it is recommended to explicitly write it for readability. Example:
 `or(isAdmin)and(aboveId):id>` = `or(isAdmin)(aboveId):id>`
 
-</DocAlert>
+</Info>
 
 #### Example
 

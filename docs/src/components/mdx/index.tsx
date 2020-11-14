@@ -1,5 +1,6 @@
-import { Divider, Kbd, ListItem, UnorderedList, OrderedList } from "@chakra-ui/react";
+import { Flex, Divider, Kbd, ListItem, UnorderedList, OrderedList } from "@chakra-ui/react";
 
+import { DocAlert } from "@/components/DocAlert";
 import { Wrapper } from "@/components/layout/Wrapper";
 import { Pre } from "./Pre";
 import { Table } from "./Table";
@@ -13,6 +14,8 @@ import { Code } from "./Code";
 import { Link } from "./Link";
 
 const MDXComponents = {
+    Flex,
+    Info: (props) => <DocAlert status="info" {...props} css={{ svg: { width: "20px" } }} />,
     wrapper: Wrapper,
     hr: (props) => <Divider my="3em !important" {...props} />,
     h1: (props) => <DocsHeading as="h1" fontSize="2em" {...props} />,

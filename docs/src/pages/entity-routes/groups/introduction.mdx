@@ -2,8 +2,6 @@
 title: Introduction
 ---
 
-import { DocAlert } from "@/components";
-
 By using the [@Groups](/definitions#groups) decorator, you can expose entity properties through one or more
 [`route scopes`](/entity-routes/route-scope/).
 
@@ -49,12 +47,8 @@ Or you can expose a property globally (for **any** entity [`route scope`](/entit
 @Groups(["create", "details"])
 ```
 
-<DocAlert status="warning">
-
-On a `persist` operation, any property not exposed through [`@Groups`](/definitions#groups) will be ignored from the
-request body.
-
-</DocAlert>
+> On a `persist` operation, any property not exposed through [`@Groups`](/definitions#groups) will be ignored from the
+> request body.
 
 There are also the [shortcuts](operations#shortcuts) `all` and `basic` that you can use directly, or use as a route
 scope value.

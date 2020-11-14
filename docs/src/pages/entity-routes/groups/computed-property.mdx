@@ -2,8 +2,6 @@
 title: Computed property
 ---
 
-import { DocAlert } from "@/components";
-
 ## Computed property
 
 You can expose methods that will be lazily called them after the entity they belong to has been retrieved.
@@ -81,12 +79,12 @@ Accessors are the special methods
 
 They are treated as properties even though they will not be used for SQL selection.
 
-<DocAlert status="info">
+<Info>
 
 Just like regular methods, you can use the 2nd arg of [`@Groups`](/definitions#groups) to define an `alias` if you want
 your getter to have another name in your `entity-routes` responses.
 
-</DocAlert>
+</Info>
 
 Using almost the same entity/properties as the [`computed property` basic example](#basic-example).
 

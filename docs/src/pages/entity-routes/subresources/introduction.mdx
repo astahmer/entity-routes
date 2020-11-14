@@ -2,8 +2,6 @@
 title: Introduction
 ---
 
-import { DocAlert } from "@/components";
-
 It's a way to generate a dedicated endpoint for an entity property.
 
 Let's say you have a `User` entity that owns a collection of `articles`. Rather than exposing the `articles` in the
@@ -42,13 +40,9 @@ class Article {
 }
 ```
 
-<DocAlert status="warning">
-
-For an entity to be used as a Subresource, it **must have an [`EntityRouter`](/definitions/classes/entityrouter)**
-registered. And if you don't want to generates CRUD routes, you can just provide no arguments to
-[`@EntityRoute`](/definitions#entityroute) just like the example above.
-
-</DocAlert>
+> For an entity to be used as a Subresource, it **must have an [`EntityRouter`](/definitions/classes/entityrouter)**
+> registered. And if you don't want to generates CRUD routes, you can just provide no arguments to
+> [`@EntityRoute`](/definitions#entityroute) just like the example above.
 
 Of course, you can customize your Subresource using [SubresourceOptions](/definitions#subresourceoptions) as optional
 second argument.
@@ -60,14 +54,14 @@ second argument.
 | canHaveNested | boolean                                                     | true                                      | Allow this subresource to have nested child subresources       |
 | canBeNested   | boolean                                                     | true                                      | Allow this subresource to be used as a child subresource       |
 
-<DocAlert status="info">
+<Info>
 
 -   By just specifying "create" as [`SubresourceOperation`](/definitions#subresourceoperation), only the
     `POST:/users/:userId/articles` would be generated. You get the idea, this works the same for others operations.
 -   A single relation should use the `details` [`SubresourceOperation`](/definitions#subresourceoperation) whereas a
     collection should use the `list` [`SubresourceOperation`](/definitions#subresourceoperation).
 
-</DocAlert>
+</Info>
 
 ## Nesting
 
@@ -75,12 +69,12 @@ Subresources are nestable by default, so you could have a `GET:/users/:userId/ar
 `Article.comments` a subresource as well. And if you're crazy enough, nothing stops you from nesting further with a
 `GET:/users/:userId/articles/comments/upvotes`, etc.
 
-<DocAlert status="info">
+<Info>
 
 The [`defaultEntityRouteOptions`](/definitions#const-defaultentityrouteoptions) (passed to the
 [`makers`](/entity-routes/introduction#maker)) has a `defaultSubresourceMaxDepthLvl: 2`.
 
-</DocAlert>
+</Info>
 
 ### Max depth
 
@@ -129,12 +123,12 @@ With the [`EntityRouteOptions`](/definitions#entityrouteoptions) key `shouldSetS
 subresources IRI are added for each items having subresources (without exposing them through
 [`@Groups`](/definitions#groups)).
 
-<DocAlert status="info">
+<Info>
 
 The [`defaultEntityRouteOptions`](/definitions#const-defaultentityrouteoptions) (passed to the
 [`makers`](/entity-routes/introduction#maker)) has a `shouldSetSubresourcesIriOnItem: true`.
 
-</DocAlert>
+</Info>
 
 ### With subresource IRI
 

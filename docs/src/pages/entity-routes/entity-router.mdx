@@ -2,16 +2,14 @@
 title: EntityRouter
 ---
 
-import { DocAlert } from "@/components";
-
 An entity for `entity-router` is nothing more than a TypeORM entity.
 
-<DocAlert status="info">
+<Info>
 
 Please refer to the [`TypeORM`](http://typeorm.io/) documentation on how to make
 [`entities`](https://typeorm.io/#/entities).
 
-</DocAlert>
+</Info>
 
 There are 3 steps to make and use an [`EntityRouter`](/definitions/classes/entityrouter).
 
@@ -47,10 +45,12 @@ can learn more about [`TypeORM`](http://typeorm.io/) table inheritance [here](ht
 The [`@EntityRoute`](/definitions#entityroute) decorator creates an [`EntityRouter`](/definitions/classes/entityrouter)
 on the decorated [entity](https://typeorm.io/#/entities/what-is-entity).
 
-<DocAlert>
-    The name distinction is to avoid any conflict between the service
-    ([`EntityRouter`](/definitions/classes/entityrouter)) and the decorator (`EntityRoute`).
-</DocAlert>
+<Info>
+
+The name distinction is to avoid any conflict between the service ([`EntityRouter`](/definitions/classes/entityrouter))
+and the decorator (`EntityRoute`).
+
+</Info>
 
 Example :
 
@@ -73,18 +73,18 @@ The first argument ([EntityRouteArgs](/definitions#entityrouteargs)) defines **y
     adding `create` [**operation**](/entity-routes/operations/) will lead to having a `POST:/users` route in the example
     above.
 
-<DocAlert>
+<Info>
     When no path is specified, it defaults to the entity name. With the example above on User entity, the base path
     would be equal to "/user"
-</DocAlert>
+</Info>
 
 The second argument ([EntityRouteConfig](/definitions#entityrouteconfig)) defines the options passed to every routes on
 that entity.
 
-<DocAlert>
+<Info>
     When no args are passed, the EntityRoute is registered to be used by others as a Subresource but generates no routes
     for its own entity.
-</DocAlert>
+</Info>
 
 If you don't wan't to write all basic [**operations**](/entity-routes/operations/) everytime you just need to import &
 use [CRUD_OPERATIONS](/definitions#const-crud_operations). It looks like this.

@@ -2,8 +2,6 @@
 title: Formating
 ---
 
-import { DocAlert } from "@/components";
-
 Response are formated using the [`Writer`](/definitions/classes/writer), itself called in the `getDetails`/`getList`
 methods of [`RouteController`](/definitions/classes/routecontroller). That means auto-reloaded entities are also
 formated
@@ -108,13 +106,13 @@ class User extends AbstractEntity {
 
 ### 2. Flatten item with only id if needed
 
-<DocAlert status="info">
+<Info>
 
 Enabled by default (see [`defaultEntityRouteOptions`](/definitions#const-defaultentityrouteoptions)). You can opt-out of
 this behavior by setting the `shouldEntityWithOnlyIdBeFlattened` key of
 [`EntityRouteOptions`](/definitions#entityrouteoptions) to false.
 
-</DocAlert>
+</Info>
 
 Let's say you have a `Role` and a `User` entity such as :
 
@@ -169,13 +167,13 @@ Since no properties except `id` is exposed on the `user.details` route scope :
 
 ### 3. Set subresources IRI
 
-<DocAlert status="info">
+<Info>
 
 Enabled by default (see [`defaultEntityRouteOptions`](/definitions#const-defaultentityrouteoptions)). You can opt-out of
 this behavior by setting the `defaultWriterOptions`.`shouldSetSubresourcesIriOnItem` key of
 [`EntityRouteOptions`](/definitions#entityrouteoptions) to false.
 
-</DocAlert>
+</Info>
 
 ```typescript {11}
 @EntityRoute()
@@ -221,13 +219,13 @@ class User extends AbstractEntity {
 
 ### 4. Sort item's property keys
 
-<DocAlert status="info">
+<Info>
 
 Enabled by default (see [`defaultEntityRouteOptions`](/definitions#const-defaultentityrouteoptions)). You can opt-out of
 this behavior by setting the `defaultWriterOptions`.`shouldSortItemKeys` key of
 [`EntityRouteOptions`](/definitions#entityrouteoptions) to false.
 
-</DocAlert>
+</Info>
 
 ```typescript {1}
 @EntityRoute({ path: "/users/", operations: ["list"] }, { defaultWriterOptions: { shouldSortItemKeys: true } })

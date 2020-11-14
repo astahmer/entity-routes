@@ -2,8 +2,6 @@
 title: Operations
 ---
 
-import { DocAlert } from "@/components";
-
 There are two types of _operations_ : [`RouteOperation`](/definitions#routeoperation) and
 [`GroupsOperation`](/definitions#groupsoperation).
 
@@ -43,12 +41,12 @@ type GroupsOperationOrShortcuts = GroupsOperation[] | "all" | "basic";
 
 These are used to define the [`route scopes`](/entity-routes/route-scope/) where a property might be exposed.
 
-<DocAlert status="info">
+<Info>
 
 Each [`GroupsOperation`](/definitions#groupsoperation) match one from [`RouteOperation`](/definitions#routeoperation),
 except `delete` since there is no property exposed in a DELETE route response.
 
-</DocAlert>
+</Info>
 
 [More on `@Groups` here](/entity-routes/entity-router).
 

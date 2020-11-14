@@ -2,8 +2,6 @@
 title: Introduction
 ---
 
-import { DocAlert } from "@/components";
-
 A very common need for APIs is to filter a list through different conditions.
 
 Filters receive query parameters to determine which conditions to apply, and the current request queryBuilder onto which
@@ -31,12 +29,8 @@ If neither of them satisfies your need, you can always make your own custom filt
 
 ## Enabling properties
 
-<DocAlert status="warning">
-
-You will need to explicitly enable the properties you want to be filterable, else the corresponding query parameters
-will be ignored.
-
-</DocAlert>
+> You will need to explicitly enable the properties you want to be filterable, else the corresponding query parameters
+> will be ignored.
 
 With the [`AbstractFilter`](/definitions/classes/abstractfilter) class, you can quickly define which properties will be
 filterable. To do so, you need to set its options ([`DefaultFilterOptions`](/definitions#defaultfilteroptions))
