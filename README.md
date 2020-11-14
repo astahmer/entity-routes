@@ -2,11 +2,17 @@
 
 :zap: Design your API around your [TypeORM](https://github.com/typeorm/typeorm/) entities in minutes. :stopwatch:
 
-_No boilerplate controllers. No code generation. No bullshit._
+_No boilerplate controllers. No code generation. No custom schema._
 
 **This README is still a WIP.**
 
-[A documentation site is being built right now on the `feat/docs` branch.](https://entity-routes.vercel.app/)
+[Check the docs here.](https://entity-routes.vercel.app/)
+
+## Motivation
+
+Basically this is a **Node / Typescript** route handler tightly coupled with **[TypeORM](https://github.com/typeorm/typeorm/)** entities.
+
+I wanted to get rid of writing the same boring controllers again & again for each entities and I could not find a NodeJS project that would fit my needs : being simple enough not to require any configuration (or controllers), yet easily customizable when needed.
 
 ## Table of Contents
 
@@ -199,14 +205,8 @@ That's it. There is no final step. Your routes are ready.
 -   Almost complete code coverage (95%+)
 -   Everything (types included) is exported so you can use it your own way
 
-## What/why ?
-
-Basically this is a **Node / Typescript** route handler tightly coupled with **[TypeORM](https://github.com/typeorm/typeorm/)** entities.
-
-I wanted to get rid of writing the same boring controllers again & again for each entities and I could not find a NodeJS project that would fit my needs : being simple enough not to require any configuration (or controllers), yet easily customizable when needed.
-
-_Inspired by an internal project made at [ACSEO](https://acseo.fr/) with ApiPlatform (Symfony/PHP)_
-
 ## License
 
 MIT © 2020 Alexandre Stahmer
+
+_Inspired by an internal project made at [ACSEO](https://acseo.fr/) with ApiPlatform (Symfony/PHP)_
