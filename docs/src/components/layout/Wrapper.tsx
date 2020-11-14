@@ -1,8 +1,8 @@
 import { useColorMode, Box, Stack, Flex } from "@chakra-ui/react";
-import { useLayoutConfig } from "@/components/LayoutProvider";
+import { useLayoutConfig } from "@/components/layout/LayoutProvider";
 import { SideNav } from "./SideNav";
-import { PropsWithChildren, useContext } from "react";
-import { WrapperContext } from "../Wrapper";
+import { PropsWithChildren } from "react";
+import { usePageContext } from "./PageProvider";
 import { FooterButtons } from "./FooterButtons";
 import NavBar from "./NavBar";
 import { TableOfContents } from "./TableOfContents";
@@ -13,7 +13,7 @@ const TABLE_OF_C_W = 200;
 const NAVBAR_H = 62;
 export const LAYOUT_SIZES = { SIDENAV_W, TABLE_OF_C_W, NAVBAR_H };
 
-export function DokzWrapper({ children, currentItem }: PropsWithChildren<{ currentItem: DirectoryTree }>) {
+export function Wrapper({ children, currentItem }: PropsWithChildren<{ currentItem: DirectoryTree }>) {
     const {
         footer,
         headerLogo,
@@ -24,7 +24,7 @@ export function DokzWrapper({ children, currentItem }: PropsWithChildren<{ curre
         fontWeight,
         fontFamily,
     } = useLayoutConfig();
-    const { sidebarTree, tableOfContentsItems } = useContext(WrapperContext);
+    const { sidebarTree, tableOfContentsItems } = usePageContext();
     const { colorMode } = useColorMode();
     return (
         <Stack

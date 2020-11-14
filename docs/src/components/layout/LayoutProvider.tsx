@@ -9,7 +9,7 @@ import darkPrismTheme from "prism-react-renderer/themes/oceanicNext";
 
 import { resetCodeBlockCount } from "@/components/mdx/Code";
 import { useRouteChanged } from "@/functions/useRouteChanged";
-import { Arrow, ArrowEmpty } from "./layout/icons";
+import { Arrow, ArrowEmpty } from "./icons";
 
 export function LayoutProvider({ children, ...rest }: LayoutProviderProps) {
     const ctx = { ...defaultLayoutContext, ...rest };

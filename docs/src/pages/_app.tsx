@@ -2,10 +2,9 @@ import { Fragment } from "react";
 import Head from "next/head";
 
 import { Divider } from "@chakra-ui/react";
-import { Wrapper } from "@/components";
+import { PageProvider, LayoutProvider } from "@/components/layout";
 import { ColorModeSwitch, GithubLink } from "@/components/layout/NavBar";
 import MDXComponents from "@/components/mdx";
-import { LayoutProvider } from "@/components/LayoutProvider";
 
 export default function App(props) {
     const { Component, pageProps } = props;
@@ -31,7 +30,7 @@ export default function App(props) {
                 ]}
                 maxPageWidth="1350px"
                 mdxComponents={{
-                    wrapper: Wrapper,
+                    wrapper: PageProvider,
                     h2: (props) => (
                         <>
                             <Divider mt="1.5em" />

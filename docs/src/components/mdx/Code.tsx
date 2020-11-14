@@ -1,35 +1,17 @@
-import { useLayoutConfig } from "@/components/LayoutProvider";
+import { useLayoutConfig } from "@/components/layout/LayoutProvider";
 import { ReactNode, useState, useRef, useEffect } from "react";
 import { Box, Collapse, Switch, Flex, Text, useColorMode, useClipboard, BoxProps, Stack, Link } from "@chakra-ui/react";
-import Highlight, { defaultProps } from "prism-react-renderer";
+import Highlight, { defaultProps, Language } from "prism-react-renderer";
 import rangeParser from "parse-numeric-range";
 import { FiCheck, FiCopy } from "react-icons/fi";
 
-export type CodeProps = {
-    className: string;
-    children: ReactNode;
-    metastring?: string;
-    preProps?: BoxProps;
-};
-
-export type CodePropsMetaString = {
-    topLeft?: string;
-    bottomLeft?: string;
-    bottomRight?: string;
-    collapsable?: boolean;
-    hidden?: boolean;
-    left?: boolean;
-    slug?: string;
-    withoutLang?: boolean;
-    minimal?: boolean;
-    notMinimal?: boolean;
-};
-
-export function Code(props: CodeProps) {
-    const metas = extractMeta<CodePropsMetaString>(props.metastring || "");
+const langRegex = /language-/;
+export const Code = ({ children, className, metastring, preProps }: CodeProps) => {
+    const metas = extractMeta<CodePropsMetaString>(metastring || "");
     const { topLeft, bottomLeft, bottomRight, collapsable, hidden, slug, withoutLang } = metas;
+
     const hasBottomTxt = bottomLeft || bottomRight;
-    const language = props.className?.replace(langRegex, "");
+    const language = className?.replace(langRegex, "") as Language;
 
     const [isOpen, setIsOpened] = useState(!hidden);
     const toggle = () => setIsOpened(!isOpen);
@@ -43,6 +25,18 @@ export function Code(props: CodeProps) {
             increment();
         }
     }, []);
+
+    // console.log({rest, live})
+    const { colorMode } = useColorMode();
+    let { prismTheme } = useLayoutConfig();
+
+    const code = typeof children === "string" ? children.trim() : "";
+    const { onCopy, hasCopied } = useClipboard(code);
+
+    const shouldHighlightLine = calculateLinesToHighlight(metastring);
+    const lineCount = code.split("\n").length;
+    const isShort = lineCount <= 5 && !metas.notMinimal;
+    const isMinimal = language === "json" || metas.minimal;
 
     return (
         <Box position="relative" id={identifier} css={{ "&:hover a": { opacity: 1 } }}>
@@ -61,17 +55,67 @@ export function Code(props: CodeProps) {
             >
                 #
             </Link>
-            <DokzCode
-                {...metas}
-                {...props}
-                isOpen={isOpen}
-                preProps={{
-                    paddingTop: collapsable ? "30px" : topLeft && "25px",
-                    paddingBottom: hasBottomTxt && "30px",
-                    ...props.preProps,
-                }}
-                codeBlockIdentifier={identifier}
-            />
+            <Box position="relative" mb={isShort && "10px"}>
+                <Highlight {...defaultProps} theme={prismTheme[colorMode]} code={code} language={language}>
+                    {({ className, style, tokens, getLineProps, getTokenProps }) => (
+                        <Box
+                            p={!isShort && !isMinimal ? "20px" : "10px"}
+                            paddingTop={collapsable ? "30px" : topLeft && "25px"}
+                            paddingBottom={hasBottomTxt && "30px"}
+                            borderRadius="8px"
+                            as="pre"
+                            fontSize="0.85em"
+                            className={"codeContainer " + className}
+                            style={{ ...style }}
+                            shadow="sm"
+                            overflowX="auto"
+                            {...preProps}
+                        >
+                            <Collapse in={isOpen} startingHeight={100}>
+                                <Stack
+                                    spacing={2}
+                                    direction="row"
+                                    alignItems="center"
+                                    position="absolute"
+                                    top={!isShort ? "8px" : "-20px"}
+                                    right="10px"
+                                >
+                                    <Box opacity={0.6} fontSize="0.9em">
+                                        {language}
+                                    </Box>
+                                    <CopyButton onClick={onCopy} hasCopied={hasCopied} />
+                                </Stack>
+                                {tokens.map((line, i) => (
+                                    <Box
+                                        key={i}
+                                        {...getLineProps({ line, key: i })}
+                                        bg={shouldHighlightLine(i) && "gray.600"}
+                                        width="fit-content"
+                                        id={`${identifier}-line-${i + 1}`}
+                                    >
+                                        <Link
+                                            display="inline-block"
+                                            textAlign="right"
+                                            w={!isShort ? "40px" : "20px"}
+                                            opacity={0.4}
+                                            pr={!isShort ? "30px" : "15px"}
+                                            aria-label="anchor"
+                                            as="a"
+                                            href={`#${identifier}-line-${i + 1}`}
+                                            userSelect="none"
+                                        >
+                                            {i + 1}
+                                        </Link>
+                                        {line.map((token, key) => (
+                                            <span key={key} {...getTokenProps({ token, key })} />
+                                        ))}
+                                    </Box>
+                                ))}
+                            </Collapse>
+                        </Box>
+                    )}
+                </Highlight>
+            </Box>
             {topLeft && (
                 <Box opacity={0.7} fontSize="0.8em" position="absolute" left="10px" top="5px">
                     {topLeft}
@@ -95,84 +139,26 @@ export function Code(props: CodeProps) {
             )}
         </Box>
     );
-}
+};
 
-const langRegex = /language-/;
-export const DokzCode = ({ children, className, isOpen, preProps, ...rest }) => {
-    // console.log({rest, live})
-    const { colorMode } = useColorMode();
-    let { prismTheme } = useLayoutConfig();
+export type CodeProps = {
+    className: string;
+    children: ReactNode;
+    metastring?: string;
+    preProps?: BoxProps;
+};
 
-    const code = typeof children === "string" ? children.trim() : "";
-    const language = className && className.replace(langRegex, "");
-    const { onCopy, hasCopied } = useClipboard(code);
-
-    const shouldHighlightLine = calculateLinesToHighlight(rest.metastring);
-    const lineCount = code.split("\n").length;
-    const isShort = lineCount <= 5 && !rest.notMinimal;
-    const isMinimal = language === "json" || rest.minimal;
-
-    return (
-        <Box position="relative" mb={isShort && "10px"}>
-            <Highlight {...defaultProps} theme={prismTheme[colorMode]} code={code} language={language}>
-                {({ className, style, tokens, getLineProps, getTokenProps }) => (
-                    <Box
-                        p={!isShort && !isMinimal ? "20px" : "10px"}
-                        borderRadius="8px"
-                        as="pre"
-                        fontSize="0.85em"
-                        className={"codeContainer " + className}
-                        style={{ ...style }}
-                        shadow="sm"
-                        overflowX="auto"
-                        {...preProps}
-                    >
-                        <Collapse in={isOpen} startingHeight={100}>
-                            <Stack
-                                spacing={2}
-                                direction="row"
-                                alignItems="center"
-                                position="absolute"
-                                top={!isShort ? "8px" : "-20px"}
-                                right="10px"
-                            >
-                                <Box opacity={0.6} fontSize="0.9em">
-                                    {language}
-                                </Box>
-                                <CopyButton onClick={onCopy} hasCopied={hasCopied} />
-                            </Stack>
-                            {tokens.map((line, i) => (
-                                <Box
-                                    key={i}
-                                    {...getLineProps({ line, key: i })}
-                                    bg={shouldHighlightLine(i) && "gray.600"}
-                                    width="fit-content"
-                                    id={`${rest.codeBlockIdentifier}-line-${i + 1}`}
-                                >
-                                    <Link
-                                        display="inline-block"
-                                        textAlign="right"
-                                        w={!isShort ? "40px" : "20px"}
-                                        opacity={0.4}
-                                        pr={!isShort ? "30px" : "15px"}
-                                        aria-label="anchor"
-                                        as="a"
-                                        href={`#${rest.codeBlockIdentifier}-line-${i + 1}`}
-                                        userSelect="none"
-                                    >
-                                        {i + 1}
-                                    </Link>
-                                    {line.map((token, key) => (
-                                        <span key={key} {...getTokenProps({ token, key })} />
-                                    ))}
-                                </Box>
-                            ))}
-                        </Collapse>
-                    </Box>
-                )}
-            </Highlight>
-        </Box>
-    );
+export type CodePropsMetaString = {
+    topLeft?: string;
+    bottomLeft?: string;
+    bottomRight?: string;
+    collapsable?: boolean;
+    hidden?: boolean;
+    left?: boolean;
+    slug?: string;
+    withoutLang?: boolean;
+    minimal?: boolean;
+    notMinimal?: boolean;
 };
 
 export function extractMeta<T = Record<string, string>>(string: string): Partial<T> {

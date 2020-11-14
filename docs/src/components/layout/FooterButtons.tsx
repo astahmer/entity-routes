@@ -1,15 +1,13 @@
-import { useContext } from "react";
 import NextLink from "next/link";
 
-import { Box, Flex, Icon, Stack } from "@chakra-ui/react";
-import { css } from "@emotion/react";
+import { Box, Flex, Stack } from "@chakra-ui/react";
 
-import { WrapperContext } from "../Wrapper";
+import { usePageContext } from "./PageProvider";
 import { removeMdxExt } from "@/functions/sidebar";
 import { Arrow } from "./icons";
 
 export const FooterButtons = ({ ...rest }) => {
-    const { next: nextTree, previous: prevTree } = useContext(WrapperContext);
+    const { next: nextTree, previous: prevTree } = usePageContext();
 
     const [isPrevDir, isNextDir] = [prevTree?.children?.length, nextTree?.children?.length];
     const [prev, next] = [

@@ -1,10 +1,9 @@
-import { createContext, useMemo } from "react";
+import { createContext, useContext, useMemo } from "react";
 import { Stack } from "@chakra-ui/react";
 import MDXComponents from "@/components/mdx";
 import GithubSlugger from "github-slugger";
 
-// Dokz override
-import { DokzWrapper, TableOfContentItem } from "./layout";
+import { Wrapper, TableOfContentItem } from "./index";
 import { useRouter } from "next/router";
 import {
     defaultSidebarTree,
@@ -16,7 +15,7 @@ import {
     SubTree,
 } from "@/functions/sidebar";
 
-export const Wrapper = ({ children, meta: { tableOfContents } }) => {
+export const PageProvider = ({ children, meta: { tableOfContents } }) => {
     const router = useRouter();
 
     const tree = getSidebarTree();
@@ -34,18 +33,18 @@ export const Wrapper = ({ children, meta: { tableOfContents } }) => {
     // TODO Gtag manager ?
 
     return (
-        <WrapperContext.Provider value={{ sidebarTree, tableOfContentsItems: tableOfContents, ...sidebarItemData }}>
-            <DokzWrapper currentItem={currentItem}>
+        <PageContext.Provider value={{ sidebarTree, tableOfContentsItems: tableOfContents, ...sidebarItemData }}>
+            <Wrapper currentItem={currentItem}>
                 <Stack spacing={6} fontSize={[16, 16, 16, 16, 17]} shouldWrapChildren>
                     {hasTitle && <MDXComponents.h1 id={currentItem.meta.slug}>{meta.title}</MDXComponents.h1>}
                     {children}
                 </Stack>
-            </DokzWrapper>
-        </WrapperContext.Provider>
+            </Wrapper>
+        </PageContext.Provider>
     );
 };
 
-const defaultWrapperContext: WrapperContext = {
+const defaultPageContext: PageContext = {
     sidebarTree: defaultSidebarTree,
     tableOfContentsItems: [],
     current: null,
@@ -55,9 +54,10 @@ const defaultWrapperContext: WrapperContext = {
     parent: null,
 };
 
-export type WrapperContext = {
+export type PageContext = {
     sidebarTree: DirectoryTree;
     tableOfContentsItems: TableOfContentItem[];
 } & SubTree;
 
-export const WrapperContext = createContext(defaultWrapperContext);
+export const PageContext = createContext(defaultPageContext);
+export const usePageContext = () => useContext(PageContext);

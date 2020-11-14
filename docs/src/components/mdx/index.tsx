@@ -1,6 +1,6 @@
 import { Divider, Kbd, ListItem, UnorderedList, OrderedList } from "@chakra-ui/react";
 
-import { DokzWrapper } from "@/components/layout/Wrapper";
+import { Wrapper } from "@/components/layout/Wrapper";
 import { Pre } from "./Pre";
 import { Table } from "./Table";
 import { THead } from "./THead";
@@ -13,7 +13,7 @@ import { Code } from "./Code";
 import { Link } from "./Link";
 
 const MDXComponents = {
-    wrapper: DokzWrapper,
+    wrapper: Wrapper,
     hr: (props) => <Divider my="3em !important" {...props} />,
     h1: (props) => <DocsHeading as="h1" fontSize="2em" {...props} />,
     h2: (props) => <DocsHeading as="h2" fontSize="1.4em" {...props} />,

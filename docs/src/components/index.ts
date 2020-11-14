@@ -4,4 +4,3 @@ export * from "./DocAlert";
 export * from "./layout";
 export * from "./Preview";
 export * from "./SubresourcePlayground";
-export * from "./Wrapper";

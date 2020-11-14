@@ -1,5 +1,5 @@
 import { Box, Flex, IconButton, useColorMode, Stack } from "@chakra-ui/react";
-import { useLayoutConfig } from "@/components/LayoutProvider";
+import { useLayoutConfig } from "@/components/layout/LayoutProvider";
 import { DiGithubBadge } from "react-icons/di";
 import MobileNav from "./MobileNav";
 import { MoonIcon, SunIcon } from "@chakra-ui/icons";

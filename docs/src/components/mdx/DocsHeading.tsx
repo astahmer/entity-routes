@@ -1,5 +1,5 @@
 import { Box, Heading, Link as ChakraLink, useColorMode } from "@chakra-ui/react";
-import { useLayoutConfig } from "@/components/LayoutProvider";
+import { useLayoutConfig } from "@/components/layout/LayoutProvider";
 
 export const DocsHeading = (props) => {
     const { headingColor } = useLayoutConfig();
