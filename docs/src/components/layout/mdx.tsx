@@ -18,7 +18,7 @@ import { DokzWrapper } from "./Wrapper";
 const Pre = (props) => <Box as="pre" rounded="sm" {...props} />;
 
 const Table = (props) => (
-    <Box overflowX="auto">
+    <Box overflowX="auto" my="1em">
         <Box as="table" textAlign="left" my="2em" width="full" {...props} />
     </Box>
 );

@@ -1,11 +1,10 @@
-import MDXComponents from "@/components/DokzOverride/mdx";
+import MDXComponents from "@/components/layout/mdx";
 import { BoxProps } from "@chakra-ui/react";
-import { Table } from "./Table";
 
 export type DataTableProps = { columns: string[]; rows: string[][] } & BoxProps;
 export function DataTable({ columns, rows, ...props }: DataTableProps) {
     return (
-        <Table {...props}>
+        <MDXComponents.table {...props}>
             <thead>
                 <tr>
                     {columns.map((col, i) => (
@@ -22,6 +21,6 @@ export function DataTable({ columns, rows, ...props }: DataTableProps) {
                     </tr>
                 ))}
             </tbody>
-        </Table>
+        </MDXComponents.table>
     );
 }

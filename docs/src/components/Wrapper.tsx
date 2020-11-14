@@ -1,10 +1,10 @@
 import { createContext, useMemo } from "react";
 import { Stack } from "@chakra-ui/react";
-import MDXComponents from "@/components/DokzOverride/mdx";
+import MDXComponents from "@/components/layout/mdx";
 import GithubSlugger from "github-slugger";
 
 // Dokz override
-import { DokzWrapper, TableOfContentItem } from "./DokzOverride";
+import { DokzWrapper, TableOfContentItem } from "./layout";
 import { useRouter } from "next/router";
 import {
     defaultSidebarTree,

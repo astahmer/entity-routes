@@ -1,11 +1,11 @@
 import { Fragment } from "react";
 import Head from "next/head";
 
-import { Code, Table, Wrapper } from "@/components";
+import { Code, Wrapper } from "@/components";
 import { Divider } from "@chakra-ui/react";
-import { ColorModeSwitch, GithubLink } from "@/components/DokzOverride/NavBar";
-import MDXComponents from "@/components/DokzOverride/mdx";
-import { Link } from "@/components/DokzOverride/Link";
+import { ColorModeSwitch, GithubLink } from "@/components/layout/NavBar";
+import MDXComponents from "@/components/layout/mdx";
+import { Link } from "@/components/layout/Link";
 import { LayoutProvider } from "@/components/LayoutProvider";
 
 export default function App(props) {
@@ -33,7 +33,6 @@ export default function App(props) {
                 maxPageWidth="1350px"
                 mdxComponents={{
                     code: Code,
-                    table: Table,
                     wrapper: Wrapper,
                     h2: (props) => (
                         <>
