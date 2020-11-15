@@ -1,5 +1,5 @@
 const path = require("path");
-const { writeFile } = require("fs/promises");
+const { promises } = require("fs");
 
 const chokidar = require("chokidar");
 const throttle = require("lodash/throttle");
@@ -9,7 +9,7 @@ const getMdxFilesTree = require("./getMdxFilesTree");
 
 const makeSidebar = throttle(async () => {
     try {
-        await writeFile(sidebarFile, JSON.stringify(getMdxFilesTree(), null, 4));
+        await promises.writeFile(sidebarFile, JSON.stringify(getMdxFilesTree(), null, 4));
         console.log(`[DOC] generated ${sidebarFile}`);
     } catch (e) {
         console.error(`could not write ${sidebarFile}`);

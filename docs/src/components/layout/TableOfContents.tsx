@@ -6,7 +6,7 @@ import { LAYOUT_SIZES } from "./Wrapper";
 
 export type TableOfContentsProps = { items: TableOfContentItem[]; currentItem: DirectoryTree } & FlexProps;
 export function TableOfContents({ items = [], currentItem, ...rest }: TableOfContentsProps) {
-    const tocTitle = { lvl: 1, slug: currentItem.meta.slug, title: currentItem.meta.title };
+    const tocTitle = currentItem ? { lvl: 1, slug: currentItem.meta.slug, title: currentItem.meta.title } : null;
     return (
         <Flex
             direction="column"
@@ -18,7 +18,7 @@ export function TableOfContents({ items = [], currentItem, ...rest }: TableOfCon
             whiteSpace="nowrap"
             {...rest}
         >
-            <TocItem key={"toc-title"} {...tocTitle} />
+            {tocTitle && <TocItem key={"toc-title"} {...tocTitle} />}
             {items.map((item) => (
                 <TocItem key={item.slug} {...item} />
             ))}

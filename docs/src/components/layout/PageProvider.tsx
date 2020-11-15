@@ -24,10 +24,14 @@ export const PageProvider = ({ children, meta: { tableOfContents } }) => {
 
     const sidebarItemData = (findSubtreeByUrl(sidebarTree, router.pathname) || {}) as SubTree;
     const currentItem = sidebarItemData.current;
-    // Generates & re-use title slug for h1#id & TOC anchor link
-    currentItem.meta.slug = GithubSlugger.slug(currentItem.meta.title);
 
-    const meta = { tableOfContents, ...currentItem.meta };
+    // If current page is found in sidebar.json
+    if (currentItem) {
+        // Generates & re-use title slug for h1#id & TOC anchor link
+        currentItem.meta.slug = GithubSlugger.slug(currentItem.meta.title);
+    }
+
+    const meta = { tableOfContents, ...currentItem?.meta };
     const hasTitle = meta.title && !meta.withoutH1;
 
     // TODO Gtag manager ?

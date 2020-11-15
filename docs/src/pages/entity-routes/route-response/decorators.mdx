@@ -4,23 +4,25 @@ title: Decorator functions
 
 ## What problem does it solve ?
 
-When you need to dynamically add attributes to your entity properties recursively (which means **computed properties**
-can't meet your needs), maybe depending on the metadata, a concrete example of that case are
+When you need to dynamically add attributes to your entity properties recursively (which means
+[**computed properties**](/entity-groups/groups/introduction#computed-property) can't meet your needs), maybe depending
+on the metadata, a concrete example of that case are
 [subresources IRIs](/entity-routes/subresources/introduction#format-in-response).
 
 ## How
 
 Decorator functions recursively traverse an item to decorate it.
 
-> Each decorator function is added to the pipe of the `Writer`.`fromItem` function.
+> Each decorator function is added to the pipe of the [`Writer`](/definitions/classes/writer).`fromItem` function.
 
-They get access to `DecorateFnArgs`, among them there is the current item metadata & a clone/ref to update in any way an
-item's property (or even completely re-assign the item to another type).
+They get access to [`DecorateFnArgs`](/definitions#decoratefnargs), among them there is the current item metadata & a
+clone/ref to update in any way an item's property (or even completely re-assign the item to another type).
 
 A decorator function can be async and therefore will be awaited before passing the updated item to the next decorator
 function.
 
-> You can pass any custom data to the decorator function under the `DecorateFnArgs`.`data` key.
+> You can pass any custom data to the decorator function under the
+> [`DecorateFnArgs`](/definitions#decoratefnargs).`data` key.
 
 ## Usage
 
