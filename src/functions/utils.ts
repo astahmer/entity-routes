@@ -5,9 +5,11 @@ export const log = (obj: Object, options?: util.InspectOptions) =>
 
 export type Composable<T = any, R = any> = (item: T) => R;
 
+/** Compose right-to-left */
 export const compose = <T = any, R = any>(...functions: Composable<T, R>[]) => (item: T) =>
     functions.reduceRight((chain, func) => chain.then(func), Promise.resolve(item));
 
+/** Compose left-to-right, most commonly used */
 export const pipe = <T = any, R = any>(...functions: Composable<T, R>[]) => (item: T) =>
     functions.reduce((chain, func) => chain.then(func), Promise.resolve(item));
 
