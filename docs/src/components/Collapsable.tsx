@@ -1,5 +1,5 @@
+import { Box, Button, Collapse, Flex } from "@chakra-ui/react";
 import { useState } from "react";
-import { Collapse, Button, Flex, Box } from "@chakra-ui/react";
 
 export function Collapsable({ children, collapse, button, btnLabel, suffix = "" }) {
     const [show, setShow] = useState(false);

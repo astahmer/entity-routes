@@ -1,19 +1,20 @@
-import { createContext, useContext, useMemo } from "react";
 import { Stack } from "@chakra-ui/react";
-import MDXComponents from "@/components/mdx";
 import GithubSlugger from "github-slugger";
-
-import { Wrapper, TableOfContentItem } from "./index";
 import { useRouter } from "next/router";
+import { createContext, useContext, useMemo } from "react";
+
+import MDXComponents from "@/components/mdx";
 import {
-    defaultSidebarTree,
     DirectoryTree,
-    findSubtreeByUrl,
-    getSidebarTree,
-    getSidebarOrder,
-    orderTree,
     SubTree,
+    defaultSidebarTree,
+    findSubtreeByUrl,
+    getSidebarOrder,
+    getSidebarTree,
+    orderTree,
 } from "@/functions/sidebar";
+
+import { TableOfContentItem, Wrapper } from "./index";
 
 export const PageProvider = ({ children, meta: { tableOfContents } }) => {
     const router = useRouter();

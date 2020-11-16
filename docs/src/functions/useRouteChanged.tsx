@@ -1,5 +1,5 @@
-import { useEffect } from "react";
 import { useRouter } from "next/router";
+import { useEffect } from "react";
 
 type Handler = (...evts: any[]) => void;
 export function useRouteChanged({ onComplete, onStart }: { onStart?: Handler; onComplete?: Handler }) {

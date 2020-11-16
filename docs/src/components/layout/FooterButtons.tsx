@@ -1,10 +1,10 @@
+import { Box, Flex, Stack } from "@chakra-ui/react";
 import NextLink from "next/link";
 
-import { Box, Flex, Stack } from "@chakra-ui/react";
-
-import { usePageContext } from "./PageProvider";
 import { removeMdxExt } from "@/functions/sidebar";
+
 import { Arrow } from "./icons";
+import { usePageContext } from "./PageProvider";
 
 export const FooterButtons = ({ ...rest }) => {
     const { next: nextTree, previous: prevTree } = usePageContext();

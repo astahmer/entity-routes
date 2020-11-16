@@ -1,8 +1,10 @@
-import { Box, Flex, IconButton, useColorMode, Stack } from "@chakra-ui/react";
-import { useLayoutConfig } from "@/components/layout/LayoutProvider";
-import { DiGithubBadge } from "react-icons/di";
-import MobileNav from "./MobileNav";
 import { MoonIcon, SunIcon } from "@chakra-ui/icons";
+import { Box, Flex, IconButton, Stack, useColorMode } from "@chakra-ui/react";
+import { DiGithubBadge } from "react-icons/di";
+
+import { useLayoutConfig } from "@/components/layout/LayoutProvider";
+
+import MobileNav from "./MobileNav";
 
 export const GithubLink = ({ url = "", ...rest }: any) => (
     <Box

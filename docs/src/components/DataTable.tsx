@@ -1,5 +1,6 @@
-import MDXComponents from "@/components/mdx";
 import { BoxProps } from "@chakra-ui/react";
+
+import MDXComponents from "@/components/mdx";
 
 export type DataTableProps = { columns: string[]; rows: string[][] } & BoxProps;
 export function DataTable({ columns, rows, ...props }: DataTableProps) {

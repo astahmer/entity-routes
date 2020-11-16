@@ -1,9 +1,10 @@
-import { useLayoutConfig } from "@/components/layout/LayoutProvider";
-import { ReactNode, useState, useRef, useEffect } from "react";
-import { Box, Collapse, Switch, Flex, Text, useColorMode, useClipboard, BoxProps, Stack, Link } from "@chakra-ui/react";
-import Highlight, { defaultProps, Language } from "prism-react-renderer";
+import { Box, BoxProps, Collapse, Flex, Link, Stack, Switch, Text, useClipboard, useColorMode } from "@chakra-ui/react";
 import rangeParser from "parse-numeric-range";
+import Highlight, { Language, defaultProps } from "prism-react-renderer";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import { FiCheck, FiCopy } from "react-icons/fi";
+
+import { useLayoutConfig } from "@/components/layout/LayoutProvider";
 
 const langRegex = /language-/;
 export const Code = ({ children, className, metastring, preProps }: CodeProps) => {

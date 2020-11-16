@@ -1,7 +1,7 @@
 import { Box, BoxProps, useColorMode } from "@chakra-ui/react";
 import NextLink from "next/link";
 import { useRouter } from "next/router";
-import { cloneElement, forwardRef, ReactElement } from "react";
+import { ReactElement, cloneElement, forwardRef } from "react";
 
 const NavLink = ({ children, ...props }: any) => {
     const router = useRouter();

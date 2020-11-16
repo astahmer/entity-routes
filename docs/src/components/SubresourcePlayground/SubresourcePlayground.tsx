@@ -1,14 +1,15 @@
-import { useState, useMemo } from "react";
-import { Stack, Divider } from "@chakra-ui/react";
+import { Divider, Stack } from "@chakra-ui/react";
+import { useMemo, useState } from "react";
+
 import {
     Entities,
-    makeRecordFromKeys,
+    SubresourcePlaygroundContext,
     baseEntityNames,
     defaultEntity,
-    removeValue,
     getMaxDepthData,
     getUniqueRoutes,
-    SubresourcePlaygroundContext,
+    makeRecordFromKeys,
+    removeValue,
 } from "./helpers";
 import { PropsByEntities } from "./PropsByEntities";
 import { SubresourceRouteList } from "./SubresourceRouteList";

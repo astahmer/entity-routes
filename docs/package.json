@@ -17,7 +17,7 @@
         "docs:fixdry": "ts-node -T -O '{\"module\":\"commonjs\"}' $npm_package_directories_docFix --dry",
         "docs:build": "npm run docs:clean && npm run docs:make && npm run docs:fix",
         "deploy": "npm run docs:build && vercel",
-        "prettier": "prettier --write \"./{src,scripts}/**/*.{js,jsx,ts,tsx,md,mdx}\"",
+        "prettier": "prettier --write \"./{src,scripts}/**/*.{js,jsx,ts,tsx}\"",
         "postinstall": "patch-package"
     },
     "dependencies": {
@@ -52,7 +52,8 @@
         "markdown-toc": "^1.2.0",
         "next-images": "^1.4.1",
         "next-mdx-enhanced": "^5.0.0",
-        "prettier": "^2.0.5",
+        "prettier": "^2.1.2",
+        "prettier-plugin-sorted": "^2.0.0",
         "remark-mdx-metadata": "^1.0.1",
         "remark-slug": "^6.0.0",
         "replace-in-file": "^6.1.0",
@@ -62,5 +63,15 @@
         "typedoc": "^0.17.0-3",
         "typedoc-plugin-markdown": "^2.4.2",
         "typescript": "^4.0.5"
+    },
+    "importSort": {
+        ".js, jsx, .ts, .tsx": {
+            "options": {
+                "ignoreTsConfig": true,
+                "extraAliases": [
+                    "@/*"
+                ]
+            }
+        }
     }
 }

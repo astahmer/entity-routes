@@ -1,22 +1,23 @@
 import { AddIcon } from "@chakra-ui/icons";
 import {
-    Stack,
-    Grid,
-    Switch,
-    FormLabel,
-    Tag,
-    TagLabel,
-    TagCloseButton,
     Checkbox,
-    Editable,
-    EditablePreview,
-    EditableInput,
-    Tooltip,
-    IconButton,
-    Flex,
     CheckboxGroup,
+    Editable,
+    EditableInput,
+    EditablePreview,
+    Flex,
+    FormLabel,
+    Grid,
+    IconButton,
+    Stack,
+    Switch,
+    Tag,
+    TagCloseButton,
+    TagLabel,
+    Tooltip,
 } from "@chakra-ui/react";
-import { useContext, ChangeEvent } from "react";
+import { ChangeEvent, useContext } from "react";
+
 import { SubresourcePlaygroundContext } from "./helpers";
 
 export function PropsByEntities() {

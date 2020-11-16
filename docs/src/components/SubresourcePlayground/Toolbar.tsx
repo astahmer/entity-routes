@@ -1,6 +1,5 @@
+import { CheckIcon } from "@chakra-ui/icons";
 import {
-    useDisclosure,
-    useClipboard,
     Box,
     Button,
     Icon,
@@ -20,9 +19,11 @@ import {
     NumberInputStepper,
     Stack,
     Textarea,
+    useClipboard,
+    useDisclosure,
 } from "@chakra-ui/react";
-import { CheckIcon } from "@chakra-ui/icons";
-import { useRef, useState, useContext, useMemo } from "react";
+import { useContext, useMemo, useRef, useState } from "react";
+
 import { BasicDialog } from "../BasicDialog";
 import { SubresourcePlaygroundContext } from "./helpers";
 

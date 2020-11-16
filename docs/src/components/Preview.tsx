@@ -1,4 +1,4 @@
-import { Select, Box } from "@chakra-ui/react";
+import { Box, Select } from "@chakra-ui/react";
 import { useState } from "react";
 
 export function Preview({ options }) {

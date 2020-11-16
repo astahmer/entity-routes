@@ -1,14 +1,14 @@
-import { MDXProvider } from "@mdx-js/react";
-import { createContext, useContext, ReactNode, ComponentType } from "react";
-import MDXComponents from "@/components/mdx";
 import { Box, ChakraProvider, css } from "@chakra-ui/react";
-import { ColorModeSwitch } from "@/components/layout/NavBar";
-
+import { MDXProvider } from "@mdx-js/react";
 import { PrismTheme } from "prism-react-renderer";
 import darkPrismTheme from "prism-react-renderer/themes/oceanicNext";
+import { ComponentType, ReactNode, createContext, useContext } from "react";
 
+import { ColorModeSwitch } from "@/components/layout/NavBar";
+import MDXComponents from "@/components/mdx";
 import { resetCodeBlockCount } from "@/components/mdx/Code";
 import { useRouteChanged } from "@/functions/useRouteChanged";
+
 import { Arrow, ArrowEmpty } from "./icons";
 
 export function LayoutProvider({ children, ...rest }: LayoutProviderProps) {

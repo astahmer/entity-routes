@@ -1,8 +1,8 @@
-import { Fragment } from "react";
-import Head from "next/head";
-
 import { Divider } from "@chakra-ui/react";
-import { PageProvider, LayoutProvider } from "@/components/layout";
+import Head from "next/head";
+import { Fragment } from "react";
+
+import { LayoutProvider, PageProvider } from "@/components/layout";
 import { ColorModeSwitch, GithubLink } from "@/components/layout/NavBar";
 import MDXComponents from "@/components/mdx";
 

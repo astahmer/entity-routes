@@ -1,12 +1,14 @@
-import { useColorMode, Box, Stack, Flex } from "@chakra-ui/react";
-import { useLayoutConfig } from "@/components/layout/LayoutProvider";
-import { SideNav } from "./SideNav";
+import { Box, Flex, Stack, useColorMode } from "@chakra-ui/react";
 import { PropsWithChildren } from "react";
-import { usePageContext } from "./PageProvider";
+
+import { useLayoutConfig } from "@/components/layout/LayoutProvider";
+import { DirectoryTree } from "@/functions/sidebar";
+
 import { FooterButtons } from "./FooterButtons";
 import NavBar from "./NavBar";
+import { usePageContext } from "./PageProvider";
+import { SideNav } from "./SideNav";
 import { TableOfContents } from "./TableOfContents";
-import { DirectoryTree } from "@/functions/sidebar";
 
 const SIDENAV_W = 280;
 const TABLE_OF_C_W = 200;

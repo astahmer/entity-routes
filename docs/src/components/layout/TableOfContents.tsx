@@ -1,5 +1,7 @@
+import { Box, Flex, FlexProps, Link } from "@chakra-ui/react";
+
 import { DirectoryTree } from "@/functions/sidebar";
-import { Flex, Box, Link, FlexProps } from "@chakra-ui/react";
+
 import { LAYOUT_SIZES } from "./Wrapper";
 
 // TODO TableOfContents Quick links (View source / See test file/folder), both from page meta

@@ -1,17 +1,18 @@
-import { Flex, Divider, Kbd, ListItem, UnorderedList, OrderedList } from "@chakra-ui/react";
+import { Divider, Flex, Kbd, ListItem, OrderedList, UnorderedList } from "@chakra-ui/react";
 
 import { DocAlert } from "@/components/DocAlert";
 import { Wrapper } from "@/components/layout/Wrapper";
-import { Pre } from "./Pre";
-import { Table } from "./Table";
-import { THead } from "./THead";
-import { TData } from "./TData";
-import { DocsHeading } from "./DocsHeading";
-import { Paragraph } from "./Paragraph";
-import { InlineCode } from "./InlineCode";
+
 import { BlockQuote } from "./BlockQuote";
 import { Code } from "./Code";
+import { DocsHeading } from "./DocsHeading";
+import { InlineCode } from "./InlineCode";
 import { Link } from "./Link";
+import { Paragraph } from "./Paragraph";
+import { Pre } from "./Pre";
+import { Table } from "./Table";
+import { TData } from "./TData";
+import { THead } from "./THead";
 
 const MDXComponents = {
     Flex,

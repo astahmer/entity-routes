@@ -1,7 +1,9 @@
-import { Drawer, DrawerBody, IconButton, useDisclosure, DrawerOverlay, DrawerContent, Box } from "@chakra-ui/react";
+import { Box, Drawer, DrawerBody, DrawerContent, DrawerOverlay, IconButton, useDisclosure } from "@chakra-ui/react";
 import { MdDehaze } from "react-icons/md";
-import { SideNav } from "./SideNav";
+
 import { useRouteChanged } from "@/functions/useRouteChanged";
+
+import { SideNav } from "./SideNav";
 
 export const MobileNav = (props) => {
     const { isOpen, onToggle, onClose } = useDisclosure();

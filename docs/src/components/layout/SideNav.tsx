@@ -1,9 +1,10 @@
 import { Box, BoxProps, Collapse, Divider, Flex, useDisclosure } from "@chakra-ui/react";
-
 import { useRouter } from "next/router";
+
 import { DirectoryTree, MDX_EXTENSION_REGEX } from "@/functions/sidebar";
-import { ComponentLink } from "./NavLink";
+
 import { CollapseDown, CollapseRight } from "./icons";
+import { ComponentLink } from "./NavLink";
 
 export const SideNav = ({ tree, ...rest }: { tree: DirectoryTree } & BoxProps) => {
     const router = useRouter();

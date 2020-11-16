@@ -1,32 +1,33 @@
 import { DeleteIcon } from "@chakra-ui/icons";
 import {
     Accordion,
-    Flex,
-    AccordionItem,
     AccordionButton,
-    Box,
     AccordionIcon,
+    AccordionItem,
     AccordionPanel,
-    Tooltip,
+    Box,
+    Button,
+    Flex,
     Icon,
+    IconButton,
     Menu,
     MenuButton,
-    Button,
-    MenuList,
     MenuItem,
-    IconButton,
+    MenuList,
     Stack,
+    Tooltip,
 } from "@chakra-ui/react";
 import { useContext } from "react";
+
 import {
     SubresourcePlaygroundContext,
-    setValueAt,
     addValue,
-    getMaxDepthData,
-    maxDepthWarning,
-    lastPartWarning,
-    cantHaveNestedWarning,
     allSubRoutesAlreadyAddedWarning,
+    cantHaveNestedWarning,
+    getMaxDepthData,
+    lastPartWarning,
+    maxDepthWarning,
+    setValueAt,
 } from "./helpers";
 
 export function SubresourceRouteList() {
