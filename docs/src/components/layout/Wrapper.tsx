@@ -55,7 +55,6 @@ export function Wrapper({ children, currentItem }: PropsWithChildren<{ currentIt
                     position="fixed"
                     top={NAVBAR_H}
                     bottom={0}
-                    left={0}
                     tree={sidebarTree}
                     width={SIDENAV_W}
                     display={["none", null, "block"]}
