@@ -72,7 +72,7 @@ export const Code = ({ children, className, metastring, preProps }: CodeProps) =
                             overflowX="auto"
                             {...preProps}
                         >
-                            <Collapse in={isOpen} startingHeight={100}>
+                            <Collapse in={isOpen} startingHeight={100} style={{ overflow: "auto" }}>
                                 <Stack
                                     spacing={2}
                                     direction="row"
