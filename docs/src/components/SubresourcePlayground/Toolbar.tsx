@@ -24,7 +24,8 @@ import {
 } from "@chakra-ui/react";
 import { useContext, useMemo, useRef, useState } from "react";
 
-import { BasicDialog } from "../BasicDialog";
+import { BasicDialog } from "@/components/common/BasicDialog";
+
 import { SubresourcePlaygroundContext } from "./helpers";
 
 export function Toolbar({ onSubmit, onMaxDepthChange, generateRoutes }) {
@@ -84,7 +85,7 @@ export function Toolbar({ onSubmit, onMaxDepthChange, generateRoutes }) {
                 <Button onClick={generateRoutes}>Generate all possible routes</Button>
                 <Menu>
                     <MenuButton
-                        as={(props) => (
+                        as={({ ref, props }) => (
                             <Button {...props} aria-label="Add route">
                                 Add route
                             </Button>

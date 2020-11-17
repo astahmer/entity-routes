@@ -1,7 +1,7 @@
 import { Divider, Flex, Kbd, ListItem, OrderedList, UnorderedList } from "@chakra-ui/react";
 
-import { DocAlert } from "@/components/DocAlert";
 import { Wrapper } from "@/components/layout/Wrapper";
+import { DocAlert } from "@/components/mdx/DocAlert";
 
 import { BlockQuote } from "./BlockQuote";
 import { Code } from "./Code";
