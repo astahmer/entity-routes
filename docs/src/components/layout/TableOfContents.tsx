@@ -8,7 +8,10 @@ import { LAYOUT_SIZES } from "./Wrapper";
 
 export type TableOfContentsProps = { items: TableOfContentItem[]; currentItem: DirectoryTree } & FlexProps;
 export function TableOfContents({ items = [], currentItem, ...rest }: TableOfContentsProps) {
-    const tocTitle = currentItem ? { lvl: 1, slug: currentItem.meta.slug, title: currentItem.meta.title } : null;
+    const tocTitle =
+        currentItem && !currentItem.meta.withoutH1
+            ? { lvl: 1, slug: currentItem.meta.slug, title: currentItem.meta.title }
+            : null;
     return (
         <Flex
             direction="column"
