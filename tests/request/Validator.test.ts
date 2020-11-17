@@ -1,9 +1,10 @@
-import { PrimaryGeneratedColumn, Entity, Column, ManyToOne, getRepository, OneToMany } from "typeorm";
-import { Validator, RequestContext } from "@/index";
-import { createTestConnection, closeTestConnection } from "@@/testConnection";
-import { Container } from "typedi";
-import { IsString, IsEmail, IsDate, registerDecorator, ValidationArguments } from "class-validator";
 import { registerEntityDecorator } from "@astahmer/entity-validator";
+import { IsDate, IsEmail, IsString, ValidationArguments, registerDecorator } from "class-validator";
+import { Container } from "typedi";
+import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, getRepository } from "typeorm";
+
+import { closeTestConnection, createTestConnection } from "@@/testConnection";
+import { RequestContext, Validator } from "@/index";
 
 describe("Validator", () => {
     class AbstractEntity {

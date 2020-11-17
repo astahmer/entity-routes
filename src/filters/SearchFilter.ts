@@ -6,17 +6,17 @@ import { StrategyType, WhereManager } from "@/filters/WhereManager";
 import { sortBy } from "@/functions/array";
 import { isDefined, isWhereType } from "@/functions/asserts";
 import { formatIriToId, isIriValidForProperty } from "@/functions/entity";
-import { setNestedKey, sortObjectByKeys, get } from "@/functions/object";
+import { get, setNestedKey, sortObjectByKeys } from "@/functions/object";
 import { ObjectLiteral } from "@/utils-types";
 
 import {
     AbstractFilter,
     AbstractFilterApplyArgs,
     COMPARISON_OPERATOR,
-    FilterDefaultConfig,
     DefaultFilterOptions,
-    QueryParams,
+    FilterDefaultConfig,
     QueryParamValue,
+    QueryParams,
     WhereMethod,
     WhereType,
 } from "./AbstractFilter";

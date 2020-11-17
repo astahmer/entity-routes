@@ -1,15 +1,15 @@
-import { PrimaryGeneratedColumn, Entity, Column, ManyToOne } from "typeorm";
-import { IsString, IsEmail, IsDate } from "class-validator";
+import { IsDate, IsEmail, IsString } from "class-validator";
 import * as Router from "koa-router";
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 
-import { createTestConnection, closeTestConnection } from "@@/testConnection";
+import { closeTestConnection, createTestConnection } from "@@/testConnection";
 import {
     EntityRoute,
     getEntityRouters,
-    makeEntityRouters,
-    registerKoaRouteFromBridgeRoute,
     koaMwAdapter,
     koaRouterFactory,
+    makeEntityRouters,
+    registerKoaRouteFromBridgeRoute,
 } from "@/index";
 
 describe("container", () => {

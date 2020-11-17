@@ -1,8 +1,9 @@
-import { MappingManager, MappingItem, ENTITY_META_SYMBOL } from "@/mapping/MappingManager";
 import { Container } from "typedi";
-import { Entity, Column, getRepository, ManyToOne, PrimaryGeneratedColumn, OneToMany, EntityMetadata } from "typeorm";
-import { createTestConnection, closeTestConnection } from "@@/testConnection";
-import { EntityGroupsMetadata, Groups, GROUPS_METAKEY, Subresource } from "@/index";
+import { Column, Entity, EntityMetadata, ManyToOne, OneToMany, PrimaryGeneratedColumn, getRepository } from "typeorm";
+
+import { closeTestConnection, createTestConnection } from "@@/testConnection";
+import { EntityGroupsMetadata, GROUPS_METAKEY, Groups, Subresource } from "@/index";
+import { ENTITY_META_SYMBOL, MappingItem, MappingManager } from "@/mapping/MappingManager";
 
 describe("MappingManager", () => {
     const manager = Container.get(MappingManager);

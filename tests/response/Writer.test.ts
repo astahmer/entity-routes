@@ -1,10 +1,9 @@
 import { getRepository } from "typeorm";
 
 import { closeTestConnection, createTestConnection, makeReqCtxWithState } from "@@/testConnection";
+import { CustomDecoratorFnArgs, DecorateFn, Writer, WriterOptions, makeEntity } from "@/index";
 
-import { CustomDecoratorFnArgs, DecorateFn, makeEntity, Writer, WriterOptions } from "@/index";
-
-import { getWriterTestEntities, User } from "./functions/sample/entities";
+import { User, getWriterTestEntities } from "./functions/sample/entities";
 
 describe("Writer", () => {
     const entities = getWriterTestEntities();

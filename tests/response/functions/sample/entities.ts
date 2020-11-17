@@ -1,4 +1,5 @@
-import { PrimaryGeneratedColumn, Entity, Column, ManyToOne, OneToMany } from "typeorm";
+import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+
 import { DependsOn, Groups, Subresource } from "@/decorators";
 import { makeEntity } from "@/index";
 

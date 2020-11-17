@@ -1,16 +1,16 @@
-import { AxiosInstance } from "axios";
-import { Router } from "express";
 import { Server } from "net";
 
+import { AxiosInstance } from "axios";
+import { Router } from "express";
+
 import { setupExpressApp } from "@@/router/bridge/expressSetup";
-import { getTestEntities, expectedRouteDesc } from "@@/router/bridge/sample/entities";
-import { testRouteConfigs, TestRequestConfig, testRoute } from "@@/router/bridge/sample/requests";
-import { createTestConnection, closeTestConnection } from "@@/testConnection";
-
+import { expectedRouteDesc, getTestEntities } from "@@/router/bridge/sample/entities";
+import { TestRequestConfig, testRoute, testRouteConfigs } from "@@/router/bridge/sample/requests";
+import { closeTestConnection, createTestConnection } from "@@/testConnection";
 import { RouteVerb, flatMapOnProp } from "@/index";
-import { registerExpressRouteFromBridgeRoute, makeExpressEntityRouters, printBridgeRoute } from "@/router/bridge/index";
+import { makeExpressEntityRouters, printBridgeRoute, registerExpressRouteFromBridgeRoute } from "@/router/bridge/index";
 
-import { resetHooksCalled, makeTestFn, testHooksConfigs } from "./sample/hooks";
+import { makeTestFn, resetHooksCalled, testHooksConfigs } from "./sample/hooks";
 
 describe("Express BridgeRouter adapter", () => {
     const entities = getTestEntities();

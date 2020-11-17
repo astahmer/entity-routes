@@ -1,8 +1,9 @@
-import { Container } from "typedi";
-import { Reader, Persistor, Groups, AliasHandler } from "@/index";
-import { PrimaryGeneratedColumn, Entity, Column, ManyToOne, getRepository } from "typeorm";
-import { createTestConnection, closeTestConnection } from "@@/testConnection";
 import { IsEmail } from "class-validator";
+import { Container } from "typedi";
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn, getRepository } from "typeorm";
+
+import { closeTestConnection, createTestConnection } from "@@/testConnection";
+import { AliasHandler, Groups, Persistor, Reader } from "@/index";
 
 describe("Reader", () => {
     const reader = Container.get(Reader);

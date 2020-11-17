@@ -2,8 +2,7 @@ import { Server } from "net";
 
 import { setupKoaApp } from "@@/router/bridge/koaSetup";
 import { closeTestConnection } from "@@/testConnection";
-
-import { makeOpenApiBuilderFrom, makeOpenApi } from "@/open-api";
+import { makeOpenApi, makeOpenApiBuilderFrom } from "@/open-api";
 
 import { getOpenApiTestEntities } from "../mapping/sample/entities";
 

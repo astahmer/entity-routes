@@ -1,17 +1,18 @@
-import { EntityGroupsMetadata } from "./EntityGroupsMetadata";
 import {
-    MetaKey,
-    PropsByOperations,
-    PropsByContextByOperations,
+    GROUPS_METAKEY,
     GROUPS_OPERATIONS,
     GroupsDecoratorArg,
-    RouteOperation,
-    GROUPS_METAKEY,
     GroupsOperation,
+    MetaKey,
+    PropsByContextByOperations,
+    PropsByOperations,
+    RouteOperation,
     getGroupsMetadata,
 } from "@/decorators/Groups";
+import { combineUniqueValues, getUniqueValues } from "@/functions/array";
 import { deepMerge } from "@/functions/object";
-import { getUniqueValues, combineUniqueValues } from "@/functions/array";
+
+import { EntityGroupsMetadata } from "./EntityGroupsMetadata";
 
 export class GroupsMetadata {
     /** The key under which the Reflect metadata will be stored on the target entity */

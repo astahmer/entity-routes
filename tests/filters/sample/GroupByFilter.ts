@@ -1,4 +1,4 @@
-import { registerFilterDecorator, AbstractFilter, AbstractFilterApplyArgs } from "@/index";
+import { AbstractFilter, AbstractFilterApplyArgs, registerFilterDecorator } from "@/index";
 
 export function GroupBy(): PropertyDecorator;
 export function GroupBy(props: string[]): ClassDecorator;

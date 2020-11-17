@@ -1,6 +1,8 @@
-import { Entity, ManyToOne, Column, PrimaryGeneratedColumn, getRepository, EntityMetadata, OneToMany } from "typeorm";
-import { getGroupsMetadata, Groups, formatGroupsMethodName, EntityGroupsMetadata, Subresource } from "@/index";
-import { createTestConnection, closeTestConnection } from "../testConnection";
+import { Column, Entity, EntityMetadata, ManyToOne, OneToMany, PrimaryGeneratedColumn, getRepository } from "typeorm";
+
+import { EntityGroupsMetadata, Groups, Subresource, formatGroupsMethodName, getGroupsMetadata } from "@/index";
+
+import { closeTestConnection, createTestConnection } from "../testConnection";
 
 describe("EntityGroupsMetadata", () => {
     class AbstractEntity {

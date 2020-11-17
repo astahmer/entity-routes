@@ -1,14 +1,13 @@
 import { AxiosRequestConfig } from "axios";
 
 import { closeTestConnection } from "@@/testConnection";
-
 import {
-    RouteDefaultOperation,
-    HookSchema,
-    EntityRouteOptions,
-    hookNames,
-    fromEntries,
     CRUD_OPERATIONS,
+    EntityRouteOptions,
+    HookSchema,
+    RouteDefaultOperation,
+    fromEntries,
+    hookNames,
 } from "@/index";
 
 // An object of hooks name called for each operation

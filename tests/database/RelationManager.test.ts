@@ -1,16 +1,17 @@
-import {
-    PrimaryGeneratedColumn,
-    Entity,
-    Column,
-    ManyToOne,
-    getRepository,
-    OneToOne,
-    JoinColumn,
-    OneToMany,
-} from "typeorm";
-import { Groups, AliasHandler, RelationManager, DependsOn, Subresource, getSubresourceRelation } from "@/index";
-import { createTestConnection, closeTestConnection } from "@@/testConnection";
 import { Container } from "typedi";
+import {
+    Column,
+    Entity,
+    JoinColumn,
+    ManyToOne,
+    OneToMany,
+    OneToOne,
+    PrimaryGeneratedColumn,
+    getRepository,
+} from "typeorm";
+
+import { closeTestConnection, createTestConnection } from "@@/testConnection";
+import { AliasHandler, DependsOn, Groups, RelationManager, Subresource, getSubresourceRelation } from "@/index";
 
 describe("RelationManager", () => {
     class AbstractEntity {

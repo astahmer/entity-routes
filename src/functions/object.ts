@@ -1,4 +1,4 @@
-import { isObject, isDefined, isDate } from "@/functions/asserts";
+import { isDate, isDefined, isObject } from "@/functions/asserts";
 import { ObjectLiteral } from "@/utils-types";
 
 /** Sort object keys alphabetically */

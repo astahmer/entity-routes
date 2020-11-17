@@ -3,8 +3,8 @@ import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
 import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
 
 import { formatRoutePath } from "@/functions/route";
-import { GenericEntity, getRouteMetadata } from "@/router/EntityRouter";
 import { getEntityRouters } from "@/router/container";
+import { GenericEntity, getRouteMetadata } from "@/router/EntityRouter";
 import { CType, Props } from "@/utils-types";
 
 export const iriRegex = new RegExp(/\/api\/(\w+)\//g, "i");

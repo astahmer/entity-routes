@@ -1,9 +1,10 @@
-import { isDev } from "@/functions/asserts";
-import { AnyFunction } from "@/utils-types";
-import { RouteVerb } from "@/router/MiddlewareMaker";
-import { areSameRoutes } from "@/functions/route";
-import { SubresourceRelation } from "../SubresourceMaker";
 import { RouteOperation } from "@/decorators";
+import { isDev } from "@/functions/asserts";
+import { areSameRoutes } from "@/functions/route";
+import { RouteVerb } from "@/router/MiddlewareMaker";
+import { AnyFunction } from "@/utils-types";
+
+import { SubresourceRelation } from "../SubresourceMaker";
 
 export class BridgeRouter<T = any> {
     readonly instance: T;

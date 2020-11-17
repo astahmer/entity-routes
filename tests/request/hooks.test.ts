@@ -1,29 +1,30 @@
-import { PrimaryGeneratedColumn, Entity, Column, getRepository } from "typeorm";
-import { createTestConnection, closeTestConnection, makeTestCtx } from "@@/testConnection";
-import {
-    MiddlewareMaker,
-    Groups,
-    RequestState,
-    ContextWithState,
-    ObjectLiteral,
-    EntityRouteState,
-    EntityRoute,
-    Persistor,
-    HookFnBeforeClean,
-    HookFnAfterClean,
-    HookFnBeforeValidate,
-    HookFnAfterValidate,
-    HookFnBeforePersist,
-    HookFnAfterPersist,
-    Reader,
-    HookFnBeforeRead,
-    AliasHandler,
-    HookFnAfterRead,
-    HookFnOnRespond,
-} from "@/index";
-import { setupKoaApp } from "@@/router/bridge/koaSetup";
 import { IsEmail } from "class-validator";
 import { Container } from "typedi";
+import { Column, Entity, PrimaryGeneratedColumn, getRepository } from "typeorm";
+
+import { setupKoaApp } from "@@/router/bridge/koaSetup";
+import { closeTestConnection, createTestConnection, makeTestCtx } from "@@/testConnection";
+import {
+    AliasHandler,
+    ContextWithState,
+    EntityRoute,
+    EntityRouteState,
+    Groups,
+    HookFnAfterClean,
+    HookFnAfterPersist,
+    HookFnAfterRead,
+    HookFnAfterValidate,
+    HookFnBeforeClean,
+    HookFnBeforePersist,
+    HookFnBeforeRead,
+    HookFnBeforeValidate,
+    HookFnOnRespond,
+    MiddlewareMaker,
+    ObjectLiteral,
+    Persistor,
+    Reader,
+    RequestState,
+} from "@/index";
 
 /** Possible hooks are [before/after][Handle/?:(Clean/Validate/Persist)/?:(Read)/Respond] */
 describe("hooks", () => {

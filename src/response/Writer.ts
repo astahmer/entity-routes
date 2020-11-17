@@ -8,10 +8,10 @@ import { ComparatorFn, deepSort } from "@/functions/object";
 import { pipe } from "@/functions/utils";
 import { ContextWithState, EntityRouteState } from "@/request";
 import {
-    setComputedPropsOnItem,
-    setSubresourcesIriOnItem,
     BaseFlattenItemOptions,
     flattenItem,
+    setComputedPropsOnItem,
+    setSubresourcesIriOnItem,
 } from "@/response//functions";
 import { DecorateFn, Decorator } from "@/response/Decorator";
 import { Context, ResponseTypeFromCtxWithOperation, ResponseTypeFromOperation, RouteControllerResult } from "@/router";

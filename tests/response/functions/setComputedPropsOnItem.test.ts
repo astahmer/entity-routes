@@ -1,11 +1,10 @@
 import Container from "typedi";
 import { getRepository } from "typeorm";
 
-import { createTestConnection, closeTestConnection } from "@@/testConnection";
-
+import { closeTestConnection, createTestConnection } from "@@/testConnection";
 import { Decorator, makeComputedPropNameFromMethod, setComputedPropsOnItem } from "@/index";
 
-import { User, Article, Comment, Role, ThingWithComputed, makeItem } from "./sample/entities";
+import { Article, Comment, Role, ThingWithComputed, User, makeItem } from "./sample/entities";
 
 describe("Computed props", () => {
     beforeAll(() => createTestConnection([Role, User, ThingWithComputed, Article, Comment]));

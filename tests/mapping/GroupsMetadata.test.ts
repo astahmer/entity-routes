@@ -1,4 +1,5 @@
-import { getOwnExposedProps, getExposedProps, GroupsMetadata, getGroupsMetadata, PropsByOperations } from "@/index";
+import { GroupsMetadata, PropsByOperations, getExposedProps, getGroupsMetadata, getOwnExposedProps } from "@/index";
+
 import { TestGroups } from "../decorators/TestGroups";
 
 describe("GroupsMetadata", () => {

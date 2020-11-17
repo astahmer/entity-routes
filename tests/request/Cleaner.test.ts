@@ -1,7 +1,8 @@
-import { PrimaryGeneratedColumn, Entity, Column, ManyToOne, getRepository, OneToMany } from "typeorm";
-import { Groups, DependsOn, Cleaner, MappingManager, isAnyItemPropMapped, MappingItem } from "@/index";
-import { createTestConnection, closeTestConnection } from "@@/testConnection";
 import { Container } from "typedi";
+import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, getRepository } from "typeorm";
+
+import { closeTestConnection, createTestConnection } from "@@/testConnection";
+import { Cleaner, DependsOn, Groups, MappingItem, MappingManager, isAnyItemPropMapped } from "@/index";
 
 describe("Cleaner", () => {
     class AbstractEntity {

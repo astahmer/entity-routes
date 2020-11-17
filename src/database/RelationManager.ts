@@ -1,18 +1,18 @@
-import { SelectQueryBuilder, EntityMetadata } from "typeorm";
-import { Container } from "typedi/Container";
-
-import { getComputedPropMethodAndKey } from "@/response/functions/setComputedPropsOnItem";
-import { AliasHandler } from "@/database/AliasHandler";
-import { RouteOperation } from "@/decorators/Groups";
-import { GenericEntity } from "@/router/EntityRouter";
-import { getDependsOnMetadata } from "@/decorators/DependsOn";
-import { MappingManager } from "@/mapping/MappingManager";
-import { SubresourceRelation } from "@/router/SubresourceMaker";
 import { Service } from "typedi";
-import { MaxDeptMetadata, getMaxDepthMetadata } from "@/decorators/MaxDepth";
-import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
-import { isDev } from "@/functions/asserts";
+import { Container } from "typedi/Container";
+import { EntityMetadata, SelectQueryBuilder } from "typeorm";
 import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
+import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
+
+import { AliasHandler } from "@/database/AliasHandler";
+import { getDependsOnMetadata } from "@/decorators/DependsOn";
+import { RouteOperation } from "@/decorators/Groups";
+import { MaxDeptMetadata, getMaxDepthMetadata } from "@/decorators/MaxDepth";
+import { isDev } from "@/functions/asserts";
+import { MappingManager } from "@/mapping/MappingManager";
+import { getComputedPropMethodAndKey } from "@/response/functions/setComputedPropsOnItem";
+import { GenericEntity } from "@/router/EntityRouter";
+import { SubresourceRelation } from "@/router/SubresourceMaker";
 
 @Service()
 export class RelationManager {

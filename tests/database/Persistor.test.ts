@@ -1,8 +1,9 @@
+import { IsEmail, IsString } from "class-validator";
 import { Container } from "typedi";
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn, getRepository } from "typeorm";
+
+import { closeTestConnection, createTestConnection } from "@@/testConnection";
 import { Groups, Persistor, setEntityValidatorsDefaultOption } from "@/index";
-import { PrimaryGeneratedColumn, Entity, Column, ManyToOne, getRepository } from "typeorm";
-import { createTestConnection, closeTestConnection } from "@@/testConnection";
-import { IsString, IsEmail } from "class-validator";
 
 describe("Persistor", () => {
     class AbstractEntity {

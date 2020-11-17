@@ -1,4 +1,4 @@
-import { getRouteSubresourcesMetadata, Subresource } from "@/index";
+import { Subresource, getRouteSubresourcesMetadata } from "@/index";
 
 describe("@Subresource", () => {
     class Article {

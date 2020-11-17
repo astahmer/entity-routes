@@ -2,10 +2,9 @@ import Container from "typedi";
 import { getRepository } from "typeorm";
 
 import { closeTestConnection, createTestConnection } from "@@/testConnection";
-
 import { Decorator, flattenItem } from "@/index";
 
-import { Article, Comment, makeItem, Role, SimpleThing, ThingWithComputed, User } from "./sample/entities";
+import { Article, Comment, Role, SimpleThing, ThingWithComputed, User, makeItem } from "./sample/entities";
 
 describe("Decorator > flattenItem", () => {
     beforeAll(() => createTestConnection([Role, User, ThingWithComputed, Article, Comment]));

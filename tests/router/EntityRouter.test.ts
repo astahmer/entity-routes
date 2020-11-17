@@ -1,8 +1,9 @@
-import { PrimaryGeneratedColumn, Column, Entity, DeleteDateColumn } from "typeorm";
-import { EntityRoute, makeKoaEntityRouters, flatMapOnProp, ObjectLiteral } from "@/index";
-import { createTestConnection, closeTestConnection } from "@@/testConnection";
 import { Context } from "koa";
+import { Column, DeleteDateColumn, Entity, PrimaryGeneratedColumn } from "typeorm";
+
 import { setupKoaApp } from "@@/router/bridge/koaSetup";
+import { closeTestConnection, createTestConnection } from "@@/testConnection";
+import { EntityRoute, ObjectLiteral, flatMapOnProp, makeKoaEntityRouters } from "@/index";
 
 describe("EntityRouter", () => {
     it("generates no routes when no params given", async () => {

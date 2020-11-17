@@ -1,11 +1,11 @@
+import { AddressInfo } from "net";
+
 import axios from "axios";
 import * as bodyParser from "body-parser";
 import * as express from "express";
-import { AddressInfo } from "net";
 
 import { createTestConnection } from "@@/testConnection";
-
-import { makeExpressEntityRouters, EntityRouteOptions } from "@/index";
+import { EntityRouteOptions, makeExpressEntityRouters } from "@/index";
 
 export async function setupExpressApp(entities: Function[], options?: EntityRouteOptions) {
     const connection = await createTestConnection(entities);

@@ -1,14 +1,14 @@
-import { PrimaryGeneratedColumn, Entity, Column, ManyToOne, OneToOne, getConnection } from "typeorm";
-import { IsString, IsEmail, IsDate, getMetadataStorage } from "class-validator";
+import { IsDate, IsEmail, IsString, getMetadataStorage } from "class-validator";
+import { Column, Entity, ManyToOne, OneToOne, PrimaryGeneratedColumn, getConnection } from "typeorm";
 
-import { createTestConnection, closeTestConnection } from "@@/testConnection";
+import { closeTestConnection, createTestConnection } from "@@/testConnection";
 import {
     EntityRoute,
-    makeEntityRouters,
-    registerKoaRouteFromBridgeRoute,
     getEntityRouters,
     koaMwAdapter,
     koaRouterFactory,
+    makeEntityRouters,
+    registerKoaRouteFromBridgeRoute,
 } from "@/index";
 
 describe("maker", () => {

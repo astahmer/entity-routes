@@ -1,5 +1,5 @@
 import { Container } from "typedi";
-import { Repository, SelectQueryBuilder, DeleteResult } from "typeorm";
+import { DeleteResult, Repository, SelectQueryBuilder } from "typeorm";
 
 import { AliasHandler } from "@/database/AliasHandler";
 import { EntityErrorResponse, Persistor, SaveItemArgs } from "@/database/Persistor";
@@ -13,8 +13,8 @@ import { isRelationSingle } from "@/functions/entity";
 import { deepMerge, parseStringAsBoolean } from "@/functions/index";
 import { fromEntries } from "@/functions/object";
 import { Handler } from "@/request/Handler";
-import { getRouteFiltersMeta, RouteFiltersMeta, GenericEntity } from "@/router/EntityRouter";
-import { RequestContext, CollectionResult } from "@/router/MiddlewareMaker";
+import { GenericEntity, RouteFiltersMeta, getRouteFiltersMeta } from "@/router/EntityRouter";
+import { CollectionResult, RequestContext } from "@/router/MiddlewareMaker";
 
 export class RouteController<Entity extends GenericEntity> {
     private filtersMeta: RouteFiltersMeta;

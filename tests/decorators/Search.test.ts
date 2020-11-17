@@ -1,5 +1,6 @@
-import { Entity, Column, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
-import { Search, getSearchFilterDefaultConfig, getRouteFiltersMeta } from "@/index";
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+
+import { Search, getRouteFiltersMeta, getSearchFilterDefaultConfig } from "@/index";
 
 describe("@Search", () => {
     class AbstractEntity {

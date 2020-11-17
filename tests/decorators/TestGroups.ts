@@ -1,9 +1,9 @@
 import {
-    GroupsOperationOrShortcuts,
-    GroupsDecoratorArg,
-    registerGroupsDecorator,
-    GroupsMetadata,
     GROUPS_METAKEY,
+    GroupsDecoratorArg,
+    GroupsMetadata,
+    GroupsOperationOrShortcuts,
+    registerGroupsDecorator,
 } from "@/index";
 
 // Using metaClass GroupsMetadata instead of EntityGroupsMetadata for testing

@@ -7,14 +7,14 @@ import { deepMerge, isDev } from "@/functions";
 import { parseStringAsBoolean } from "@/functions/primitives";
 import { MappingManager } from "@/mapping/MappingManager";
 import { ContextWithState, removeRequestContext } from "@/request";
+import { makeRequestContext } from "@/request/context";
 import { Handler } from "@/request/Handler";
 import { EntityErrorResults } from "@/request/Validator";
-import { makeRequestContext } from "@/request/context";
 import { Writer } from "@/response/Writer";
-import { GenericEntity, EntityRouter } from "@/router/EntityRouter";
+import { ContextAdapter, Middleware } from "@/router/bridge/ContextAdapter";
+import { EntityRouter, GenericEntity } from "@/router/EntityRouter";
 import { RouteController } from "@/router/RouteController";
 import { SubresourceRelation } from "@/router/SubresourceMaker";
-import { ContextAdapter, Middleware } from "@/router/bridge/ContextAdapter";
 import { DeepPartial, FunctionKeys, ObjectLiteral, Unpacked } from "@/utils-types";
 
 export class MiddlewareMaker<Entity extends GenericEntity> {

@@ -1,25 +1,26 @@
+import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, getRepository } from "typeorm";
+
+import { Article, Comment, Manager, Upvote, User } from "@@/router/sample/entities";
+import { closeTestConnection, createTestConnection } from "@@/testConnection";
 import {
+    BridgeRouter,
+    EntityRoute,
+    EntityRouter,
+    EntityRouterFactoryOptions,
+    EntityRouterOptions,
+    ROUTE_SUBRESOURCES_METAKEY,
     Subresource,
     SubresourceMaker,
-    getRouteMetadata,
-    BridgeRouter,
-    registerKoaRouteFromBridgeRoute,
-    getEntityRouters,
-    EntityRouter,
-    koaMwAdapter,
-    prop,
-    printBridgeRoute,
-    ROUTE_SUBRESOURCES_METAKEY,
-    EntityRoute,
-    EntityRouterFactoryOptions,
-    koaRouterFactory,
-    SubresourceOptions,
     SubresourceMakerOptions,
-    EntityRouterOptions,
+    SubresourceOptions,
+    getEntityRouters,
+    getRouteMetadata,
+    koaMwAdapter,
+    koaRouterFactory,
+    printBridgeRoute,
+    prop,
+    registerKoaRouteFromBridgeRoute,
 } from "@/index";
-import { PrimaryGeneratedColumn, Entity, Column, ManyToOne, OneToMany, getRepository } from "typeorm";
-import { createTestConnection, closeTestConnection } from "@@/testConnection";
-import { User, Manager, Article, Comment, Upvote } from "@@/router/sample/entities";
 
 describe("SubresourceManager", () => {
     const options: EntityRouterFactoryOptions = {

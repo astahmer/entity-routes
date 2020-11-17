@@ -1,13 +1,13 @@
 import { Connection, createConnection, getConnection } from "typeorm";
 
 import {
-    QueryParams,
     Context,
-    deepMerge,
-    RequestContextWithState,
-    RequestState,
     GenericEntity,
     GroupsOperation,
+    QueryParams,
+    RequestContextWithState,
+    RequestState,
+    deepMerge,
 } from "@/index";
 
 let connection: Connection;

@@ -1,16 +1,16 @@
-import { AxiosInstance } from "axios";
-import * as Router from "koa-router";
 import { Server } from "net";
 
+import { AxiosInstance } from "axios";
+import * as Router from "koa-router";
+
 import { setupKoaApp } from "@@/router/bridge/koaSetup";
-import { getTestEntities, expectedRouteNames } from "@@/router/bridge/sample/entities";
-import { testRouteConfigs, testRoute, TestRequestConfig } from "@@/router/bridge/sample/requests";
-import { createTestConnection, closeTestConnection } from "@@/testConnection";
-
+import { expectedRouteNames, getTestEntities } from "@@/router/bridge/sample/entities";
+import { TestRequestConfig, testRoute, testRouteConfigs } from "@@/router/bridge/sample/requests";
+import { closeTestConnection, createTestConnection } from "@@/testConnection";
 import { RouteVerb, flatMapOnProp } from "@/index";
-import { registerKoaRouteFromBridgeRoute, makeKoaEntityRouters } from "@/router/bridge/koa";
+import { makeKoaEntityRouters, registerKoaRouteFromBridgeRoute } from "@/router/bridge/koa";
 
-import { resetHooksCalled, testHooksConfigs, makeTestFn } from "./sample/hooks";
+import { makeTestFn, resetHooksCalled, testHooksConfigs } from "./sample/hooks";
 
 describe("koa BridgeRouter adapter", () => {
     const entities = getTestEntities();

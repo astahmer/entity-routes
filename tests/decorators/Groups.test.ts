@@ -1,10 +1,11 @@
 import {
-    registerGroupsDecorator,
-    getGroupsMetadata,
     GROUPS_METAKEY,
-    formatGroupsMethodName,
     GroupsMetadata,
+    formatGroupsMethodName,
+    getGroupsMetadata,
+    registerGroupsDecorator,
 } from "@/index";
+
 import { TestGroups } from "./TestGroups";
 
 describe("@Groups", () => {

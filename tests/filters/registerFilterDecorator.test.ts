@@ -1,9 +1,9 @@
 import {
-    registerFilterDecorator,
-    FilterDefaultConfig,
     AbstractFilter,
     AbstractFilterApplyArgs,
+    FilterDefaultConfig,
     getRouteFiltersMeta,
+    registerFilterDecorator,
 } from "@/index";
 
 describe("registerFilterDecorator", () => {

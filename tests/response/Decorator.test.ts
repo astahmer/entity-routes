@@ -1,9 +1,8 @@
 import { Container } from "typedi";
 import { getRepository } from "typeorm";
 
-import { getWriterTestEntities, User, makeItem } from "@@/response/functions/sample/entities";
-import { createTestConnection, closeTestConnection } from "@@/testConnection";
-
+import { User, getWriterTestEntities, makeItem } from "@@/response/functions/sample/entities";
+import { closeTestConnection, createTestConnection } from "@@/testConnection";
 import { DecorateFn, DecorateFnArgs, Decorator, wait } from "@/index";
 
 describe("Decorator", () => {

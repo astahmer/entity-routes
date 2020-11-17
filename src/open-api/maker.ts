@@ -1,33 +1,33 @@
 import {
+    ComponentsObject,
     OpenAPIObject,
     OpenApiBuilder,
-    PathsObject,
-    ParameterObject,
-    ComponentsObject,
     OperationObject,
+    ParameterObject,
     PathItemObject,
+    PathsObject,
     SchemaObject,
 } from "openapi3-ts";
 import { Container } from "typedi";
 
 import {
-    deepMerge,
+    ENTITY_META_SYMBOL,
+    MappingItem,
     MappingManager,
+    deepMerge,
+    fromEntries,
     getEntityRouters,
     last,
-    MappingItem,
-    ENTITY_META_SYMBOL,
-    fromEntries,
     sortObjectByKeys,
 } from "@/index";
 
 import { addComponentsReferences } from "./baseReferences";
 import {
-    getOpenApiPath,
-    routeResponseTypeByOperation,
     getBaseRouteResponseSchemaByType,
-    makeResponseWithRef,
+    getOpenApiPath,
     makeResponseFromSchema,
+    makeResponseWithRef,
+    routeResponseTypeByOperation,
     typeOrmTypeToOpenApiType,
 } from "./helpers";
 

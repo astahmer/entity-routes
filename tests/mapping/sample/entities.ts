@@ -1,5 +1,6 @@
+import { Column, Entity, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+
 import { CRUD_OPERATIONS, EntityRoute, Groups, Subresource } from "@/index";
-import { PrimaryGeneratedColumn, Entity, Column, OneToMany, ManyToOne, ManyToMany } from "typeorm";
 
 export const getOpenApiTestEntities = () => [Image, Role, User, Article, Comment, Upvote];
 

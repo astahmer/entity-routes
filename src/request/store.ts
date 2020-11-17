@@ -4,8 +4,8 @@ import { v4 as uuidv4 } from "uuid";
 import { GroupsOperation } from "@/decorators/Groups";
 import { QueryParams } from "@/filters/AbstractFilter";
 import { GenericEntity } from "@/router";
-import { RequestContext, RequestState } from "@/router/MiddlewareMaker";
 import { Context } from "@/router/bridge/ContextAdapter";
+import { RequestContext, RequestState } from "@/router/MiddlewareMaker";
 
 /** Map<uuid/ContextAdapter> for each request, last until request is done and then gets removed from the Map */
 const requestStore = new Map<string, ContextWithState>();
