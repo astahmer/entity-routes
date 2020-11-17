@@ -1,13 +1,16 @@
 export function trackPageview(url: string) {
-    const _window = window as typeof window & { gtag: any };
-    try {
-        _window.gtag("config", process.env.GA_TRACKING_ID, {
-            page_location: url,
-            page_title: document.title,
-        });
-    } catch (err) {
-        console.error("Failed sending metrics", err);
-    }
+    setTimeout(() => {
+        const _window = window as typeof window & { gtag: any };
+
+        try {
+            _window.gtag("config", process.env.NEXT_PUBLIC_GA_TRACKING_ID, {
+                page_location: url,
+                page_title: document.title,
+            });
+        } catch (err) {
+            console.error("Failed sending metrics", err);
+        }
+    }, 0);
 }
 
 type TrackEventOptions = {
