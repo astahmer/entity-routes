@@ -4,6 +4,7 @@ import Head from "next/head";
 import { Router } from "next/router";
 import { Fragment } from "react";
 
+import { Logo } from "@/components";
 import { LayoutProvider, PageProvider } from "@/components/layout";
 import { ColorModeSwitch, GithubLink } from "@/components/layout/NavBar";
 import MDXComponents from "@/components/mdx";
@@ -31,35 +32,41 @@ export default function App(props) {
             </Head>
             <DefaultSeo {...seoConfig} />
             <LayoutProvider
-                headerLogo={
-                    <MDXComponents.a href="/">
-                        <img src="/logo-full.png" style={{ opacity: 0.8 }} width="200px" />
-                    </MDXComponents.a>
-                }
-                headerItems={[
-                    <MDXComponents.a href="/">Docs</MDXComponents.a>,
-                    <GithubLink key="0" url="https://github.com/astahmer/entity-routes" />,
-                    <ColorModeSwitch key="1" />,
-                ]}
+                headerLogo={headerLogo}
+                headerItems={headerItems}
                 maxPageWidth="1350px"
-                mdxComponents={{
-                    wrapper: PageProvider,
-                    h2: (props) => (
-                        <>
-                            <Divider mt="1.5em" />
-                            <MDXComponents.h2 {...props} />
-                        </>
-                    ),
-                    h3: (props) => (
-                        <>
-                            <Divider mt="0.5em" opacity={0.4} />
-                            <MDXComponents.h2 {...props} />
-                        </>
-                    ),
-                }}
+                mdxComponents={mdxComponents}
             >
                 <Component {...pageProps} />
             </LayoutProvider>
         </Fragment>
     );
 }
+
+const headerLogo = (
+    <MDXComponents.a href="/">
+        <Logo opacity={0.8} />
+    </MDXComponents.a>
+);
+
+const headerItems = [
+    <MDXComponents.a href="/">Docs</MDXComponents.a>,
+    <GithubLink key="0" url="https://github.com/astahmer/entity-routes" />,
+    <ColorModeSwitch key="1" />,
+];
+
+const mdxComponents = {
+    wrapper: PageProvider,
+    h2: (props) => (
+        <>
+            <Divider mt="1.5em" />
+            <MDXComponents.h2 {...props} />
+        </>
+    ),
+    h3: (props) => (
+        <>
+            <Divider mt="0.5em" opacity={0.4} />
+            <MDXComponents.h2 {...props} />
+        </>
+    ),
+};
