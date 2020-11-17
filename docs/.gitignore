@@ -21,6 +21,7 @@ docs.json
 # misc
 .DS_Store
 .env*
+!.env.dist
 .vscode
 
 # debug

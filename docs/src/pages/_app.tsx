@@ -1,10 +1,16 @@
 import { Divider } from "@chakra-ui/react";
 import Head from "next/head";
+import { Router } from "next/router";
 import { Fragment } from "react";
 
 import { LayoutProvider, PageProvider } from "@/components/layout";
 import { ColorModeSwitch, GithubLink } from "@/components/layout/NavBar";
 import MDXComponents from "@/components/mdx";
+import { trackPageview } from "@/seo/trackEvent";
+
+Router.events.on("routeChangeComplete", (url) => {
+    trackPageview(url);
+});
 
 export default function App(props) {
     const { Component, pageProps } = props;
