@@ -1,4 +1,4 @@
-import { Box, ChakraProvider, css } from "@chakra-ui/react";
+import { Box, ChakraProvider } from "@chakra-ui/react";
 import { MDXProvider } from "@mdx-js/react";
 import { PrismTheme } from "prism-react-renderer";
 import darkPrismTheme from "prism-react-renderer/themes/oceanicNext";
@@ -10,6 +10,7 @@ import { resetCodeBlockCount } from "@/components/mdx/Code";
 import { useRouteChanged } from "@/functions/useRouteChanged";
 
 import { Arrow, ArrowEmpty } from "./icons";
+import { customTheme } from "./theme";
 
 export function LayoutProvider({ children, ...rest }: LayoutProviderProps) {
     const ctx = { ...defaultLayoutContext, ...rest };
@@ -27,16 +28,11 @@ export function LayoutProvider({ children, ...rest }: LayoutProviderProps) {
     });
 
     return (
-        <LayoutContext.Provider value={ctx}>
+        <ChakraProvider theme={customTheme}>
             <MDXProvider components={{ ...MDXComponents, ...userMDXComponents }}>
-                <ChakraProvider>
-                    {children}
-                    <style jsx global>
-                        {globalStyles}
-                    </style>
-                </ChakraProvider>
+                <LayoutContext.Provider value={ctx}>{children}</LayoutContext.Provider>
             </MDXProvider>
-        </LayoutContext.Provider>
+        </ChakraProvider>
     );
 }
 
@@ -103,27 +99,3 @@ export type LayoutProviderProps = {
     /* The font family */
     fontFamily?: string;
 };
-
-export const globalStyles = css`
-    * {
-        box-sizing: border-box;
-    }
-    html {
-        height: 100%;
-    }
-    #__next {
-        min-height: 100%;
-        overflow-x: hidden;
-    }
-    body {
-        height: 100%;
-        overflow: auto;
-        scroll-behavior: smooth;
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-        text-rendering: optimizeLegibility;
-    }
-    .overflowScrollingTouch {
-        -webkit-overflow-scrolling: touch;
-    }
-`;
