@@ -119,10 +119,12 @@ export type DirectoryTree = {
     meta?: Record<string, any> & SidebarItemMeta;
 };
 
-/** sidebar.json item.meta */
+/** sidebar.json item.meta coming from frontmatter */
 export type SidebarItemMeta = Partial<{
-    /** Page title, will produce an h1 at the top, will be used as sidebar label as well unless overidden */
+    /** Page title used for SEO, will produce an h1 at the top, will be used as sidebar label as well unless overidden */
     title: string;
+    /** Page description used for SEO */
+    description: string;
     /** Allow NOT producing an h1 at the top of the page */
     withoutH1: boolean;
     /** Overrides title as sidebar label, used by TypeDoc generated pages */

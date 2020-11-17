@@ -1,5 +1,6 @@
 import { Stack } from "@chakra-ui/react";
 import GithubSlugger from "github-slugger";
+import { NextSeo } from "next-seo";
 import { useRouter } from "next/router";
 import { createContext, useContext, useMemo } from "react";
 
@@ -39,6 +40,7 @@ export const PageProvider = ({ children, meta: { tableOfContents } }) => {
 
     return (
         <PageContext.Provider value={{ sidebarTree, tableOfContentsItems: tableOfContents, ...sidebarItemData }}>
+            <NextSeo title={meta.title} description={meta.description} />
             <Wrapper currentItem={currentItem}>
                 <Stack spacing={6} fontSize={[16, 16, 16, 16, 17]} shouldWrapChildren>
                     {hasTitle && <MDXComponents.h1 id={currentItem.meta.slug}>{meta.title}</MDXComponents.h1>}

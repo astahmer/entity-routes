@@ -6,7 +6,7 @@
             "name": "entity-routes",
             "routes": [
                 { "name": "introduction" },
-                { "name": "entity-router" },
+                { "name": "usage" },
                 {
                     "name": "route-response",
                     "routes": [{ "name": "introduction" }, { "name": "formating" }, { "name": "examples" }]

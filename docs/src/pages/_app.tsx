@@ -1,4 +1,5 @@
 import { Divider } from "@chakra-ui/react";
+import { DefaultSeo } from "next-seo";
 import Head from "next/head";
 import { Router } from "next/router";
 import { Fragment } from "react";
@@ -6,6 +7,7 @@ import { Fragment } from "react";
 import { LayoutProvider, PageProvider } from "@/components/layout";
 import { ColorModeSwitch, GithubLink } from "@/components/layout/NavBar";
 import MDXComponents from "@/components/mdx";
+import { seoConfig } from "@/seo/config";
 import { trackPageview } from "@/seo/trackEvent";
 
 Router.events.on("routeChangeComplete", (url) => {
@@ -17,12 +19,17 @@ export default function App(props) {
     return (
         <Fragment>
             <Head>
+                <meta content="IE=edge" httpEquiv="X-UA-Compatible" />
+                <meta content="width=device-width, initial-scale=1" name="viewport" />
+                <meta name="theme-color" content="#1a202c" />
+                <link rel="icon" sizes="48x48" href="/favicon.ico" />
                 <link
                     href="https://fonts.googleapis.com/css?family=Fira+Code"
                     rel="stylesheet"
                     key="google-font-Fira"
                 />
             </Head>
+            <DefaultSeo {...seoConfig} />
             <LayoutProvider
                 headerLogo={
                     <MDXComponents.a href="/">
