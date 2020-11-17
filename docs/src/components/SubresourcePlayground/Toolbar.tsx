@@ -1,4 +1,4 @@
-import { CheckIcon } from "@chakra-ui/icons";
+import { AddIcon, CheckIcon } from "@chakra-ui/icons";
 import {
     Box,
     Button,
@@ -84,14 +84,8 @@ export function Toolbar({ onSubmit, onMaxDepthChange, generateRoutes }) {
                 <Button onClick={onCopy}>{hasCopied ? "Copied" : "Export"}</Button>
                 <Button onClick={generateRoutes}>Generate all possible routes</Button>
                 <Menu>
-                    <MenuButton
-                        as={({ ref, props }) => (
-                            <Button {...props} aria-label="Add route">
-                                Add route
-                            </Button>
-                        )}
-                    >
-                        <Icon name="add" />
+                    <MenuButton as={Button} rightIcon={<AddIcon />}>
+                        Add route
                     </MenuButton>
                     <MenuList>
                         {entityNames.map((name) => (

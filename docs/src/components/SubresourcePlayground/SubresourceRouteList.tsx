@@ -1,4 +1,4 @@
-import { DeleteIcon } from "@chakra-ui/icons";
+import { AddIcon, DeleteIcon, WarningIcon } from "@chakra-ui/icons";
 import {
     Accordion,
     AccordionButton,
@@ -16,6 +16,7 @@ import {
     MenuList,
     Stack,
     Tooltip,
+    forwardRef,
 } from "@chakra-ui/react";
 import { useContext } from "react";
 
@@ -98,6 +99,12 @@ export function SubresourceRouteList() {
     );
 }
 
+const SubresourceRouteMenuButton = forwardRef(({ isDisabled, ...props }, ref) => (
+    <Tooltip hasArrow aria-label={"Add subresource"} label={"Add subresource"} placement="bottom">
+        <Button ref={ref} {...props} variant="ghost" aria-label="Add subresource" size="xs" isDisabled={isDisabled} />
+    </Tooltip>
+));
+
 export type SubresourceRouteProps = {
     addSubresource: (entity: string, routeIndex: number, subresource: string) => void;
     removeLastSubresource: (entity: string, routeIndex: number) => void;
@@ -170,31 +177,14 @@ function SubresourceRoute({
             {isDisabled ? (
                 <Tooltip hasArrow aria-label={disabledWarning} label={disabledWarning} placement="bottom">
                     <Flex width="28px" justifyContent="center" alignItems="center">
-                        <Icon name="warning" color="yellow.500" />
+                        <WarningIcon color="yellow.500" />
                     </Flex>
                 </Tooltip>
             ) : (
                 <Box position="relative">
                     <Menu>
-                        <MenuButton
-                            as={(props) => (
-                                <Tooltip
-                                    hasArrow
-                                    aria-label={"Add subresource"}
-                                    label={"Add subresource"}
-                                    placement="bottom"
-                                >
-                                    <Button
-                                        {...props}
-                                        variant="ghost"
-                                        aria-label="Add subresource"
-                                        size="xs"
-                                        isDisabled={isDisabled}
-                                    />
-                                </Tooltip>
-                            )}
-                        >
-                            <Icon name="add" />
+                        <MenuButton as={SubresourceRouteMenuButton} isDisabled={isDisabled}>
+                            <AddIcon />
                         </MenuButton>
                         <MenuList>
                             {lastPartProperties.map((name) => (
@@ -224,6 +214,17 @@ function SubresourceRoute({
     );
 }
 
+const SubresourcePartMenuButton = forwardRef(({ isMaxDepthReached, ...props }, ref) => (
+    <Button
+        ref={ref}
+        {...props}
+        variant="ghost"
+        aria-label="Edit subresource"
+        padding="2"
+        color={props.isMaxDepthReached && "yellow.400"}
+    />
+));
+
 type SubresourcePartProps = Pick<SubresourceRouteProps, "setSubresourceAt" | "entity" | "route" | "routeIndex"> & {
     subresource: string;
     index: number;
@@ -250,17 +251,7 @@ function SubresourcePart({
 
             <Stack alignItems="center" direction="row" shouldWrapChildren>
                 <Menu key={"editSub" + entity + routeIndex + index}>
-                    <MenuButton
-                        as={(props) => (
-                            <Button
-                                {...props}
-                                variant="ghost"
-                                aria-label="Edit subresource"
-                                padding="2"
-                                color={isMaxDepthReached && "yellow.400"}
-                            />
-                        )}
-                    >
+                    <MenuButton as={SubresourcePartMenuButton} isMaxDepthReached={isMaxDepthReached}>
                         <Tooltip
                             hasArrow
                             aria-label={"Change subresource"}
