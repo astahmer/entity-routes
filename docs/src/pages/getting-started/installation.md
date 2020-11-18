@@ -1,5 +1,6 @@
 ---
 title: Installation
+description: A step-by-step tutorial on how-to install entity-routes.
 ---
 
 ```bash

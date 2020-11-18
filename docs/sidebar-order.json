@@ -7,48 +7,48 @@
             "routes": [
                 { "name": "introduction" },
                 { "name": "usage" },
+                { "name": "operations" },
+                { "name": "route-scope" },
                 {
                     "name": "route-response",
                     "routes": [{ "name": "introduction" }, { "name": "formating" }, { "name": "examples" }]
-                },
-                { "name": "route-scope" },
-                { "name": "operations" },
-                {
-                    "name": "groups",
-                    "routes": [{ "name": "introduction" }, { "name": "computed-property" }, { "name": "examples" }]
                 },
                 {
                     "name": "subresources",
                     "routes": [{ "name": "introduction" }, { "name": "playground" }]
                 },
-                {
-                    "name": "filters",
-                    "routes": [
-                        { "name": "introduction" },
-                        { "name": "search", "url": "/internals/filters/search-filter" },
-                        { "name": "pagination", "url": "/internals/filters/pagination-filter" },
-                        { "name": "custom-filter" }
-                    ]
-                },
-                {
-                    "name": "decorators",
-                    "meta": { "defaultOpened": false },
-                    "routes": [
-                        { "name": "list" },
-                        { "url": "/entity-routes/entity-router", "meta": { "title": "@EntityRoute" } },
-                        { "url": "/entity-routes/groups/introduction", "meta": { "title": "@Groups" } },
-                        { "url": "/entity-routes/subresources", "meta": { "title": "@Subresources" } },
-                        { "name": "depends-on" },
-                        { "url": "/entity-routes/groups/max-depth", "meta": { "title": "@MaxDepth" } },
-                        { "url": "/entity-routes/filters/search", "meta": { "title": "@Search" } },
-                        { "url": "/entity-routes/filters/pagination", "meta": { "title": "@Pagination" } },
-                        { "url": "/entity-routes/filters/pagination#order-by", "meta": { "title": "@OrderBy" } }
-                    ]
-                },
                 { "name": "request-context" },
                 { "name": "middlewares" },
                 { "name": "hooks" },
                 { "name": "request-lifecycle" }
+            ]
+        },
+        {
+            "name": "groups",
+            "routes": [{ "name": "introduction" }, { "name": "computed-property" }, { "name": "examples" }]
+        },
+        {
+            "name": "filters",
+            "routes": [
+                { "name": "introduction" },
+                { "name": "search", "url": "/internals/filters/search-filter" },
+                { "name": "pagination", "url": "/internals/filters/pagination-filter" },
+                { "name": "custom-filter" }
+            ]
+        },
+        {
+            "name": "decorators",
+            "meta": { "defaultOpened": false, "hidden": true },
+            "routes": [
+                { "name": "list" },
+                { "url": "/entity-routes/entity-router", "meta": { "title": "@EntityRoute" } },
+                { "url": "/entity-routes/groups/introduction", "meta": { "title": "@Groups" } },
+                { "url": "/entity-routes/subresources", "meta": { "title": "@Subresources" } },
+                { "name": "depends-on" },
+                { "url": "/entity-routes/groups/max-depth", "meta": { "title": "@MaxDepth" } },
+                { "url": "/entity-routes/filters/search", "meta": { "title": "@Search" } },
+                { "url": "/entity-routes/filters/pagination", "meta": { "title": "@Pagination" } },
+                { "url": "/entity-routes/filters/pagination#order-by", "meta": { "title": "@OrderBy" } }
             ]
         },
         { "name": "internals", "meta": { "hidden": true } },
