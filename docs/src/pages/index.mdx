@@ -1,11 +1,6 @@
 ---
 title: Features
-withoutH1: true
 ---
-
-import { Logo } from "@/components/Logo.tsx";
-
-<Logo />
 
 `entity-routes` enables you to design your API around your [TypeORM](https://github.com/typeorm/typeorm/) `entities` in
 minutes. It is compatible with [**Express**](https://expressjs.com/)/[**Koa**](https://koajs.com/) or any connect-like
@@ -60,7 +55,7 @@ There are [**hooks**](/entity-routes/hooks/) available to intervene at any point
 
 You can have methods exposed as properties in your API responses. Those methods can be asynchronous and can also require
 other entity properties that are not exposed through [`@Groups`](/definitions#groups) and still be resolved with
-[`@DependsOn`](/definitions#dependson) decorator. (title TODO docref)
+[`@DependsOn`](/definitions#dependson) decorator.
 
 ## Re-usable service components
 
