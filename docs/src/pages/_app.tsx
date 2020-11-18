@@ -34,7 +34,7 @@ export default function App(props) {
             <LayoutProvider
                 headerLogo={headerLogo}
                 headerItems={headerItems}
-                maxPageWidth="1350px"
+                maxPageWidth="1450px"
                 mdxComponents={mdxComponents}
             >
                 <Component {...pageProps} />
@@ -44,7 +44,7 @@ export default function App(props) {
 }
 
 const headerLogo = (
-    <MDXComponents.a href="/">
+    <MDXComponents.a href="/" _hover={{}}>
         <Logo opacity={0.8} />
     </MDXComponents.a>
 );

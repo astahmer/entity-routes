@@ -15,7 +15,7 @@ export const SideNav = ({ tree, ...rest }: { tree: DirectoryTree } & BoxProps) =
     }
 
     return (
-        <Box overflowY="auto" as="nav" aria-label="Main navigation" py="6" px="4" pr="6" {...rest}>
+        <Box as="aside" aria-label="Main navigation" overflowY="auto" py="6" px="4" pr="6" {...rest}>
             <Box>
                 {tree.children.map((x, i) => (
                     <NavTreeComponent
@@ -87,9 +87,9 @@ const NavTreeComponent = ({
     if (isFolder) {
         return (
             <Flex direction="column">
-                <Box my="0.2em">
+                <Box mt="0.8em" mb="0.2em">
                     {!hideDivider && <Divider />}
-                    <Box py="0.2em" pt="1.4em" my="0.2em" fontSize="1.1em" fontWeight="semibold">
+                    <Box py="0.2em" fontSize="1.2em" fontWeight="semibold">
                         {formattedTitle}
                     </Box>
                 </Box>

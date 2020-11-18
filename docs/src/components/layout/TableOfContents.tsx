@@ -1,4 +1,4 @@
-import { Box, Flex, FlexProps, Link } from "@chakra-ui/react";
+import { Flex, FlexProps, Link } from "@chakra-ui/react";
 
 import { DirectoryTree } from "@/functions/sidebar";
 
@@ -14,13 +14,15 @@ export function TableOfContents({ items = [], currentItem, ...rest }: TableOfCon
             : null;
     return (
         <Flex
+            as="nav"
+            aria-label="Table of Contents"
             direction="column"
-            pl="20px"
-            width="200px"
+            width={LAYOUT_SIZES.TABLE_OF_C_W}
             maxHeight={`calc(100vh - ${LAYOUT_SIZES.NAVBAR_H}px)`}
             overflowY="auto"
-            lineHeight="2.2em"
             whiteSpace="nowrap"
+            lineHeight="2.2em"
+            fontSize="0.9em"
             {...rest}
         >
             {tocTitle && <TocItem key={"toc-title"} {...tocTitle} />}
@@ -40,8 +42,13 @@ export type TableOfContentItem = {
 const baseW = 20;
 function TocItem({ lvl, title, slug }: TableOfContentItem) {
     return (
-        <Box ml={baseW * (lvl - 2) + "px"}>
-            <Link href={"#" + slug}>{title}</Link>
-        </Box>
+        <Link
+            ml={(lvl > 1 ? baseW * (lvl - 2) : 0) + "px"}
+            href={"#" + slug}
+            textOverflow="ellipsis"
+            overflowX="hidden"
+        >
+            {title}
+        </Link>
     );
 }

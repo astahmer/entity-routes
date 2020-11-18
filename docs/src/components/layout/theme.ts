@@ -8,7 +8,6 @@ export const globalStyles = css`
     }
     #__next {
         min-height: 100%;
-        overflow-x: hidden;
     }
     body {
         height: 100%;
