@@ -11,8 +11,10 @@ import { SideNav } from "./SideNav";
 import { TableOfContents } from "./TableOfContents";
 
 const SIDENAV_W = 280;
+const SIDENAV_W_TABLET = 240;
 const TABLE_OF_C_W = 300;
 const NAVBAR_H = 62;
+
 export const LAYOUT_SIZES = { SIDENAV_W, TABLE_OF_C_W, NAVBAR_H };
 
 export function Wrapper({ children, currentItem }: PropsWithChildren<{ currentItem: DirectoryTree }>) {
@@ -51,8 +53,8 @@ export function Wrapper({ children, currentItem }: PropsWithChildren<{ currentIt
                 left={0}
                 right={0}
             />
-            <Flex justifyContent="center" height="100%">
-                <Flex maxWidth={maxPageWidth} height="100%">
+            <Flex justifyContent="center" width="100%" height="100%">
+                <Flex maxWidth={maxPageWidth} width="100%" height="100%">
                     <SideNav
                         className="overflowScrollingTouch"
                         alignSelf="flex-start"
@@ -60,7 +62,7 @@ export function Wrapper({ children, currentItem }: PropsWithChildren<{ currentIt
                         top={NAVBAR_H}
                         bottom={0}
                         tree={sidebarTree}
-                        width={SIDENAV_W}
+                        width={[null, null, SIDENAV_W_TABLET, SIDENAV_W]}
                         display={["none", null, "block"]}
                         overflowY="auto"
                         overflowX="hidden"
@@ -70,8 +72,16 @@ export function Wrapper({ children, currentItem }: PropsWithChildren<{ currentIt
                         as="main"
                         direction="column"
                         align="stretch"
+                        width="100%"
+                        maxWidth={[
+                            null,
+                            null,
+                            `calc(100% - ${SIDENAV_W_TABLET}px)`,
+                            null,
+                            `calc(100% - ${SIDENAV_W}px - ${TABLE_OF_C_W}px)`,
+                        ]}
                         minHeight="100%"
-                        ml={["", null, SIDENAV_W]}
+                        ml={["", null, SIDENAV_W_TABLET, SIDENAV_W]}
                         mt={[NAVBAR_H + "px"]}
                         className="mainContent overflowScrollingTouch"
                         px={["10px", null, "20px", "30px"]}

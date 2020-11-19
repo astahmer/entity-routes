@@ -45,7 +45,7 @@ export default function App(props) {
 
 const headerLogo = (
     <MDXComponents.a href="/" _hover={{}}>
-        <Logo opacity={0.8} />
+        <Logo opacity={0.8} margin={[null, null, "1em auto"]} />
     </MDXComponents.a>
 );
 
