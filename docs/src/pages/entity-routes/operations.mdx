@@ -16,7 +16,7 @@ type RouteOperation = RouteDefaultOperation | string;
 
 For basic _operations_, a [`RouteOperation`](/definitions#routeoperation) defines which
 [**RouteController**](/definitions/classes/routecontroller) method will be used for a specific route. The basic
-[**groups**](/entity-routes/groups/) are those that you know well, the [CRUD](/definitions#groupsoperation) ones.
+[**groups**](/groups/) are those that you know well, the [CRUD](/definitions#groupsoperation) ones.
 
 For [custom actions](/docref), any string can be used to make your own specific
 [`route scope`](/entity-routes/route-scope).
@@ -43,10 +43,12 @@ These are used to define the [`route scopes`](/entity-routes/route-scope/) where
 
 <Info>
 
+
 Each [`GroupsOperation`](/definitions#groupsoperation) match one from [`RouteOperation`](/definitions#routeoperation),
 except `delete` since there is no property exposed in a DELETE route response.
 
 </Info>
+
 
 [More on `@Groups` here](/entity-routes/entity-router).
 

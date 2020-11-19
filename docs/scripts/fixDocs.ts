@@ -1,7 +1,7 @@
 import path from "path";
 
 import { replaceTypedocLinks } from "./replaceTypedocLinks";
-import { ReplaceTagReferencesArgs, getDocItemTagRefs, references, replaceTagReferences } from "./tag-references";
+import { getDocItemTagRefs, references, replaceTagReferences } from "./tag-references";
 import { updateTagReferences } from "./tag-references/updateTagReferences";
 
 const pkg = require("../package.json");

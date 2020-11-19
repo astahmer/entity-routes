@@ -42,13 +42,13 @@
             "routes": [
                 { "name": "list" },
                 { "url": "/entity-routes/entity-router", "meta": { "title": "@EntityRoute" } },
-                { "url": "/entity-routes/groups/introduction", "meta": { "title": "@Groups" } },
+                { "url": "/groups/introduction", "meta": { "title": "@Groups" } },
                 { "url": "/entity-routes/subresources", "meta": { "title": "@Subresources" } },
                 { "name": "depends-on" },
-                { "url": "/entity-routes/groups/max-depth", "meta": { "title": "@MaxDepth" } },
-                { "url": "/entity-routes/filters/search", "meta": { "title": "@Search" } },
-                { "url": "/entity-routes/filters/pagination", "meta": { "title": "@Pagination" } },
-                { "url": "/entity-routes/filters/pagination#order-by", "meta": { "title": "@OrderBy" } }
+                { "url": "/groups/max-depth", "meta": { "title": "@MaxDepth" } },
+                { "url": "/filters/search", "meta": { "title": "@Search" } },
+                { "url": "/filters/pagination", "meta": { "title": "@Pagination" } },
+                { "url": "/filters/pagination#order-by", "meta": { "title": "@OrderBy" } }
             ]
         },
         { "name": "internals", "meta": { "hidden": true } },

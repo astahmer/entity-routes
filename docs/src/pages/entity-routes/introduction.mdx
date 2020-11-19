@@ -6,11 +6,13 @@ import { DocAlert } from "@/components";
 
 <DocAlert status="success" >
 
+
 While browsing the documentation, if you feel like an example is missing, feel free to check the
 [`tests`](https://github.com/astahmer/entity-routes/tree/main/tests) folder to see the actual usage of the feature you
 were reading about.
 
 </DocAlert>
+
 
 ## Motivation
 
@@ -24,22 +26,20 @@ customizable when needed.
 ## Main Features
 
 -   Instant CRUD with a simple [`@EntityRoute`](/definitions#entityroute) decorator
--   [Granular control over which properties are exposed](/entity-routes/groups/introduction) (with
-    [`@Groups`](/definitions#groups)) in which route scope
+-   [Granular control over which properties are exposed](/groups/introduction) (with [`@Groups`](/definitions#groups))
+    in which route scope
 -   [`Subresources`](/entity-routes/subresources): Entity properties that have dedicated endpoints, can be nested
 -   Independant service components (Database [`Reader`](/definitions/classes/reader), `Persister`,
     [`RelationManager`](/definitions/classes/relationmanager) etc...)
--   Built-in powerful [`filters`](/entity-routes/filters) for lists (`Search`/`Pagination`) that should fit well for 99%
-    use cases
--   [Custom filters](/entity-routes/filters/custom-filter) if you find yourself in the 1%
+-   Built-in powerful [`filters`](/filters) for lists (`Search`/`Pagination`) that should fit well for 99% use cases
+-   [Custom filters](/filters/custom-filter) if you find yourself in the 1%
 -   [`Hooks`](/entity-routes/hooks) to alter a request handling at any point in the process
 -   Built-in validation using
     [class-validator](https://github.com/typestack/class-validator)/[entity-validator](https://github.com/astahmer/entity-validator)
     decorators on your entities
 -   Inferred entity route mappings (with generated endpoints to get the summary of an entity exposed properties for each
     contexts)
--   [Computed properties](/entity-groups/groups/introduction#computed-property): methods, possibly async, exposed as
-    properties
+-   [Computed properties](/entity-groups/groups/computed-property): methods, possibly async, exposed as properties
 -   [`@MaxDepth`](/definitions#maxdepth) decorator for entity/properties
 -   Optimized SQL queries with only exposed properties selected
 -   Soft delete/restoration supported (also for Subresources)

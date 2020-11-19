@@ -2,7 +2,7 @@
 title: Route Scope
 ---
 
-import { Tabs, TabList, TabPanels, Tab, TabPanel } from "@chakra-ui/react";
+import { Tab, TabList, TabPanel, TabPanels, Tabs } from "@chakra-ui/react";
 
 Let's start by defining what we call a **route scope**.
 
@@ -35,9 +35,11 @@ These are the routes generated from the [Quick start example](../getting-started
 
 <Info>
 
+
 The route main entity for subresources routes is its relation entity, here it is `Article` and not `User`.
 
 </Info>
+
 
 ### Subresources
 
@@ -59,8 +61,8 @@ operation you're looking for !
 
 ## Exposing properties
 
-With the [@Groups](/definitions#groups) decorator you can expose any property (or method [/docref computedmethod]), from
-any entity in the route scope of your choice.
+With the [@Groups](/definitions#groups) decorator you can expose any property ([or method](/groups/computed-property)),
+from any entity in the route scope of your choice.
 
 What that means is that you can for example have a different mapping for the `User` **creation** route and the `User`
 **update** route. More on that [later](groups).
@@ -80,10 +82,12 @@ This mapping route will give you the response schema expected on the actual rout
 
 <Info mt="20px">
 
+
 There is a `pretty` query parameter (`?pretty=true`) available to make it less verbose, it makes mapping look kind of
 like a GraphQL request body, as you can see below.
 
 </Info>
+
 
 <Tabs>
   <TabList>
@@ -91,8 +95,10 @@ like a GraphQL request body, as you can see below.
     <Tab>Pretty mapping</Tab>
   </TabList>
 
+
   <TabPanels>
     <TabPanel>
+
 
 ```json
 {
@@ -119,6 +125,7 @@ like a GraphQL request body, as you can see below.
 </TabPanel>
 <TabPanel>
 
+
 ```json
 {
     "context": {
@@ -135,8 +142,10 @@ like a GraphQL request body, as you can see below.
 
 </TabPanel>
 
+
   </TabPanels>
 </Tabs>
+
 
 ## Scoped Validation
 
