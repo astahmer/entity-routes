@@ -74,7 +74,6 @@ export function makeOpenApi(): OpenAPIObject {
                 )
                 .filter(Boolean)
                 .concat(path.includes("{id}") ? [{ $ref: "#/components/parameters/EntityId" }] : []);
-            // TODO diff response if mapping route
 
             const entityMeta = bridgeRoute.subresources?.length
                 ? last(bridgeRoute.subresources).relation.inverseEntityMetadata

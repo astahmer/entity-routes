@@ -36,8 +36,6 @@ export const PageProvider = ({ children, meta: { tableOfContents } }) => {
     const meta = { tableOfContents, ...currentItem?.meta };
     const hasTitle = meta.title && !meta.withoutH1;
 
-    // TODO Gtag manager ?
-
     return (
         <PageContext.Provider value={{ sidebarTree, tableOfContentsItems: tableOfContents, ...sidebarItemData }}>
             <NextSeo title={meta.title} description={meta.description} />

@@ -17,7 +17,6 @@ module.exports = function withDoc(nextConfig = {}) {
         pageExtensions,
         webpack: (config, options) => {
             config.resolve.alias["__NEXT_ROOT__"] = path.join(process.cwd());
-            config.resolve.alias["nextjs_root_folder_"] = path.join(process.cwd()); // TODO rm
 
             if (options.isServer) return config; // only run once
             if (nextConfig.webpack && typeof nextConfig.webpack === "function") {

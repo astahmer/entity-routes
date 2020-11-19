@@ -70,7 +70,6 @@ const NavTreeComponent = ({
         // If folder.meta.defaultOpened = false OR if a parent folder.meta.childrenDefaultOpened = false
         // Then collapse (close) children initially
         const defaultClosed = meta.defaultOpened === false || parentDefaultOpened === false;
-        // TODO localStorage
         const defaultOpened = defaultClosed ? false : isRouteActive;
         return (
             <CollapsableTreeNode
