@@ -18,12 +18,7 @@ export const SideNav = ({ tree, ...rest }: { tree: DirectoryTree } & BoxProps) =
         <Box as="aside" aria-label="Main navigation" overflowY="auto" py="6" px="4" pr="6" {...rest}>
             <Box>
                 {tree.children.map((x, i) => (
-                    <NavTreeComponent
-                        hideDivider
-                        key={i + "" + (x.path || x.url)}
-                        activeRoute={router.pathname}
-                        {...x}
-                    />
+                    <NavTreeComponent key={i + "" + (x.path || x.url)} activeRoute={router.pathname} {...x} />
                 ))}
             </Box>
         </Box>
@@ -38,7 +33,6 @@ const NavTreeComponent = ({
     name = "",
     children,
     depth = 0,
-    hideDivider = false,
     url = "",
     meta = {},
     activeRoute,
@@ -87,7 +81,6 @@ const NavTreeComponent = ({
         return (
             <Flex direction="column">
                 <Box mt="0.8em" mb="0.2em">
-                    {!hideDivider && <Divider />}
                     <Box py="0.2em" fontSize="1.2em" fontWeight="semibold">
                         {formattedTitle}
                     </Box>
