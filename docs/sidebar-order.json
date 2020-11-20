@@ -29,6 +29,7 @@
         },
         {
             "name": "filters",
+            "meta": { "collapsable": true },
             "routes": [
                 { "name": "introduction" },
                 { "name": "search", "url": "/internals/filters/search-filter" },
@@ -38,7 +39,7 @@
         },
         {
             "name": "decorators",
-            "meta": { "defaultOpened": false, "hidden": true },
+            "meta": { "defaultOpened": false, "collapsable": true },
             "routes": [
                 { "name": "list" },
                 { "url": "/entity-routes/entity-router", "meta": { "title": "@EntityRoute" } },
@@ -52,7 +53,11 @@
             ]
         },
         { "name": "internals", "meta": { "hidden": true } },
-        { "name": "compatibility" },
-        { "name": "definitions", "meta": { "childrenDefaultOpened": false }, "routes": [{ "name": "index.md" }] }
+        { "name": "compatibility", "meta": { "defaultOpened": false, "collapsable": true } },
+        {
+            "name": "definitions",
+            "meta": { "childrenDefaultOpened": false, "collapsable": true, "hidden": true },
+            "routes": [{ "name": "index.md" }]
+        }
     ]
 }

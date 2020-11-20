@@ -1,143 +1,156 @@
-import { Box, BoxProps, Collapse, Divider, Flex, useDisclosure } from "@chakra-ui/react";
+import { AddIcon, MinusIcon } from "@chakra-ui/icons";
+import { Box, BoxProps } from "@chakra-ui/react";
 import { useRouter } from "next/router";
+import { PropsWithChildren, ReactNode } from "react";
 
-import { DirectoryTree, MDX_EXTENSION_REGEX } from "@/functions/sidebar";
+import { DirectoryTree, MDX_EXTENSION_REGEX, SidebarMergedMeta, findActiveRouteRecursive } from "@/functions/sidebar";
 
+import { CollapsableTree, RenderTitleProps } from "./CollapsableTree";
 import { CollapseDown, CollapseRight } from "./icons";
-import { ComponentLink } from "./NavLink";
+import { SideNavLink } from "./SideNavLink";
 
 export const SideNav = ({ tree, ...rest }: { tree: DirectoryTree } & BoxProps) => {
     const router = useRouter();
 
-    if (!tree) {
-        console.error(new Error(`sidenav tree is null`));
-        tree = { name: "", children: [] };
-    }
-
     return (
-        <Box as="aside" aria-label="Main navigation" overflowY="auto" py="6" px="4" pr="6" {...rest}>
-            <Box>
-                {tree.children.map((x, i) => (
-                    <NavTreeComponent key={i + "" + (x.path || x.url)} activeRoute={router.pathname} {...x} />
-                ))}
-            </Box>
+        <Box as="aside" aria-label="Main navigation" overflowY="auto" py="6" px="4" pr="6" lineHeight="1.4em" {...rest}>
+            {tree.children.map(({ children: childTree, ...dirTree }, i) => (
+                <NavTreeComponent
+                    key={i + "" + (dirTree.path || dirTree.url)}
+                    depth={0}
+                    activeRoute={router.pathname}
+                    childTree={childTree}
+                    {...dirTree}
+                />
+            ))}
         </Box>
     );
 };
 
-const formatTitle = (name: string) =>
+export const formatTitle = (name: string) =>
     capitalizeFirstLetter(name.replace(/_/g, " ").replace(/-/g, " ").replace(MDX_EXTENSION_REGEX, ""));
-const capitalizeFirstLetter = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
+export const capitalizeFirstLetter = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
+
+export type NavTreeComponentBaseProps = {
+    meta?: SidebarMergedMeta;
+    depth: number;
+    activeRoute: string;
+    parentDefaultOpened?: boolean;
+};
+export type NavTreeComponentProps = Pick<DirectoryTree, "name" | "url"> & {
+    childTree: DirectoryTree["children"];
+} & NavTreeComponentBaseProps;
 
 const NavTreeComponent = ({
     name = "",
-    children,
     depth = 0,
     url = "",
     meta = {},
+    childTree,
     activeRoute,
     parentDefaultOpened,
-}: DirectoryTree & { depth?: number; hideDivider?: boolean; activeRoute: string; parentDefaultOpened?: boolean }) => {
-    const isFolder = !url;
-    const formattedTitle = meta.sidebar_label || meta.title || formatTitle(name);
-    const subTree = children?.map((x, i) => {
-        return (
-            <NavTreeComponent
-                key={i + "" + (x.path || x.url)}
-                {...x}
-                depth={depth + 1}
-                activeRoute={activeRoute}
-                parentDefaultOpened={meta.childrenDefaultOpened}
-            />
-        );
-    });
+}: NavTreeComponentProps) => {
+    const title = meta.sidebar_label || meta.title || formatTitle(name);
 
-    function findActiveRouteRecursive(children: DirectoryTree[]) {
-        return !!children.find(
-            (tree) => tree.url === activeRoute || (tree.children ? findActiveRouteRecursive(tree.children) : false)
+    // Folder
+    if (!url) {
+        const props = { childTree, activeRoute, meta, depth, title, parentDefaultOpened };
+        return (
+            <SideNavFolder {...props}>
+                {childTree?.map(({ children: childTree, ...dirTree }, i) => {
+                    return (
+                        <NavTreeComponent
+                            key={i + "" + (dirTree.path || dirTree.url)}
+                            childTree={childTree}
+                            {...dirTree}
+                            depth={depth + 1}
+                            activeRoute={activeRoute}
+                            parentDefaultOpened={meta.childrenDefaultOpened}
+                        />
+                    );
+                })}
+            </SideNavFolder>
         );
     }
 
-    // Sub folders
-    if (isFolder && depth > 0) {
-        const isRouteActive = findActiveRouteRecursive(children);
-        // If folder.meta.defaultOpened = false OR if a parent folder.meta.childrenDefaultOpened = false
-        // Then collapse (close) children initially
-        const defaultClosed = meta.defaultOpened === false || parentDefaultOpened === false;
-        const defaultOpened = defaultClosed ? false : isRouteActive;
-        return (
-            <CollapsableTreeNode
-                depth={depth}
-                title={formattedTitle}
-                subTree={subTree}
-                isActive={isRouteActive}
-                defaultIsOpen={defaultOpened}
-            />
-        );
-    }
-
-    // Root folders
-    if (isFolder) {
-        return (
-            <Flex direction="column">
-                <Box mt="0.8em" mb="0.2em">
-                    <Box py="0.2em" fontSize="1.2em" fontWeight="semibold">
-                        {formattedTitle}
-                    </Box>
-                </Box>
-                {subTree}
-            </Flex>
-        );
-    }
     return (
-        <Flex direction="column">
-            <ComponentLink opacity={0.8} py="0.2em" my="0.2em" href={url} isTruncated>
-                {formattedTitle}
-            </ComponentLink>
-            {subTree}
-        </Flex>
+        <SideNavLink opacity={0.8} py="0.2em" my="0.2em" href={url} isTruncated>
+            {title}
+        </SideNavLink>
     );
 };
 
-function CollapsableTreeNode({ title, depth, subTree, isActive, defaultIsOpen }) {
-    const { onToggle, isOpen } = useDisclosure({ defaultIsOpen });
+export type SideNavFolderProps = PropsWithChildren<NavTreeComponentBaseProps> &
+    Pick<NavTreeComponentProps, "childTree" | "meta"> &
+    PropsWithChildren<{
+        title: string;
+        depth: NavTreeComponentBaseProps["depth"];
+        renderTitle?: (props: RenderTitleProps) => ReactNode;
+    }>;
+
+export const SideNavFolder = ({
+    children,
+    title,
+    depth,
+    meta,
+    childTree,
+    activeRoute,
+    parentDefaultOpened,
+    ...props
+}) => {
+    const isActive = findActiveRouteRecursive(activeRoute, childTree);
+    const isCollapsable = depth === 0 ? meta.collapsable : true;
+    // If folder.meta.defaultOpened = false OR if a parent folder.meta.childrenDefaultOpened = false
+    // Then collapse (close) children initially
+    const defaultClosed = meta.defaultOpened === false || parentDefaultOpened === false;
+    const defaultIsOpen = isCollapsable ? isActive || (depth === 0 ? !defaultClosed : false) : true;
+
+    const collapsableTreeProps = { title, depth, defaultIsOpen, ...props };
 
     return (
-        <Flex direction="column">
-            <Box
-                display="flex"
-                alignItems="center"
-                cursor="pointer"
-                onClick={onToggle}
-                py="0.2em"
-                my="0.2em"
-                textDecoration={isActive && "underline"}
-            >
+        <CollapsableTree
+            {...collapsableTreeProps}
+            renderTitle={(titleProps) => <FolderTitle {...{ ...titleProps, isActive, isCollapsable }} />}
+        >
+            {children}
+        </CollapsableTree>
+    );
+};
+
+export const folderIcons = {
+    root: { open: MinusIcon, close: AddIcon },
+    sub: { open: CollapseDown, close: CollapseRight },
+};
+
+export type FolderTitleProps = { isActive: boolean; isCollapsable?: boolean } & RenderTitleProps;
+export const FolderTitle = ({ title, isActive, isCollapsable, onToggle, isOpen, depth }: FolderTitleProps) => {
+    const isRootFolder = depth === 0;
+    const icons = depth === 0 ? folderIcons.root : folderIcons.sub;
+
+    return (
+        <Box
+            display="flex"
+            alignItems="center"
+            py="0.2em"
+            my={"0.2em"}
+            mt={isRootFolder && "0.5em"}
+            cursor={isCollapsable && "pointer"}
+            onClick={isCollapsable && onToggle}
+            textDecoration={!isRootFolder && isActive && "underline"}
+            fontSize={isRootFolder && "1.2em"}
+            fontWeight={isRootFolder && "semibold"}
+        >
+            {isCollapsable && (
                 <Box
                     mr="0.4em"
-                    width="0.6em"
-                    height="0.6em"
+                    width="0.5em"
+                    height="0.5em"
                     opacity={0.6}
                     display="inline-block"
-                    as={isOpen ? CollapseDown : CollapseRight}
+                    as={isOpen ? icons.open : icons.close}
                 />
-                {title}
-            </Box>
-            <Box>
-                <Collapse in={isOpen} startingHeight={1}>
-                    <Box pl={depth * 20 + "px"} position="relative">
-                        <Box
-                            position="absolute"
-                            left="5px"
-                            height="100%"
-                            border="1px solid"
-                            borderColor="gray.400"
-                            opacity={0.1}
-                        />
-                        {subTree}
-                    </Box>
-                </Collapse>
-            </Box>
-        </Flex>
+            )}
+            {title}
+        </Box>
     );
-}
+};

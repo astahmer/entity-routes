@@ -35,7 +35,7 @@ export function orderTree({ tree, order, root }: { tree: DirectoryTree; order: S
         const { routes, meta: routeMeta, ...rest } = route;
         // Shallow merge item/route except for meta that is also shallow merged
         const itemMeta = (item || {}).meta;
-        const meta = itemMeta && routeMeta ? { ...itemMeta, ...routeMeta } : itemMeta || routeMeta;
+        const meta: SidebarMergedMeta = itemMeta && routeMeta ? { ...itemMeta, ...routeMeta } : itemMeta || routeMeta;
         const merged = { ...item, ...rest, meta };
 
         // If route has child, re-order them
@@ -101,6 +101,15 @@ export function findSubtreeByUrl(
         if (found) return found;
     }
 }
+
+export function findActiveRouteRecursive(activeRoute: string, children: DirectoryTree[]) {
+    return !!children.find(
+        (tree) =>
+            tree.url === activeRoute || (tree.children ? findActiveRouteRecursive(activeRoute, tree.children) : false)
+    );
+}
+
+export type SidebarMergedMeta = Record<string, any> & SidebarItemMeta & SidebarOrderItemMeta;
 
 export type SubTree = {
     current: DirectoryTree;
