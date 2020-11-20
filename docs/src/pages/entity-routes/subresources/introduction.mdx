@@ -1,5 +1,6 @@
 ---
 title: Introduction
+description: Subresources are a way to generate a dedicated endpoint for an entity property.
 ---
 
 It's a way to generate a dedicated endpoint for an entity property.
@@ -56,12 +57,14 @@ second argument.
 
 <Info>
 
+
 -   By just specifying "create" as [`SubresourceOperation`](/definitions#subresourceoperation), only the
     `POST:/users/:userId/articles` would be generated. You get the idea, this works the same for others operations.
 -   A single relation should use the `details` [`SubresourceOperation`](/definitions#subresourceoperation) whereas a
     collection should use the `list` [`SubresourceOperation`](/definitions#subresourceoperation).
 
 </Info>
+
 
 ## Nesting
 
@@ -71,10 +74,12 @@ Subresources are nestable by default, so you could have a `GET:/users/:userId/ar
 
 <Info>
 
+
 The [`defaultEntityRouteOptions`](/definitions#const-defaultentityrouteoptions) (passed to the
 [`makers`](/entity-routes/introduction#maker)) has a `defaultSubresourceMaxDepthLvl: 2`.
 
 </Info>
+
 
 ### Max depth
 
@@ -125,10 +130,12 @@ subresources IRI are added for each items having subresources (without exposing 
 
 <Info>
 
+
 The [`defaultEntityRouteOptions`](/definitions#const-defaultentityrouteoptions) (passed to the
 [`makers`](/entity-routes/introduction#maker)) has a `shouldSetSubresourcesIriOnItem: true`.
 
 </Info>
+
 
 ### With subresource IRI
 

@@ -1,8 +1,9 @@
 ---
 title: Middlewares
+description: Definition & usage of middlewares with entity-routes.
 ---
 
-import { Tabs, TabList, TabPanels, Tab, TabPanel } from "@chakra-ui/react";
+import { Tab, TabList, TabPanel, TabPanels, Tabs } from "@chakra-ui/react";
 
 Middlewares are functions that process the request, chained one by one, which make them very easy to re-use. Using
 middlewares you can handle authentication, logging, permissions, etc.
@@ -14,10 +15,12 @@ A middleware has access to the [`req`](https://nodejs.org/api/http.html#http_cla
 
 <Info>
 
+
 Learn more about them from [Koa's documentation](https://github.com/koajs/koa) or from
 [Express's documentation](https://expressjs.com/en/guide/using-middleware.html)
 
 </Info>
+
 
 ## Usage
 
@@ -41,8 +44,10 @@ A basic middleware looks like this :
     <Tab>Express</Tab>
   </TabList>
 
+
   <TabPanels>
     <TabPanel>
+
 
 ```typescript bottomLeft="Example taken from https://koajs.com/"
 const logMw = async (ctx, next) => {
@@ -56,6 +61,7 @@ const logMw = async (ctx, next) => {
 </TabPanel>
     <TabPanel>
 
+
 ```typescript bottomLeft="Example taken from https://expressjs.com/fr/guide/using-middleware.html"
 const timeMw = function (req, res, next) {
     console.log("Time:", Date.now());
@@ -65,8 +71,10 @@ const timeMw = function (req, res, next) {
 
 </TabPanel>
 
+
   </TabPanels>
 </Tabs>
+
 
 ## Differences with [**hooks**](/entity-routes/hooks/)
 
