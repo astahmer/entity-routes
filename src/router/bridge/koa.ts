@@ -1,5 +1,5 @@
 import { Context, Middleware, Next } from "koa";
-import * as Router from "koa-router";
+import Router from "koa-router";
 
 import { QueryParams } from "@/filters/index";
 import { BridgeRouterRoute, printBridgeRoute } from "@/router/bridge/BridgeRouter";

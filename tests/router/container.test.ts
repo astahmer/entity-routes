@@ -1,5 +1,4 @@
 import { IsDate, IsEmail, IsString } from "class-validator";
-import * as Router from "koa-router";
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 
 import { closeTestConnection, createTestConnection } from "@@/testConnection";

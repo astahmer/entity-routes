@@ -1,8 +1,8 @@
 import { AddressInfo } from "net";
 
 import axios from "axios";
-import * as bodyParser from "body-parser";
-import * as express from "express";
+import bodyParser from "body-parser";
+import express from "express";
 
 import { createTestConnection } from "@@/testConnection";
 import { EntityRouteOptions, makeExpressEntityRouters } from "@/index";

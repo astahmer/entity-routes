@@ -1,12 +1,15 @@
 {
     "compilerOptions": {
-        "lib": ["es5", "es6"],
-        "target": "es6",
-        "module": "ES6",
+        "target": "ES2015",
+        "module": "ES2020",
         "moduleResolution": "node",
-        "outDir": "./dist",
+        "outDir": "./dist/esm",
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true,
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
+        "forceConsistentCasingInFileNames": true,
+        "skipLibCheck": true,
         "sourceMap": true,
         "declaration": true,
         "noUnusedParameters": true,
@@ -14,7 +17,8 @@
         "baseUrl": "./",
         "paths": {
             "@/*": ["./src/*"]
-        }
+        },
+        "plugins": [{ "transform": "@zerollup/ts-transform-paths" }]
     },
     "include": ["./src"]
 }

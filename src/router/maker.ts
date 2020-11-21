@@ -14,11 +14,6 @@ import { AnyFunction } from "@/utils-types";
 
 let connectionManager: ConnectionManager;
 
-declare const module: any;
-if (module.hot) {
-    module.hot.accept(console.log);
-}
-
 /** Make an EntityRouter out of each given entities and assign them a global options object (overridable with @EntityRoute) */
 export async function makeEntityRouters<T extends AnyFunction = any>({
     connection,

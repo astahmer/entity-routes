@@ -1,7 +1,7 @@
 import { Server } from "net";
 
 import { AxiosInstance } from "axios";
-import * as Router from "koa-router";
+import Router from "koa-router";
 
 import { setupKoaApp } from "@@/router/bridge/koaSetup";
 import { expectedRouteNames, getTestEntities } from "@@/router/bridge/sample/entities";

@@ -1,8 +1,8 @@
 import { AddressInfo } from "net";
 
 import axios from "axios";
-import * as Koa from "koa";
-import * as bodyParser from "koa-bodyparser";
+import Koa from "koa";
+import bodyParser from "koa-bodyparser";
 
 import { createTestConnection } from "@@/testConnection";
 import { EntityRouteOptions, makeKoaEntityRouters } from "@/index";
