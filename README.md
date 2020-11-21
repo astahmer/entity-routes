@@ -4,7 +4,7 @@
 
 _No boilerplate controllers. No code generation. No custom schema._
 
-**This README is still a WIP.**
+## Documentation
 
 [Check the docs here.](https://entity-routes.vercel.app/)
 
@@ -140,25 +140,20 @@ It will automatically generate those routes :
 
 ```typescript
 import { AddressInfo } from "net";
+import { makeKoaEntityRouters } from "@astahmer/entity-routes";
 import * as Koa from "koa";
 import * as bodyParser from "koa-bodyparser";
 import { Connection } from "typeorm";
-import { makeKoaEntityRouters } from "@astahmer/entity-routes";
-
 export async function setupKoaApp(connection: Connection) {
     const entities = connection.entityMetadatas.map((meta) => meta.target) as Function[];
-
     const bridgeRouters = await makeKoaEntityRouters({ connection, entities, options });
     const app = new Koa();
     app.use(bodyParser());
-
-    // Register all routes on koa server
+    / Register all routes on koa server
     bridgeRouters.forEach((router) => app.use(router.instance.routes()));
-
-    // Always validate when no groups are passed on validators
+    / Always validate when no groups are passed on validators
     setEntityValidatorsDefaultOption(entities);
-
-    const server = app.listen(); // random port
+    const server = app.listen(); / random port
     const baseURL = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
     const client = axios.create({ baseURL });
     return { baseURL, server, client };
@@ -169,23 +164,19 @@ export async function setupKoaApp(connection: Connection) {
 
 ```typescript
 import { AddressInfo } from "net";
-import * as express from "express";
-import * as bodyParser from "body-parser";
-import { Connection } from "typeorm";
 import { makeExpressEntityRouters } from "@astahmer/entity-routes";
-
+import * as bodyParser from "body-parser";
+import * as express from "express";
+import { Connection } from "typeorm";
 export async function setupExpressApp(connection: Connection) {
     const entities = connection.entityMetadatas.map((meta) => meta.target) as Function[];
-
     const bridgeRouters = await makeExpressEntityRouters({ connection, entities, options });
     const app = express();
     app.use(bodyParser.json());
     app.use(bodyParser.urlencoded({ extended: true }));
-
-    // Register all routes on Express server
+    / Register all routes on Express server
     bridgeRouters.forEach((router) => app.use(router.instance));
-
-    const server = app.listen(); // random port
+    const server = app.listen(); / random port
     const baseURL = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
     const client = axios.create({ baseURL });
     return { baseURL, server, client };
