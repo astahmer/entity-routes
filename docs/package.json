@@ -5,7 +5,8 @@
     "directories": {
         "typedoc": "./src/pages/definitions",
         "typedocEntrypoint": "../src/index.ts",
-        "docFix": "./scripts/fixDocs.ts"
+        "docFix": "./scripts/fixDocs.ts",
+        "checkLinks": "./scripts/checkLinks.ts"
     },
     "scripts": {
         "dev": "next dev",
@@ -13,6 +14,7 @@
         "start": "next start",
         "docs:clean": "rimraf $npm_package_directories_typedoc",
         "docs:make": "typedoc $npm_package_directories_typedocEntrypoint",
+        "docs:links": "ts-node -T -O '{\"module\":\"commonjs\"}' $npm_package_directories_checkLinks",
         "docs:fix": "ts-node -T -O '{\"module\":\"commonjs\"}' $npm_package_directories_docFix",
         "docs:fixdry": "ts-node -T -O '{\"module\":\"commonjs\"}' $npm_package_directories_docFix --dry",
         "docs:build": "npm run docs:clean && npm run docs:make && npm run docs:fix",
@@ -50,6 +52,7 @@
         "front-matter": "^4.0.2",
         "lodash": "^4.17.20",
         "lodash.throttle": "^4.1.1",
+        "markdown-link-check": "^3.8.3",
         "markdown-toc": "^1.2.0",
         "next-images": "^1.4.1",
         "next-mdx-enhanced": "^5.0.0",
@@ -60,6 +63,7 @@
         "replace-in-file": "^6.1.0",
         "rimraf": "^3.0.2",
         "shelljs": "^0.8.4",
+        "smart-glob": "^1.0.1",
         "ts-node": "^9.0.0",
         "typedoc": "^0.17.0-3",
         "typedoc-plugin-markdown": "^2.4.2",

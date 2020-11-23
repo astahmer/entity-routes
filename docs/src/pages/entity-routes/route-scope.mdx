@@ -10,14 +10,14 @@ Let's start by defining what we call a **route scope**.
 It is a unique combination of 2 elements :
 
 -   The route main [entity](https://typeorm.io/#/entities/what-is-entity)
--   An [operation](operations), for example any of the [C|R|U|D operations](/definitions#groupsoperation)
+-   An [operation](/entity-routes/operations), for example any of the [C|R|U|D operations](/definitions#groupsoperation)
 
 Each route scope will have unique responses schema generated from the mapping, itself made from the list of exposed
 properties on that scope.
 
 ## Examples
 
-These are the routes generated from the [Quick start example](../getting-started/quick-start) :
+These are the routes generated from the [Quick start example](/getting-started/quick-start) :
 
 | Verb   | Path                                  | Entity  | Operation | Route scope         |
 | ------ | ------------------------------------- | ------- | --------- | ------------------- |
@@ -66,7 +66,7 @@ With the [@Groups](/definitions#groups) decorator you can expose any property ([
 from any entity in the route scope of your choice.
 
 What that means is that you can for example have a different mapping for the `User` **creation** route and the `User`
-**update** route. More on that [later](groups).
+**update** route. More on that [later](/groups/introduction).
 
 _Of course this also means that you can have differents constraints for each route scope._ TODO Validator docref
 

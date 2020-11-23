@@ -32,8 +32,8 @@
             "meta": { "collapsable": true },
             "routes": [
                 { "name": "introduction" },
-                { "name": "search", "url": "/internals/filters/search-filter" },
-                { "name": "pagination", "url": "/internals/filters/pagination-filter" },
+                { "name": "search-filter" },
+                { "name": "pagination-filter" },
                 { "name": "custom-filter" }
             ]
         },

@@ -50,7 +50,7 @@ I wanted to get rid of writing the same boring controllers again & again for eac
 
 -   [Core Features](#core-features)
 -   [Installation](#installation)
--   [Quick start](quick-start)
+-   [Quick start](#quick-start)
     -   [Using Koa](#using-koa)
     -   [Using Express/Next/Nuxt](#using-expressnextnuxt)
 -   [Benefits](#benefits)

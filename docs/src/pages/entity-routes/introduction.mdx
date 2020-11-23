@@ -29,10 +29,12 @@ customizable when needed.
 -   Instant CRUD with a simple [`@EntityRoute`](/definitions#entityroute) decorator
 -   [Granular control over which properties are exposed](/groups/introduction) (with [`@Groups`](/definitions#groups))
     in which route scope
--   [`Subresources`](/entity-routes/subresources): Entity properties that have dedicated endpoints, can be nested
+-   [`Subresources`](/entity-routes/subresources/introduction): Entity properties that have dedicated endpoints, can be
+    nested
 -   Independant service components (Database [`Reader`](/definitions/classes/reader), `Persister`,
     [`RelationManager`](/definitions/classes/relationmanager) etc...)
--   Built-in powerful [`filters`](/filters) for lists (`Search`/`Pagination`) that should fit well for 99% use cases
+-   Built-in powerful [`filters`](/filters/introduction) for lists (`Search`/`Pagination`) that should fit well for 99%
+    use cases
 -   [Custom filters](/filters/custom-filter) if you find yourself in the 1%
 -   [`Hooks`](/entity-routes/hooks) to alter a request handling at any point in the process
 -   Built-in validation using
@@ -40,11 +42,11 @@ customizable when needed.
     decorators on your entities
 -   Inferred entity route mappings (with generated endpoints to get the summary of an entity exposed properties for each
     contexts)
--   [Computed properties](/entity-groups/groups/computed-property): methods, possibly async, exposed as properties
+-   [Computed properties](/groups/computed-property): methods, possibly async, exposed as properties
 -   [`@MaxDepth`](/definitions#maxdepth) decorator for entity/properties
 -   Optimized SQL queries with only exposed properties selected
 -   Soft delete/restoration supported (also for Subresources)
--   Standardized REST [responses](/entity-routes/response-format)
+-   Standardized REST [responses](/entity-routes/introduction)
 
 ## Perks
 
