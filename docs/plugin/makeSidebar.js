@@ -25,7 +25,8 @@ function onFileChange(name) {
 }
 
 function makeWatcher() {
-    const watcher = chokidar.watch(["./**/*.mdx", "./**/*.md"], {
+    console.log(`[DOC] watching ./**/*.{mdx} on add|unlink|change...`);
+    const watcher = chokidar.watch("./**/*.{md,mdx}", {
         persistent: true,
         ignoreInitial: true,
     });
