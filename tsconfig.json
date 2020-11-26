@@ -1,9 +1,8 @@
 {
     "compilerOptions": {
-        "target": "ES2015",
-        "module": "ES2020",
+        "target": "ES5",
+        "module": "ESNext",
         "moduleResolution": "node",
-        "outDir": "./dist/esm",
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true,
         "esModuleInterop": true,
@@ -14,11 +13,9 @@
         "declaration": true,
         "noUnusedParameters": true,
         "noImplicitAny": true,
-        "baseUrl": "./",
-        "paths": {
-            "@/*": ["./src/*"]
-        },
+        "downlevelIteration": true,
         "plugins": [{ "transform": "@zerollup/ts-transform-paths" }]
     },
-    "include": ["./src"]
+    "include": ["packages", "docs"],
+    "exclude": ["node_modules"]
 }

@@ -1,13 +1,7 @@
 {
-    "name": "entity-route-web",
-    "version": "0.0.1",
+    "name": "@entity-routes/docs",
+    "version": "0.2.0",
     "private": true,
-    "directories": {
-        "typedoc": "./src/pages/definitions",
-        "typedocEntrypoint": "../src/index.ts",
-        "docFix": "./scripts/fixDocs.ts",
-        "checkLinks": "./scripts/checkLinks.ts"
-    },
     "scripts": {
         "dev": "next dev",
         "build": "next build",
@@ -21,6 +15,12 @@
         "deploy": "npm run docs:build && vercel",
         "prettier": "prettier --write \"./{src,scripts}/**/*.{js,jsx,ts,tsx}\"",
         "postinstall": "patch-package"
+    },
+    "directories": {
+        "typedoc": "./src/pages/definitions",
+        "typedocEntrypoint": "../src/index.ts",
+        "docFix": "./scripts/fixDocs.ts",
+        "checkLinks": "./scripts/checkLinks.ts"
     },
     "dependencies": {
         "@chakra-ui/icons": "^1.0.0",
@@ -68,15 +68,5 @@
         "typedoc": "^0.17.0-3",
         "typedoc-plugin-markdown": "^2.4.2",
         "typescript": "^4.0.5"
-    },
-    "importSort": {
-        ".js, jsx, .ts, .tsx": {
-            "options": {
-                "ignoreTsConfig": true,
-                "extraAliases": [
-                    "@/*"
-                ]
-            }
-        }
     }
 }

@@ -1,8 +1,8 @@
-import { escapeRegex } from "../helpers";
-import { ReplaceTagReferencesArgs } from "./replaceTagReferences";
+import consola from "consola";
+import { ReplaceInFileConfig, replaceInFile } from "replace-in-file";
 
-const replace = require("replace-in-file");
-const consola = require("consola");
+import { escapeRegex } from "../helpers";
+import { ReplaceTagReferencesArgs, TagReplaceResult } from "./replaceTagReferences";
 
 export type UpdateTagReferencesArgs = ReplaceTagReferencesArgs & { ignoreSource: string[] };
 /** Update written tag references with those from current config in case there is a diff */
@@ -22,7 +22,7 @@ export async function updateTagReferences({
 
     // Match every [`tag`](anyLink)
     const tagReferences = Object.keys(source).map((tag) => new RegExp(`\\[${escapeRegex(tag)}\\]\\([^)]+\\)`, "g"));
-    const results = [];
+    const results: TagReplaceResult[] = [];
 
     try {
         const options = {
@@ -30,7 +30,7 @@ export async function updateTagReferences({
             files,
             ignore,
             from: tagReferences,
-            to: (current: string, position: number, fileContent: string, fileName: string) => {
+            to: (current: string, _position: number, _fileContent: string, fileName: string) => {
                 const tag = current.substring(1, current.indexOf("]"));
                 const currentReference = current.substring(3 + tag.length, current.indexOf(")"));
                 const reference = source[tag];
@@ -53,7 +53,7 @@ export async function updateTagReferences({
                 return result;
             },
         };
-        await replace(options);
+        await replaceInFile((options as unknown) as ReplaceInFileConfig);
         dry && console.log(results);
         consola.success(`Done updating ${results.length} ${name} references`);
         return results;
