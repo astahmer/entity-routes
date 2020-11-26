@@ -64,6 +64,7 @@
         "rimraf": "^3.0.2",
         "shelljs": "^0.8.4",
         "smart-glob": "^1.0.1",
+        "ts-morph": "^9.0.0",
         "ts-node": "^9.0.0",
         "typedoc": "^0.17.0-3",
         "typedoc-plugin-markdown": "^2.4.2",
