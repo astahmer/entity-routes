@@ -17,5 +17,13 @@
         "plugins": [{ "transform": "@zerollup/ts-transform-paths" }]
     },
     "include": ["packages", "docs"],
-    "exclude": ["node_modules"]
+    "exclude": ["node_modules"],
+    "ts-node": {
+        "transpileOnly": true,
+        "compilerOptions": {
+            "module": "CommonJS",
+            "resolveJsonModule": true,
+            "noImplicitAny": false
+        }
+    }
 }
