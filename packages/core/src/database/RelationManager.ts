@@ -261,17 +261,17 @@ export type RelationManagerBaseArgs<Entity extends GenericEntity = GenericEntity
     aliasHandler: AliasHandler;
 };
 
-export type MakeJoinsFromPropPathArgs<Entity extends GenericEntity = GenericEntity> = RelationManagerBaseArgs<
-    Entity
-> & {
+export type MakeJoinsFromPropPathArgs<
+    Entity extends GenericEntity = GenericEntity
+> = RelationManagerBaseArgs<Entity> & {
     propPath: string;
     currentProp: string;
     prevAlias?: string;
 };
 
-export type JoinAndSelectExposedPropsArgs<Entity extends GenericEntity = GenericEntity> = RelationManagerBaseArgs<
-    Entity
-> & {
+export type JoinAndSelectExposedPropsArgs<
+    Entity extends GenericEntity = GenericEntity
+> = RelationManagerBaseArgs<Entity> & {
     rootMetadata: EntityMetadata;
     operation: RouteOperation;
     currentPath: string;
@@ -287,9 +287,9 @@ export type JoinAndSelectPropsThatComputedPropsDependsOnArgs<
     alias?: string;
 };
 
-export type JoinSubresourceOnInverseSideArgs<Entity extends GenericEntity = GenericEntity> = RelationManagerBaseArgs<
-    Entity
-> & {
+export type JoinSubresourceOnInverseSideArgs<
+    Entity extends GenericEntity = GenericEntity
+> = RelationManagerBaseArgs<Entity> & {
     subresourceRelation: SubresourceRelation;
     prevAlias?: string;
 };

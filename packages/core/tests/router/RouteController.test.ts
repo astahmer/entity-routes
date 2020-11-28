@@ -1,3 +1,12 @@
+import {
+    EntityRouteOptions,
+    Groups,
+    RouteController,
+    Search,
+    Subresource,
+    getSubresourceRelation,
+    pick,
+} from "@entity-routes/core";
 import { IsDate, IsEmail, IsString } from "class-validator";
 import { Container } from "typedi";
 import {
@@ -11,16 +20,7 @@ import {
     getRepository,
 } from "typeorm";
 
-import { closeTestConnection, createTestConnection } from "@@/testConnection";
-import {
-    EntityRouteOptions,
-    Groups,
-    RouteController,
-    Search,
-    Subresource,
-    getSubresourceRelation,
-    pick,
-} from "@/index";
+import { closeTestConnection, createTestConnection } from "@/testConnection";
 
 const routeOptions: EntityRouteOptions = { defaultCreateUpdateOptions: { shouldAutoReload: true } };
 

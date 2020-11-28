@@ -1,4 +1,4 @@
-import { EntityRoute, getRouteMetadata } from "@/index";
+import { EntityRoute, getRouteMetadata } from "@entity-routes/core";
 
 describe("@EntityRoute", () => {
     it("can retrieve metadata with getRouteMetadata", () => {

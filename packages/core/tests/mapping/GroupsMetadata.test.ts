@@ -1,4 +1,10 @@
-import { GroupsMetadata, PropsByOperations, getExposedProps, getGroupsMetadata, getOwnExposedProps } from "@/index";
+import {
+    GroupsMetadata,
+    PropsByOperations,
+    getExposedProps,
+    getGroupsMetadata,
+    getOwnExposedProps,
+} from "@entity-routes/core";
 
 import { TestGroups } from "../decorators/TestGroups";
 

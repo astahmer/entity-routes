@@ -1,7 +1,3 @@
-import { Container } from "typedi/Container";
-import { Column, Entity, EntityMetadata, ManyToOne, PrimaryGeneratedColumn, Repository, getRepository } from "typeorm";
-
-import { closeTestConnection, createTestConnection } from "@@/testConnection";
 import {
     AbstractFilterConfig,
     COMPARISON_OPERATOR,
@@ -11,7 +7,11 @@ import {
     StrategyType,
     WhereManager,
     getSearchFilterDefaultConfig,
-} from "@/index";
+} from "@entity-routes/core";
+import { Container } from "typedi/Container";
+import { Column, Entity, EntityMetadata, ManyToOne, PrimaryGeneratedColumn, Repository, getRepository } from "typeorm";
+
+import { closeTestConnection, createTestConnection } from "@/testConnection";
 
 class AbstractEntity {
     @PrimaryGeneratedColumn()

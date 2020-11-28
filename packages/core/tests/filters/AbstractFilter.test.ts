@@ -1,17 +1,17 @@
-import { Column, Entity, EntityMetadata, ManyToOne, PrimaryGeneratedColumn, Repository, getRepository } from "typeorm";
-import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
-import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
-
-import { Cache, CacheFilter, CacheFilterOptions } from "@@/filters/sample/CacheFilter";
-import { GroupBy, GroupByFilter } from "@@/filters/sample/GroupByFilter";
-import { closeTestConnection, createTestConnection } from "@@/testConnection";
 import {
     AbstractFilter,
     AbstractFilterApplyArgs,
     GetPropMetaAtPathOptions,
     RouteFiltersMeta,
     getRouteFiltersMeta,
-} from "@/index";
+} from "@entity-routes/core";
+import { Column, Entity, EntityMetadata, ManyToOne, PrimaryGeneratedColumn, Repository, getRepository } from "typeorm";
+import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
+import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
+
+import { Cache, CacheFilter, CacheFilterOptions } from "@/filters/sample/CacheFilter";
+import { GroupBy, GroupByFilter } from "@/filters/sample/GroupByFilter";
+import { closeTestConnection, createTestConnection } from "@/testConnection";
 
 describe("AbstractFilter", () => {
     class AbstractEntity {

@@ -5,7 +5,7 @@ import {
     FilterDefaultConfig,
     parseStringAsBoolean,
     registerFilterDecorator,
-} from "@/index";
+} from "@entity-routes/core";
 
 export type CacheFilterOptions = DefaultFilterOptions & {
     enabled?: boolean;

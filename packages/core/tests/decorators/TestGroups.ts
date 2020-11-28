@@ -4,7 +4,7 @@ import {
     GroupsMetadata,
     GroupsOperationOrShortcuts,
     registerGroupsDecorator,
-} from "@/index";
+} from "@entity-routes/core";
 
 // Using metaClass GroupsMetadata instead of EntityGroupsMetadata for testing
 export function TestGroups(groups: GroupsDecoratorArg): PropertyDecorator;

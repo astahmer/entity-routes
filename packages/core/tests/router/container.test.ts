@@ -1,15 +1,8 @@
+import { EntityRoute, getEntityRouters, makeKoaEntityRouters } from "@entity-routes/core";
 import { IsDate, IsEmail, IsString } from "class-validator";
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 
-import { closeTestConnection, createTestConnection } from "@@/testConnection";
-import {
-    EntityRoute,
-    getEntityRouters,
-    koaMwAdapter,
-    koaRouterFactory,
-    makeEntityRouters,
-    registerKoaRouteFromBridgeRoute,
-} from "@/index";
+import { closeTestConnection, createTestConnection } from "@/testConnection";
 
 describe("container", () => {
     it("can be retrieved", () => {
@@ -55,15 +48,7 @@ describe("container", () => {
         const entities = [Role, User];
         const connection = await createTestConnection(entities);
 
-        await makeEntityRouters({
-            connection,
-            entities,
-            options: {
-                routerFactoryFn: koaRouterFactory,
-                routerRegisterFn: registerKoaRouteFromBridgeRoute,
-                middlewareAdapter: koaMwAdapter,
-            },
-        });
+        await makeKoaEntityRouters({ connection, entities });
 
         const entityRouters = getEntityRouters();
         expect(Object.keys(entityRouters)).toEqual(["Role", "User"]);

@@ -1,14 +1,19 @@
 import { Server } from "net";
 
+import {
+    RouteVerb,
+    flatMapOnProp,
+    makeExpressEntityRouters,
+    printBridgeRoute,
+    registerExpressRouteFromBridgeRoute,
+} from "@entity-routes/core";
 import { AxiosInstance } from "axios";
 import { Router } from "express";
 
-import { setupExpressApp } from "@@/router/bridge/expressSetup";
-import { expectedRouteDesc, getTestEntities } from "@@/router/bridge/sample/entities";
-import { TestRequestConfig, testRoute, testRouteConfigs } from "@@/router/bridge/sample/requests";
-import { closeTestConnection, createTestConnection } from "@@/testConnection";
-import { RouteVerb, flatMapOnProp } from "@/index";
-import { makeExpressEntityRouters, printBridgeRoute, registerExpressRouteFromBridgeRoute } from "@/router/bridge/index";
+import { setupExpressApp } from "@/router/bridge/expressSetup";
+import { expectedRouteDesc, getTestEntities } from "@/router/bridge/sample/entities";
+import { TestRequestConfig, testRoute, testRouteConfigs } from "@/router/bridge/sample/requests";
+import { closeTestConnection, createTestConnection } from "@/testConnection";
 
 import { makeTestFn, resetHooksCalled, testHooksConfigs } from "./sample/hooks";
 
@@ -52,7 +57,7 @@ describe("Express BridgeRouter adapter", () => {
             (route) => printBridgeRoute(route)
         );
 
-        expect(routeDescs).toEqual(expectedRouteDesc);
+        expect(routeDescs).toEqualMessy(expectedRouteDesc);
 
         return closeTestConnection();
     });

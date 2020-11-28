@@ -14,6 +14,7 @@
     "author": "Alexandre Stahmer <alexandre.stahmer@gmail.com>",
     "license": "ISC",
     "scripts": {
+        "test": "yarn workspace @entity-routes/core test",
         "dev": "yarn workspace @entity-routes/core dev",
         "start": "yarn workspace @entity-routes/core start",
         "build": "yarn workspace @entity-routes/core build",

@@ -4,7 +4,7 @@ import {
     FilterDefaultConfig,
     getRouteFiltersMeta,
     registerFilterDecorator,
-} from "@/index";
+} from "@entity-routes/core";
 
 describe("registerFilterDecorator", () => {
     it("can register filter decorator & retrieve metadata with getRouteFiltersMeta", () => {

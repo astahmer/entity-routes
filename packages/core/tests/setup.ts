@@ -1,7 +1,5 @@
+import { isEqualArrays, isPrimitive } from "@entity-routes/core";
 import diff from "jest-diff";
-
-import { isEqualArrays } from "@/functions/array";
-import { isPrimitive } from "@/functions/asserts";
 
 const arrayTester = (received: any, expected: any) =>
     Array.isArray(received) && Array.isArray(expected) && isPrimitive(received[0]) && isPrimitive(expected[0])

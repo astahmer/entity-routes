@@ -1,8 +1,8 @@
+import { Decorator, flattenItem } from "@entity-routes/core";
 import Container from "typedi";
 import { getRepository } from "typeorm";
 
-import { closeTestConnection, createTestConnection } from "@@/testConnection";
-import { Decorator, flattenItem } from "@/index";
+import { closeTestConnection, createTestConnection } from "@/testConnection";
 
 import { Article, Comment, Role, SimpleThing, ThingWithComputed, User, makeItem } from "./sample/entities";
 

@@ -1,9 +1,9 @@
+import { DecorateFn, DecorateFnArgs, Decorator, wait } from "@entity-routes/core";
 import { Container } from "typedi";
 import { getRepository } from "typeorm";
 
-import { User, getWriterTestEntities, makeItem } from "@@/response/functions/sample/entities";
-import { closeTestConnection, createTestConnection } from "@@/testConnection";
-import { DecorateFn, DecorateFnArgs, Decorator, wait } from "@/index";
+import { User, getWriterTestEntities, makeItem } from "@/response/functions/sample/entities";
+import { closeTestConnection, createTestConnection } from "@/testConnection";
 
 describe("Decorator", () => {
     const entities = getWriterTestEntities();

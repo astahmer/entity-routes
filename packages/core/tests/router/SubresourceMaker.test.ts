@@ -1,7 +1,3 @@
-import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, getRepository } from "typeorm";
-
-import { Article, Comment, Manager, Upvote, User } from "@@/router/sample/entities";
-import { closeTestConnection, createTestConnection } from "@@/testConnection";
 import {
     BridgeRouter,
     EntityRoute,
@@ -20,7 +16,11 @@ import {
     printBridgeRoute,
     prop,
     registerKoaRouteFromBridgeRoute,
-} from "@/index";
+} from "@entity-routes/core";
+import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, getRepository } from "typeorm";
+
+import { Article, Comment, Manager, Upvote, User } from "@/router/sample/entities";
+import { closeTestConnection, createTestConnection } from "@/testConnection";
 
 describe("SubresourceManager", () => {
     const options: EntityRouterFactoryOptions = {

@@ -7,8 +7,7 @@ module.exports = {
     preset: "ts-jest",
     testEnvironment: "node",
     moduleNameMapper: {
-        "^@/(.*)$": "<rootDir>/src/$1",
-        "^@@/(.*)$": "<rootDir>/tests/$1",
+        "^@/(.*)$": "<rootDir>/tests/$1",
     },
     globals: { "ts-jest": { tsconfig: "<rootDir>/tests/tsconfig.json" } },
     collectCoverageFrom: ["<rootDir>/src/**/*.ts"],

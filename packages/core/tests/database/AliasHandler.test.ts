@@ -1,7 +1,7 @@
+import { AliasHandler } from "@entity-routes/core";
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn, getRepository } from "typeorm";
 
-import { closeTestConnection, createTestConnection } from "@@/testConnection";
-import { AliasHandler } from "@/index";
+import { closeTestConnection, createTestConnection } from "@/testConnection";
 
 describe("AliasHandler", () => {
     class AbstractEntity {

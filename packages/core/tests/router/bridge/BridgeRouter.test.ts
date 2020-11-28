@@ -1,5 +1,3 @@
-import { Context } from "koa";
-
 import {
     BridgeRouter,
     IRouteAction,
@@ -7,7 +5,8 @@ import {
     koaRouterFactory,
     makeRouterFromActions,
     registerKoaRouteFromBridgeRoute,
-} from "@/index";
+} from "@entity-routes/core";
+import { Context } from "koa";
 
 const noop = () => {};
 

@@ -1,6 +1,5 @@
+import { EntityRoute } from "@entity-routes/core";
 import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
-
-import { EntityRoute } from "@/index";
 
 export class AbstractEntity {
     @PrimaryGeneratedColumn()

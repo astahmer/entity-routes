@@ -1,8 +1,8 @@
+import { Decorator, makeComputedPropNameFromMethod, setComputedPropsOnItem } from "@entity-routes/core";
 import Container from "typedi";
 import { getRepository } from "typeorm";
 
-import { closeTestConnection, createTestConnection } from "@@/testConnection";
-import { Decorator, makeComputedPropNameFromMethod, setComputedPropsOnItem } from "@/index";
+import { closeTestConnection, createTestConnection } from "@/testConnection";
 
 import { Article, Comment, Role, ThingWithComputed, User, makeItem } from "./sample/entities";
 

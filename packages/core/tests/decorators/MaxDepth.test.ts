@@ -1,4 +1,4 @@
-import { MaxDepth, getMaxDepthMetadata } from "@/index";
+import { MaxDepth, getMaxDepthMetadata } from "@entity-routes/core";
 
 describe("@MaxDepth", () => {
     @MaxDepth()

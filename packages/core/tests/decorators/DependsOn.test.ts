@@ -1,4 +1,4 @@
-import { DependsOn, getDependsOnMetadata } from "@/index";
+import { DependsOn, getDependsOnMetadata } from "@entity-routes/core";
 
 describe("@DependsOn", () => {
     it("can retrieve metadata with getDependsOnMetadata", () => {

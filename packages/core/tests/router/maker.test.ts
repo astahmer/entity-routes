@@ -1,15 +1,8 @@
+import { EntityRoute, getEntityRouters, makeKoaEntityRouters } from "@entity-routes/core";
 import { IsDate, IsEmail, IsString, getMetadataStorage } from "class-validator";
 import { Column, Entity, ManyToOne, OneToOne, PrimaryGeneratedColumn, getConnection } from "typeorm";
 
-import { closeTestConnection, createTestConnection } from "@@/testConnection";
-import {
-    EntityRoute,
-    getEntityRouters,
-    koaMwAdapter,
-    koaRouterFactory,
-    makeEntityRouters,
-    registerKoaRouteFromBridgeRoute,
-} from "@/index";
+import { closeTestConnection, createTestConnection } from "@/testConnection";
 
 describe("maker", () => {
     class AbstractEntity {
@@ -81,15 +74,7 @@ describe("maker", () => {
             expect(validationMetas.find((meta) => meta.propertyName === "name").always).toEqual(undefined);
             expect(validationMetas.find((meta) => meta.propertyName === "email").always).toEqual(false);
 
-            await makeEntityRouters({
-                connection: getConnection(),
-                entities,
-                options: {
-                    routerFactoryFn: koaRouterFactory,
-                    routerRegisterFn: registerKoaRouteFromBridgeRoute,
-                    middlewareAdapter: koaMwAdapter,
-                },
-            });
+            await makeKoaEntityRouters({ connection: getConnection(), entities });
             expect(validationMetas.find((meta) => meta.propertyName === "name").always).toEqual(undefined);
 
             // should have been set to true since no groups were provided
@@ -97,15 +82,7 @@ describe("maker", () => {
         });
 
         it("only make routers for entities decorated with @EntityRoute", async () => {
-            await makeEntityRouters({
-                connection: getConnection(),
-                entities,
-                options: {
-                    routerFactoryFn: koaRouterFactory,
-                    routerRegisterFn: registerKoaRouteFromBridgeRoute,
-                    middlewareAdapter: koaMwAdapter,
-                },
-            });
+            await makeKoaEntityRouters({ connection: getConnection(), entities });
             const entityRouters = getEntityRouters();
             expect(Object.keys(entityRouters).length).toEqual(3);
         });

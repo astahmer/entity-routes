@@ -4,7 +4,7 @@ import {
     formatGroupsMethodName,
     getGroupsMetadata,
     registerGroupsDecorator,
-} from "@/index";
+} from "@entity-routes/core";
 
 import { TestGroups } from "./TestGroups";
 

@@ -1,6 +1,11 @@
+import {
+    EntityGroupsMetadata,
+    Groups,
+    Subresource,
+    formatGroupsMethodName,
+    getGroupsMetadata,
+} from "@entity-routes/core";
 import { Column, Entity, EntityMetadata, ManyToOne, OneToMany, PrimaryGeneratedColumn, getRepository } from "typeorm";
-
-import { EntityGroupsMetadata, Groups, Subresource, formatGroupsMethodName, getGroupsMetadata } from "@/index";
 
 import { closeTestConnection, createTestConnection } from "../testConnection";
 

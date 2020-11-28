@@ -1,7 +1,14 @@
+import {
+    ENTITY_META_SYMBOL,
+    EntityRouteOptions,
+    Groups,
+    MiddlewareMaker,
+    RequestState,
+    RouteResponse,
+} from "@entity-routes/core";
 import { Column, Entity, PrimaryGeneratedColumn, getConnection, getRepository } from "typeorm";
 
-import { closeTestConnection, createTestConnection, makeReqCtxWithState, makeTestCtx } from "@@/testConnection";
-import { ENTITY_META_SYMBOL, EntityRouteOptions, Groups, MiddlewareMaker, RequestState, RouteResponse } from "@/index";
+import { closeTestConnection, createTestConnection, makeReqCtxWithState, makeTestCtx } from "@/testConnection";
 
 describe("MiddlewareMaker", () => {
     class AbstractEntity {

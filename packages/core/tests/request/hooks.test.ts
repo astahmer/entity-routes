@@ -1,9 +1,3 @@
-import { IsEmail } from "class-validator";
-import { Container } from "typedi";
-import { Column, Entity, PrimaryGeneratedColumn, getRepository } from "typeorm";
-
-import { setupKoaApp } from "@@/router/bridge/koaSetup";
-import { closeTestConnection, createTestConnection, makeTestCtx } from "@@/testConnection";
 import {
     AliasHandler,
     ContextWithState,
@@ -24,7 +18,13 @@ import {
     Persistor,
     Reader,
     RequestState,
-} from "@/index";
+} from "@entity-routes/core";
+import { IsEmail } from "class-validator";
+import { Container } from "typedi";
+import { Column, Entity, PrimaryGeneratedColumn, getRepository } from "typeorm";
+
+import { setupKoaApp } from "@/router/bridge/koaSetup";
+import { closeTestConnection, createTestConnection, makeTestCtx } from "@/testConnection";
 
 /** Possible hooks are [before/after][Handle/?:(Clean/Validate/Persist)/?:(Read)/Respond] */
 describe("hooks", () => {

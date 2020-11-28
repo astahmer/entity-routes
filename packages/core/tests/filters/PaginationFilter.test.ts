@@ -1,6 +1,3 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn, getRepository } from "typeorm";
-
-import { closeTestConnection, createTestConnection } from "@@/testConnection";
 import {
     AliasHandler,
     OrderBy,
@@ -9,7 +6,10 @@ import {
     PaginationFilterOptions,
     getPaginationFilterDefaultConfig,
     getRouteFiltersMeta,
-} from "@/index";
+} from "@entity-routes/core";
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn, getRepository } from "typeorm";
+
+import { closeTestConnection, createTestConnection } from "@/testConnection";
 
 class AbstractEntity {
     @PrimaryGeneratedColumn()

@@ -1,4 +1,4 @@
-import { AbstractFilter, AbstractFilterApplyArgs, registerFilterDecorator } from "@/index";
+import { AbstractFilter, AbstractFilterApplyArgs, registerFilterDecorator } from "@entity-routes/core";
 
 export function GroupBy(): PropertyDecorator;
 export function GroupBy(props: string[]): ClassDecorator;
