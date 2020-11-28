@@ -3,10 +3,12 @@
     "compilerOptions": {
         "sourceMap": false,
         "declaration": false,
+        "declarationMap": false,
+        "noEmit": true,
+        "baseUrl": "./",
         "paths": {
-            "@/*": ["./src/*"],
-            "@@/*": ["./tests/*"]
+            "@/*": ["./*"]
         }
     },
-    "include": ["../src", "../tests"]
+    "include": ["./"]
 }

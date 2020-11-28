@@ -1,24 +1,16 @@
 // For a detailed explanation regarding each configuration property, visit:
 // https://jestjs.io/docs/en/configuration.html
 
-const threshold = 50;
+const threshold = 80;
 
 module.exports = {
-    roots: ["<rootDir>/tests"],
-    transform: {
-        "^.+\\.tsx?$": "ts-jest",
-    },
+    preset: "ts-jest",
     testEnvironment: "node",
     moduleNameMapper: {
         "^@/(.*)$": "<rootDir>/src/$1",
         "^@@/(.*)$": "<rootDir>/tests/$1",
     },
-    globals: {
-        "ts-jest": {
-            tsConfig: "<rootDir>/tests/tsconfig.json",
-        },
-    },
-    setupFilesAfterEnv: ["jest-extended", "<rootDir>/tests/setup.ts"],
+    globals: { "ts-jest": { tsconfig: "<rootDir>/tests/tsconfig.json" } },
     collectCoverageFrom: ["<rootDir>/src/**/*.ts"],
     coverageThreshold: {
         global: {

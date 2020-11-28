@@ -15,32 +15,29 @@
         "dist",
         "src"
     ],
-    "publishConfig": {
-        "access": "public"
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/astahmer/entity-routes.git"
     },
+    "author": "Alexandre Stahmer <alexandre.stahmer@gmail.com>",
+    "license": "ISC",
     "scripts": {
-        "test": "jest --runInBand --detectOpenHandles",
+        "test": "jest --runInBand --forceExit",
         "test:clear": "jest --clearCache",
-        "test:watch": "jest --runInBand --detectOpenHandles --watch --no-watchman",
-        "test:coverage": "jest --coverage --runInBand --detectOpenHandles",
-        "commit": "git-cz",
-        "prettier": "prettier --write \"./{src,tests}/**/*.ts\"",
-        "ttsc": "ttsc",
-        "dev": "ttsc --watch --incremental",
-        "build:cjs": "ttsc -p tsconfig.cjs.json",
-        "build:esm": "ttsc -p tsconfig.json",
-        "build": "concurrently \"npm run build:cjs\" \"npm run build:esm\"",
-        "start": "node -r ts-node/register dist/index",
+        "test:watch": "jest --runInBand --forceExit --watch --no-watchman",
+        "test:coverage": "jest --coverage --runInBand --forceExit",
+        "dev": "ttsc --watch --incremental --outDir dist/esm",
+        "build:cjs": "ttsc --outDir dist/cjs -m CommonJS",
+        "build:esm": "ttsc --outDir dist/esm",
+        "build": "concurrently yarn:build:*",
+        "start": "node -r ts-node/register dist/cjs/index",
         "release": "standard-version",
         "prebuild": "rimraf dist",
-        "prepare": "npm run build",
-        "prepublishOnly": "npm test",
-        "release-publish": "npm run release && npm publish && git push --follow-tags origin main"
-    },
-    "config": {
-        "commitizen": {
-            "path": "./node_modules/cz-conventional-changelog"
-        }
+        "prepare": "yarn build",
+        "prepublishOnly": "yarn test",
+        "release-publish": "npm release && npm publish && git push --follow-tags origin main",
+        "prettier": "prettier --write \"./{src,tests}/**/*.ts\"",
+        "commit": "git-cz"
     },
     "dependencies": {
         "@astahmer/entity-validator": "^0.1.1",
@@ -85,6 +82,9 @@
         "express": "^4.17.1",
         "koa": "^2.13.0"
     },
+    "publishConfig": {
+        "access": "public"
+    },
     "keywords": [
         "entity",
         "routes",
@@ -94,5 +94,10 @@
         "model",
         "typeorm",
         "koa"
-    ]
+    ],
+    "config": {
+        "commitizen": {
+            "path": "./node_modules/cz-conventional-changelog"
+        }
+    }
 }
