@@ -19,12 +19,12 @@ import {
     Reader,
     RequestState,
 } from "@entity-routes/core";
+import { closeTestConnection, createTestConnection, makeTestCtx } from "@entity-routes/test-utils";
 import { IsEmail } from "class-validator";
 import { Container } from "typedi";
 import { Column, Entity, PrimaryGeneratedColumn, getRepository } from "typeorm";
 
 import { setupKoaApp } from "@/router/bridge/koaSetup";
-import { closeTestConnection, createTestConnection, makeTestCtx } from "@/testConnection";
 
 /** Possible hooks are [before/after][Handle/?:(Clean/Validate/Persist)/?:(Read)/Respond] */
 describe("hooks", () => {

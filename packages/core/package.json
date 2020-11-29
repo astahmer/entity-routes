@@ -50,6 +50,7 @@
         "uuid": "^8.2.0"
     },
     "devDependencies": {
+        "@entity-routes/test-utils": "^0.1.0",
         "@types/body-parser": "^1.19.0",
         "@types/jest": "^26.0.3",
         "@types/koa": "^2.11.3",

@@ -17,10 +17,10 @@ import {
     prop,
     registerKoaRouteFromBridgeRoute,
 } from "@entity-routes/core";
+import { closeTestConnection, createTestConnection } from "@entity-routes/test-utils";
 import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, getRepository } from "typeorm";
 
 import { Article, Comment, Manager, Upvote, User } from "@/router/sample/entities";
-import { closeTestConnection, createTestConnection } from "@/testConnection";
 
 describe("SubresourceManager", () => {
     const options: EntityRouterFactoryOptions = {

@@ -7,13 +7,13 @@ import {
     printBridgeRoute,
     registerExpressRouteFromBridgeRoute,
 } from "@entity-routes/core";
+import { closeTestConnection, createTestConnection } from "@entity-routes/test-utils";
 import { AxiosInstance } from "axios";
 import { Router } from "express";
 
 import { setupExpressApp } from "@/router/bridge/expressSetup";
 import { expectedRouteDesc, getTestEntities } from "@/router/bridge/sample/entities";
 import { TestRequestConfig, testRoute, testRouteConfigs } from "@/router/bridge/sample/requests";
-import { closeTestConnection, createTestConnection } from "@/testConnection";
 
 import { makeTestFn, resetHooksCalled, testHooksConfigs } from "./sample/hooks";
 

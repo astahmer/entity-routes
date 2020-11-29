@@ -12,9 +12,8 @@ import {
     getRouteFiltersMeta,
     getSearchFilterDefaultConfig,
 } from "@entity-routes/core";
+import { closeTestConnection, createTestConnection } from "@entity-routes/test-utils";
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn, getRepository } from "typeorm";
-
-import { closeTestConnection, createTestConnection } from "@/testConnection";
 
 class AbstractEntity {
     @PrimaryGeneratedColumn()

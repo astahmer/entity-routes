@@ -1,8 +1,7 @@
 import { EntityRoute, getEntityRouters, makeKoaEntityRouters } from "@entity-routes/core";
+import { closeTestConnection, createTestConnection } from "@entity-routes/test-utils";
 import { IsDate, IsEmail, IsString, getMetadataStorage } from "class-validator";
 import { Column, Entity, ManyToOne, OneToOne, PrimaryGeneratedColumn, getConnection } from "typeorm";
-
-import { closeTestConnection, createTestConnection } from "@/testConnection";
 
 describe("maker", () => {
     class AbstractEntity {

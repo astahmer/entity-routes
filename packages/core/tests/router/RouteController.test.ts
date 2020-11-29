@@ -7,6 +7,7 @@ import {
     getSubresourceRelation,
     pick,
 } from "@entity-routes/core";
+import { closeTestConnection, createTestConnection } from "@entity-routes/test-utils";
 import { IsDate, IsEmail, IsString } from "class-validator";
 import { Container } from "typedi";
 import {
@@ -19,8 +20,6 @@ import {
     UpdateResult,
     getRepository,
 } from "typeorm";
-
-import { closeTestConnection, createTestConnection } from "@/testConnection";
 
 const routeOptions: EntityRouteOptions = { defaultCreateUpdateOptions: { shouldAutoReload: true } };
 

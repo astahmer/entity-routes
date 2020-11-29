@@ -6,6 +6,7 @@ import {
     Subresource,
     getSubresourceRelation,
 } from "@entity-routes/core";
+import { closeTestConnection, createTestConnection } from "@entity-routes/test-utils";
 import { Container } from "typedi";
 import {
     Column,
@@ -17,8 +18,6 @@ import {
     PrimaryGeneratedColumn,
     getRepository,
 } from "typeorm";
-
-import { closeTestConnection, createTestConnection } from "@/testConnection";
 
 describe("RelationManager", () => {
     class AbstractEntity {

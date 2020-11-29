@@ -14,10 +14,10 @@
     "author": "Alexandre Stahmer <alexandre.stahmer@gmail.com>",
     "license": "ISC",
     "scripts": {
-        "test": "yarn workspace @entity-routes/core test",
+        "test": "lerna run test --stream",
+        "build": "lerna run build --ignore @entity-routes/docs --no-private --stream",
         "dev": "yarn workspace @entity-routes/core dev",
         "start": "yarn workspace @entity-routes/core start",
-        "build": "yarn workspace @entity-routes/core build",
         "docs:dev": "yarn workspace @entity-routes/docs dev",
         "docs:start": "yarn workspace @entity-routes/docs start",
         "docs:build": "yarn workspace @entity-routes/docs build"
@@ -32,5 +32,8 @@
                 ]
             }
         }
+    },
+    "devDependencies": {
+        "lerna": "^3.22.1"
     }
 }

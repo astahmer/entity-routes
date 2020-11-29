@@ -1,9 +1,8 @@
 import { AliasHandler, Groups, Persistor, Reader } from "@entity-routes/core";
+import { closeTestConnection, createTestConnection } from "@entity-routes/test-utils";
 import { IsEmail } from "class-validator";
 import { Container } from "typedi";
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn, getRepository } from "typeorm";
-
-import { closeTestConnection, createTestConnection } from "@/testConnection";
 
 describe("Reader", () => {
     const reader = Container.get(Reader);

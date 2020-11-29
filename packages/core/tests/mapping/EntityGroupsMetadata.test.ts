@@ -5,9 +5,8 @@ import {
     formatGroupsMethodName,
     getGroupsMetadata,
 } from "@entity-routes/core";
+import { closeTestConnection, createTestConnection } from "@entity-routes/test-utils";
 import { Column, Entity, EntityMetadata, ManyToOne, OneToMany, PrimaryGeneratedColumn, getRepository } from "typeorm";
-
-import { closeTestConnection, createTestConnection } from "../testConnection";
 
 describe("EntityGroupsMetadata", () => {
     class AbstractEntity {

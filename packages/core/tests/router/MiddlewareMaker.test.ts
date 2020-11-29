@@ -6,9 +6,8 @@ import {
     RequestState,
     RouteResponse,
 } from "@entity-routes/core";
+import { closeTestConnection, createTestConnection, makeReqCtxWithState, makeTestCtx } from "@entity-routes/test-utils";
 import { Column, Entity, PrimaryGeneratedColumn, getConnection, getRepository } from "typeorm";
-
-import { closeTestConnection, createTestConnection, makeReqCtxWithState, makeTestCtx } from "@/testConnection";
 
 describe("MiddlewareMaker", () => {
     class AbstractEntity {
