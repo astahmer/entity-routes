@@ -22,7 +22,7 @@ async function getRawBody(req: IncomingMessage): Promise<ObjectLiteral> {
             data += chunk;
         });
         req.on("end", () => {
-            resolve(JSON.parse(data));
+            resolve(data ? JSON.parse(data) : null);
         });
     });
 }
