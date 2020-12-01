@@ -1,3 +1,6 @@
+import { Container, Service } from "typedi";
+import { EntityMetadata, getRepository } from "typeorm";
+
 import {
     Cleaner,
     EntityErrorResults,
@@ -10,8 +13,6 @@ import {
     Validator,
     deepMerge,
 } from "@entity-routes/core";
-import { Container, Service } from "typedi";
-import { EntityMetadata, getRepository } from "typeorm";
 
 @Service()
 export class Persistor {

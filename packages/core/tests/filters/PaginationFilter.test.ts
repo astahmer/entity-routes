@@ -1,3 +1,5 @@
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn, getRepository } from "typeorm";
+
 import {
     AliasHandler,
     OrderBy,
@@ -8,7 +10,6 @@ import {
     getRouteFiltersMeta,
 } from "@entity-routes/core";
 import { closeTestConnection, createTestConnection } from "@entity-routes/test-utils";
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn, getRepository } from "typeorm";
 
 class AbstractEntity {
     @PrimaryGeneratedColumn()

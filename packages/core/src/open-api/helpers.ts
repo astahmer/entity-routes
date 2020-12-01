@@ -1,6 +1,7 @@
-import { RouteOperation, RouteResponseType, upperFirstLetter } from "@entity-routes/core";
 import { SchemaObject } from "openapi3-ts";
 import { ColumnType } from "typeorm";
+
+import { RouteOperation, RouteResponseType, upperFirstLetter } from "@entity-routes/core";
 
 const idParamType = "(\\d+)";
 

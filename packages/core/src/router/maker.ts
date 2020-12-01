@@ -1,3 +1,6 @@
+import { getMetadataStorage } from "class-validator";
+import { Connection, ConnectionManager, ObjectType, getConnectionManager } from "typeorm";
+
 import {
     AnyFunction,
     EntityRouteOptions,
@@ -8,8 +11,6 @@ import {
     getRouteMetadata,
     setEntityRouter,
 } from "@entity-routes/core";
-import { getMetadataStorage } from "class-validator";
-import { Connection, ConnectionManager, ObjectType, getConnectionManager } from "typeorm";
 
 let connectionManager: ConnectionManager;
 

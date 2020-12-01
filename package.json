@@ -28,8 +28,7 @@
             "options": {
                 "ignoreTsConfig": true,
                 "extraAliases": [
-                    "@/*",
-                    "@#/*"
+                    "@entity-routes/*"
                 ]
             }
         }

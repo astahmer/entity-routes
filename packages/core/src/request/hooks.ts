@@ -1,3 +1,5 @@
+import { DeleteResult } from "typeorm";
+
 import {
     CleanerArgs,
     ContextWithState,
@@ -12,7 +14,6 @@ import {
     SubresourceRelation,
     ValidateItemOptions,
 } from "@entity-routes/core";
-import { DeleteResult } from "typeorm";
 
 export const hookNames = [
     "beforeHandle",

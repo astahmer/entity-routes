@@ -1,3 +1,5 @@
+import { AxiosRequestConfig } from "axios";
+
 import {
     CRUD_OPERATIONS,
     EntityRouteOptions,
@@ -7,7 +9,6 @@ import {
     hookNames,
 } from "@entity-routes/core";
 import { closeTestConnection } from "@entity-routes/test-utils";
-import { AxiosRequestConfig } from "axios";
 
 // An object of hooks name called for each operation
 type HooksCalled = Record<RouteDefaultOperation, string[]>;

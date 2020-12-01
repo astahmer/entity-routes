@@ -1,7 +1,8 @@
-import { EntityRoute, ObjectLiteral, flatMapOnProp, makeKoaEntityRouters } from "@entity-routes/core";
-import { closeTestConnection, createTestConnection } from "@entity-routes/test-utils";
 import { Context } from "koa";
 import { Column, DeleteDateColumn, Entity, PrimaryGeneratedColumn } from "typeorm";
+
+import { EntityRoute, ObjectLiteral, flatMapOnProp, makeKoaEntityRouters } from "@entity-routes/core";
+import { closeTestConnection, createTestConnection } from "@entity-routes/test-utils";
 
 import { setupKoaApp } from "./bridge/koaSetup";
 

@@ -1,3 +1,5 @@
+import { ObjectType, Repository, getRepository } from "typeorm";
+
 import {
     AbstractFilterConfig,
     AnyFunction,
@@ -23,7 +25,6 @@ import {
     formatRouteName,
     makeRouterFromActions,
 } from "@entity-routes/core";
-import { ObjectType, Repository, getRepository } from "typeorm";
 
 export class EntityRouter<Entity extends GenericEntity> {
     public readonly middlewareMaker: MiddlewareMaker<Entity>;

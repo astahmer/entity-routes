@@ -1,3 +1,5 @@
+import { Repository } from "typeorm";
+
 import {
     CRUD_ACTIONS,
     EntityRouteOptions,
@@ -7,7 +9,6 @@ import {
     MiddlewareMaker,
     RouteController,
 } from "@entity-routes/core";
-import { Repository } from "typeorm";
 
 import { ContextWithState } from "./store";
 

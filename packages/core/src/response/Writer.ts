@@ -1,3 +1,6 @@
+import { Container } from "typedi";
+import { DeleteResult, Repository } from "typeorm";
+
 import {
     BaseFlattenItemOptions,
     CollectionResult,
@@ -25,8 +28,6 @@ import {
     setComputedPropsOnItem,
     setSubresourcesIriOnItem,
 } from "@entity-routes/core";
-import { Container } from "typedi";
-import { DeleteResult, Repository } from "typeorm";
 
 /** Write response from result & decorators */
 export class Writer<Entity extends GenericEntity> {

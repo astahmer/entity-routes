@@ -1,3 +1,6 @@
+import { Container, Service } from "typedi";
+import { EntityMetadata, ObjectType } from "typeorm";
+
 import {
     EntityGroupsMetadata,
     GROUPS_METAKEY,
@@ -10,8 +13,6 @@ import {
     get,
     pluck,
 } from "@entity-routes/core";
-import { Container, Service } from "typedi";
-import { EntityMetadata, ObjectType } from "typeorm";
 
 @Service()
 export class MappingManager {

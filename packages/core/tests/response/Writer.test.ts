@@ -1,6 +1,7 @@
+import { getRepository } from "typeorm";
+
 import { CustomDecoratorFnArgs, DecorateFn, Writer, WriterOptions, makeEntity } from "@entity-routes/core";
 import { closeTestConnection, createTestConnection, makeReqCtxWithState } from "@entity-routes/test-utils";
-import { getRepository } from "typeorm";
 
 import { User, getWriterTestEntities } from "./functions/sample/entities";
 

@@ -1,3 +1,6 @@
+import { Container } from "typedi/Container";
+import { Column, Entity, EntityMetadata, ManyToOne, PrimaryGeneratedColumn, Repository, getRepository } from "typeorm";
+
 import {
     AbstractFilterConfig,
     COMPARISON_OPERATOR,
@@ -9,8 +12,6 @@ import {
     getSearchFilterDefaultConfig,
 } from "@entity-routes/core";
 import { closeTestConnection, createTestConnection } from "@entity-routes/test-utils";
-import { Container } from "typedi/Container";
-import { Column, Entity, EntityMetadata, ManyToOne, PrimaryGeneratedColumn, Repository, getRepository } from "typeorm";
 
 class AbstractEntity {
     @PrimaryGeneratedColumn()

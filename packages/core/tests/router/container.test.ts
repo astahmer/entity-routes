@@ -1,7 +1,8 @@
-import { EntityRoute, getEntityRouters, makeKoaEntityRouters } from "@entity-routes/core";
-import { closeTestConnection, createTestConnection } from "@entity-routes/test-utils";
 import { IsDate, IsEmail, IsString } from "class-validator";
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+
+import { EntityRoute, getEntityRouters, makeKoaEntityRouters } from "@entity-routes/core";
+import { closeTestConnection, createTestConnection } from "@entity-routes/test-utils";
 
 describe("container", () => {
     it("can be retrieved", () => {

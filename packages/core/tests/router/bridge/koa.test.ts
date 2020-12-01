@@ -1,9 +1,10 @@
 import { Server } from "net";
 
-import { RouteVerb, flatMapOnProp, makeKoaEntityRouters, registerKoaRouteFromBridgeRoute } from "@entity-routes/core";
-import { closeTestConnection, createTestConnection } from "@entity-routes/test-utils";
 import { AxiosInstance } from "axios";
 import Router from "koa-router";
+
+import { RouteVerb, flatMapOnProp, makeKoaEntityRouters, registerKoaRouteFromBridgeRoute } from "@entity-routes/core";
+import { closeTestConnection, createTestConnection } from "@entity-routes/test-utils";
 
 import { setupKoaApp } from "./koaSetup";
 import { expectedRouteNames, getTestEntities } from "./sample/entities";

@@ -1,3 +1,5 @@
+import { Container } from "typedi";
+
 import {
     ACCESSOR_PREFIX,
     ALIAS_PREFIX,
@@ -7,7 +9,6 @@ import {
     MappingManager,
     lowerFirstLetter,
 } from "@entity-routes/core";
-import { Container } from "typedi";
 
 import { DecorateFnArgs } from "../Decorator";
 

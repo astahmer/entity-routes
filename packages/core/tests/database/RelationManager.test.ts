@@ -1,12 +1,3 @@
-import {
-    AliasHandler,
-    DependsOn,
-    Groups,
-    RelationManager,
-    Subresource,
-    getSubresourceRelation,
-} from "@entity-routes/core";
-import { closeTestConnection, createTestConnection } from "@entity-routes/test-utils";
 import { Container } from "typedi";
 import {
     Column,
@@ -18,6 +9,16 @@ import {
     PrimaryGeneratedColumn,
     getRepository,
 } from "typeorm";
+
+import {
+    AliasHandler,
+    DependsOn,
+    Groups,
+    RelationManager,
+    Subresource,
+    getSubresourceRelation,
+} from "@entity-routes/core";
+import { closeTestConnection, createTestConnection } from "@entity-routes/test-utils";
 
 describe("RelationManager", () => {
     class AbstractEntity {

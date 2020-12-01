@@ -1,6 +1,7 @@
-import { EntityRoute, Groups, Subresource } from "@entity-routes/core";
 import { IsString } from "class-validator";
 import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+
+import { EntityRoute, Groups, Subresource } from "@entity-routes/core";
 
 export const getTestEntities = () => [User, Article, Comment, Upvote, Image, Role];
 

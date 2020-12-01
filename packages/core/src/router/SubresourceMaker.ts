@@ -1,3 +1,6 @@
+import { EntityMetadata, Repository } from "typeorm";
+import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
+
 import {
     BridgeRouter,
     CRUD_ACTIONS,
@@ -10,8 +13,6 @@ import {
     pick,
     prop,
 } from "@entity-routes/core";
-import { EntityMetadata, Repository } from "typeorm";
-import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
 
 import { EntityRouterOptions, GenericEntity, RouteMetadata, getRouteSubresourcesMetadata } from "./EntityRouter";
 

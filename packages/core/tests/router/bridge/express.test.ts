@@ -1,5 +1,8 @@
 import { Server } from "net";
 
+import { AxiosInstance } from "axios";
+import { Router } from "express";
+
 import {
     RouteVerb,
     flatMapOnProp,
@@ -8,8 +11,6 @@ import {
     registerExpressRouteFromBridgeRoute,
 } from "@entity-routes/core";
 import { closeTestConnection, createTestConnection } from "@entity-routes/test-utils";
-import { AxiosInstance } from "axios";
-import { Router } from "express";
 
 import { setupExpressApp } from "./expressSetup";
 import { expectedRouteDesc, getTestEntities } from "./sample/entities";

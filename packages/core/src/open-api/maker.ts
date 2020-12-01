@@ -1,14 +1,4 @@
 import {
-    ENTITY_META_SYMBOL,
-    MappingItem,
-    MappingManager,
-    deepMerge,
-    fromEntries,
-    getEntityRouters,
-    last,
-    sortObjectByKeys,
-} from "@entity-routes/core";
-import {
     ComponentsObject,
     OpenAPIObject,
     OpenApiBuilder,
@@ -19,6 +9,17 @@ import {
     SchemaObject,
 } from "openapi3-ts";
 import { Container } from "typedi";
+
+import {
+    ENTITY_META_SYMBOL,
+    MappingItem,
+    MappingManager,
+    deepMerge,
+    fromEntries,
+    getEntityRouters,
+    last,
+    sortObjectByKeys,
+} from "@entity-routes/core";
 
 import { addComponentsReferences } from "./baseReferences";
 import {

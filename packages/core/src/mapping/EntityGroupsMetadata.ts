@@ -1,3 +1,5 @@
+import { EntityMetadata, getRepository } from "typeorm";
+
 import {
     ACCESSOR_PREFIX,
     COMPUTED_PREFIX,
@@ -6,7 +8,6 @@ import {
     combineUniqueValues,
     getGroupsMetadata,
 } from "@entity-routes/core";
-import { EntityMetadata, getRepository } from "typeorm";
 
 import { GroupsMetadata, getInheritanceTree } from "./GroupsMetadata";
 

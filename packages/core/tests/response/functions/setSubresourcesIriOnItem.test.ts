@@ -1,7 +1,8 @@
-import { Decorator, setSubresourcesIriOnItem } from "@entity-routes/core";
-import { closeTestConnection, createTestConnection } from "@entity-routes/test-utils";
 import { Container } from "typedi";
 import { getRepository } from "typeorm";
+
+import { Decorator, setSubresourcesIriOnItem } from "@entity-routes/core";
+import { closeTestConnection, createTestConnection } from "@entity-routes/test-utils";
 
 import { Article, Comment, Role, ThingWithComputed, User, makeItem } from "./sample/entities";
 

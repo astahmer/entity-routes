@@ -1,5 +1,6 @@
-import { GenericEntity, MappingManager, RequestContext, idToIRI, isEntity } from "@entity-routes/core";
 import { Container } from "typedi";
+
+import { GenericEntity, MappingManager, RequestContext, idToIRI, isEntity } from "@entity-routes/core";
 
 import { DecorateFnArgs } from "../Decorator";
 import { WriterOptions } from "../Writer";

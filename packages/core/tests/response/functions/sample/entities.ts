@@ -1,5 +1,6 @@
-import { DependsOn, Groups, Subresource, makeEntity } from "@entity-routes/core";
 import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+
+import { DependsOn, Groups, Subresource, makeEntity } from "@entity-routes/core";
 
 export const getWriterTestEntities = () => [User, Role, Article, Comment, ThingWithComputed];
 

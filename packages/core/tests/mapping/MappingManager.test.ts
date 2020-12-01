@@ -1,3 +1,6 @@
+import { Container } from "typedi";
+import { Column, Entity, EntityMetadata, ManyToOne, OneToMany, PrimaryGeneratedColumn, getRepository } from "typeorm";
+
 import {
     ENTITY_META_SYMBOL,
     EntityGroupsMetadata,
@@ -8,8 +11,6 @@ import {
     Subresource,
 } from "@entity-routes/core";
 import { closeTestConnection, createTestConnection } from "@entity-routes/test-utils";
-import { Container } from "typedi";
-import { Column, Entity, EntityMetadata, ManyToOne, OneToMany, PrimaryGeneratedColumn, getRepository } from "typeorm";
 
 describe("MappingManager", () => {
     const manager = Container.get(MappingManager);

@@ -1,3 +1,6 @@
+import { Container } from "typedi";
+import { Brackets, ObjectLiteral, WhereExpression } from "typeorm";
+
 import {
     RelationManager,
     StrategyType,
@@ -11,8 +14,6 @@ import {
     sortBy,
     sortObjectByKeys,
 } from "@entity-routes/core";
-import { Container } from "typedi";
-import { Brackets, ObjectLiteral, WhereExpression } from "typeorm";
 
 import {
     AbstractFilter,

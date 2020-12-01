@@ -1,3 +1,9 @@
+import { Service } from "typedi";
+import { Container } from "typedi/Container";
+import { EntityMetadata, SelectQueryBuilder } from "typeorm";
+import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
+import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
+
 import {
     AliasHandler,
     GenericEntity,
@@ -10,11 +16,6 @@ import {
     getMaxDepthMetadata,
     isDev,
 } from "@entity-routes/core";
-import { Service } from "typedi";
-import { Container } from "typedi/Container";
-import { EntityMetadata, SelectQueryBuilder } from "typeorm";
-import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
-import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
 
 @Service()
 export class RelationManager {
