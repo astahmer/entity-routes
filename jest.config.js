@@ -1,7 +1,7 @@
 // For a detailed explanation regarding each configuration property, visit:
 // https://jestjs.io/docs/en/configuration.html
 
-const threshold = 80;
+const threshold = 85;
 
 const path = require("path");
 const rootDir = path.resolve(__dirname);
@@ -41,6 +41,7 @@ module.exports = {
             ...base,
             roots: [pkgDir],
             collectCoverageFrom: [`${pkgRootDir}/src/**/*.ts`],
+            coverageDirectory: `${pkgRootDir}/coverage`,
             coverageThreshold: {
                 global: {
                     branches: pkgThreshold || threshold,
