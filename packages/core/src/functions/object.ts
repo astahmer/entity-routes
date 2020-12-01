@@ -1,5 +1,4 @@
-import { isDate, isDefined, isObject } from "@/functions/asserts";
-import { ObjectLiteral } from "@/utils-types";
+import { ObjectLiteral, isDate, isDefined, isObject } from "@entity-routes/core";
 
 /** Sort object keys alphabetically */
 export const sortObjectByKeys = (obj: ObjectLiteral) =>

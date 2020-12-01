@@ -1,9 +1,13 @@
+import {
+    ACCESSOR_PREFIX,
+    ALIAS_PREFIX,
+    COMPUTED_PREFIX,
+    GenericEntity,
+    GroupsOperation,
+    MappingManager,
+    lowerFirstLetter,
+} from "@entity-routes/core";
 import { Container } from "typedi";
-
-import { ACCESSOR_PREFIX, ALIAS_PREFIX, COMPUTED_PREFIX, GroupsOperation } from "@/decorators/Groups";
-import { lowerFirstLetter } from "@/functions/primitives";
-import { MappingManager } from "@/mapping/MappingManager";
-import { GenericEntity } from "@/router/EntityRouter";
 
 import { DecorateFnArgs } from "../Decorator";
 

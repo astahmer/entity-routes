@@ -1,8 +1,11 @@
-import { FilterProperty } from "@/filters/AbstractFilter";
-import { registerFilterDecorator } from "@/filters/registerFilterDecorator";
-import { SearchFilterOptions, getSearchFilterDefaultConfig } from "@/filters/SearchFilter";
-import { StrategyType } from "@/filters/WhereManager";
-import { isType } from "@/index";
+import {
+    FilterProperty,
+    SearchFilterOptions,
+    StrategyType,
+    getSearchFilterDefaultConfig,
+    isType,
+    registerFilterDecorator,
+} from "@entity-routes/core";
 
 /**
  * SearchFilter PropertyDecorator

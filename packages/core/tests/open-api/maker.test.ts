@@ -3,9 +3,8 @@ import { Server } from "net";
 import { makeOpenApi, makeOpenApiBuilderFrom } from "@entity-routes/core";
 import { closeTestConnection } from "@entity-routes/test-utils";
 
-import { setupKoaApp } from "@/router/bridge/koaSetup";
-
 import { getOpenApiTestEntities } from "../mapping/sample/entities";
+import { setupKoaApp } from "../router/bridge/koaSetup";
 
 describe("OpenAPI", () => {
     const entities = getOpenApiTestEntities();

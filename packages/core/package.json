@@ -26,9 +26,9 @@
         "test:clear": "jest --clearCache",
         "test:watch": "jest --runInBand --forceExit --watch --no-watchman",
         "test:coverage": "jest --coverage --runInBand --forceExit",
-        "dev": "ttsc --watch --incremental --outDir dist/esm",
-        "build:cjs": "ttsc --outDir dist/cjs -m CommonJS",
-        "build:esm": "ttsc --outDir dist/esm",
+        "dev": "ttsc --watch --incremental -p tsconfig.build.json --outDir dist/esm",
+        "build:cjs": "ttsc -p tsconfig.build.json --outDir dist/cjs -m CommonJS",
+        "build:esm": "ttsc -p tsconfig.build.json --outDir dist/esm",
         "build": "concurrently yarn:build:*",
         "start": "node -r ts-node/register dist/cjs/index",
         "release": "standard-version",
@@ -50,7 +50,6 @@
         "uuid": "^8.2.0"
     },
     "devDependencies": {
-        "@entity-routes/test-utils": "^0.1.0",
         "@types/body-parser": "^1.19.0",
         "@types/jest": "^26.0.3",
         "@types/koa": "^2.11.3",

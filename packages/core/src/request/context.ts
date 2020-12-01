@@ -1,5 +1,4 @@
-import { GenericEntity } from "@/router";
-import { MakeRequestContextMwArgs, RequestContext } from "@/router/MiddlewareMaker";
+import { GenericEntity, MakeRequestContextMwArgs, RequestContext } from "@entity-routes/core";
 
 import { ContextWithState, addRequestContext } from "./store";
 

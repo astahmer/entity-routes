@@ -1,12 +1,7 @@
+import { GenericEntity, MappingManager, ObjectLiteral, isDev, isEntity, isPrimitive } from "@entity-routes/core";
 import { isDate } from "class-validator";
 import { Container, Service } from "typedi";
 import { EntityMetadata, getRepository } from "typeorm";
-
-import { isEntity, isPrimitive } from "@/functions/asserts";
-import { isDev } from "@/functions/asserts";
-import { MappingManager } from "@/mapping/MappingManager";
-import { GenericEntity } from "@/router/EntityRouter";
-import { ObjectLiteral } from "@/utils-types";
 
 @Service()
 /** Recursively traverses an item to decorate it */

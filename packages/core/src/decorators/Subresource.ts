@@ -1,6 +1,11 @@
-import { ROUTE_SUBRESOURCES_METAKEY, getRouteSubresourcesMetadata } from "@/router/EntityRouter";
-import { RouteSubresourcesMeta, SubresourceOperation, SubresourceProperty } from "@/router/SubresourceMaker";
-import { EntityReference } from "@/utils-types";
+import {
+    EntityReference,
+    ROUTE_SUBRESOURCES_METAKEY,
+    RouteSubresourcesMeta,
+    SubresourceOperation,
+    SubresourceProperty,
+    getRouteSubresourcesMetadata,
+} from "@entity-routes/core";
 
 export function Subresource(
     entityTarget: Promise<EntityReference> | EntityReference,

@@ -11,9 +11,9 @@
         "test:clear": "jest --clearCache",
         "test:watch": "jest --runInBand --forceExit --watch --no-watchman",
         "test:coverage": "jest --coverage --runInBand --forceExit",
-        "dev": "ttsc --watch --incremental --outDir dist/esm",
-        "build:cjs": "ttsc --outDir dist/cjs -m CommonJS",
-        "build:esm": "ttsc --outDir dist/esm",
+        "dev": "ttsc --watch --incremental -p tsconfig.build.json --outDir dist/esm",
+        "build:cjs": "ttsc -p tsconfig.build.json --outDir dist/cjs -m CommonJS",
+        "build:esm": "ttsc -p tsconfig.build.json --outDir dist/esm",
         "build": "concurrently yarn:build:*",
         "prebuild": "rimraf dist"
     },

@@ -1,14 +1,17 @@
+import {
+    BridgeRouter,
+    CRUD_ACTIONS,
+    ObjectOrCollectionKeys,
+    formatRouteName,
+    formatRoutePath,
+    getEntityRouters,
+    isRelationSingle,
+    last,
+    pick,
+    prop,
+} from "@entity-routes/core";
 import { EntityMetadata, Repository } from "typeorm";
 import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
-
-import { last } from "@/functions/array";
-import { isRelationSingle } from "@/functions/entity";
-import { pick, prop } from "@/functions/object";
-import { formatRouteName, formatRoutePath } from "@/functions/route";
-import { BridgeRouter } from "@/router/bridge/BridgeRouter";
-import { getEntityRouters } from "@/router/container";
-import { CRUD_ACTIONS } from "@/router/MiddlewareMaker";
-import { ObjectOrCollectionKeys } from "@/utils-types";
 
 import { EntityRouterOptions, GenericEntity, RouteMetadata, getRouteSubresourcesMetadata } from "./EntityRouter";
 
@@ -19,7 +22,7 @@ export class SubresourceMaker<Entity extends GenericEntity> {
         private repository: Repository<Entity>,
         private routeMetadata: RouteMetadata,
         private mwAdapter: EntityRouterOptions["middlewareAdapter"],
-        private options?: SubresourceMakerOptions
+        protected options?: SubresourceMakerOptions
     ) {
         this.subresourcesMeta = getRouteSubresourcesMetadata(repository.metadata.target as Function);
     }
@@ -58,7 +61,7 @@ export class SubresourceMaker<Entity extends GenericEntity> {
             // Check for the relation EntityRouter subresources options
             const relationEntityName = (relationMeta.target as Function).name;
             const shouldAllowCircular =
-                entityRouters[relationEntityName]?.subresourceMaker.options?.shouldAllowCircular;
+                entityRouters[relationEntityName]?.subresourceMaker["options"]?.shouldAllowCircular;
 
             // Ensures that it is not making circular subresources routes if not allowed
             if (isCircular && !shouldAllowCircular) continue;

@@ -15,6 +15,7 @@
     "license": "ISC",
     "scripts": {
         "test": "lerna run test --stream",
+        "test:coverage": "lerna run test:coverage --stream",
         "build": "lerna run build --ignore @entity-routes/docs --no-private --stream",
         "dev": "yarn workspace @entity-routes/core dev",
         "start": "yarn workspace @entity-routes/core start",

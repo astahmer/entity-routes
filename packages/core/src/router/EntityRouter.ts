@@ -1,24 +1,29 @@
-import { ObjectType, Repository, getRepository } from "typeorm";
-
-import { JoinAndSelectExposedPropsOptions } from "@/database";
-import { GroupsOperation, RouteOperation } from "@/decorators/Groups";
-import { AbstractFilterConfig } from "@/filters/AbstractFilter";
-import { deepMerge } from "@/functions";
-import { formatRouteName } from "@/functions/route";
-import { HookSchema } from "@/request/hooks";
-import { WriterOptions } from "@/response";
 import {
+    AbstractFilterConfig,
+    AnyFunction,
+    BridgeRouter,
+    BridgeRouterRegisterFn,
+    CRUD_ACTIONS,
+    CreateUpdateOptions,
+    GroupsOperation,
+    HookSchema,
+    JoinAndSelectExposedPropsOptions,
+    ListDetailsOptions,
+    MiddlewareMaker,
     RouteActionClassOptions,
     RouteActionConfig,
     RouteActionConstructorData,
     RouteActionFunctionOptions,
+    RouteOperation,
+    RouteSubresourcesMeta,
+    SubresourceMaker,
+    SubresourceMakerOptions,
+    WriterOptions,
+    deepMerge,
+    formatRouteName,
     makeRouterFromActions,
-} from "@/router/actions";
-import { BridgeRouter, BridgeRouterRegisterFn } from "@/router/bridge/BridgeRouter";
-import { CRUD_ACTIONS, MiddlewareMaker } from "@/router/MiddlewareMaker";
-import { CreateUpdateOptions, ListDetailsOptions } from "@/router/RouteController";
-import { RouteSubresourcesMeta, SubresourceMaker, SubresourceMakerOptions } from "@/router/SubresourceMaker";
-import { AnyFunction } from "@/utils-types";
+} from "@entity-routes/core";
+import { ObjectType, Repository, getRepository } from "typeorm";
 
 export class EntityRouter<Entity extends GenericEntity> {
     public readonly middlewareMaker: MiddlewareMaker<Entity>;

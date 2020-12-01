@@ -1,18 +1,20 @@
+import {
+    AliasHandler,
+    GenericEntity,
+    MappingManager,
+    MaxDeptMetadata,
+    RouteOperation,
+    SubresourceRelation,
+    getComputedPropMethodAndKey,
+    getDependsOnMetadata,
+    getMaxDepthMetadata,
+    isDev,
+} from "@entity-routes/core";
 import { Service } from "typedi";
 import { Container } from "typedi/Container";
 import { EntityMetadata, SelectQueryBuilder } from "typeorm";
 import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
 import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
-
-import { AliasHandler } from "@/database/AliasHandler";
-import { getDependsOnMetadata } from "@/decorators/DependsOn";
-import { RouteOperation } from "@/decorators/Groups";
-import { MaxDeptMetadata, getMaxDepthMetadata } from "@/decorators/MaxDepth";
-import { isDev } from "@/functions/asserts";
-import { MappingManager } from "@/mapping/MappingManager";
-import { getComputedPropMethodAndKey } from "@/response/functions/setComputedPropsOnItem";
-import { GenericEntity } from "@/router/EntityRouter";
-import { SubresourceRelation } from "@/router/SubresourceMaker";
 
 @Service()
 export class RelationManager {

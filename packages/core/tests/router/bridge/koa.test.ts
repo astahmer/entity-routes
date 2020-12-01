@@ -5,11 +5,10 @@ import { closeTestConnection, createTestConnection } from "@entity-routes/test-u
 import { AxiosInstance } from "axios";
 import Router from "koa-router";
 
-import { setupKoaApp } from "@/router/bridge/koaSetup";
-import { expectedRouteNames, getTestEntities } from "@/router/bridge/sample/entities";
-import { TestRequestConfig, testRoute, testRouteConfigs } from "@/router/bridge/sample/requests";
-
+import { setupKoaApp } from "./koaSetup";
+import { expectedRouteNames, getTestEntities } from "./sample/entities";
 import { makeTestFn, resetHooksCalled, testHooksConfigs } from "./sample/hooks";
+import { TestRequestConfig, testRoute, testRouteConfigs } from "./sample/requests";
 
 describe("koa BridgeRouter adapter", () => {
     const entities = getTestEntities();

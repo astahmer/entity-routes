@@ -7,10 +7,11 @@ import {
     PropsByContextByOperations,
     PropsByOperations,
     RouteOperation,
+    combineUniqueValues,
+    deepMerge,
     getGroupsMetadata,
-} from "@/decorators/Groups";
-import { combineUniqueValues, getUniqueValues } from "@/functions/array";
-import { deepMerge } from "@/functions/object";
+    getUniqueValues,
+} from "@entity-routes/core";
 
 import { EntityGroupsMetadata } from "./EntityGroupsMetadata";
 
@@ -189,7 +190,7 @@ export class GroupsMetadata {
             parentAlwaysAndLocalsProps: string[];
 
         for (i; i < inheritanceTree.length; i++) {
-            parentGroupsMeta = getGroupsMetadata(inheritanceTree[i], this.metaKey);
+            parentGroupsMeta = (getGroupsMetadata(inheritanceTree[i], this.metaKey) as unknown) as EntityGroupsMetadata;
             parentProps = parentGroupsMeta?.getOwnExposedProps(tableName);
 
             if (!parentProps) continue;

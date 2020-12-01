@@ -1,5 +1,5 @@
-import { EntityRoute, getEntityRouters, makeKoaEntityRouters } from "@entity-routes/core";
-import { closeTestConnection, createTestConnection } from "@entity-routes/test-utils";
+import { EntityRoute, getEntityRouters } from "@entity-routes/core";
+import { closeTestConnection, createTestConnection, makeTestEntityRouters } from "@entity-routes/test-utils";
 import { IsDate, IsEmail, IsString, getMetadataStorage } from "class-validator";
 import { Column, Entity, ManyToOne, OneToOne, PrimaryGeneratedColumn, getConnection } from "typeorm";
 
@@ -73,7 +73,7 @@ describe("maker", () => {
             expect(validationMetas.find((meta) => meta.propertyName === "name").always).toEqual(undefined);
             expect(validationMetas.find((meta) => meta.propertyName === "email").always).toEqual(false);
 
-            await makeKoaEntityRouters({ connection: getConnection(), entities });
+            await makeTestEntityRouters({ connection: getConnection(), entities });
             expect(validationMetas.find((meta) => meta.propertyName === "name").always).toEqual(undefined);
 
             // should have been set to true since no groups were provided
@@ -81,7 +81,7 @@ describe("maker", () => {
         });
 
         it("only make routers for entities decorated with @EntityRoute", async () => {
-            await makeKoaEntityRouters({ connection: getConnection(), entities });
+            await makeTestEntityRouters({ connection: getConnection(), entities });
             const entityRouters = getEntityRouters();
             expect(Object.keys(entityRouters).length).toEqual(3);
         });

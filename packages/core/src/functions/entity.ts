@@ -1,11 +1,7 @@
+import { CType, GenericEntity, Props, formatRoutePath, getEntityRouters, getRouteMetadata } from "@entity-routes/core";
 import { EntityMetadata } from "typeorm";
 import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
 import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
-
-import { formatRoutePath } from "@/functions/route";
-import { getEntityRouters } from "@/router/container";
-import { GenericEntity, getRouteMetadata } from "@/router/EntityRouter";
-import { CType, Props } from "@/utils-types";
 
 export const iriRegex = new RegExp(/\/api\/(\w+)\//g, "i");
 export function formatIriToId<B extends Boolean>(iri: string, asInt?: B): B extends true ? number : string;

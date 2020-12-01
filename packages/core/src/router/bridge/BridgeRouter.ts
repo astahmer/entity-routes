@@ -1,8 +1,4 @@
-import { RouteOperation } from "@/decorators";
-import { isDev } from "@/functions/asserts";
-import { areSameRoutes } from "@/functions/route";
-import { RouteVerb } from "@/router/MiddlewareMaker";
-import { AnyFunction } from "@/utils-types";
+import { AnyFunction, RouteOperation, RouteVerb, areSameRoutes, isDev } from "@entity-routes/core";
 
 import { SubresourceRelation } from "../SubresourceMaker";
 

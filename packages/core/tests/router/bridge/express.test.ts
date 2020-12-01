@@ -11,11 +11,10 @@ import { closeTestConnection, createTestConnection } from "@entity-routes/test-u
 import { AxiosInstance } from "axios";
 import { Router } from "express";
 
-import { setupExpressApp } from "@/router/bridge/expressSetup";
-import { expectedRouteDesc, getTestEntities } from "@/router/bridge/sample/entities";
-import { TestRequestConfig, testRoute, testRouteConfigs } from "@/router/bridge/sample/requests";
-
+import { setupExpressApp } from "./expressSetup";
+import { expectedRouteDesc, getTestEntities } from "./sample/entities";
 import { makeTestFn, resetHooksCalled, testHooksConfigs } from "./sample/hooks";
+import { TestRequestConfig, testRoute, testRouteConfigs } from "./sample/requests";
 
 describe("Express BridgeRouter adapter", () => {
     const entities = getTestEntities();

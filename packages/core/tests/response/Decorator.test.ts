@@ -3,7 +3,7 @@ import { closeTestConnection, createTestConnection } from "@entity-routes/test-u
 import { Container } from "typedi";
 import { getRepository } from "typeorm";
 
-import { User, getWriterTestEntities, makeItem } from "@/response/functions/sample/entities";
+import { User, getWriterTestEntities, makeItem } from "./functions/sample/entities";
 
 describe("Decorator", () => {
     const entities = getWriterTestEntities();

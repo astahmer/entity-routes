@@ -1,6 +1,5 @@
+import { PrimitiveValue } from "@entity-routes/core";
 import { ObjectType } from "typeorm";
-
-import { PrimitiveValue } from "@/functions/index";
 
 import { GenericEntity } from "./router/EntityRouter";
 

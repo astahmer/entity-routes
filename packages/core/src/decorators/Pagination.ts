@@ -1,6 +1,10 @@
-import { FilterProperty } from "@/filters/AbstractFilter";
-import { OrderDirection, PaginationFilterOptions, getPaginationFilterDefaultConfig } from "@/filters/PaginationFilter";
-import { registerFilterDecorator } from "@/filters/registerFilterDecorator";
+import {
+    FilterProperty,
+    OrderDirection,
+    PaginationFilterOptions,
+    getPaginationFilterDefaultConfig,
+    registerFilterDecorator,
+} from "@entity-routes/core";
 
 /**
  * Pagination ClassDecorator without properties

@@ -1,5 +1,4 @@
-import { deepMerge } from "@/functions";
-import { ROUTE_FILTERS_METAKEY, RouteFiltersMeta, getRouteFiltersMeta } from "@/router/EntityRouter";
+import { ROUTE_FILTERS_METAKEY, RouteFiltersMeta, deepMerge, getRouteFiltersMeta } from "@entity-routes/core";
 
 import { AbstractFilterConfig, DefaultFilterOptions, FilterDefaultConfig, FilterProperty } from "./AbstractFilter";
 

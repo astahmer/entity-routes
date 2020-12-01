@@ -1,7 +1,12 @@
+import {
+    ACCESSOR_PREFIX,
+    COMPUTED_PREFIX,
+    MetaKey,
+    RouteOperation,
+    combineUniqueValues,
+    getGroupsMetadata,
+} from "@entity-routes/core";
 import { EntityMetadata, getRepository } from "typeorm";
-
-import { ACCESSOR_PREFIX, COMPUTED_PREFIX, MetaKey, RouteOperation, getGroupsMetadata } from "@/decorators/Groups";
-import { combineUniqueValues } from "@/functions/array";
 
 import { GroupsMetadata, getInheritanceTree } from "./GroupsMetadata";
 
@@ -70,7 +75,10 @@ export class EntityGroupsMetadata extends GroupsMetadata {
                 let i = 0;
                 let parentGroupsMeta: EntityGroupsMetadata;
                 for (i; i < inheritanceTree.length; i++) {
-                    parentGroupsMeta = getGroupsMetadata(inheritanceTree[i], this.metaKey);
+                    parentGroupsMeta = (getGroupsMetadata(
+                        inheritanceTree[i],
+                        this.metaKey
+                    ) as unknown) as EntityGroupsMetadata;
                     if (!parentGroupsMeta) continue;
 
                     this.exposedPropsByContexts[tableName][operation] = combineUniqueValues(

@@ -10,8 +10,8 @@ import { Column, Entity, EntityMetadata, ManyToOne, PrimaryGeneratedColumn, Repo
 import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
 import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
 
-import { Cache, CacheFilter, CacheFilterOptions } from "@/filters/sample/CacheFilter";
-import { GroupBy, GroupByFilter } from "@/filters/sample/GroupByFilter";
+import { Cache, CacheFilter, CacheFilterOptions } from "./sample/CacheFilter";
+import { GroupBy, GroupByFilter } from "./sample/GroupByFilter";
 
 describe("AbstractFilter", () => {
     class AbstractEntity {

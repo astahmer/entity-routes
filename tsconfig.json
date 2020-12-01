@@ -9,16 +9,17 @@
         "allowSyntheticDefaultImports": true,
         "forceConsistentCasingInFileNames": true,
         "skipLibCheck": true,
-        "sourceMap": true,
-        "declaration": true,
-        "declarationMap": true,
         "noUnusedParameters": true,
         "noImplicitAny": true,
         "downlevelIteration": true,
+        "baseUrl": "./",
+        "paths": {
+            "@entity-routes/*": ["./packages/*/src"]
+        },
         "plugins": [{ "transform": "@zerollup/ts-transform-paths" }]
     },
     "include": ["packages", "docs"],
-    "exclude": ["node_modules"],
+    "exclude": ["**/node_modules/**", "packages/*/dist"],
     "ts-node": {
         "transpileOnly": true,
         "compilerOptions": {

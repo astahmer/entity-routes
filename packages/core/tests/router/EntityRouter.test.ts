@@ -3,7 +3,7 @@ import { closeTestConnection, createTestConnection } from "@entity-routes/test-u
 import { Context } from "koa";
 import { Column, DeleteDateColumn, Entity, PrimaryGeneratedColumn } from "typeorm";
 
-import { setupKoaApp } from "@/router/bridge/koaSetup";
+import { setupKoaApp } from "./bridge/koaSetup";
 
 describe("EntityRouter", () => {
     it("generates no routes when no params given", async () => {
