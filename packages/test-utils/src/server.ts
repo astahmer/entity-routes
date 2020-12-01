@@ -7,8 +7,10 @@ import { TestContext, createTestContext } from "./context";
 // Pretty much a mini-Koa server
 // So we do not actually depend on koa or express for testing purpose
 
-export function createTestServer(): TestServer {
-    const stack: TestMiddleware[] = [bodyParser];
+export function createTestServer(
+    { withBodyParser }: { withBodyParser?: boolean } = { withBodyParser: true }
+): TestServer {
+    const stack: TestMiddleware[] = [].concat(withBodyParser ? bodyParser : []);
 
     const use = (fn: TestMiddleware) => stack.push(fn);
     const handler = (req: IncomingMessage, res: ServerResponse) =>
