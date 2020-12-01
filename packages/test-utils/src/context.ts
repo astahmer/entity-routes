@@ -13,7 +13,9 @@ export const createTestContext = (req: IncomingMessage, res: ServerResponse): Te
     },
     set responseBody(value) {
         this.state.responseBody = value;
-        this.res.statusCode = 200;
+        if (this.res.statusCode === 404) {
+            this.res.statusCode = 200;
+        }
     },
     get url() {
         return new URL("http://" + this.req.headers.host + this.req.url);
