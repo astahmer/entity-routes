@@ -30,7 +30,7 @@ const base = {
 
 module.exports = {
     base,
-    scoped: (pkgDir) => {
+    scoped: (pkgDir, pkgThreshold) => {
         const pkgName = path.basename(pkgDir);
         const currentPackage = `packages/${pkgName}`;
         const pkgRootDir = `<rootDir>/${currentPackage}`;
@@ -41,6 +41,14 @@ module.exports = {
             ...base,
             roots: [pkgDir],
             collectCoverageFrom: [`${pkgRootDir}/src/**/*.ts`],
+            coverageThreshold: {
+                global: {
+                    branches: pkgThreshold || threshold,
+                    functions: pkgThreshold || threshold,
+                    lines: pkgThreshold || threshold,
+                    statements: pkgThreshold || threshold,
+                },
+            },
         };
     },
 };
