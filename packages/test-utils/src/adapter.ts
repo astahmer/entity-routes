@@ -9,7 +9,7 @@ import {
 
 import { TestContext } from "./context";
 import { TestRouter, createTestRouter } from "./router";
-import { Method, TestMiddleware, TestNextFn } from "./server";
+import { Method, TestMiddleware } from "./server";
 
 export function registerTestRouteFromBridgeRoute(router: TestRouter, route: BridgeRouterRoute<TestMiddleware>) {
     route.methods.forEach((verb) => router.register({ method: verb.toUpperCase() as Method, ...route }));
@@ -29,8 +29,7 @@ export async function makeTestEntityRouters(
     });
 }
 
-export const makeTestAdapter = (mw: Function) => (ctx: TestContext, next: TestNextFn) =>
-    mw(makeTestContextAdapter(ctx), next);
+export const makeTestAdapter = (mw: Function): TestMiddleware => (ctx, next) => mw(makeTestContextAdapter(ctx), next);
 
 interface WithContext {
     ctx: TestContext;
