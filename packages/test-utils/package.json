@@ -22,7 +22,7 @@
         "url": "https://github.com/astahmer/entity-routes.git"
     },
     "author": "Alexandre Stahmer <alexandre.stahmer@gmail.com>",
-    "license": "ISC",
+    "license": "MIT",
     "dependencies": {
         "@entity-routes/core": "^0.1.8",
         "typeorm": "^0.2.29"

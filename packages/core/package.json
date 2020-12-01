@@ -20,7 +20,7 @@
         "url": "https://github.com/astahmer/entity-routes.git"
     },
     "author": "Alexandre Stahmer <alexandre.stahmer@gmail.com>",
-    "license": "ISC",
+    "license": "MIT",
     "scripts": {
         "test": "jest --runInBand --forceExit",
         "test:clear": "jest --clearCache",
