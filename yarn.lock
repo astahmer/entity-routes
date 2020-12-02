@@ -1580,38 +1580,22 @@ __metadata:
   dependencies:
     "@astahmer/entity-validator": ^0.1.1
     "@types/body-parser": ^1.19.0
-    "@types/jest": ^26.0.16
     "@types/koa": ^2.11.6
     "@types/koa-bodyparser": ^4.3.0
     "@types/koa-router": ^7.4.1
     "@types/uuid": ^8.3.0
-    "@zerollup/ts-transform-paths": ^1.7.18
     axios: ^0.21.0
     body-parser: ^1.19.0
     class-validator: ^0.12.2
-    commitizen: ^4.2.2
-    concurrently: ^5.3.0
     express: ^4.17.1
-    husky: ^4.3.1
-    jest: ^26.6.3
-    jest-diff: ^26.6.2
-    jest-extended: ^0.11.5
     koa: ^2.13.0
     koa-bodyparser: ^4.3.0
     koa-router: ^10.0.0
     openapi3-ts: ^2.0.0
-    prettier: ^2.2.1
-    prettier-plugin-sorted: ^2.0.0
-    pretty-quick: ^3.1.0
     reflect-metadata: ^0.1.13
     sql.js: ^1.4.0
-    standard-version: ^9.0.0
-    ts-jest: ^26.4.4
-    ts-node: ^9.0.0
-    ttypescript: ^1.5.12
     typedi: ^0.8.0
     typeorm: ^0.2.26
-    typescript: ^4.1.2
     uuid: ^8.3.1
   peerDependencies:
     express: ^4.17.1
@@ -3310,6 +3294,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/concurrently@npm:^5":
+  version: 5.2.1
+  resolution: "@types/concurrently@npm:5.2.1"
+  dependencies:
+    "@types/node": "*"
+  checksum: 85e96ec5fe7c6ce789297d3fe70573177a2fe331798e06d7b6c87b4c006473b4195daa3ad7da98a99f9ba93cc1a7d21b5fa830688aaed3a864efd3ab6ac7434c
+  languageName: node
+  linkType: hard
+
 "@types/connect@npm:*":
   version: 3.4.33
   resolution: "@types/connect@npm:3.4.33"
@@ -3610,7 +3603,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/prettier@npm:^2.0.0":
+"@types/prettier@npm:^2, @types/prettier@npm:^2.0.0":
   version: 2.1.5
   resolution: "@types/prettier@npm:2.1.5"
   checksum: bc6271235d881fa49b2f03e8e9242a7be8ecbcdcffeb7e31347afd0343f5f5e372ce65fe257e44254156737935c9249c9722cbe991dfad9aab72056c6acdbdaa
@@ -7317,7 +7310,25 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "entity-routes@workspace:."
   dependencies:
+    "@types/concurrently": ^5
+    "@types/jest": ^26.0.16
+    "@types/prettier": ^2
+    "@zerollup/ts-transform-paths": ^1.7.18
+    commitizen: ^4.2.2
+    concurrently: ^5.3.0
+    husky: ^4.3.0
+    jest: ^26.6.3
+    jest-diff: ^26.6.2
+    jest-extended: ^0.11.5
     lerna: ^3.22.1
+    prettier: ^2.2.1
+    prettier-plugin-sorted: ^2.0.0
+    pretty-quick: ^3.1.0
+    standard-version: ^9.0.0
+    ts-jest: ^26.4.4
+    ts-node: ^9.0.0
+    ttypescript: ^1.5.12
+    typescript: ^4.1.2
   languageName: unknown
   linkType: soft
 
@@ -9233,7 +9244,7 @@ fsevents@~2.1.2:
   languageName: node
   linkType: hard
 
-"husky@npm:^4.3.1":
+"husky@npm:^4.3.0":
   version: 4.3.1
   resolution: "husky@npm:4.3.1"
   dependencies:
