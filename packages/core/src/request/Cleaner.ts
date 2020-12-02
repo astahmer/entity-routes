@@ -2,6 +2,7 @@ import { Container, Service } from "typedi";
 import { EntityMetadata } from "typeorm";
 
 import {
+    DeepPartial,
     ENTITY_META_SYMBOL,
     EntityMapperMakeOptions,
     GenericEntity,
@@ -64,7 +65,7 @@ export class Cleaner {
 
             if (Array.isArray(prop)) {
                 if (!this.mappingManager.isPropSimple(mapping[ENTITY_META_SYMBOL], key)) {
-                    clone[key] = prop.map((nestedItem: Partial<Entity>) =>
+                    clone[key] = (prop as DeepPartial<Entity>[keyof Entity]).map((nestedItem: Partial<Entity>) =>
                         this.recursiveClean(nestedItem, {}, currentPath.concat(key), routeMapping)
                     );
                 } else {
