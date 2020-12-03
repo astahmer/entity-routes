@@ -77,10 +77,17 @@
         "routes",
         "entity-routes",
         "api",
+        "rest",
+        "decorators",
         "typescript",
         "model",
         "typeorm",
-        "koa"
+        "koa",
+        "express",
+        "connect",
+        "nextjs",
+        "nuxt",
+        "subresources"
     ],
     "config": {
         "commitizen": {
