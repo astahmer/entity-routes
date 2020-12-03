@@ -61,7 +61,6 @@
         "remark-mdx-metadata": "^1.0.1",
         "remark-slug": "^6.0.0",
         "replace-in-file": "^6.1.0",
-        "rimraf": "^3.0.2",
         "shelljs": "^0.8.4",
         "smart-glob": "^1.0.1",
         "ts-node": "^9.0.0",
