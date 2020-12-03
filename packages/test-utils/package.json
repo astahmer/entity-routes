@@ -15,7 +15,13 @@
         "build:cjs": "ttsc -p tsconfig.build.json --outDir dist/cjs -m CommonJS",
         "build:esm": "ttsc -p tsconfig.build.json --outDir dist/esm",
         "build": "concurrently 'yarn:build:*'",
-        "prebuild": "rimraf dist"
+        "release": "standard-version",
+        "prebuild": "rimraf dist",
+        "prepare": "yarn build",
+        "prepublishOnly": "yarn test",
+        "release-publish": "npm release && npm publish && git push --follow-tags origin main",
+        "prettier": "prettier --write \"./{src,tests}/**/*.ts\"",
+        "commit": "git-cz"
     },
     "repository": {
         "type": "git",

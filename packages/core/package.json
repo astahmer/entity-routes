@@ -30,7 +30,6 @@
         "build:cjs": "ttsc -p tsconfig.build.json --outDir dist/cjs -m CommonJS",
         "build:esm": "ttsc -p tsconfig.build.json --outDir dist/esm",
         "build": "concurrently 'yarn:build:*'",
-        "start": "node -r ts-node/register dist/cjs/index",
         "release": "standard-version",
         "prebuild": "rimraf dist",
         "prepare": "yarn build",
