@@ -7,7 +7,7 @@
     "module": "dist/esm/index.js",
     "types": "dist/esm/index.d.ts",
     "scripts": {
-        "test": "jest --runInBand",
+        "test": "jest --runInBand --passWithNoTests --forceExit",
         "test:clear": "jest --clearCache",
         "test:watch": "yarn test -- --watch --no-watchman",
         "test:coverage": "yarn test -- --coverage",

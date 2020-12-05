@@ -15,9 +15,9 @@
     "license": "MIT",
     "scripts": {
         "each": "yarn workspaces foreach -pti run",
-        "test": "yarn each test",
-        "test:coverage": "yarn each test:coverage",
-        "build": "yarn each build --exclude @entity-routes/docs --no-private",
+        "test": "yarn workspaces foreach run test",
+        "test:coverage": "yarn workspaces foreach run test:coverage",
+        "build": "yarn workspaces foreach run build --exclude @entity-routes/docs --no-private",
         "dev": "yarn workspace @entity-routes/core dev",
         "docs:base": "yarn workspace @entity-routes/docs",
         "docs:dev": "yarn docs:base dev",
