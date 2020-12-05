@@ -1580,26 +1580,45 @@ __metadata:
   dependencies:
     "@astahmer/entity-validator": ^0.1.1
     "@types/body-parser": ^1.19.0
+    "@types/concurrently": ^5
+    "@types/jest": ^26.0.16
     "@types/koa": ^2.11.6
     "@types/koa-bodyparser": ^4.3.0
     "@types/koa-router": ^7.4.1
+    "@types/prettier": ^2
+    "@types/rimraf": ^3
     "@types/uuid": ^8.3.0
+    "@zerollup/ts-transform-paths": ^1.7.18
     axios: ^0.21.0
     body-parser: ^1.19.0
     class-validator: ^0.12.2
+    commitizen: ^4.2.2
+    concurrently: ^5.3.0
     express: ^4.17.1
+    husky: ^4.3.0
+    jest: ^26.6.3
+    jest-diff: ^26.6.2
+    jest-extended: ^0.11.5
     koa: ^2.13.0
     koa-bodyparser: ^4.3.0
     koa-router: ^10.0.0
     openapi3-ts: ^2.0.0
+    prettier: ^2.2.1
+    prettier-plugin-sorted: ^2.0.0
+    pretty-quick: ^3.1.0
     reflect-metadata: ^0.1.13
+    rimraf: ^3.0.2
     sql.js: ^1.4.0
+    standard-version: ^9.0.0
+    ts-jest: ^26.4.4
+    ts-node: ^9.1.0
+    ttypescript: ^1.5.12
     typedi: ^0.8.0
     typeorm: ^0.2.26
+    typescript: ^4.1.2
     uuid: ^8.3.1
   peerDependencies:
     express: ^4.17.1
-    koa: ^2.13.0
   languageName: unknown
   linkType: soft
 
@@ -1657,8 +1676,69 @@ __metadata:
   resolution: "@entity-routes/koa@workspace:packages/koa"
   dependencies:
     "@entity-routes/core": ^0.1.8
+    "@types/concurrently": ^5
+    "@types/jest": ^26.0.16
+    "@types/koa": ^2.11.6
+    "@types/koa-router": ^7.4.1
+    "@types/prettier": ^2
+    "@types/rimraf": ^3
+    "@zerollup/ts-transform-paths": ^1.7.18
     axios: ^0.21.0
+    commitizen: ^4.2.2
+    concurrently: ^5.3.0
+    husky: ^4.3.0
+    jest: ^26.6.3
+    jest-diff: ^26.6.2
+    jest-extended: ^0.11.5
+    koa: ^2.13.0
+    koa-router: ^10.0.0
+    prettier: ^2.2.1
+    prettier-plugin-sorted: ^2.0.0
+    pretty-quick: ^3.1.0
+    rimraf: ^3.0.2
+    standard-version: ^9.0.0
+    ts-jest: ^26.4.4
+    ts-node: ^9.1.0
+    ttypescript: ^1.5.12
     typeorm: ^0.2.29
+    typescript: ^4.1.2
+  languageName: unknown
+  linkType: soft
+
+"@entity-routes/test-koa@workspace:packages/test-koa":
+  version: 0.0.0-use.local
+  resolution: "@entity-routes/test-koa@workspace:packages/test-koa"
+  dependencies:
+    "@entity-routes/core": ^0.1.8
+    "@entity-routes/koa": "workspace:packages/koa"
+    "@entity-routes/test-utils": "workspace:packages/test-utils"
+    "@types/concurrently": ^5
+    "@types/jest": ^26.0.16
+    "@types/koa": ^2.11.6
+    "@types/koa-router": ^7.4.1
+    "@types/prettier": ^2
+    "@types/rimraf": ^3
+    "@zerollup/ts-transform-paths": ^1.7.18
+    axios: ^0.21.0
+    commitizen: ^4.2.2
+    concurrently: ^5.3.0
+    husky: ^4.3.0
+    jest: ^26.6.3
+    jest-diff: ^26.6.2
+    jest-extended: ^0.11.5
+    koa: ^2.13.0
+    koa-body-parser: ^1.1.2
+    koa-router: ^10.0.0
+    prettier: ^2.2.1
+    prettier-plugin-sorted: ^2.0.0
+    pretty-quick: ^3.1.0
+    rimraf: ^3.0.2
+    standard-version: ^9.0.0
+    ts-jest: ^26.4.4
+    ts-node: ^9.1.0
+    ttypescript: ^1.5.12
+    typeorm: ^0.2.29
+    typescript: ^4.1.2
   languageName: unknown
   linkType: soft
 
@@ -1667,8 +1747,28 @@ __metadata:
   resolution: "@entity-routes/test-utils@workspace:packages/test-utils"
   dependencies:
     "@entity-routes/core": ^0.1.8
+    "@types/concurrently": ^5
+    "@types/jest": ^26.0.16
+    "@types/prettier": ^2
+    "@types/rimraf": ^3
+    "@zerollup/ts-transform-paths": ^1.7.18
     axios: ^0.21.0
+    commitizen: ^4.2.2
+    concurrently: ^5.3.0
+    husky: ^4.3.0
+    jest: ^26.6.3
+    jest-diff: ^26.6.2
+    jest-extended: ^0.11.5
+    prettier: ^2.2.1
+    prettier-plugin-sorted: ^2.0.0
+    pretty-quick: ^3.1.0
+    rimraf: ^3.0.2
+    standard-version: ^9.0.0
+    ts-jest: ^26.4.4
+    ts-node: ^9.1.0
+    ttypescript: ^1.5.12
     typeorm: ^0.2.29
+    typescript: ^4.1.2
   languageName: unknown
   linkType: soft
 
@@ -5107,6 +5207,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"bytes@npm:1.0.0":
+  version: 1.0.0
+  resolution: "bytes@npm:1.0.0"
+  checksum: ece30287a729bcd942822049ac83ea716c1f59eb3ad27af66fb22ca8c1ff62fd4547b574091e7f784e91f892df896ec978413133c85505a732da1998886d4258
+  languageName: node
+  linkType: hard
+
 "bytes@npm:3.1.0":
   version: 3.1.0
   resolution: "bytes@npm:3.1.0"
@@ -5606,6 +5713,16 @@ __metadata:
   version: 1.0.4
   resolution: "clone@npm:1.0.4"
   checksum: aaaa58f9906002d9c07630682536cb00581ee02d7a76cfa8573ad59784add4d5d6d4afe894c21899b974044f153f8c5c6419ffc8b1cdde61bf104ad52e3a185d
+  languageName: node
+  linkType: hard
+
+"co-body@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "co-body@npm:2.0.0"
+  dependencies:
+    qs: ~2.4.1
+    raw-body: ~1.3.4
+  checksum: f1e8ec83cfc0d2d78aa0f06d8f9e2abc4fe8306494c82b369a5f8b76c9b1ed2d675c59c6fa3e0c96a23f656a342ea8e20e7cd163f4c2b764655c71851c333791
   languageName: node
   linkType: hard
 
@@ -6373,6 +6490,13 @@ __metadata:
     safe-buffer: ^5.0.1
     sha.js: ^2.4.8
   checksum: 98957676a93081678a2a915ae14898d65aac9b5651ffa55b8888484dd9d79c06d3cb3f85b137cd833ab536d87adee17394bb2b0efc591ea0e34110266d5bcd75
+  languageName: node
+  linkType: hard
+
+"create-require@npm:^1.1.0":
+  version: 1.1.1
+  resolution: "create-require@npm:1.1.1"
+  checksum: babd307893abfb26d77ae11cb9d6b6cfa6d18c9cee435cf70b5a3fb44aa8d90c9ec26ea89cbb16e0a94b8d34f5fcaee164b90ed526cdd3158955673ab9652d01
   languageName: node
   linkType: hard
 
@@ -7329,27 +7453,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "entity-routes@workspace:."
   dependencies:
-    "@types/concurrently": ^5
-    "@types/jest": ^26.0.16
-    "@types/prettier": ^2
-    "@types/rimraf": ^3
-    "@zerollup/ts-transform-paths": ^1.7.18
-    commitizen: ^4.2.2
-    concurrently: ^5.3.0
-    husky: ^4.3.0
-    jest: ^26.6.3
-    jest-diff: ^26.6.2
-    jest-extended: ^0.11.5
     lerna: ^3.22.1
-    prettier: ^2.2.1
-    prettier-plugin-sorted: ^2.0.0
-    pretty-quick: ^3.1.0
-    rimraf: ^3.0.2
-    standard-version: ^9.0.0
-    ts-jest: ^26.4.4
-    ts-node: ^9.0.0
-    ttypescript: ^1.5.12
-    typescript: ^4.1.2
   languageName: unknown
   linkType: soft
 
@@ -9295,6 +9399,13 @@ fsevents@~2.1.2:
   languageName: node
   linkType: hard
 
+"iconv-lite@npm:0.4.8":
+  version: 0.4.8
+  resolution: "iconv-lite@npm:0.4.8"
+  checksum: ef1d0b0ca9fed8c21c60f6acd85ac2c35e7a2aee95bc1a1ec419c54a8559f6804b452b5531f2540a6be28f5ec38040e28998f572950d2938b002075a80d168ec
+  languageName: node
+  linkType: hard
+
 "iconv-lite@npm:^0.6.2":
   version: 0.6.2
   resolution: "iconv-lite@npm:0.6.2"
@@ -10997,6 +11108,15 @@ fsevents@~2.1.2:
   version: 2.0.4
   resolution: "klona@npm:2.0.4"
   checksum: be4a0c784135b6a75ac2c5ac9564894807aa050de041ac775a20d3ee46969ac5c3d37503d12c215c7decb592196e59e22852fd0cf28ac0cc29fe3a6df9168624
+  languageName: node
+  linkType: hard
+
+"koa-body-parser@npm:^1.1.2":
+  version: 1.1.2
+  resolution: "koa-body-parser@npm:1.1.2"
+  dependencies:
+    co-body: ^2.0.0
+  checksum: 7bdd68aad8da84cc70cedc2210928da93e6f8a66d7ff80e9a6589416abeb501ebf1913404d7c7bce33720f208b4c962cd92d8642b44c5f57280587924c72b7c5
   languageName: node
   linkType: hard
 
@@ -14033,6 +14153,13 @@ fsevents@~2.1.2:
   languageName: node
   linkType: hard
 
+"qs@npm:~2.4.1":
+  version: 2.4.2
+  resolution: "qs@npm:2.4.2"
+  checksum: e4fe83ea5e23b266c5b88f0d05b6145550be77a5ed89929e25b2b7dde4c4d69f9c35087fb7638e88d7c62fbb0e55970d5e7c73cf5c46a5d628cd3bfb426e6df5
+  languageName: node
+  linkType: hard
+
 "qs@npm:~6.5.2":
   version: 6.5.2
   resolution: "qs@npm:6.5.2"
@@ -14126,6 +14253,16 @@ fsevents@~2.1.2:
     iconv-lite: 0.4.24
     unpipe: 1.0.0
   checksum: dc56e010d276f2fc3a17c2dd071f857917cd3734f64051488c845a9878a1eb47e03a9644861f135568d8ab4c2062072700b73060956b36f3a987025bc809402f
+  languageName: node
+  linkType: hard
+
+"raw-body@npm:~1.3.4":
+  version: 1.3.4
+  resolution: "raw-body@npm:1.3.4"
+  dependencies:
+    bytes: 1.0.0
+    iconv-lite: 0.4.8
+  checksum: 86ed9be1894fc8f07e54e382d7905c826f895ff75ad7e0c7c6222170c5aac30299af11a2b4b8885dc9ce745a2ff4837577431a9cb6669b2dba8541372f39180f
   languageName: node
   linkType: hard
 
@@ -16700,6 +16837,27 @@ fsevents@~2.1.2:
     ts-node-transpile-only: dist/bin-transpile.js
     ts-script: dist/bin-script-deprecated.js
   checksum: 49d2ab087fc4b93f0a292e426ea6d242a80d1a4809ac008758bb0170aea1a85cd4182792c1d70889285fe5328cd8bd1ffb1e5108d1c4f31c39dbe9151ea4cabe
+  languageName: node
+  linkType: hard
+
+"ts-node@npm:^9.1.0":
+  version: 9.1.0
+  resolution: "ts-node@npm:9.1.0"
+  dependencies:
+    arg: ^4.1.0
+    create-require: ^1.1.0
+    diff: ^4.0.1
+    make-error: ^1.1.1
+    source-map-support: ^0.5.17
+    yn: 3.1.1
+  peerDependencies:
+    typescript: ">=2.7"
+  bin:
+    ts-node: dist/bin.js
+    ts-node-script: dist/bin-script.js
+    ts-node-transpile-only: dist/bin-transpile.js
+    ts-script: dist/bin-script-deprecated.js
+  checksum: 4735671aabf8c5f3165683b481884f5080cb2d911771c8da368f8565d5f8d769ee6f504d2d1357429ceea076f9eb9ea6714c13a46d74b3d21c5c119a6e4c27fc
   languageName: node
   linkType: hard
 
