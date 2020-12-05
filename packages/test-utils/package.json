@@ -7,10 +7,10 @@
     "module": "dist/esm/index.js",
     "types": "dist/esm/index.d.ts",
     "scripts": {
-        "test": "jest --runInBand --forceExit",
+        "test": "jest --runInBand",
         "test:clear": "jest --clearCache",
-        "test:watch": "jest --runInBand --forceExit --watch --no-watchman",
-        "test:coverage": "jest --coverage --runInBand --forceExit",
+        "test:watch": "yarn test -- --watch --no-watchman",
+        "test:coverage": "yarn test -- --coverage",
         "dev": "ttsc --watch --incremental -p tsconfig.build.json --outDir dist/esm",
         "build:cjs": "ttsc -p tsconfig.build.json --outDir dist/cjs -m CommonJS",
         "build:esm": "ttsc -p tsconfig.build.json --outDir dist/esm",

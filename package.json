@@ -14,13 +14,15 @@
     "author": "Alexandre Stahmer <alexandre.stahmer@gmail.com>",
     "license": "MIT",
     "scripts": {
-        "test": "lerna run test --stream",
-        "test:coverage": "lerna run test:coverage --stream",
-        "build": "lerna run build --ignore @entity-routes/docs --no-private --stream",
+        "each": "yarn workspaces foreach -pti run",
+        "test": "yarn each test",
+        "test:coverage": "yarn each test:coverage",
+        "build": "yarn each build --exclude @entity-routes/docs --no-private",
         "dev": "yarn workspace @entity-routes/core dev",
-        "docs:dev": "yarn workspace @entity-routes/docs dev",
-        "docs:start": "yarn workspace @entity-routes/docs start",
-        "docs:build": "yarn workspace @entity-routes/docs build"
+        "docs:base": "yarn workspace @entity-routes/docs",
+        "docs:dev": "yarn docs:base dev",
+        "docs:start": "yarn docs:base start",
+        "docs:build": "yarn docs:base build"
     },
     "importSort": {
         ".js, jsx, .ts, .tsx": {
