@@ -15,7 +15,7 @@ export function createTestRouter(): TestRouter {
         const config = routes[method][pattern];
         ctx.params = getRouteParams(pattern, path);
 
-        compose(config.middlewares)(ctx, next);
+        return compose(config.middlewares)(ctx, next);
     };
     const list = () => routes;
     const getAll = (): RouteConfig[] =>

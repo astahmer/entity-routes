@@ -10,12 +10,19 @@ import {
     printBridgeRoute,
     registerExpressRouteFromBridgeRoute,
 } from "@entity-routes/core";
+import {
+    TestRequestConfig,
+    expectedRouteDesc,
+    getTestEntities,
+    makeTestFn,
+    resetHooksCalled,
+    testHooksConfigs,
+    testRoute,
+    testRouteConfigs,
+} from "@entity-routes/sample";
 import { closeTestConnection, createTestConnection } from "@entity-routes/test-utils";
 
 import { setupExpressApp } from "./expressSetup";
-import { expectedRouteDesc, getTestEntities } from "./sample/entities";
-import { makeTestFn, resetHooksCalled, testHooksConfigs } from "./sample/hooks";
-import { TestRequestConfig, testRoute, testRouteConfigs } from "./sample/requests";
 
 describe("Express BridgeRouter adapter", () => {
     const entities = getTestEntities();

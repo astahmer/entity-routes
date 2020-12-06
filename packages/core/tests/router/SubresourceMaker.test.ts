@@ -13,21 +13,24 @@ import {
     SubresourceOptions,
     getEntityRouters,
     getRouteMetadata,
-    koaMwAdapter,
-    koaRouterFactory,
     printBridgeRoute,
     prop,
-    registerKoaRouteFromBridgeRoute,
 } from "@entity-routes/core";
-import { closeTestConnection, createTestConnection } from "@entity-routes/test-utils";
+import {
+    closeTestConnection,
+    createTestConnection,
+    createTestRouter,
+    makeTestAdapter,
+    registerTestRouteFromBridgeRoute,
+} from "@entity-routes/test-utils";
 
 import { Article, Comment, Manager, Upvote, User } from "./sample/entities";
 
 describe("SubresourceManager", () => {
     const options: EntityRouterFactoryOptions = {
-        routerFactoryFn: koaRouterFactory,
-        routerRegisterFn: registerKoaRouteFromBridgeRoute,
-        middlewareAdapter: koaMwAdapter,
+        routerFactoryFn: createTestRouter,
+        routerRegisterFn: registerTestRouteFromBridgeRoute,
+        middlewareAdapter: makeTestAdapter,
     };
     const defaultSubresourcesOptions: SubresourceMakerOptions = {
         defaultSubresourceMaxDepthLvl: 2,
@@ -75,13 +78,13 @@ describe("SubresourceManager", () => {
         const repository = getRepository(User);
         const routeMeta = getRouteMetadata(User);
 
-        const manager = new SubresourceMaker(repository, routeMeta, koaMwAdapter);
+        const manager = new SubresourceMaker(repository, routeMeta, makeTestAdapter);
 
         const articleEntityRouter = new EntityRouter(Article, routeMeta, options);
         const entityRouters = getEntityRouters();
         entityRouters[Article.name] = articleEntityRouter;
 
-        const router = new BridgeRouter(koaRouterFactory, registerKoaRouteFromBridgeRoute);
+        const router = new BridgeRouter(createTestRouter, registerTestRouteFromBridgeRoute);
         manager.makeSubresourcesRoutes(router);
 
         const paths = router.routes.map(printBridgeRoute);
@@ -120,13 +123,13 @@ describe("SubresourceManager", () => {
         const repository = getRepository(User);
         const routeMeta = getRouteMetadata(User);
 
-        const manager = new SubresourceMaker(repository, routeMeta, koaMwAdapter);
+        const manager = new SubresourceMaker(repository, routeMeta, makeTestAdapter);
 
         const entityRouters = getEntityRouters();
         const roleEntityRouter = new EntityRouter(Role, routeMeta, options);
         entityRouters[Role.name] = roleEntityRouter;
 
-        const router = new BridgeRouter(koaRouterFactory, registerKoaRouteFromBridgeRoute);
+        const router = new BridgeRouter(createTestRouter, registerTestRouteFromBridgeRoute);
         manager.makeSubresourcesRoutes(router);
 
         const paths = router.routes.map(printBridgeRoute);
@@ -186,7 +189,7 @@ describe("SubresourceManager", () => {
                 entityRouters[entity.name] = new EntityRouter(entity, getRouteMetadata(entity), options);
             });
 
-            const router = new BridgeRouter(koaRouterFactory, registerKoaRouteFromBridgeRoute);
+            const router = new BridgeRouter(createTestRouter, registerTestRouteFromBridgeRoute);
 
             const maker = entityRouters[User.name].subresourceMaker;
             maker.makeSubresourcesRoutes(router);
@@ -238,7 +241,7 @@ describe("SubresourceManager", () => {
                 entityRouters[entity.name] = new EntityRouter(entity, getRouteMetadata(entity), mergedOptions);
             });
 
-            const router = new BridgeRouter(koaRouterFactory, registerKoaRouteFromBridgeRoute);
+            const router = new BridgeRouter(createTestRouter, registerTestRouteFromBridgeRoute);
 
             const maker = entityRouters[User.name].subresourceMaker;
             maker.makeSubresourcesRoutes(router);
@@ -304,7 +307,7 @@ describe("SubresourceManager", () => {
                 entityRouters[entity.name] = new EntityRouter(entity, getRouteMetadata(entity), options);
             });
 
-            const router = new BridgeRouter(koaRouterFactory, registerKoaRouteFromBridgeRoute);
+            const router = new BridgeRouter(createTestRouter, registerTestRouteFromBridgeRoute);
 
             const maker = entityRouters[User.name].subresourceMaker;
             maker.makeSubresourcesRoutes(router);
@@ -372,7 +375,7 @@ describe("SubresourceManager", () => {
                 entityRouters[entity.name] = new EntityRouter(entity, getRouteMetadata(entity), options);
             });
 
-            const router = new BridgeRouter(koaRouterFactory, registerKoaRouteFromBridgeRoute);
+            const router = new BridgeRouter(createTestRouter, registerTestRouteFromBridgeRoute);
 
             const maker = entityRouters[User.name].subresourceMaker;
             maker.makeSubresourcesRoutes(router);
@@ -432,7 +435,7 @@ describe("SubresourceManager", () => {
                 entityRouters[entity.name] = new EntityRouter(entity, getRouteMetadata(entity), options);
             });
 
-            const router = new BridgeRouter(koaRouterFactory, registerKoaRouteFromBridgeRoute);
+            const router = new BridgeRouter(createTestRouter, registerTestRouteFromBridgeRoute);
 
             const maker = entityRouters[User.name].subresourceMaker;
             maker.makeSubresourcesRoutes(router);
@@ -487,7 +490,7 @@ describe("SubresourceManager", () => {
                 });
             });
 
-            const router = new BridgeRouter(koaRouterFactory, registerKoaRouteFromBridgeRoute);
+            const router = new BridgeRouter(createTestRouter, registerTestRouteFromBridgeRoute);
 
             const maker = entityRouters[User.name].subresourceMaker;
             maker.makeSubresourcesRoutes(router);

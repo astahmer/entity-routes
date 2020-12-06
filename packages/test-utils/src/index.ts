@@ -4,3 +4,4 @@ export * from "./connection";
 export * from "./context";
 export * from "./router";
 export * from "./server";
+export * from "./setup";

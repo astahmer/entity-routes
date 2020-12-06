@@ -1,13 +1,13 @@
 {
-    "name": "@entity-routes/test-utils",
+    "name": "@entity-routes/koa",
     "version": "0.1.0",
-    "description": "Test utilities for entity-routes.",
+    "description": "Koa integration for entity-routes.",
     "source": "src/index.ts",
     "main": "dist/cjs/index.js",
     "module": "dist/esm/index.js",
     "types": "dist/esm/index.d.ts",
     "scripts": {
-        "test": "jest --runInBand --passWithNoTests --forceExit",
+        "test": "jest --runInBand",
         "test:clear": "jest --clearCache",
         "test:watch": "jest --runInBand --passWithNoTests --forceExit --watch --no-watchman",
         "test:coverage": "jest --runInBand --passWithNoTests --forceExit --coverage",
@@ -31,11 +31,15 @@
     "license": "MIT",
     "dependencies": {
         "@entity-routes/core": "^0.1.8",
+        "koa": "^2.13.0",
+        "koa-router": "^10.0.0",
         "typeorm": "^0.2.29"
     },
     "devDependencies": {
         "@types/concurrently": "^5",
         "@types/jest": "^26.0.16",
+        "@types/koa": "^2.11.6",
+        "@types/koa-router": "^7.4.1",
         "@types/prettier": "^2",
         "@types/rimraf": "^3",
         "@zerollup/ts-transform-paths": "^1.7.18",

@@ -1,17 +1,22 @@
 import { Server } from "net";
 
 import { AxiosInstance } from "axios";
-import Router from "koa-router";
 
-import { RouteVerb, flatMapOnProp, makeKoaEntityRouters, registerKoaRouteFromBridgeRoute } from "@entity-routes/core";
+import { RouteVerb, flatMapOnProp } from "@entity-routes/core";
+import { Router, makeKoaEntityRouters, registerKoaRouteFromBridgeRoute, setupTestKoaApp } from "@entity-routes/koa";
+import {
+    TestRequestConfig,
+    expectedRouteNames,
+    getTestEntities,
+    makeTestFn,
+    resetHooksCalled,
+    testHooksConfigs,
+    testRoute,
+    testRouteConfigs,
+} from "@entity-routes/sample";
 import { closeTestConnection, createTestConnection } from "@entity-routes/test-utils";
 
-import { setupKoaApp } from "./koaSetup";
-import { expectedRouteNames, getTestEntities } from "./sample/entities";
-import { makeTestFn, resetHooksCalled, testHooksConfigs } from "./sample/hooks";
-import { TestRequestConfig, testRoute, testRouteConfigs } from "./sample/requests";
-
-describe("koa BridgeRouter adapter", () => {
+describe("Koa integration", () => {
     const entities = getTestEntities();
 
     it("registerKoaRouteFromBridgeRouter", () => {
@@ -57,7 +62,7 @@ describe("koa BridgeRouter adapter", () => {
     describe("integrates properly with koa server", () => {
         let server: Server, client: AxiosInstance;
         beforeAll(async () => {
-            const result = await setupKoaApp(entities);
+            const result = await setupTestKoaApp(entities);
             server = result.server;
             client = result.client;
         });
@@ -74,7 +79,7 @@ describe("koa BridgeRouter adapter", () => {
     describe("invokes hooks in the right order", () => {
         beforeEach(resetHooksCalled);
 
-        const makeTest = makeTestFn(setupKoaApp, entities);
+        const makeTest = makeTestFn(setupTestKoaApp, entities);
 
         testHooksConfigs.forEach((config) =>
             (config.only ? it.only : config.skip ? it.skip : it)(

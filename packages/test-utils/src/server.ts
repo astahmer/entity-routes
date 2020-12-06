@@ -34,22 +34,22 @@ async function handleRequest(ctx: TestContext, next: TestMiddleware) {
 
     try {
         await next(ctx);
-        return respond(ctx);
     } catch (err) {
         console.error(err);
+    } finally {
+        return respond(ctx);
     }
 }
 
-async function respond(ctx: TestContext) {
+export async function respond(ctx: TestContext) {
+    if (ctx.res.headersSent) return;
     if ("HEAD" === ctx.req.method) {
         return ctx.res.end();
     }
 
     const isText = typeof ctx.responseBody === "string";
     const contentType = isText ? "text/html" : "application/json";
-    if (!ctx.res.headersSent) {
-        ctx.res.writeHead(ctx.res.statusCode, { "Content-Type": contentType });
-    }
+    ctx.res.writeHead(ctx.res.statusCode, { "Content-Type": contentType });
 
     const body = isText ? ctx.responseBody : JSON.stringify(ctx.responseBody, null, 2);
     if (body && ctx.res.statusCode === 404) {

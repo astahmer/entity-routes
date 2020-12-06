@@ -23,9 +23,7 @@ import {
     Reader,
     RequestState,
 } from "@entity-routes/core";
-import { closeTestConnection, createTestConnection, makeTestCtx } from "@entity-routes/test-utils";
-
-import { setupKoaApp } from "../router/bridge/koaSetup";
+import { closeTestConnection, createTestConnection, makeTestCtx, setupTestApp } from "@entity-routes/test-utils";
 
 /** Possible hooks are [before/after][Handle/?:(Clean/Validate/Persist)/?:(Read)/Respond] */
 describe("hooks", () => {
@@ -85,7 +83,7 @@ describe("hooks", () => {
         let responseBody: ObjectLiteral;
 
         const afterHandle = (ctx: ContextWithState) => (responseBody = ctx.responseBody);
-        const { server, client } = await setupKoaApp(entities, { hooks: { afterHandle } });
+        const { server, client } = await setupTestApp(entities, { hooks: { afterHandle } });
 
         try {
             const result = await client.get("/user");
@@ -314,7 +312,7 @@ describe("hooks", () => {
     it("beforeRespond - allows editing response before sending it", async () => {
         const edited = "edited";
         const beforeRespond: HookFnOnRespond = (args) => (args.response = "edited" as any);
-        const { server, client } = await setupKoaApp(entities, { hooks: { beforeRespond } });
+        const { server, client } = await setupTestApp(entities, { hooks: { beforeRespond } });
 
         try {
             const result = await client.get("/user");
@@ -330,7 +328,7 @@ describe("hooks", () => {
         let id = null;
         const afterRespond: HookFnOnRespond = ({ ctx }) => (id = ctx.state.requestId);
 
-        const { server, client } = await setupKoaApp(entities, { hooks: { afterRespond } });
+        const { server, client } = await setupTestApp(entities, { hooks: { afterRespond } });
 
         try {
             await client.get("/user");

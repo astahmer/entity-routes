@@ -4,10 +4,11 @@ import axios from "axios";
 import Koa from "koa";
 import bodyParser from "koa-bodyparser";
 
-import { EntityRouteOptions, makeKoaEntityRouters } from "@entity-routes/core";
+import { EntityRouteOptions } from "@entity-routes/core";
+import { makeKoaEntityRouters } from "@entity-routes/koa";
 import { createTestConnection } from "@entity-routes/test-utils";
 
-export async function setupKoaApp(entities: Function[], options?: EntityRouteOptions) {
+export async function setupTestKoaApp(entities: Function[], options?: EntityRouteOptions) {
     const connection = await createTestConnection(entities);
 
     const bridgeRouters = await makeKoaEntityRouters({ connection, entities, options });

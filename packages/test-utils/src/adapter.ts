@@ -30,6 +30,11 @@ export async function makeTestEntityRouters(
 }
 
 export const makeTestAdapter = (mw: Function): TestMiddleware => (ctx, next) => mw(makeTestContextAdapter(ctx), next);
+export const testRouterFactoryOptions = {
+    routerFactoryFn: createTestRouter,
+    routerRegisterFn: registerTestRouteFromBridgeRoute,
+    middlewareAdapter: makeTestAdapter,
+};
 
 interface WithContext {
     ctx: TestContext;
@@ -66,8 +71,7 @@ export class TestContextAdapter {
         return this.ctx.responseBody;
     }
     set responseBody(value: any) {
-        this.ctx.state.responseBody = value;
-        this.res.end();
+        this.ctx.responseBody = value;
     }
     get status() {
         return this.res.statusCode;

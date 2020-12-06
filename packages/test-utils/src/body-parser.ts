@@ -11,7 +11,7 @@ export async function bodyParser(ctx: TestContext, next: TestNextFn) {
     if (methodsWithBody.includes(ctx.req.method)) {
         ctx.requestBody = await getRawBody(ctx.req).catch(console.warn);
     }
-    next();
+    return next();
 }
 
 /** Only retrieves JSON request body */

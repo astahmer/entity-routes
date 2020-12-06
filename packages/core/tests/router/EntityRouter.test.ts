@@ -1,10 +1,13 @@
-import { Context } from "koa";
 import { Column, DeleteDateColumn, Entity, PrimaryGeneratedColumn } from "typeorm";
 
-import { EntityRoute, ObjectLiteral, flatMapOnProp, makeKoaEntityRouters } from "@entity-routes/core";
-import { closeTestConnection, createTestConnection } from "@entity-routes/test-utils";
-
-import { setupKoaApp } from "./bridge/koaSetup";
+import { EntityRoute, ObjectLiteral, flatMapOnProp } from "@entity-routes/core";
+import {
+    TestContext,
+    closeTestConnection,
+    createTestConnection,
+    makeTestEntityRouters,
+    setupTestApp,
+} from "@entity-routes/test-utils";
 
 describe("EntityRouter", () => {
     it("generates no routes when no params given", async () => {
@@ -19,12 +22,12 @@ describe("EntityRouter", () => {
         }
         const entities = [User];
         const connection = await createTestConnection(entities);
-        const bridgeRouters = await makeKoaEntityRouters({ connection, entities });
-        const koaRouters = bridgeRouters.map((bridge) => bridge.instance);
+        const bridgeRouters = await makeTestEntityRouters({ connection, entities });
+        const routers = bridgeRouters.map((bridge) => bridge.instance);
 
         const routeNames = flatMapOnProp(
-            koaRouters,
-            (router) => router.stack,
+            routers,
+            (router) => router.getAll(),
             (route) => route.name
         );
         expect(routeNames).toEqual([]);
@@ -58,15 +61,15 @@ describe("EntityRouter", () => {
 
         const entities = [User];
         const connection = await createTestConnection(entities);
-        const bridgeRouters = await makeKoaEntityRouters({ connection, entities });
-        const koaRouters = bridgeRouters.map((bridge) => bridge.instance);
+        const bridgeRouters = await makeTestEntityRouters({ connection, entities });
+        const routers = bridgeRouters.map((bridge) => bridge.instance);
 
         const routeNames = flatMapOnProp(
-            koaRouters,
-            (router) => router.stack,
+            routers,
+            (router) => router.getAll(),
             (route) => route.name
         );
-        expect(routeNames).toEqual([
+        expect(routeNames).toEqualMessy([
             "user_create",
             "user_create_mapping",
             "user_list",
@@ -92,15 +95,15 @@ describe("EntityRouter", () => {
 
         const entities = [User];
         const connection = await createTestConnection(entities);
-        const bridgeRouters = await makeKoaEntityRouters({ connection, entities });
-        const koaRouters = bridgeRouters.map((bridge) => bridge.instance);
+        const bridgeRouters = await makeTestEntityRouters({ connection, entities });
+        const routers = bridgeRouters.map((bridge) => bridge.instance);
 
         const routeNames = flatMapOnProp(
-            koaRouters,
-            (router) => router.stack,
+            routers,
+            (router) => router.getAll(),
             (route) => route.name
         );
-        expect(routeNames).toEqual(["user_delete", "user_restore"]);
+        expect(routeNames).toEqualMessy(["user_delete", "user_restore"]);
 
         closeTestConnection();
     });
@@ -110,12 +113,12 @@ describe("EntityRouter", () => {
         const increment = () => count++;
         const state: ObjectLiteral = {};
 
-        const beforeMw = async (ctx: Context, next: Function) => {
+        const beforeMw = async (ctx: TestContext, next: Function) => {
             ctx.state.increment = increment;
             state[count] = ctx.state.requestContext; // should be undefined
             return next();
         };
-        const afterMw = async (ctx: Context, next: Function) => {
+        const afterMw = async (ctx: TestContext, next: Function) => {
             ctx.state.increment();
             state[count] = ctx.state.requestContext; // should be defined
             return next();
@@ -132,7 +135,7 @@ describe("EntityRouter", () => {
         }
 
         const entities = [User];
-        const { server, client } = await setupKoaApp(entities);
+        const { server, client } = await setupTestApp(entities);
 
         await client.get("/user");
 
@@ -149,12 +152,12 @@ describe("EntityRouter", () => {
         const increment = () => count++;
         const state: ObjectLiteral = {};
 
-        const beforeMw = async (ctx: Context, next: Function) => {
+        const beforeMw = async (ctx: TestContext, next: Function) => {
             ctx.state.increment = increment;
             state[count] = ctx.state.requestContext; // should be undefined
             return next();
         };
-        const afterMw = async (ctx: Context, next: Function) => {
+        const afterMw = async (ctx: TestContext, next: Function) => {
             ctx.state.increment();
             state[count] = ctx.state.requestContext; // should be defined
             return next();
@@ -171,7 +174,7 @@ describe("EntityRouter", () => {
         }
 
         const entities = [User];
-        const { server, client } = await setupKoaApp(entities, {
+        const { server, client } = await setupTestApp(entities, {
             beforeCtxMiddlewares: [beforeMw],
             afterCtxMiddlewares: [afterMw],
         });
