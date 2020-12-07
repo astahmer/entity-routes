@@ -40,6 +40,7 @@
     },
     "dependencies": {
         "@astahmer/entity-validator": "^0.1.1",
+        "@entity-routes/shared": "workspace:packages/shared",
         "class-validator": "^0.12.2",
         "express": "^4.17.1",
         "reflect-metadata": "^0.1.13",
@@ -50,7 +51,6 @@
     "devDependencies": {
         "@entity-routes/koa": "workspace:packages/koa",
         "@entity-routes/sample": "workspace:packages/sample",
-        "@entity-routes/shared": "workspace:packages/shared",
         "@entity-routes/test-utils": "workspace:packages/test-utils",
         "@types/body-parser": "^1.19.0",
         "@types/concurrently": "^5",
