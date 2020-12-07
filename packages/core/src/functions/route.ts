@@ -1,5 +1,6 @@
+import { Primitive, isEqualArrays } from "@entity-routes/shared";
+
 import { BridgeRouterRoute } from "../router";
-import { Primitive, isEqualArrays } from ".";
 
 export const formatRoutePath = (path: string) => (path[0] === "/" ? path.slice(1) : path);
 

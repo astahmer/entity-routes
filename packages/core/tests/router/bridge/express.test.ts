@@ -5,7 +5,6 @@ import { Router } from "express";
 
 import {
     RouteVerb,
-    flatMapOnProp,
     makeExpressEntityRouters,
     printBridgeRoute,
     registerExpressRouteFromBridgeRoute,
@@ -20,6 +19,7 @@ import {
     testRoute,
     testRouteConfigs,
 } from "@entity-routes/sample";
+import { flatMapOnProp } from "@entity-routes/shared";
 import { closeTestConnection, createTestConnection } from "@entity-routes/test-utils";
 
 import { setupExpressApp } from "./expressSetup";

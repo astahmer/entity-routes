@@ -1,10 +1,10 @@
 import { Container, Service } from "typedi";
 import { EntityMetadata, ObjectType } from "typeorm";
 
+import { ObjectLiteral, get, pluck } from "@entity-routes/shared";
+
 import { JoinAndSelectExposedPropsOptions, RelationManager } from "../database";
 import { GROUPS_METAKEY, RouteOperation } from "../decorators";
-import { get, pluck } from "../functions";
-import { ObjectLiteral } from "../utils-types";
 import { EntityGroupsMetadata, GroupsMetaByRoutes, GroupsMetadata } from ".";
 
 @Service()

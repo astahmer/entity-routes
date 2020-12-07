@@ -2,7 +2,8 @@ import { Service } from "typedi";
 import { Brackets, WhereExpression } from "typeorm";
 import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
 
-import { camelToSnake, isType, parseStringAsBoolean } from "../functions";
+import { camelToSnake, isType, parseStringAsBoolean } from "@entity-routes/shared";
+
 import {
     AbstractFilterConfig,
     COMPARISON_OPERATOR,

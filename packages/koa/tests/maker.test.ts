@@ -4,7 +4,7 @@ import axios, { AxiosInstance } from "axios";
 import Koa from "koa";
 import bodyParser from "koa-bodyparser";
 
-import { EntityRouteOptions, RouteVerb, flatMapOnProp } from "@entity-routes/core";
+import { EntityRouteOptions, RouteVerb } from "@entity-routes/core";
 import { Router, makeKoaEntityRouters, registerKoaRouteFromBridgeRoute } from "@entity-routes/koa";
 import {
     TestRequestConfig,
@@ -16,6 +16,7 @@ import {
     testRoute,
     testRouteConfigs,
 } from "@entity-routes/sample";
+import { flatMapOnProp } from "@entity-routes/shared";
 import { closeTestConnection, createTestConnection } from "@entity-routes/test-utils";
 
 async function setupTestKoaApp(entities: Function[], options?: EntityRouteOptions) {

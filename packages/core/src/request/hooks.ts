@@ -1,8 +1,10 @@
 import { DeleteResult } from "typeorm";
 
+import { DeepPartial } from "@entity-routes/shared";
+
 import { ReaderOptions } from "../database";
-import { GenericEntity, RequestContext, RouteControllerResult, RouteResponse, SubresourceRelation } from "../router";
-import { DeepPartial } from "../utils-types";
+import { RequestContext, RouteControllerResult, RouteResponse, SubresourceRelation } from "../router";
+import { GenericEntity } from "../types";
 import { CleanerArgs, ContextWithState, EntityErrorResults, RequestContextWithState, ValidateItemOptions } from ".";
 
 export const hookNames = [

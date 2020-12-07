@@ -1,6 +1,6 @@
 import { EntityMetadata } from "typeorm";
 
-import { AnyDecorator } from "../utils-types";
+import { AnyDecorator } from "@entity-routes/shared";
 
 /**
  * Will apply MaxDepth attribute on every properties of this entity when used as a ClassDecorator

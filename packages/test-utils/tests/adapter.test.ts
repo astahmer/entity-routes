@@ -1,6 +1,7 @@
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
-import { BridgeRouterRoute, CRUD_OPERATIONS, EntityRoute, flatMapOnProp } from "@entity-routes/core";
+import { BridgeRouterRoute, CRUD_OPERATIONS, EntityRoute } from "@entity-routes/core";
+import { flatMapOnProp } from "@entity-routes/shared";
 
 import {
     TestMiddleware,

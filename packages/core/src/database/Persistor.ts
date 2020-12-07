@@ -1,10 +1,12 @@
 import { Container, Service } from "typedi";
 import { EntityMetadata, getRepository } from "typeorm";
 
-import { deepMerge } from "../functions";
+import { deepMerge } from "@entity-routes/shared";
+
 import { EntityMapperMakeOptions } from "../mapping";
 import { Cleaner, EntityErrorResults, ValidateItemOptions, Validator } from "../request";
-import { EntityRouteOptions, GenericEntity, RequestContextMinimal, SubresourceRelation } from "../router";
+import { EntityRouteOptions, RequestContextMinimal, SubresourceRelation } from "../router";
+import { GenericEntity } from "../types";
 
 @Service()
 export class Persistor {

@@ -1,6 +1,7 @@
 import { Column, DeleteDateColumn, Entity, PrimaryGeneratedColumn } from "typeorm";
 
-import { EntityRoute, ObjectLiteral, flatMapOnProp } from "@entity-routes/core";
+import { EntityRoute } from "@entity-routes/core";
+import { ObjectLiteral, flatMapOnProp } from "@entity-routes/shared";
 import {
     TestContext,
     closeTestConnection,

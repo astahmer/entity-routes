@@ -1,4 +1,5 @@
-import { PrimitiveValue, get, getSelf } from ".";
+import { get, getSelf } from "./object";
+import { PrimitiveValue } from "./primitives";
 
 /** Split an array in chunk of given size */
 export const chunk = <T = any>(arr: T[], size: number): T[] =>

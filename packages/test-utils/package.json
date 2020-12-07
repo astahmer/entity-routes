@@ -31,6 +31,7 @@
     "license": "MIT",
     "dependencies": {
         "@entity-routes/core": "workspace:packages/core",
+        "@entity-routes/shared": "workspace:packages/shared",
         "typeorm": "^0.2.29"
     },
     "devDependencies": {

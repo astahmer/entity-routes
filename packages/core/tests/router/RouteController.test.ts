@@ -18,8 +18,8 @@ import {
     Search,
     Subresource,
     getSubresourceRelation,
-    pick,
 } from "@entity-routes/core";
+import { pick } from "@entity-routes/shared";
 import { closeTestConnection, createTestConnection } from "@entity-routes/test-utils";
 
 const routeOptions: EntityRouteOptions = { defaultCreateUpdateOptions: { shouldAutoReload: true } };

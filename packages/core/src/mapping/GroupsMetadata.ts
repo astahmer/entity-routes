@@ -1,3 +1,5 @@
+import { combineUniqueValues, deepMerge, getUniqueValues } from "@entity-routes/shared";
+
 import {
     GROUPS_METAKEY,
     GROUPS_OPERATIONS,
@@ -9,7 +11,6 @@ import {
     RouteOperation,
     getGroupsMetadata,
 } from "../decorators";
-import { combineUniqueValues, deepMerge, getUniqueValues } from "../functions";
 import { EntityGroupsMetadata } from "./EntityGroupsMetadata";
 
 export class GroupsMetadata {

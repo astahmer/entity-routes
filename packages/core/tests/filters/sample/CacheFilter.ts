@@ -3,9 +3,9 @@ import {
     AbstractFilterApplyArgs,
     DefaultFilterOptions,
     FilterDefaultConfig,
-    parseStringAsBoolean,
     registerFilterDecorator,
 } from "@entity-routes/core";
+import { parseStringAsBoolean } from "@entity-routes/shared";
 
 export type CacheFilterOptions = DefaultFilterOptions & {
     enabled?: boolean;

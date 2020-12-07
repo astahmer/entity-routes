@@ -1,9 +1,10 @@
 import { Container } from "typedi";
 
+import { lowerFirstLetter } from "@entity-routes/shared";
+
 import { ACCESSOR_PREFIX, ALIAS_PREFIX, COMPUTED_PREFIX, GroupsOperation } from "../../decorators";
-import { lowerFirstLetter } from "../../functions";
 import { MappingManager } from "../../mapping";
-import { GenericEntity } from "../../router";
+import { GenericEntity } from "../../types";
 import { DecorateFnArgs } from "../Decorator";
 
 export const computedPropRegex = /^(get|is|has).+/;

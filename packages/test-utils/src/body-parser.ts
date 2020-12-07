@@ -1,6 +1,6 @@
 import { IncomingMessage } from "http";
 
-import { ObjectLiteral } from "@entity-routes/core";
+import { ObjectLiteral } from "@entity-routes/shared";
 
 import { TestContext } from "./context";
 import { TestNextFn } from "./server";

@@ -2,7 +2,8 @@ import { Container, Service } from "typedi";
 import { EntityMetadata, SelectQueryBuilder } from "typeorm";
 
 import { MappingManager } from "../mapping";
-import { EntityRouteOptions, GenericEntity, RequestContext } from "../router";
+import { EntityRouteOptions, RequestContext } from "../router";
+import { GenericEntity } from "../types";
 import { AliasHandler, JoinAndSelectExposedPropsOptions, RelationManager } from ".";
 
 @Service()

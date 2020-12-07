@@ -4,11 +4,13 @@ import { EntityMetadata, SelectQueryBuilder } from "typeorm";
 import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
 import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
 
+import { isDev } from "@entity-routes/shared";
+
 import { MaxDeptMetadata, RouteOperation, getDependsOnMetadata, getMaxDepthMetadata } from "../decorators";
-import { isDev } from "../functions";
 import { MappingManager } from "../mapping";
 import { getComputedPropMethodAndKey } from "../response";
-import { GenericEntity, SubresourceRelation } from "../router";
+import { SubresourceRelation } from "../router";
+import { GenericEntity } from "../types";
 import { AliasHandler } from ".";
 
 @Service()

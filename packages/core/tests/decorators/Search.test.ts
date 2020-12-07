@@ -1,4 +1,4 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
 import { Search, getRouteFiltersMeta, getSearchFilterDefaultConfig } from "@entity-routes/core";
 

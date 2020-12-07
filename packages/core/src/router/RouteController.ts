@@ -1,6 +1,8 @@
 import { Container } from "typedi";
 import { DeleteResult, Repository, SelectQueryBuilder } from "typeorm";
 
+import { deepMerge, fromEntries, isType, last, parseStringAsBoolean } from "@entity-routes/shared";
+
 import {
     AliasHandler,
     EntityErrorResponse,
@@ -12,9 +14,10 @@ import {
 } from "../database";
 import { GroupsOperation } from "../decorators";
 import { AbstractFilter, AbstractFilterConfig, QueryParams } from "../filters";
-import { deepMerge, fromEntries, isRelationSingle, isType, last, parseStringAsBoolean } from "../functions";
+import { isRelationSingle } from "../functions";
 import { Handler } from "../request/Handler";
-import { CollectionResult, GenericEntity, RequestContext, RouteFiltersMeta, getRouteFiltersMeta } from ".";
+import { GenericEntity } from "../types";
+import { CollectionResult, RequestContext, RouteFiltersMeta, getRouteFiltersMeta } from ".";
 
 export class RouteController<Entity extends GenericEntity> {
     private filtersMeta: RouteFiltersMeta;

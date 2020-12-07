@@ -14,8 +14,8 @@ import {
     getEntityRouters,
     getRouteMetadata,
     printBridgeRoute,
-    prop,
 } from "@entity-routes/core";
+import { prop } from "@entity-routes/shared";
 import {
     closeTestConnection,
     createTestConnection,

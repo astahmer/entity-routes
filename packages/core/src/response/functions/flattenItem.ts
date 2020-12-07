@@ -2,7 +2,8 @@ import { Container } from "typedi";
 
 import { idToIRI, isEntity } from "../../functions";
 import { MappingManager } from "../../mapping";
-import { GenericEntity, RequestContext } from "../../router";
+import { RequestContext } from "../../router";
+import { GenericEntity } from "../../types";
 import { DecorateFnArgs } from "../Decorator";
 import { WriterOptions } from "../Writer";
 

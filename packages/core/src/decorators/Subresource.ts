@@ -5,7 +5,7 @@ import {
     SubresourceProperty,
     getRouteSubresourcesMetadata,
 } from "../router";
-import { EntityReference } from "../utils-types";
+import { EntityReference } from "../types";
 
 export function Subresource(
     entityTarget: Promise<EntityReference> | EntityReference,

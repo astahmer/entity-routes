@@ -7,4 +7,4 @@ export * from "./open-api";
 export * from "./request";
 export * from "./response";
 export * from "./router";
-export * from "./utils-types";
+export * from "./types";

@@ -1,17 +1,10 @@
 import { Container } from "typedi";
 import { Brackets, ObjectLiteral, WhereExpression } from "typeorm";
 
+import { get, isDefined, setNestedKey, sortBy, sortObjectByKeys } from "@entity-routes/shared";
+
 import { RelationManager } from "../database";
-import {
-    formatIriToId,
-    get,
-    isDefined,
-    isIriValidForProperty,
-    isWhereType,
-    setNestedKey,
-    sortBy,
-    sortObjectByKeys,
-} from "../functions";
+import { formatIriToId, isIriValidForProperty, isWhereType } from "../functions";
 import {
     AbstractFilter,
     AbstractFilterApplyArgs,

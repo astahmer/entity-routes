@@ -1,14 +1,14 @@
 import { Container } from "typedi";
-import { DeleteResult, ObjectLiteral, Repository } from "typeorm";
+import { DeleteResult, Repository } from "typeorm";
+
+import { ComparatorFn, ObjectLiteral, deepSort, isObject, isType, pipe } from "@entity-routes/shared";
 
 import { EntityErrorResponse } from "../database";
 import { GroupsOperation } from "../decorators";
-import { ComparatorFn, deepSort, isObject, isType, pipe } from "../functions";
 import { ContextWithState, EntityRouteState } from "../request";
 import {
     CollectionResult,
     Context,
-    GenericEntity,
     RequestContext,
     ResponseTypeFromCtxWithOperation,
     ResponseTypeFromOperation,
@@ -16,6 +16,7 @@ import {
     RouteControllerResult,
     RouteResponse,
 } from "../router";
+import { GenericEntity } from "../types";
 import {
     BaseFlattenItemOptions,
     DecorateFn,

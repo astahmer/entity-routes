@@ -1,14 +1,23 @@
 import { Container } from "typedi";
 import { Connection, QueryRunner, Repository, getConnection } from "typeorm";
 
+import {
+    DeepPartial,
+    FunctionKeys,
+    ObjectLiteral,
+    Unpacked,
+    deepMerge,
+    isDev,
+    parseStringAsBoolean,
+} from "@entity-routes/shared";
+
 import { GroupsDefaultOperation, GroupsOperation, RouteOperation } from "../decorators";
 import { QueryParams } from "../filters";
-import { deepMerge, isDev, parseStringAsBoolean } from "../functions";
 import { MappingManager } from "../mapping";
 import { ContextWithState, EntityErrorResults, Handler, makeRequestContext, removeRequestContext } from "../request";
 import { Writer } from "../response";
-import { DeepPartial, FunctionKeys, ObjectLiteral, Unpacked } from "../utils-types";
-import { ContextAdapter, EntityRouter, GenericEntity, Middleware, RouteController, SubresourceRelation } from ".";
+import { GenericEntity } from "../types";
+import { ContextAdapter, EntityRouter, Middleware, RouteController, SubresourceRelation } from ".";
 
 export class MiddlewareMaker<Entity extends GenericEntity> {
     get mappingManager() {

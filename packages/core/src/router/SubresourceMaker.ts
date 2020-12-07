@@ -1,9 +1,11 @@
 import { EntityMetadata, Repository } from "typeorm";
 import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
 
-import { formatRouteName, formatRoutePath, isRelationSingle, last, pick, prop } from "../functions";
-import { ObjectOrCollectionKeys } from "../utils-types";
-import { EntityRouterOptions, GenericEntity, RouteMetadata, getRouteSubresourcesMetadata } from "./EntityRouter";
+import { ObjectOrCollectionKeys, last, pick, prop } from "@entity-routes/shared";
+
+import { formatRouteName, formatRoutePath, isRelationSingle } from "../functions";
+import { GenericEntity } from "../types";
+import { EntityRouterOptions, RouteMetadata, getRouteSubresourcesMetadata } from "./EntityRouter";
 import { BridgeRouter, CRUD_ACTIONS, getEntityRouters } from ".";
 
 export class SubresourceMaker<Entity extends GenericEntity> {

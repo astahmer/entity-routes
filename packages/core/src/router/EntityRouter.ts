@@ -1,12 +1,14 @@
 import { ObjectType, Repository, getRepository } from "typeorm";
 
+import { AnyFunction, deepMerge } from "@entity-routes/shared";
+
 import { JoinAndSelectExposedPropsOptions } from "../database";
 import { GroupsOperation, RouteOperation } from "../decorators";
 import { AbstractFilterConfig } from "../filters";
-import { deepMerge, formatRouteName } from "../functions";
+import { formatRouteName } from "../functions";
 import { HookSchema } from "../request";
 import { WriterOptions } from "../response";
-import { AnyFunction } from "../utils-types";
+import { GenericEntity } from "../types";
 import {
     BridgeRouter,
     BridgeRouterRegisterFn,
@@ -159,11 +161,6 @@ export const getRouteSubresourcesMetadata = <Entity extends GenericEntity>(
 export const ROUTE_FILTERS_METAKEY = Symbol("filters");
 export const getRouteFiltersMeta = (entity: Function): RouteFiltersMeta =>
     Reflect.getOwnMetadata(ROUTE_FILTERS_METAKEY, entity);
-
-export interface GenericEntity {
-    [k: string]: any;
-    id: string | number;
-}
 
 export type RouteMetadata = {
     /** The path prefix for every action of this route */

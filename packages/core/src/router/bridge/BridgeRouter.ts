@@ -1,6 +1,7 @@
+import { AnyFunction, isDev } from "@entity-routes/shared";
+
 import { RouteOperation } from "../../decorators";
-import { areSameRoutes, isDev } from "../../functions";
-import { AnyFunction } from "../../utils-types";
+import { areSameRoutes } from "../../functions";
 import { SubresourceRelation } from "../SubresourceMaker";
 import { RouteVerb } from "..";
 

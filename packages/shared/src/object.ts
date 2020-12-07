@@ -1,5 +1,5 @@
-import { ObjectLiteral } from "../utils-types";
 import { isDate, isDefined, isObject } from "./asserts";
+import { ObjectLiteral } from "./types";
 
 /** Sort object keys alphabetically */
 export const sortObjectByKeys = (obj: ObjectLiteral) =>

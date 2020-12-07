@@ -1,3 +1,5 @@
+import { isType } from "@entity-routes/shared";
+
 import {
     FilterProperty,
     SearchFilterOptions,
@@ -5,7 +7,6 @@ import {
     getSearchFilterDefaultConfig,
     registerFilterDecorator,
 } from "../filters";
-import { isType } from "../functions";
 
 /**
  * SearchFilter PropertyDecorator

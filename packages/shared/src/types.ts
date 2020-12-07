@@ -1,11 +1,7 @@
-import { ObjectType } from "typeorm";
-
-import { PrimitiveValue } from "./functions";
-import { GenericEntity } from "./router/EntityRouter";
+import { PrimitiveValue } from "./primitives";
 
 export type ObjectLiteral = Record<string, any>;
 export type PartialRecord<K extends keyof any, T> = Partial<Record<K, T>>;
-export type Props<T extends GenericEntity> = NonFunctionKeys<T>;
 export type AnyDecorator = (target: Object | Function, propName?: string) => void;
 export type CType<T = any> = new (...args: any[]) => T;
 export type AnyFunction<T = any> = (...args: any[]) => T;
@@ -50,12 +46,6 @@ export type FunctionKeys<T extends object> = Exclude<keyof T, NonFunctionKeys<T>
 export type ObjectKeys<T extends object> = {
     [K in keyof T]: T[K] extends ObjectLiteralType<T[K]> ? K : never;
 }[keyof T];
-
-export type EntityKeys<T extends GenericEntity> = {
-    [K in keyof T]: T[K] extends GenericEntity ? K : never;
-}[keyof T];
-
-export type EntityReference = <Entity extends GenericEntity>(type?: Entity) => ObjectType<Entity>;
 
 export type PrimitiveArrayKeys<T extends object> = AllowedNames<T, Array<PrimitiveValue>>;
 export type ObjectOrArrayKeys<T extends object> = {

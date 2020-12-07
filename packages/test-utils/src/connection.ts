@@ -1,3 +1,5 @@
+import { Connection, createConnection, getConnection } from "typeorm";
+
 import {
     Context,
     GenericEntity,
@@ -5,9 +7,8 @@ import {
     QueryParams,
     RequestContextWithState,
     RequestState,
-    deepMerge,
 } from "@entity-routes/core";
-import { Connection, createConnection, getConnection } from "typeorm";
+import { deepMerge } from "@entity-routes/shared";
 
 let connection: Connection;
 
