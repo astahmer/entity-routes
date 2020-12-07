@@ -6,7 +6,7 @@ description: Hooks are a way to intervene at any point in the process of a reque
 If you need to alter some part of the request handling, there are hooks available. These hooks are basic functions
 receiving arguments that will help you change or make something happens when called.
 
-> Possible hooks are [before/after][handle/?:(clean/validate/persist)/?:(read/format)/respond]
+> Possible hooks are [before/after]Handle/({Clean,Validate,Persist}|Read)/Respond]
 
 ```typescript
 type HookSchema = Partial<{

@@ -23,7 +23,7 @@ export const hookNames = [
     "beforeRemove",
     "afterRemove",
 ];
-/** Possible hooks are [before/after][Handle/?:(Clean/Validate/Persist)/?:(Read/Format)/Respond] */
+/** Possible hooks are [before/after]Handle/({Clean,Validate,Persist}|Read)/Respond] */
 export type HookSchema = Partial<{
     /**
      * Called right after the requestContext has been set by the appropriate middleware &
