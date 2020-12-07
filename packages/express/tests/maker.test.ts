@@ -1,14 +1,11 @@
-import { Server } from "net";
+import { AddressInfo, Server } from "net";
 
-import { AxiosInstance } from "axios";
-import { Router } from "express";
+import axios, { AxiosInstance } from "axios";
+import bodyParser from "body-parser";
+import express, { Router } from "express";
 
-import {
-    RouteVerb,
-    makeExpressEntityRouters,
-    printBridgeRoute,
-    registerExpressRouteFromBridgeRoute,
-} from "@entity-routes/core";
+import { EntityRouteOptions, RouteVerb, printBridgeRoute } from "@entity-routes/core";
+import { makeExpressEntityRouters, registerExpressRouteFromBridgeRoute } from "@entity-routes/express";
 import {
     TestRequestConfig,
     expectedRouteDesc,
@@ -22,7 +19,22 @@ import {
 import { flatMapOnProp } from "@entity-routes/shared";
 import { closeTestConnection, createTestConnection } from "@entity-routes/test-utils";
 
-import { setupExpressApp } from "./expressSetup";
+export async function setupTestExpressApp(entities: Function[], options?: EntityRouteOptions) {
+    const connection = await createTestConnection(entities);
+
+    const bridgeRouters = await makeExpressEntityRouters({ connection, entities, options });
+    const app = express();
+    app.use(bodyParser.json());
+    app.use(bodyParser.urlencoded({ extended: true }));
+
+    // Register all routes on Express server
+    bridgeRouters.forEach((router) => app.use(router.instance));
+
+    const server = app.listen(); // random port
+    const baseURL = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+    const client = axios.create({ baseURL });
+    return { baseURL, server, client };
+}
 
 describe("Express BridgeRouter adapter", () => {
     const entities = getTestEntities();
@@ -51,7 +63,7 @@ describe("Express BridgeRouter adapter", () => {
             (layer) => layer.route.path
         );
 
-        expect(routePaths).toEqual(
+        expect(routePaths).toEqualMessy(
             flatMapOnProp(
                 bridgeRouters,
                 (router) => router.routes,
@@ -72,7 +84,7 @@ describe("Express BridgeRouter adapter", () => {
     describe("integrates properly with Express server", () => {
         let server: Server, client: AxiosInstance;
         beforeAll(async () => {
-            const result = await setupExpressApp(entities);
+            const result = await setupTestExpressApp(entities);
             server = result.server;
             client = result.client;
         });
@@ -91,7 +103,7 @@ describe("Express BridgeRouter adapter", () => {
     describe("invokes hooks in the right order", () => {
         beforeEach(resetHooksCalled);
 
-        const makeTest = makeTestFn(setupExpressApp, entities);
+        const makeTest = makeTestFn(setupTestExpressApp, entities);
 
         testHooksConfigs.forEach((config) =>
             (config.only ? it.only : config.skip ? it.skip : it)(

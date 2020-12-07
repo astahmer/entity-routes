@@ -25,7 +25,6 @@ import {
 import { ObjectLiteral } from "@entity-routes/shared";
 import { closeTestConnection, createTestConnection, makeTestCtx, setupTestApp } from "@entity-routes/test-utils";
 
-/** Possible hooks are [before/after][Handle/?:(Clean/Validate/Persist)/?:(Read)/Respond] */
 describe("hooks", () => {
     class AbstractEntity {
         @Groups("all")
