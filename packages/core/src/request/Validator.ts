@@ -1,16 +1,10 @@
 import { EntityValidator, EntityValidatorFunctionOptions } from "@astahmer/entity-validator";
 import { ValidatorOptions, validate } from "class-validator";
 import { Container, Service } from "typedi";
-import { EntityMetadata } from "typeorm";
+import { EntityMetadata, ObjectLiteral } from "typeorm";
 
-import {
-    GenericEntity,
-    ObjectLiteral,
-    RequestContextMinimal,
-    isDev,
-    isObjectLiteral,
-    isType,
-} from "@entity-routes/core";
+import { isDev, isObjectLiteral, isType } from "../functions";
+import { GenericEntity, RequestContextMinimal } from "../router";
 
 @Service()
 export class Validator {

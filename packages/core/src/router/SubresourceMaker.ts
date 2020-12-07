@@ -1,20 +1,10 @@
 import { EntityMetadata, Repository } from "typeorm";
 import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
 
-import {
-    BridgeRouter,
-    CRUD_ACTIONS,
-    ObjectOrCollectionKeys,
-    formatRouteName,
-    formatRoutePath,
-    getEntityRouters,
-    isRelationSingle,
-    last,
-    pick,
-    prop,
-} from "@entity-routes/core";
-
+import { formatRouteName, formatRoutePath, isRelationSingle, last, pick, prop } from "../functions";
+import { ObjectOrCollectionKeys } from "../utils-types";
 import { EntityRouterOptions, GenericEntity, RouteMetadata, getRouteSubresourcesMetadata } from "./EntityRouter";
+import { BridgeRouter, CRUD_ACTIONS, getEntityRouters } from ".";
 
 export class SubresourceMaker<Entity extends GenericEntity> {
     private subresourcesMeta: RouteSubresourcesMeta<Entity>;

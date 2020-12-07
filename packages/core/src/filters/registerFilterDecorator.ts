@@ -1,5 +1,5 @@
-import { ROUTE_FILTERS_METAKEY, RouteFiltersMeta, deepMerge, getRouteFiltersMeta } from "@entity-routes/core";
-
+import { deepMerge } from "../functions";
+import { ROUTE_FILTERS_METAKEY, RouteFiltersMeta, getRouteFiltersMeta } from "../router";
 import { AbstractFilterConfig, DefaultFilterOptions, FilterDefaultConfig, FilterProperty } from "./AbstractFilter";
 
 export function registerFilterDecorator<Options = DefaultFilterOptions>({

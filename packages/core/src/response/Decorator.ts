@@ -1,8 +1,10 @@
 import { isDate } from "class-validator";
 import { Container, Service } from "typedi";
-import { EntityMetadata, getRepository } from "typeorm";
+import { EntityMetadata, ObjectLiteral, getRepository } from "typeorm";
 
-import { GenericEntity, MappingManager, ObjectLiteral, isDev, isEntity, isPrimitive } from "@entity-routes/core";
+import { isDev, isEntity, isPrimitive } from "../functions";
+import { MappingManager } from "../mapping";
+import { GenericEntity } from "../router";
 
 @Service()
 /** Recursively traverses an item to decorate it */

@@ -1,7 +1,6 @@
 import { ObjectType } from "typeorm";
 
-import { PrimitiveValue } from "@entity-routes/core";
-
+import { PrimitiveValue } from "./functions";
 import { GenericEntity } from "./router/EntityRouter";
 
 export type ObjectLiteral = Record<string, any>;

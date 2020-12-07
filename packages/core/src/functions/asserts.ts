@@ -1,4 +1,7 @@
-import { CType, GenericEntity, ObjectLiteral, Primitive, WhereType } from "@entity-routes/core";
+import { WhereType } from "../filters";
+import { GenericEntity } from "../router";
+import { CType, ObjectLiteral } from "../utils-types";
+import { Primitive } from ".";
 
 export const isTestEnv = () => process.env.NODE_ENV === "test";
 export const isDev = () => process.env.NODE_ENV === "development" || isTestEnv();

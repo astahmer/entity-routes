@@ -1,12 +1,7 @@
 import { Request, RequestHandler, Response, Router } from "express";
 
-import {
-    BridgeRouterRoute,
-    ContextAdapter,
-    EntityRouteOptions,
-    MakeEntityRouters,
-    makeEntityRouters,
-} from "@entity-routes/core";
+import { BridgeRouterRoute, ContextAdapter } from ".";
+import { EntityRouteOptions, MakeEntityRouters, makeEntityRouters } from "..";
 
 export function registerExpressRouteFromBridgeRoute(instance: Router, route: BridgeRouterRoute<RequestHandler>) {
     route.methods.forEach((verb) => instance[verb](route.path, route.middlewares));

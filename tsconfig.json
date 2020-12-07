@@ -1,25 +1,11 @@
 {
+    "extends": "./tsconfig.base.json",
     "compilerOptions": {
-        "target": "ES5",
-        "module": "ESNext",
-        "moduleResolution": "node",
-        "emitDecoratorMetadata": true,
-        "experimentalDecorators": true,
-        "esModuleInterop": true,
-        "allowSyntheticDefaultImports": true,
-        "forceConsistentCasingInFileNames": true,
-        "skipLibCheck": true,
-        "noUnusedParameters": true,
-        "noImplicitAny": true,
-        "downlevelIteration": true,
         "baseUrl": "./",
         "paths": {
             "@entity-routes/*": ["./packages/*/src"]
-        },
-        "plugins": [{ "transform": "@zerollup/ts-transform-paths" }]
+        }
     },
-    "include": ["packages", "docs"],
-    "exclude": ["**/node_modules/**", "packages/*/dist"],
     "ts-node": {
         "transpileOnly": true,
         "compilerOptions": {

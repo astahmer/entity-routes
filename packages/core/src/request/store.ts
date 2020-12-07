@@ -1,14 +1,9 @@
 import { ObjectLiteral } from "typeorm";
 import { v4 as uuidv4 } from "uuid";
 
-import {
-    Context,
-    GenericEntity,
-    GroupsOperation,
-    QueryParams,
-    RequestContext,
-    RequestState,
-} from "@entity-routes/core";
+import { GroupsOperation } from "../decorators";
+import { QueryParams } from "../filters";
+import { Context, GenericEntity, RequestContext, RequestState } from "../router";
 
 /** Map<uuid/ContextAdapter> for each request, last until request is done and then gets removed from the Map */
 const requestStore = new Map<string, ContextWithState>();

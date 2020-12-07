@@ -30,7 +30,7 @@
     "author": "Alexandre Stahmer <alexandre.stahmer@gmail.com>",
     "license": "MIT",
     "dependencies": {
-        "@entity-routes/core": "^0.1.8",
+        "@entity-routes/core": "workspace:packages/core",
         "typeorm": "^0.2.29"
     },
     "devDependencies": {
@@ -38,7 +38,6 @@
         "@types/jest": "^26.0.16",
         "@types/prettier": "^2",
         "@types/rimraf": "^3",
-        "@zerollup/ts-transform-paths": "^1.7.18",
         "axios": "^0.21.0",
         "commitizen": "^4.2.2",
         "concurrently": "^5.3.0",

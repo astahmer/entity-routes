@@ -1,18 +1,11 @@
 import { Container, Service } from "typedi";
 import { EntityMetadata, ObjectType } from "typeorm";
 
-import {
-    EntityGroupsMetadata,
-    GROUPS_METAKEY,
-    GroupsMetaByRoutes,
-    GroupsMetadata,
-    JoinAndSelectExposedPropsOptions,
-    ObjectLiteral,
-    RelationManager,
-    RouteOperation,
-    get,
-    pluck,
-} from "@entity-routes/core";
+import { JoinAndSelectExposedPropsOptions, RelationManager } from "../database";
+import { GROUPS_METAKEY, RouteOperation } from "../decorators";
+import { get, pluck } from "../functions";
+import { ObjectLiteral } from "../utils-types";
+import { EntityGroupsMetadata, GroupsMetaByRoutes, GroupsMetadata } from ".";
 
 @Service()
 export class MappingManager {

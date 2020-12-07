@@ -10,17 +10,9 @@ import {
 } from "openapi3-ts";
 import { Container } from "typedi";
 
-import {
-    ENTITY_META_SYMBOL,
-    MappingItem,
-    MappingManager,
-    deepMerge,
-    fromEntries,
-    getEntityRouters,
-    last,
-    sortObjectByKeys,
-} from "@entity-routes/core";
-
+import { deepMerge, fromEntries, last, sortObjectByKeys } from "../functions";
+import { ENTITY_META_SYMBOL, MappingItem, MappingManager } from "../mapping";
+import { getEntityRouters } from "../router";
 import { addComponentsReferences } from "./baseReferences";
 import {
     getBaseRouteResponseSchemaByType,

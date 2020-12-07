@@ -1,10 +1,8 @@
 import { Container } from "typedi";
 import { Brackets, ObjectLiteral, WhereExpression } from "typeorm";
 
+import { RelationManager } from "../database";
 import {
-    RelationManager,
-    StrategyType,
-    WhereManager,
     formatIriToId,
     get,
     isDefined,
@@ -13,8 +11,7 @@ import {
     setNestedKey,
     sortBy,
     sortObjectByKeys,
-} from "@entity-routes/core";
-
+} from "../functions";
 import {
     AbstractFilter,
     AbstractFilterApplyArgs,
@@ -26,6 +23,7 @@ import {
     WhereMethod,
     WhereType,
 } from "./AbstractFilter";
+import { StrategyType, WhereManager } from ".";
 
 /** Add a/multiple where clause on any (deep?) properties of the decorated entity  */
 export class SearchFilter extends AbstractFilter<SearchFilterOptions, StrategyType> {

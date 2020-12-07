@@ -2,30 +2,19 @@ import { Container } from "typedi";
 import { DeleteResult, Repository, SelectQueryBuilder } from "typeorm";
 
 import {
-    AbstractFilter,
-    AbstractFilterConfig,
     AliasHandler,
-    CollectionResult,
     EntityErrorResponse,
-    GenericEntity,
-    GroupsOperation,
-    Handler,
     Persistor,
-    QueryParams,
     Reader,
     ReaderOptions,
     RelationManager,
-    RequestContext,
-    RouteFiltersMeta,
     SaveItemArgs,
-    deepMerge,
-    fromEntries,
-    getRouteFiltersMeta,
-    isRelationSingle,
-    isType,
-    last,
-    parseStringAsBoolean,
-} from "@entity-routes/core";
+} from "../database";
+import { GroupsOperation } from "../decorators";
+import { AbstractFilter, AbstractFilterConfig, QueryParams } from "../filters";
+import { deepMerge, fromEntries, isRelationSingle, isType, last, parseStringAsBoolean } from "../functions";
+import { Handler } from "../request/Handler";
+import { CollectionResult, GenericEntity, RequestContext, RouteFiltersMeta, getRouteFiltersMeta } from ".";
 
 export class RouteController<Entity extends GenericEntity> {
     private filtersMeta: RouteFiltersMeta;

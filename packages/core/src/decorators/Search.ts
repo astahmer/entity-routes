@@ -3,9 +3,9 @@ import {
     SearchFilterOptions,
     StrategyType,
     getSearchFilterDefaultConfig,
-    isType,
     registerFilterDecorator,
-} from "@entity-routes/core";
+} from "../filters";
+import { isType } from "../functions";
 
 /**
  * SearchFilter PropertyDecorator

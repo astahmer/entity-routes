@@ -1,22 +1,11 @@
 import { Container, Service } from "typedi";
 import { EntityMetadata } from "typeorm";
 
-import {
-    DeepPartial,
-    ENTITY_META_SYMBOL,
-    EntityMapperMakeOptions,
-    GenericEntity,
-    MappingItem,
-    MappingManager,
-    Primitive,
-    RequestContext,
-    SaveItemArgs,
-    formatIriToId,
-    isDate,
-    isObject,
-    isPrimitive,
-    isType,
-} from "@entity-routes/core";
+import { SaveItemArgs } from "../database";
+import { Primitive, formatIriToId, isDate, isObject, isPrimitive, isType } from "../functions";
+import { ENTITY_META_SYMBOL, EntityMapperMakeOptions, MappingItem, MappingManager } from "../mapping";
+import { GenericEntity, RequestContext } from "../router";
+import { DeepPartial } from "../utils-types";
 
 @Service()
 /** Clean the request body by removing any property not mapped for that route scope */

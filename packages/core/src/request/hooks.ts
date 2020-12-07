@@ -1,19 +1,9 @@
 import { DeleteResult } from "typeorm";
 
-import {
-    CleanerArgs,
-    ContextWithState,
-    DeepPartial,
-    EntityErrorResults,
-    GenericEntity,
-    ReaderOptions,
-    RequestContext,
-    RequestContextWithState,
-    RouteControllerResult,
-    RouteResponse,
-    SubresourceRelation,
-    ValidateItemOptions,
-} from "@entity-routes/core";
+import { ReaderOptions } from "../database";
+import { GenericEntity, RequestContext, RouteControllerResult, RouteResponse, SubresourceRelation } from "../router";
+import { DeepPartial } from "../utils-types";
+import { CleanerArgs, ContextWithState, EntityErrorResults, RequestContextWithState, ValidateItemOptions } from ".";
 
 export const hookNames = [
     "beforeHandle",

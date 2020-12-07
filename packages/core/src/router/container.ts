@@ -1,6 +1,6 @@
 import { Container } from "typedi";
 
-import { EntityRouter } from "@entity-routes/core";
+import { EntityRouter } from ".";
 
 const entityRouters: Record<string, EntityRouter<any>> = {};
 Container.set("entityRouters", entityRouters);

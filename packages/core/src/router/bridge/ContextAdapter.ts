@@ -1,6 +1,6 @@
 import { IncomingMessage, ServerResponse } from "http";
 
-import { ObjectLiteral } from "@entity-routes/core";
+import { ObjectLiteral } from "../../utils-types";
 
 export type Middleware = (ctx: Context, next: NextFn) => any;
 export type BaseContext = { req: IncomingMessage; res: ServerResponse };

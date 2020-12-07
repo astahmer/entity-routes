@@ -1,8 +1,8 @@
 import { Container } from "typedi";
 import { SelectQueryBuilder } from "typeorm";
 
-import { AliasHandler, OrderByOptions, RelationManager } from "@entity-routes/core";
-
+import { AliasHandler, RelationManager } from "../database";
+import { OrderByOptions } from "../decorators";
 import {
     AbstractFilter,
     AbstractFilterApplyArgs,

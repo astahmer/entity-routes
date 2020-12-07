@@ -1,15 +1,9 @@
 import { Container, Service } from "typedi";
 import { EntityMetadata, SelectQueryBuilder } from "typeorm";
 
-import {
-    AliasHandler,
-    EntityRouteOptions,
-    GenericEntity,
-    JoinAndSelectExposedPropsOptions,
-    MappingManager,
-    RelationManager,
-    RequestContext,
-} from "@entity-routes/core";
+import { MappingManager } from "../mapping";
+import { EntityRouteOptions, GenericEntity, RequestContext } from "../router";
+import { AliasHandler, JoinAndSelectExposedPropsOptions, RelationManager } from ".";
 
 @Service()
 export class Reader {

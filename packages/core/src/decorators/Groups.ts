@@ -1,6 +1,7 @@
 import { EntityMetadata } from "typeorm";
 
-import { EntityGroupsMetadata, GroupsMetadata, PartialRecord } from "@entity-routes/core";
+import { EntityGroupsMetadata, GroupsMetadata } from "../mapping";
+import { PartialRecord } from "../utils-types";
 
 /**
  * Expose decorated property for each operation for each listed EntityRoute scope

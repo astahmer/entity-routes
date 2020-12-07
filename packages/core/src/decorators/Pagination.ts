@@ -4,7 +4,7 @@ import {
     PaginationFilterOptions,
     getPaginationFilterDefaultConfig,
     registerFilterDecorator,
-} from "@entity-routes/core";
+} from "../filters";
 
 /**
  * Pagination ClassDecorator without properties

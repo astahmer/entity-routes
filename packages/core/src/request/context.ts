@@ -1,5 +1,4 @@
-import { GenericEntity, MakeRequestContextMwArgs, RequestContext } from "@entity-routes/core";
-
+import { GenericEntity, MakeRequestContextMwArgs, RequestContext } from "../router";
 import { ContextWithState, addRequestContext } from "./store";
 
 export function makeRequestContext<Entity extends GenericEntity>(

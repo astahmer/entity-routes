@@ -1,15 +1,9 @@
 import { EntityMetadata } from "typeorm";
 
-import {
-    AnyFunction,
-    BridgeRouter,
-    CrudAction,
-    EntityRouterFactoryOptions,
-    RouteMetadata,
-    RouteOperation,
-    formatRouteName,
-    isType,
-} from "@entity-routes/core";
+import { RouteOperation } from "../decorators";
+import { formatRouteName, isType } from "../functions";
+import { AnyFunction } from "../utils-types";
+import { BridgeRouter, CrudAction, EntityRouterFactoryOptions, RouteMetadata } from ".";
 
 export function makeRouterFromActions<Data extends object = object, T extends AnyFunction = any>(
     actions: RouteActionConfig[],

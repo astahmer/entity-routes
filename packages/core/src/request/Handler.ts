@@ -1,15 +1,14 @@
 import { Repository } from "typeorm";
 
+import { GroupsOperation } from "../decorators";
 import {
     CRUD_ACTIONS,
     EntityRouteOptions,
     GenericEntity,
-    GroupsOperation,
     ListDetailsOptions,
     MiddlewareMaker,
     RouteController,
-} from "@entity-routes/core";
-
+} from "../router";
 import { ContextWithState } from "./store";
 
 /** Handle request and return the appropriate RouteController[method] result  */

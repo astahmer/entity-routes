@@ -1,4 +1,5 @@
-import { EntityRouteConfig, ROUTE_METAKEY, RouteDefaultOperation } from "@entity-routes/core";
+import { EntityRouteConfig, ROUTE_METAKEY } from "../router";
+import { RouteDefaultOperation } from ".";
 
 /**
  * @example

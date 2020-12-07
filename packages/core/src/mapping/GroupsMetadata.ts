@@ -7,12 +7,9 @@ import {
     PropsByContextByOperations,
     PropsByOperations,
     RouteOperation,
-    combineUniqueValues,
-    deepMerge,
     getGroupsMetadata,
-    getUniqueValues,
-} from "@entity-routes/core";
-
+} from "../decorators";
+import { combineUniqueValues, deepMerge, getUniqueValues } from "../functions";
 import { EntityGroupsMetadata } from "./EntityGroupsMetadata";
 
 export class GroupsMetadata {

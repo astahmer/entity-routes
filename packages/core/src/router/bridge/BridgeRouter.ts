@@ -1,6 +1,8 @@
-import { AnyFunction, RouteOperation, RouteVerb, areSameRoutes, isDev } from "@entity-routes/core";
-
+import { RouteOperation } from "../../decorators";
+import { areSameRoutes, isDev } from "../../functions";
+import { AnyFunction } from "../../utils-types";
 import { SubresourceRelation } from "../SubresourceMaker";
+import { RouteVerb } from "..";
 
 export class BridgeRouter<T = any> {
     readonly instance: T;

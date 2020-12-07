@@ -1,4 +1,4 @@
-import { PrimitiveValue, get, getSelf } from "@entity-routes/core";
+import { PrimitiveValue, get, getSelf } from ".";
 
 /** Split an array in chunk of given size */
 export const chunk = <T = any>(arr: T[], size: number): T[] =>

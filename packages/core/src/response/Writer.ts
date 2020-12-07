@@ -1,33 +1,29 @@
 import { Container } from "typedi";
-import { DeleteResult, Repository } from "typeorm";
+import { DeleteResult, ObjectLiteral, Repository } from "typeorm";
 
+import { EntityErrorResponse } from "../database";
+import { GroupsOperation } from "../decorators";
+import { ComparatorFn, deepSort, isObject, isType, pipe } from "../functions";
+import { ContextWithState, EntityRouteState } from "../request";
 import {
-    BaseFlattenItemOptions,
     CollectionResult,
-    ComparatorFn,
     Context,
-    ContextWithState,
-    DecorateFn,
-    Decorator,
-    EntityErrorResponse,
-    EntityRouteState,
     GenericEntity,
-    GroupsOperation,
-    ObjectLiteral,
     RequestContext,
     ResponseTypeFromCtxWithOperation,
     ResponseTypeFromOperation,
     RouteController,
     RouteControllerResult,
     RouteResponse,
-    deepSort,
+} from "../router";
+import {
+    BaseFlattenItemOptions,
+    DecorateFn,
+    Decorator,
     flattenItem,
-    isObject,
-    isType,
-    pipe,
     setComputedPropsOnItem,
     setSubresourcesIriOnItem,
-} from "@entity-routes/core";
+} from ".";
 
 /** Write response from result & decorators */
 export class Writer<Entity extends GenericEntity> {
