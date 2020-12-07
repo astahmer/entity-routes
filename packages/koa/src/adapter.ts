@@ -1,6 +1,13 @@
 import { Context } from "koa";
 
-export const makeKoaContextAdapter = (ctx: Context) => new KoaContextAdapter(ctx)
+import { ContextAdapter } from "@entity-routes/core";
+
+export const makeKoaContextAdapter = (ctx: Context) => new KoaContextAdapter(ctx);
+
+interface WithContext {
+    ctx: Context;
+}
+export interface KoaContextAdapter extends ContextAdapter, WithContext {}
 export class KoaContextAdapter {
     req: Context["req"];
     res: Context["res"];
@@ -22,7 +29,7 @@ export class KoaContextAdapter {
         return new URLSearchParams(this.ctx.URL.search);
     }
     get query() {
-        return this.ctx.query
+        return this.ctx.query;
     }
     get state() {
         return this.ctx.state;
@@ -40,4 +47,3 @@ export class KoaContextAdapter {
         this.ctx.status = value;
     }
 }
-
