@@ -2,7 +2,7 @@ import { EntityMetadata } from "typeorm";
 import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
 import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
 
-import { CType } from "@entity-routes/shared/src";
+import { CType } from "@entity-routes/shared";
 
 import { getEntityRouters, getRouteMetadata } from "../router";
 import { GenericEntity, Props } from "../types";
