@@ -1,4 +1,4 @@
-import { get, getSelf } from "./object";
+import { get } from "./object";
 import { PrimitiveValue } from "./primitives";
 
 /** Split an array in chunk of given size */
@@ -8,8 +8,9 @@ export const chunk = <T = any>(arr: T[], size: number): T[] =>
 export const flatMapOnProp = <T, U, V>(arr: T[], getArrayProp: (v: T) => U[], getProp: (el: U) => V) =>
     arr.reduce((acc, item) => acc.concat(...getArrayProp(item).map(getProp)), []);
 
-export const flatMap = <T, V = T>(arr: T[][], getProp: (subArray: T) => V = getSelf as any): V[] =>
-    arr.reduce<V[]>((acc, item) => acc.concat(item.map(getProp)), []);
+export function flatMap<T, U>(array: T[], callbackfn: (value: T, index: number, array: T[]) => U[]): U[] {
+    return Array.prototype.concat(...array.map(callbackfn));
+}
 
 export const pluck = <K extends keyof T, T extends object>(arr: T[], prop: K) => arr.map((item) => item[prop]);
 
