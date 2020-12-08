@@ -22,7 +22,7 @@
     "author": "Alexandre Stahmer <alexandre.stahmer@gmail.com>",
     "license": "MIT",
     "scripts": {
-        "test": "jest --runInBand --passWithNoTests --forceExit",
+        "test": "jest --runInBand --forceExit",
         "test:clear": "jest --clearCache",
         "test:watch": "jest --runInBand --passWithNoTests --forceExit --watch --no-watchman",
         "test:coverage": "jest --runInBand --passWithNoTests --forceExit --coverage",
