@@ -6,6 +6,7 @@ import bodyParser from "koa-bodyparser";
 
 import { EntityRouteOptions, RouteVerb } from "@entity-routes/core";
 import { Router, makeKoaEntityRouters, registerKoaRouteFromBridgeRoute } from "@entity-routes/koa";
+import { flatMapOnProp } from "@entity-routes/shared";
 import {
     TestRequestConfig,
     expectedRouteNames,
@@ -15,8 +16,7 @@ import {
     testHooksConfigs,
     testRoute,
     testRouteConfigs,
-} from "@entity-routes/sample";
-import { flatMapOnProp } from "@entity-routes/shared";
+} from "@entity-routes/test-sample";
 import { closeTestConnection, createTestConnection } from "@entity-routes/test-utils";
 
 async function setupTestKoaApp(entities: Function[], options?: EntityRouteOptions) {

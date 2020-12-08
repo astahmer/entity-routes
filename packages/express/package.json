@@ -35,8 +35,8 @@
         "typeorm": "^0.2.29"
     },
     "devDependencies": {
-        "@entity-routes/sample": "workspace:packages/sample",
         "@entity-routes/shared": "workspace:packages/shared",
+        "@entity-routes/test-sample": "workspace:packages/test-sample",
         "@entity-routes/test-utils": "workspace:packages/test-utils",
         "@types/body-parser": "^1.19.0",
         "@types/concurrently": "^5",

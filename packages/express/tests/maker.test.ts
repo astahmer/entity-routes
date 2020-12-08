@@ -6,6 +6,7 @@ import express, { Router } from "express";
 
 import { EntityRouteOptions, RouteVerb, printBridgeRoute } from "@entity-routes/core";
 import { makeExpressEntityRouters, registerExpressRouteFromBridgeRoute } from "@entity-routes/express";
+import { flatMapOnProp } from "@entity-routes/shared";
 import {
     TestRequestConfig,
     expectedRouteDesc,
@@ -15,8 +16,7 @@ import {
     testHooksConfigs,
     testRoute,
     testRouteConfigs,
-} from "@entity-routes/sample";
-import { flatMapOnProp } from "@entity-routes/shared";
+} from "@entity-routes/test-sample";
 import { closeTestConnection, createTestConnection } from "@entity-routes/test-utils";
 
 export async function setupTestExpressApp(entities: Function[], options?: EntityRouteOptions) {

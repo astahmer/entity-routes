@@ -1579,8 +1579,8 @@ __metadata:
   resolution: "@entity-routes/core@workspace:packages/core"
   dependencies:
     "@astahmer/entity-validator": ^0.1.1
-    "@entity-routes/sample": "workspace:packages/sample"
     "@entity-routes/shared": "workspace:packages/shared"
+    "@entity-routes/test-sample": "workspace:packages/test-sample"
     "@entity-routes/test-utils": "workspace:packages/test-utils"
     "@types/concurrently": ^5
     "@types/jest": ^26.0.16
@@ -1667,8 +1667,8 @@ __metadata:
   resolution: "@entity-routes/express@workspace:packages/express"
   dependencies:
     "@entity-routes/core": "workspace:packages/core"
-    "@entity-routes/sample": "workspace:packages/sample"
     "@entity-routes/shared": "workspace:packages/shared"
+    "@entity-routes/test-sample": "workspace:packages/test-sample"
     "@entity-routes/test-utils": "workspace:packages/test-utils"
     "@types/body-parser": ^1.19.0
     "@types/concurrently": ^5
@@ -1703,8 +1703,8 @@ __metadata:
   resolution: "@entity-routes/koa@workspace:packages/koa"
   dependencies:
     "@entity-routes/core": "workspace:packages/core"
-    "@entity-routes/sample": "workspace:packages/sample"
     "@entity-routes/shared": "workspace:packages/shared"
+    "@entity-routes/test-sample": "workspace:packages/test-sample"
     "@entity-routes/test-utils": "workspace:packages/test-utils"
     "@types/concurrently": ^5
     "@types/jest": ^26.0.16
@@ -1736,23 +1736,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@entity-routes/sample@workspace:packages/sample":
-  version: 0.0.0-use.local
-  resolution: "@entity-routes/sample@workspace:packages/sample"
-  dependencies:
-    "@types/prettier": ^2
-    axios: ^0.21.0
-    commitizen: ^4.2.2
-    husky: ^4.3.0
-    prettier: ^2.2.1
-    prettier-plugin-sorted: ^2.0.0
-    pretty-quick: ^3.1.0
-    standard-version: ^9.0.0
-    ttypescript: ^1.5.12
-    typescript: ^4.1.2
-  languageName: unknown
-  linkType: soft
-
 "@entity-routes/shared@workspace:packages/shared":
   version: 0.0.0-use.local
   resolution: "@entity-routes/shared@workspace:packages/shared"
@@ -1775,6 +1758,23 @@ __metadata:
     standard-version: ^9.0.0
     ts-jest: ^26.4.4
     ts-node: ^9.1.0
+    ttypescript: ^1.5.12
+    typescript: ^4.1.2
+  languageName: unknown
+  linkType: soft
+
+"@entity-routes/test-sample@workspace:packages/test-sample":
+  version: 0.0.0-use.local
+  resolution: "@entity-routes/test-sample@workspace:packages/test-sample"
+  dependencies:
+    "@types/prettier": ^2
+    axios: ^0.21.0
+    commitizen: ^4.2.2
+    husky: ^4.3.0
+    prettier: ^2.2.1
+    prettier-plugin-sorted: ^2.0.0
+    pretty-quick: ^3.1.0
+    standard-version: ^9.0.0
     ttypescript: ^1.5.12
     typescript: ^4.1.2
   languageName: unknown

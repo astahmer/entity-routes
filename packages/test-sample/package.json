@@ -1,6 +1,6 @@
 {
     "private": true,
-    "name": "@entity-routes/sample",
+    "name": "@entity-routes/test-sample",
     "version": "0.1.0",
     "description": "Sample data used for tests.",
     "source": "src/index.ts",
