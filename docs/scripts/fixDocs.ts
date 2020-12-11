@@ -1,16 +1,16 @@
+import { exec } from "child_process";
 import path from "path";
 
+import typeDocsReflections from "../docs.json";
+import pkg from "../package.json";
 import { replaceTypedocLinks } from "./replaceTypedocLinks";
 import { getDocItemTagRefs, references, replaceTagReferences } from "./tag-references";
 import { updateTagReferences } from "./tag-references/updateTagReferences";
-
-const pkg = require("../package.json");
 
 const pageDir = "./src/pages";
 const generatedDocsDir = pkg.directories.typedoc;
 const prefix = `/${path.basename(path.resolve(pkg.directories.typedoc))}`;
 
-const typeDocsReflections = require("../docs.json");
 const typeDocRefs = Object.fromEntries(getDocItemTagRefs(typeDocsReflections));
 
 const fromPath = pageDir;
@@ -27,8 +27,6 @@ const typeDocArgs = {
     prefix,
     dry,
 };
-
-const { exec } = require("child_process");
 
 async function run() {
     await replaceTypedocLinks({ fromPath: generatedDocsDir, prefix });

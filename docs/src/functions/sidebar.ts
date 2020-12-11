@@ -1,3 +1,4 @@
+// import {} from "@entity-routes/core";
 export const defaultSidebarTree: DirectoryTree = { name: "pages", children: [] };
 
 export function getSidebarTree(): DirectoryTree {

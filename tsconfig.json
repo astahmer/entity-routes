@@ -1,24 +1,17 @@
 {
+    "extends": "./tsconfig.base.json",
     "compilerOptions": {
-        "target": "ES2015",
-        "module": "ES2020",
-        "moduleResolution": "node",
-        "outDir": "./dist/esm",
-        "emitDecoratorMetadata": true,
-        "experimentalDecorators": true,
-        "esModuleInterop": true,
-        "allowSyntheticDefaultImports": true,
-        "forceConsistentCasingInFileNames": true,
-        "skipLibCheck": true,
-        "sourceMap": true,
-        "declaration": true,
-        "noUnusedParameters": true,
-        "noImplicitAny": true,
         "baseUrl": "./",
         "paths": {
-            "@/*": ["./src/*"]
-        },
-        "plugins": [{ "transform": "@zerollup/ts-transform-paths" }]
+            "@entity-routes/*": ["./packages/*/src"]
+        }
     },
-    "include": ["./src"]
+    "ts-node": {
+        "transpileOnly": true,
+        "compilerOptions": {
+            "module": "CommonJS",
+            "resolveJsonModule": true,
+            "noImplicitAny": false
+        }
+    }
 }

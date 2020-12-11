@@ -1,7 +1,7 @@
-import { escapeRegex } from "../helpers";
+import consola from "consola";
+import { ReplaceInFileConfig, replaceInFile } from "replace-in-file";
 
-const replace = require("replace-in-file");
-const consola = require("consola");
+import { escapeRegex } from "../helpers";
 
 const [openBracket, closeBracket] = ["[", "]"];
 
@@ -29,7 +29,7 @@ export async function replaceTagReferences({
     consola.info(`Replacing ${name} tag references in: ${files}`);
 
     const tags = Object.keys(source).map((tag) => new RegExp(escapeRegex(tag), "g"));
-    const results = [];
+    const results: TagReplaceResult[] = [];
 
     try {
         const options = {
@@ -81,7 +81,7 @@ export async function replaceTagReferences({
                 return result;
             },
         };
-        await replace(options);
+        await replaceInFile((options as unknown) as ReplaceInFileConfig);
         dry && console.log(results);
         consola.success(`Done replacing ${results.length} ${name} references`);
         return results;
@@ -89,6 +89,16 @@ export async function replaceTagReferences({
         consola.error(`Error while replacing ${name} references`, error);
     }
 }
+
+export type TagReplaceResult = {
+    tag: string;
+    fileName: string;
+    reference: string;
+    result: string;
+    before?: string;
+    after?: string;
+    word?: string;
+};
 
 type GetNextCharIndexArgs = { char: string; str: string; start: number; direction: "prev" | "next" };
 function getNextCharIndex({ char, str, start, direction = "next" }: GetNextCharIndexArgs) {
