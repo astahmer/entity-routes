@@ -1,9 +1,9 @@
 const base = (isRoot) => ({
     skip: {
         changelog: false,
-        bump: !isRoot,
-        commit: !isRoot,
-        tag: !isRoot,
+        bump: true,
+        commit: true,
+        tag: true,
     },
     types: [
         { type: "feat", section: "Features" },
