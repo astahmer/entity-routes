@@ -1,7 +1,7 @@
 {
     "private": true,
     "name": "@entity-routes/test-sample",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "description": "Sample data used for tests.",
     "source": "src/index.ts",
     "main": "dist/cjs/index.js",
