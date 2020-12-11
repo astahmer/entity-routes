@@ -29,7 +29,7 @@ const base = {
 };
 
 module.exports = {
-    base,
+    ...base,
     scoped: (pkgDir, pkgThreshold) => {
         const pkgName = path.basename(pkgDir);
         const currentPackage = `packages/${pkgName}`;
