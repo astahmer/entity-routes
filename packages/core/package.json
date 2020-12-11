@@ -1,6 +1,6 @@
 {
     "name": "@entity-routes/core",
-    "version": "0.2.0",
+    "version": "0.2.1",
     "description": "Design your API around your entities in minutes",
     "source": "src/index.ts",
     "main": "dist/cjs/index.js",
