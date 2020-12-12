@@ -185,16 +185,17 @@ import { Connection } from "typeorm";
 export async function setupKoaApp(connection: Connection) {
     const entities = connection.entityMetadatas.map((meta) => meta.target) as Function[];
     const bridgeRouters = await makeKoaEntityRouters({ connection, entities, options });
+
     const app = new Koa();
     app.use(bodyParser());
-    / Register all routes on koa server
+
+    // Register all routes on koa server
     bridgeRouters.forEach((router) => app.use(router.instance.routes()));
-    / Always validate when no groups are passed on validators
-    setEntityValidatorsDefaultOption(entities);
+
     const server = app.listen(); / random port
     const baseURL = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
-    const client = axios.create({ baseURL });
-    return { baseURL, server, client };
+
+    return { baseURL, server };
 }
 ```
 
@@ -209,15 +210,18 @@ import { Connection } from "typeorm";
 export async function setupExpressApp(connection: Connection) {
     const entities = connection.entityMetadatas.map((meta) => meta.target) as Function[];
     const bridgeRouters = await makeExpressEntityRouters({ connection, entities, options });
+
     const app = express();
     app.use(bodyParser.json());
     app.use(bodyParser.urlencoded({ extended: true }));
-    / Register all routes on Express server
+
+    // Register all routes on Express server
     bridgeRouters.forEach((router) => app.use(router.instance));
+
     const server = app.listen(); / random port
     const baseURL = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
-    const client = axios.create({ baseURL });
-    return { baseURL, server, client };
+
+    return { baseURL, server };
 }
 ```
 
