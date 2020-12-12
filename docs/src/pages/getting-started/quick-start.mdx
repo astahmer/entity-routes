@@ -3,8 +3,8 @@ title: Quick start
 description: A quick tutorial showing the basics.
 ---
 
-import { Tab, TabList, TabPanel, TabPanels, Tabs } from "@chakra-ui/react";
 import { DocAlert } from "@/components";
+import { Tab, TabList, TabPanel, TabPanels, Tabs } from "@chakra-ui/react";
 
 ## Make your entities
 
@@ -79,14 +79,12 @@ It will automatically generate those routes :
     <Tab>Express</Tab>
   </TabList>
 
-
   <TabPanels>
     <TabPanel>
 
-
 ```typescript {10,15}
 import { AddressInfo } from "net";
-import { makeKoaEntityRouters } from "@astahmer/entity-routes";
+import { makeKoaEntityRouters } from "@entity-routes/koa";
 import * as Koa from "koa";
 import * as bodyParser from "koa-bodyparser";
 import { Connection } from "typeorm";
@@ -106,10 +104,9 @@ export async function setupKoaApp(connection: Connection) {
 </TabPanel>
 <TabPanel>
 
-
 ```typescript {10,16}
 import { AddressInfo } from "net";
-import { makeExpressEntityRouters } from "@astahmer/entity-routes";
+import { makeExpressEntityRouters } from "@entity-routes/express";
 import * as bodyParser from "body-parser";
 import * as express from "express";
 import { Connection } from "typeorm";
@@ -131,7 +128,6 @@ export async function setupExpressApp(connection: Connection) {
   </TabPanels>
 </Tabs>
 
-
 ## Final step
 
 That's it. There is no final step. Your routes are ready.
@@ -140,10 +136,8 @@ That's it. There is no final step. Your routes are ready.
 
 <DocAlert status="success">
 
-
 While browsing the documentation, if you feel like an example is missing, feel free to check the
 [`tests`](https://github.com/astahmer/entity-routes/tree/main/tests) folder to see the actual usage of the feature you
 were reading about.
 
 </DocAlert>
-

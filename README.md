@@ -79,7 +79,13 @@ I wanted to get rid of writing the same boring controllers again & again for eac
 Since this library depends on TS Decorators just like typeorm, we need to install ReflectMetadata.
 
 ```bash
-npm i @astahmer/entity-routes reflect-metadata typeorm
+npm i @entity-routes/core @entity-routes/express reflect-metadata typeorm
+```
+
+or
+
+```bash
+npm i @entity-routes/core @entity-routes/koa reflect-metadata typeorm
 ```
 
 Don't forget to import ReflectMetadata in your **app entrypoint**.
@@ -172,7 +178,7 @@ It will automatically generate those routes :
 
 ```typescript
 import { AddressInfo } from "net";
-import { makeKoaEntityRouters } from "@astahmer/entity-routes";
+import { makeKoaEntityRouters } from "@entity-routes/koa";
 import * as Koa from "koa";
 import * as bodyParser from "koa-bodyparser";
 import { Connection } from "typeorm";
@@ -196,7 +202,7 @@ export async function setupKoaApp(connection: Connection) {
 
 ```typescript
 import { AddressInfo } from "net";
-import { makeExpressEntityRouters } from "@astahmer/entity-routes";
+import { makeExpressEntityRouters } from "@entity-routes/express";
 import * as bodyParser from "body-parser";
 import * as express from "express";
 import { Connection } from "typeorm";

@@ -15,7 +15,13 @@ information (`metadata`) and use it to make things like `@EntityRoute`/`@Groups`
 ## Prerequisites
 
 ```bash
-npm i @astahmer/entity-routes typeorm reflect-metadata
+npm i @entity-routes/core @entity-routes/express reflect-metadata typeorm
+```
+
+or
+
+```bash
+npm i @entity-routes/core @entity-routes/koa reflect-metadata typeorm
 ```
 
 Since this library depends on it, we need to enable them

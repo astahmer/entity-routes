@@ -8,7 +8,7 @@ import { AddressInfo } from "net";
 import * as express from "express";
 import * as bodyParser from "body-parser";
 import { Connection } from "typeorm";
-import { makeExpressEntityRouters } from "@astahmer/entity-routes";
+import { makeExpressEntityRouters } from "@entity-routes/express";
 
 export async function setupExpressApp(connection: Connection) {
     const entities = connection.entityMetadatas.map((meta) => meta.target) as Function[];
