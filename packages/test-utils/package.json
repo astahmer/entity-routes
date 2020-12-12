@@ -67,5 +67,25 @@
     },
     "publishConfig": {
         "access": "public"
-    }
+    },
+    "keywords": [
+        "entity",
+        "routes",
+        "entity-routes",
+        "api",
+        "rest",
+        "decorators",
+        "typescript",
+        "model",
+        "typeorm",
+        "koa",
+        "express",
+        "connect",
+        "nextjs",
+        "nuxt",
+        "subresources",
+        "test-utils",
+        "test",
+        "utils"
+    ]
 }
