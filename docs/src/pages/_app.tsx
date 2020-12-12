@@ -1,19 +1,12 @@
-import { Divider } from "@chakra-ui/react";
-import { DefaultSeo } from "next-seo";
-import Head from "next/head";
-import { Router } from "next/router";
-import { Fragment } from "react";
-
 import { Logo } from "@/components";
 import { LayoutProvider, PageProvider } from "@/components/layout";
 import { ColorModeSwitch, GithubLink } from "@/components/layout/NavBar";
 import MDXComponents from "@/components/mdx";
 import { seoConfig } from "@/seo/config";
-import { trackPageview } from "@/seo/trackEvent";
-
-Router.events.on("routeChangeComplete", (url) => {
-    trackPageview(url);
-});
+import { Divider } from "@chakra-ui/react";
+import { DefaultSeo } from "next-seo";
+import Head from "next/head";
+import { Fragment } from "react";
 
 export default function App(props) {
     const { Component, pageProps } = props;
