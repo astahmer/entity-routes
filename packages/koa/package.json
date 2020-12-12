@@ -1,6 +1,6 @@
 {
     "name": "@entity-routes/koa",
-    "version": "0.2.1",
+    "version": "0.2.2",
     "description": "Koa integration for entity-routes.",
     "source": "src/index.ts",
     "main": "dist/cjs/index.js",

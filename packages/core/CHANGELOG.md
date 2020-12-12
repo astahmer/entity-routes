@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.2](https://github.com/astahmer/entity-routes/compare/v0.2.1...v0.2.2) (2020-12-12)
+
+
+### Documentation
+
+* update install instructions ([a5ea2cf](https://github.com/astahmer/entity-routes/commit/a5ea2cf199613f45e40a2a66970d6ee1c75a313a))
+
 ### [0.2.1](https://github.com/astahmer/entity-routes/compare/v0.2.0...v0.2.1) (2020-12-11)
 
 ### [0.1.8](https://github.com/astahmer/entity-routes/compare/v0.1.7...v0.1.8) (2020-11-21)

@@ -1,6 +1,6 @@
 {
     "name": "@entity-routes/shared",
-    "version": "0.2.1",
+    "version": "0.2.2",
     "description": "Shared utilities used by entity-routes.",
     "source": "src/index.ts",
     "main": "dist/cjs/index.js",
