@@ -3,6 +3,7 @@ import { ObjectType } from "typeorm";
 
 import { AnyFunction, deepMerge } from "@entity-routes/shared";
 
+import { OrmProvider } from "../orm/OrmProvider";
 import { GenericEntity } from "../types";
 import { EntityRouteOptions, EntityRouter, EntityRouterOptions, getRouteMetadata, setEntityRouter } from ".";
 
@@ -51,6 +52,8 @@ export type MakeEntityRouters<T extends AnyFunction = any> = {
     entities: ObjectType<GenericEntity>[];
     /** Each EntityRouter will take its default options from this, this is deep merged with the defaultEntityRouteOptions */
     options: EntityRouterOptions<T>;
+    /** ORM Provider that will be responsible for handling entities */
+    ormProvider: OrmProvider;
 };
 
 /** Set "always" validator option to true when no groups are passed to validation decorators */
