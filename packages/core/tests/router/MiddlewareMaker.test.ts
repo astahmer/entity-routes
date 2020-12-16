@@ -32,7 +32,6 @@ describe("MiddlewareMaker", () => {
     afterAll(closeTestConnection);
 
     it("makeRequestContextMiddleware", async () => {
-        const connection = getConnection();
         const repository = getRepository(User);
         const maker = new MiddlewareMaker(repository);
 
@@ -41,9 +40,7 @@ describe("MiddlewareMaker", () => {
         const nextSpy = jest.fn();
         const req = mw(ctx, nextSpy);
 
-        expect(ctx.state.queryRunner.connection).toBe(connection);
         expect(ctx.state.requestContext.queryParams).toEqual({ id: "123" });
-        expect(ctx.state.queryRunner.isReleased).toBe(false);
 
         await req;
 

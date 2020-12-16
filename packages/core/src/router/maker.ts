@@ -1,27 +1,14 @@
 import { getMetadataStorage } from "class-validator";
-import { Connection, ConnectionManager, ObjectType, getConnectionManager } from "typeorm";
+import { ObjectType } from "typeorm";
 
 import { AnyFunction, deepMerge } from "@entity-routes/shared";
 
 import { GenericEntity } from "../types";
 import { EntityRouteOptions, EntityRouter, EntityRouterOptions, getRouteMetadata, setEntityRouter } from ".";
 
-let connectionManager: ConnectionManager;
-
 /** Make an EntityRouter out of each given entities and assign them a global options object (overridable with @EntityRoute) */
-export async function makeEntityRouters<T extends AnyFunction = any>({
-    connection,
-    entities,
-    options,
-}: MakeEntityRouters<T>) {
+export async function makeEntityRouters<T extends AnyFunction = any>({ entities, options }: MakeEntityRouters<T>) {
     options = deepMerge({}, defaultEntityRouteOptions, options);
-
-    // Init with existing connections
-    connectionManager = getConnectionManager();
-    // Handle HMR by resetting connections array
-    if (connectionManager) connectionManager.connections.splice(0, connectionManager.connections.length);
-
-    connectionManager.connections.push(connection);
 
     // Fix class-validator shitty default behavior with groups
     setEntityValidatorsDefaultOption(entities);
@@ -60,8 +47,6 @@ export const defaultEntityRouteOptions: EntityRouteOptions = {
 };
 
 export type MakeEntityRouters<T extends AnyFunction = any> = {
-    /** TypeORM active connection for the EntityRouters */
-    connection: Connection;
     /** The list of entities with EntityRoute metadata to make an EntityRouter for */
     entities: ObjectType<GenericEntity>[];
     /** Each EntityRouter will take its default options from this, this is deep merged with the defaultEntityRouteOptions */

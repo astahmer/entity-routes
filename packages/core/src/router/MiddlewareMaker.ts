@@ -1,5 +1,5 @@
 import { Container } from "typedi";
-import { Connection, QueryRunner, Repository, getConnection } from "typeorm";
+import { QueryRunner, Repository } from "typeorm";
 
 import {
     DeepPartial,
@@ -28,12 +28,10 @@ export class MiddlewareMaker<Entity extends GenericEntity> {
         return this.repository.metadata;
     }
 
-    private connection: Connection;
     private handler: Handler<Entity>;
     private writer: Writer<Entity>;
 
     constructor(private repository: Repository<Entity>, private options: EntityRouter<Entity>["options"] = {}) {
-        this.connection = getConnection();
         this.handler = new Handler(repository, options);
         this.writer = new Writer(repository, options);
     }
@@ -43,13 +41,7 @@ export class MiddlewareMaker<Entity extends GenericEntity> {
         return async (ctx: ContextWithState, next) => {
             const requestContext = makeRequestContext<Entity>(args, ctx);
 
-            // Create query runner to retrieve requestContext in subscribers
-            const queryRunner = this.connection.createQueryRunner();
-            queryRunner.data = { requestContext };
-
             ctx.state.requestContext = requestContext;
-            ctx.state.queryRunner = queryRunner;
-
             await this.options.hooks?.beforeHandle?.(ctx as ContextWithState);
 
             return next();
@@ -91,10 +83,6 @@ export class MiddlewareMaker<Entity extends GenericEntity> {
     /** Release queryRunner / remove requestContext from store */
     public makeEndResponseMiddleware(): Middleware {
         return async (ctx: ContextWithState) => {
-            if (!ctx.state.queryRunner.isReleased) {
-                await ctx.state.queryRunner.release();
-            }
-
             await this.options.hooks?.afterHandle?.(ctx);
 
             removeRequestContext(ctx.state.requestId);
