@@ -22,8 +22,8 @@ describe("EntityRouter", () => {
             username: string;
         }
         const entities = [User];
-        const connection = await createTestConnection(entities);
-        const bridgeRouters = await makeTestEntityRouters({ connection, entities });
+        await createTestConnection(entities);
+        const bridgeRouters = await makeTestEntityRouters({ entities });
         const routers = bridgeRouters.map((bridge) => bridge.instance);
 
         const routeNames = flatMapOnProp(
@@ -61,8 +61,8 @@ describe("EntityRouter", () => {
         }
 
         const entities = [User];
-        const connection = await createTestConnection(entities);
-        const bridgeRouters = await makeTestEntityRouters({ connection, entities });
+        await createTestConnection(entities);
+        const bridgeRouters = await makeTestEntityRouters({ entities });
         const routers = bridgeRouters.map((bridge) => bridge.instance);
 
         const routeNames = flatMapOnProp(
@@ -95,8 +95,8 @@ describe("EntityRouter", () => {
         }
 
         const entities = [User];
-        const connection = await createTestConnection(entities);
-        const bridgeRouters = await makeTestEntityRouters({ connection, entities });
+        await createTestConnection(entities);
+        const bridgeRouters = await makeTestEntityRouters({ entities });
         const routers = bridgeRouters.map((bridge) => bridge.instance);
 
         const routeNames = flatMapOnProp(

@@ -20,9 +20,9 @@ import {
 import { closeTestConnection, createTestConnection } from "@entity-routes/test-utils";
 
 export async function setupTestExpressApp(entities: Function[], options?: EntityRouteOptions) {
-    const connection = await createTestConnection(entities);
+    await createTestConnection(entities);
 
-    const bridgeRouters = await makeExpressEntityRouters({ connection, entities, options });
+    const bridgeRouters = await makeExpressEntityRouters({ entities, options });
     const app = express();
     app.use(bodyParser.json());
     app.use(bodyParser.urlencoded({ extended: true }));
@@ -52,9 +52,9 @@ describe("Express BridgeRouter adapter", () => {
     });
 
     it("makeExpressEntityRouters", async () => {
-        const connection = await createTestConnection(entities);
+        await createTestConnection(entities);
 
-        const bridgeRouters = await makeExpressEntityRouters({ connection, entities });
+        const bridgeRouters = await makeExpressEntityRouters({ entities });
         const routers = (bridgeRouters.map((bridge) => bridge.instance) as any) as Router[];
 
         const routePaths = flatMapOnProp(

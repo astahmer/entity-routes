@@ -46,9 +46,9 @@ describe("container", () => {
         }
 
         const entities = [Role, User];
-        const connection = await createTestConnection(entities);
+        await createTestConnection(entities);
 
-        await makeTestEntityRouters({ connection, entities });
+        await makeTestEntityRouters({ entities });
 
         const entityRouters = getEntityRouters();
         expect(Object.keys(entityRouters)).toEqual(["Role", "User"]);

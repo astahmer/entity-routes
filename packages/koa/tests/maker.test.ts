@@ -20,9 +20,7 @@ import {
 import { closeTestConnection, createTestConnection } from "@entity-routes/test-utils";
 
 async function setupTestKoaApp(entities: Function[], options?: EntityRouteOptions) {
-    const connection = await createTestConnection(entities);
-
-    const bridgeRouters = await makeKoaEntityRouters({ connection, entities, options });
+    const bridgeRouters = await makeKoaEntityRouters({ entities, options });
     const app = new Koa();
     app.use(bodyParser());
 
@@ -51,10 +49,9 @@ describe("Koa integration", () => {
     });
 
     it("makeKoaEntityRouters", async () => {
-        const connection = await createTestConnection(entities);
+        await createTestConnection(entities);
 
         const bridgeRouters = await makeKoaEntityRouters({
-            connection,
             entities,
             options: { defaultWriterOptions: { shouldSetSubresourcesIriOnItem: true } },
         });

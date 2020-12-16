@@ -1,4 +1,4 @@
-import { Column, Entity, PrimaryGeneratedColumn, getConnection, getRepository } from "typeorm";
+import { Column, Entity, PrimaryGeneratedColumn, getRepository } from "typeorm";
 
 import {
     ENTITY_META_SYMBOL,
