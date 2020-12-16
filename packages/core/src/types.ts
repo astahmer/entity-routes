@@ -1,6 +1,4 @@
-import { ObjectType } from "typeorm";
-
-import { NonFunctionKeys } from "@entity-routes/shared";
+import { NonFunctionKeys, ObjectType } from "@entity-routes/shared";
 
 export interface GenericEntity {
     [k: string]: any;

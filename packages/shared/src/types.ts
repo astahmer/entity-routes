@@ -81,3 +81,6 @@ export type ObjectOrArrayType<T> = T extends object
         : T
     : never;
 export type ObjectOrCollectionType<T> = ObjectLiteralType<T> | Array<ObjectLiteralType<Unpacked<T>>>;
+
+// From typeorm
+export declare type ObjectType<T> = { new (): T } | Function;
