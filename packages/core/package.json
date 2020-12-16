@@ -22,10 +22,10 @@
     "author": "Alexandre Stahmer <alexandre.stahmer@gmail.com>",
     "license": "MIT",
     "scripts": {
-        "test": "jest --runInBand --forceExit",
+        "test": "jest --runInBand",
         "test:clear": "jest --clearCache",
-        "test:watch": "jest --runInBand --passWithNoTests --forceExit --watch --no-watchman",
-        "test:coverage": "jest --runInBand --passWithNoTests --forceExit --coverage",
+        "test:watch": "jest --runInBand --passWithNoTests --watch --no-watchman",
+        "test:coverage": "jest --runInBand --passWithNoTests --coverage",
         "dev": "ttsc --watch --incremental -p tsconfig.build.json --outDir dist/esm",
         "build:cjs": "ttsc -p tsconfig.build.json --outDir dist/cjs -m CommonJS",
         "build:esm": "ttsc -p tsconfig.build.json --outDir dist/esm",
