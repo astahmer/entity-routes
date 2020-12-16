@@ -1,6 +1,5 @@
 export * from "./actions";
 export * from "./bridge/index";
-export * from "./container";
 export * from "./EntityRouter";
 export * from "./maker";
 export * from "./MiddlewareMaker";

@@ -27,6 +27,16 @@ import {
 } from ".";
 
 export class EntityRouter<Entity extends GenericEntity> {
+    private static routers: Record<string, EntityRouter<any>> = {};
+
+    static getAll() {
+        return this.routers;
+    }
+    static resetAll() {
+        this.routers = {};
+        return this.routers;
+    }
+
     public readonly middlewareMaker: MiddlewareMaker<Entity>;
     public readonly subresourceMaker: SubresourceMaker<Entity>;
 

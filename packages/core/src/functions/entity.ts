@@ -4,7 +4,7 @@ import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
 
 import { CType } from "@entity-routes/shared";
 
-import { getEntityRouters, getRouteMetadata } from "../router";
+import { EntityRouter, getRouteMetadata } from "../router";
 import { GenericEntity, Props } from "../types";
 import { formatRoutePath } from ".";
 
@@ -19,7 +19,7 @@ export const getEntrypointFromIri = (iri: string) => iri.match(iriRegex)[1];
 export const isIriValidForProperty = (iri: string, column: ColumnMetadata) => {
     if (!iri.startsWith("/api/") || !column) return;
 
-    const entityRouters = getEntityRouters();
+    const entityRouters = EntityRouter.getAll();
     const tableName = column.relationMetadata
         ? column.relationMetadata.inverseEntityMetadata.tableName
         : column.entityMetadata.tableName;

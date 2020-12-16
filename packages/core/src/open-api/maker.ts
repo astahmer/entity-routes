@@ -13,7 +13,7 @@ import { Container } from "typedi";
 import { deepMerge, fromEntries, last, sortObjectByKeys } from "@entity-routes/shared";
 
 import { ENTITY_META_SYMBOL, MappingItem, MappingManager } from "../mapping";
-import { getEntityRouters } from "../router";
+import { EntityRouter } from "../router/EntityRouter";
 import { addComponentsReferences } from "./baseReferences";
 import {
     getBaseRouteResponseSchemaByType,
@@ -30,7 +30,7 @@ export const makeOpenApiBuilderFrom = (obj: OpenAPIObject) =>
     addComponentsReferences(OpenApiBuilder.create(deepMerge({}, OpenApiBuilder.create().rootDoc, obj)));
 export function makeOpenApi(): OpenAPIObject {
     const mappingManager = Container.get(MappingManager);
-    const entityRoutes = getEntityRouters();
+    const entityRoutes = EntityRouter.getAll();
     const entries = Object.entries(entityRoutes);
     const paths: PathsObject = {};
 

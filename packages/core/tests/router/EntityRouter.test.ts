@@ -1,6 +1,6 @@
 import { Column, DeleteDateColumn, Entity, PrimaryGeneratedColumn } from "typeorm";
 
-import { EntityRoute } from "@entity-routes/core";
+import { EntityRoute, EntityRouter } from "@entity-routes/core";
 import { ObjectLiteral, flatMapOnProp } from "@entity-routes/shared";
 import {
     TestContext,
@@ -11,6 +11,42 @@ import {
 } from "@entity-routes/test-utils";
 
 describe("EntityRouter", () => {
+    it("can retrieve all routers", () => {
+        const entityRouters = EntityRouter.getAll();
+        expect(entityRouters).toEqual({});
+    });
+
+    it("has registered routes", async () => {
+        class AbstractEntity {
+            @PrimaryGeneratedColumn()
+            id: number;
+        }
+
+        @EntityRoute()
+        @Entity()
+        class Role extends AbstractEntity {
+            @Column()
+            title: string;
+        }
+
+        @EntityRoute()
+        @Entity()
+        class User extends AbstractEntity {
+            @Column()
+            name: string;
+        }
+
+        const entities = [Role, User];
+        await createTestConnection(entities);
+
+        await makeTestEntityRouters({ entities });
+
+        const entityRouters = EntityRouter.getAll();
+        expect(Object.keys(entityRouters)).toEqual(["Role", "User"]);
+
+        return closeTestConnection();
+    });
+
     it("generates no routes when no params given", async () => {
         @EntityRoute()
         @Entity()

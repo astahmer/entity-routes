@@ -11,7 +11,6 @@ import {
     SubresourceMaker,
     SubresourceMakerOptions,
     SubresourceOptions,
-    getEntityRouters,
     getRouteMetadata,
     printBridgeRoute,
 } from "@entity-routes/core";
@@ -81,7 +80,7 @@ describe("SubresourceManager", () => {
         const manager = new SubresourceMaker(repository, routeMeta, makeTestAdapter);
 
         const articleEntityRouter = new EntityRouter(Article, routeMeta, options);
-        const entityRouters = getEntityRouters();
+        const entityRouters = EntityRouter.getAll();
         entityRouters[Article.name] = articleEntityRouter;
 
         const router = new BridgeRouter(createTestRouter, registerTestRouteFromBridgeRoute);
@@ -125,7 +124,7 @@ describe("SubresourceManager", () => {
 
         const manager = new SubresourceMaker(repository, routeMeta, makeTestAdapter);
 
-        const entityRouters = getEntityRouters();
+        const entityRouters = EntityRouter.getAll();
         const roleEntityRouter = new EntityRouter(Role, routeMeta, options);
         entityRouters[Role.name] = roleEntityRouter;
 
@@ -182,7 +181,7 @@ describe("SubresourceManager", () => {
             registerAllSubresources();
             await createTestConnection(entities);
 
-            const entityRouters = getEntityRouters();
+            const entityRouters = EntityRouter.getAll();
 
             // Registering all EntityRouter
             entities.forEach((entity) => {
@@ -234,7 +233,7 @@ describe("SubresourceManager", () => {
             registerAllSubresources();
             await createTestConnection(entities);
 
-            const entityRouters = getEntityRouters();
+            const entityRouters = EntityRouter.getAll();
             const mergedOptions: EntityRouterOptions = { ...options, defaultSubresourcesOptions };
 
             entities.forEach((entity) => {
@@ -301,7 +300,7 @@ describe("SubresourceManager", () => {
 
             await createTestConnection(entities);
 
-            const entityRouters = getEntityRouters();
+            const entityRouters = EntityRouter.getAll();
 
             entities.forEach((entity) => {
                 entityRouters[entity.name] = new EntityRouter(entity, getRouteMetadata(entity), options);
@@ -369,7 +368,7 @@ describe("SubresourceManager", () => {
 
             await createTestConnection(entities);
 
-            const entityRouters = getEntityRouters();
+            const entityRouters = EntityRouter.getAll();
 
             entities.forEach((entity) => {
                 entityRouters[entity.name] = new EntityRouter(entity, getRouteMetadata(entity), options);
@@ -429,7 +428,7 @@ describe("SubresourceManager", () => {
 
             await createTestConnection(entities);
 
-            const entityRouters = getEntityRouters();
+            const entityRouters = EntityRouter.getAll();
 
             entities.forEach((entity) => {
                 entityRouters[entity.name] = new EntityRouter(entity, getRouteMetadata(entity), options);
@@ -480,7 +479,7 @@ describe("SubresourceManager", () => {
 
             await createTestConnection(entities);
 
-            const entityRouters = getEntityRouters();
+            const entityRouters = EntityRouter.getAll();
             const circularOptions = { shouldAllowCircular: true };
 
             entities.forEach((entity) => {

@@ -3,9 +3,8 @@ import { ObjectType } from "typeorm";
 
 import { AnyFunction, deepMerge } from "@entity-routes/shared";
 
-import { OrmProvider } from "../orm/OrmProvider";
 import { GenericEntity } from "../types";
-import { EntityRouteOptions, EntityRouter, EntityRouterOptions, getRouteMetadata, setEntityRouter } from ".";
+import { EntityRouteOptions, EntityRouter, EntityRouterOptions, getRouteMetadata } from ".";
 
 /** Make an EntityRouter out of each given entities and assign them a global options object (overridable with @EntityRoute) */
 export async function makeEntityRouters<T extends AnyFunction = any>({ entities, options }: MakeEntityRouters<T>) {
@@ -14,13 +13,15 @@ export async function makeEntityRouters<T extends AnyFunction = any>({ entities,
     // Fix class-validator shitty default behavior with groups
     setEntityValidatorsDefaultOption(entities);
 
+    const routers = EntityRouter.resetAll();
+
     // Instantiate every EntityRouter
     const entityRouters: EntityRouter<GenericEntity>[] = entities.reduce((acc, entity) => {
         const routeMeta = getRouteMetadata(entity);
         if (routeMeta) {
             // Add this EntityRouter to the list (used by subresources/custom actions/services)
             const router = new EntityRouter(entity, routeMeta, options);
-            setEntityRouter(entity.name, router);
+            routers[entity.name] = router;
             acc.push(router);
         }
 
@@ -52,8 +53,6 @@ export type MakeEntityRouters<T extends AnyFunction = any> = {
     entities: ObjectType<GenericEntity>[];
     /** Each EntityRouter will take its default options from this, this is deep merged with the defaultEntityRouteOptions */
     options: EntityRouterOptions<T>;
-    /** ORM Provider that will be responsible for handling entities */
-    ormProvider: OrmProvider;
 };
 
 /** Set "always" validator option to true when no groups are passed to validation decorators */

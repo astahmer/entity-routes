@@ -1,7 +1,7 @@
 import { IsDate, IsEmail, IsString, getMetadataStorage } from "class-validator";
 import { Column, Entity, ManyToOne, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 
-import { EntityRoute, getEntityRouters } from "@entity-routes/core";
+import { EntityRoute, EntityRouter } from "@entity-routes/core";
 import { closeTestConnection, createTestConnection, makeTestEntityRouters } from "@entity-routes/test-utils";
 
 describe("maker", () => {
@@ -83,7 +83,7 @@ describe("maker", () => {
 
         it("only make routers for entities decorated with @EntityRoute", async () => {
             await makeTestEntityRouters({ entities });
-            const entityRouters = getEntityRouters();
+            const entityRouters = EntityRouter.getAll();
             expect(Object.keys(entityRouters).length).toEqual(3);
         });
     });

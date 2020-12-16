@@ -5,8 +5,8 @@ import { ObjectOrCollectionKeys, last, pick, prop } from "@entity-routes/shared"
 
 import { formatRouteName, formatRoutePath, isRelationSingle } from "../functions";
 import { GenericEntity } from "../types";
-import { EntityRouterOptions, RouteMetadata, getRouteSubresourcesMetadata } from "./EntityRouter";
-import { BridgeRouter, CRUD_ACTIONS, getEntityRouters } from ".";
+import { EntityRouter, EntityRouterOptions, RouteMetadata, getRouteSubresourcesMetadata } from "./EntityRouter";
+import { BridgeRouter, CRUD_ACTIONS } from ".";
 
 export class SubresourceMaker<Entity extends GenericEntity> {
     private subresourcesMeta: RouteSubresourcesMeta<Entity>;
@@ -30,7 +30,7 @@ export class SubresourceMaker<Entity extends GenericEntity> {
             return;
         }
 
-        const entityRouters = getEntityRouters();
+        const entityRouters = EntityRouter.getAll();
 
         // For each subresources of this entity
         for (let key in this.subresourcesMeta.properties) {
