@@ -1,4 +1,5 @@
 export interface BaseEntityMeta {
+    name: string;
     target: Function | string;
     tableName: string;
     relations: RelationMetadata[];
@@ -8,9 +9,16 @@ export interface BaseEntityMeta {
 }
 
 export interface RelationMetadata {
+    target: Function | string;
     propertyName: string;
     entityMetadata: BaseEntityMeta;
-    inverseEntityMetadata: BaseEntityMeta;
+    isOneToOne: boolean;
+    isOneToMany: boolean;
+    isManyToOne: boolean;
+    isManyToMany: boolean;
+    inversePropertyName?: string | undefined;
+    inverseEntityMetadata?: BaseEntityMeta | undefined;
+    inverseRelation?: RelationMetadata | undefined;
 }
 
 export type StringColumnType = string & { _type: "ColumnType" };
@@ -22,5 +30,6 @@ export type ColumnType = StringColumnType | FunctionColumnType;
 export interface ColumnMetadata {
     type: ColumnType;
     propertyName: string;
-    relationMeta: RelationMetadata;
+    entityMetadata: BaseEntityMeta;
+    relationMetadata?: RelationMetadata | undefined;
 }

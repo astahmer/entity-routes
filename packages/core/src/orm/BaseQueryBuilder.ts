@@ -8,9 +8,9 @@ export interface BaseQueryBuilder<Entity extends GenericEntity> extends WhereExp
     addSelect(selection: string[]): this;
     addSelect(selection: string, selectionAliasName?: string): this;
     leftJoin(property: string, alias: string): this;
-    innerJoin(property: string, alias: string, condition?: string, parameters?: ObjectLiteral): this;
+    innerJoin(property: string, alias: string, condition?: ObjectLiteral): this;
+    getSelecteds(): string[];
     getJoins(): BaseQueryBuilderJoin[];
-    getWhereConditions(): WhereCondition[];
     addOrderBy(sort: string, order?: OrderDirectionCaps): this;
     take(take?: number): this;
     skip(skip?: number): this;
@@ -26,24 +26,15 @@ export interface RelationQueryBuilder {
 }
 
 export interface WhereExpression {
-    where(where: string, parameters?: ObjectLiteral): this;
-    andWhere(where: string, parameters?: ObjectLiteral): this;
-    orWhere(where: string, parameters?: ObjectLiteral): this;
+    where(condition: string, parameters?: ObjectLiteral): this;
+    andWhere(condition: string, parameters?: ObjectLiteral): this;
+    orWhere(condition: string, parameters?: ObjectLiteral): this;
 }
 
 export type WhereFactory = (qb: WhereExpression) => any;
-export interface NestedWhereExpression {
-    new (whereFactory: WhereFactory): this;
-}
-
 export interface BaseQueryBuilderJoin {
     type: "LEFT" | "INNER";
     onProperty: string;
-}
-
-export interface WhereCondition {
-    type: "simple" | "and" | "or";
-    condition: string;
 }
 
 export interface BaseQueryBuilderWithDeleted<Entity extends GenericEntity> extends BaseQueryBuilder<Entity> {

@@ -2,14 +2,13 @@ import { AddressInfo } from "net";
 
 import axios from "axios";
 
-import { EntityRouteOptions } from "@entity-routes/core";
+import { EntityRouteOptions } from "@entity-routes/core/src";
+import { createTestServer, makeTestEntityRouters } from "@entity-routes/test-utils/src";
 
-import { makeTestEntityRouters } from "./adapter";
 import { createTestConnection } from "./connection";
-import { createTestServer } from "./server";
 
 export async function setupTestApp(entities: Function[], options?: EntityRouteOptions) {
-    await createTestConnection(entities);
+    const DI = await createTestConnection(entities);
 
     const bridgeRouters = await makeTestEntityRouters({ entities, options });
     const app = createTestServer();
@@ -20,5 +19,5 @@ export async function setupTestApp(entities: Function[], options?: EntityRouteOp
     const server = app.listen(); // random port
     const baseURL = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
     const client = axios.create({ baseURL });
-    return { baseURL, server, client };
+    return { baseURL, server, client, DI };
 }
