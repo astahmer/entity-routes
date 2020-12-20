@@ -1,21 +1,24 @@
-import { EntityMetadata, getRepository } from "typeorm";
-
 import { combineUniqueValues } from "@entity-routes/shared";
 
 import { ACCESSOR_PREFIX, COMPUTED_PREFIX, MetaKey, RouteOperation, getGroupsMetadata } from "../decorators";
+import { BaseEntityMeta, OrmProvider } from "../orm";
 import { GroupsMetadata, getInheritanceTree } from "./GroupsMetadata";
 
 export class EntityGroupsMetadata extends GroupsMetadata {
-    /** EntityMetadata associated with the class */
+    get ormProvider() {
+        return OrmProvider.get();
+    }
+
+    /** BaseEntityMeta associated with the class */
     get entityMeta() {
         if (this._cachedEntityMeta) return this._cachedEntityMeta;
 
-        const repository = getRepository(this.entityTarget);
+        const repository = this.ormProvider.getRepository(this.entityTarget);
         this._cachedEntityMeta = repository.metadata;
         return this._cachedEntityMeta;
     }
 
-    private _cachedEntityMeta: EntityMetadata;
+    private _cachedEntityMeta: BaseEntityMeta;
 
     constructor(metaKey: MetaKey, entityTarget: Function) {
         super(metaKey, entityTarget);
@@ -24,7 +27,7 @@ export class EntityGroupsMetadata extends GroupsMetadata {
     /**
      * Get exposed props that are primitives props, used in queryBuilder selects
      */
-    getSelectProps(operation: RouteOperation, routeContext: EntityMetadata, withPrefix = true, prefix?: string) {
+    getSelectProps(operation: RouteOperation, routeContext: BaseEntityMeta, withPrefix = true, prefix?: string) {
         const relationNames = this.entityMeta.relations.map((rel) => rel.propertyName);
         return this.getExposedPropsOn(operation, routeContext)
             .filter(
@@ -39,7 +42,7 @@ export class EntityGroupsMetadata extends GroupsMetadata {
     /**
      * Get exposed props that are relations props, used to retrieve nested entities
      */
-    getRelationPropsMetas(operation: RouteOperation, routeContext: EntityMetadata) {
+    getRelationPropsMetas(operation: RouteOperation, routeContext: BaseEntityMeta) {
         return this.getExposedPropsOn(operation, routeContext)
             .map((propName) => this.entityMeta.relations.find((rel) => rel.propertyName === propName))
             .filter((rel) => rel);
@@ -48,14 +51,14 @@ export class EntityGroupsMetadata extends GroupsMetadata {
     /**
      * Get exposed props that are computed props, used to retrieve themselves
      */
-    getComputedProps(operation: RouteOperation, routeContext: EntityMetadata) {
+    getComputedProps(operation: RouteOperation, routeContext: BaseEntityMeta) {
         return this.getExposedPropsOn(operation, routeContext).filter((propName) => propName.includes(COMPUTED_PREFIX));
     }
 
     /**
-     * Get exposed props (from groups) for a given entity (using its EntityMetadata) on a specific operation
+     * Get exposed props (from groups) for a given entity (using its BaseEntityMeta) on a specific operation
      */
-    getExposedPropsOn(operation: RouteOperation, routeContext: EntityMetadata) {
+    getExposedPropsOn(operation: RouteOperation, routeContext: BaseEntityMeta) {
         let exposedProps = this.exposedPropsByContexts[routeContext.tableName];
 
         if (!exposedProps || !exposedProps[operation]) {

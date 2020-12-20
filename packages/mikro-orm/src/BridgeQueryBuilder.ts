@@ -1,13 +1,10 @@
-import { EntityManager, JoinOptions, QueryBuilder } from "@mikro-orm/knex";
+import { JoinOptions, QueryBuilder } from "@mikro-orm/knex";
 
 import { BaseQueryBuilder, BaseQueryBuilderJoin, GenericEntity, OrderDirectionCaps } from "@entity-routes/core";
 import { ObjectLiteral } from "@entity-routes/shared";
 
-// import { JoinOptions } from "@mikro-orm/core";
-import { BridgeRepository } from "./BridgeRepository";
-
 export class BridgeQueryBuilder<Entity extends GenericEntity> implements BaseQueryBuilder<Entity> {
-    constructor(public readonly repository: BridgeRepository<Entity>, public readonly instance: QueryBuilder<Entity>) {}
+    constructor(public readonly instance: QueryBuilder<Entity>) {}
 
     // BaseQueryBuilder
     select(selection: string[]) {
@@ -45,13 +42,18 @@ export class BridgeQueryBuilder<Entity extends GenericEntity> implements BaseQue
         return this.instance.getSingleResult();
     }
     async getManyAndCount() {
-        // TODO count
-        const countQuery = this.instance
-            .clone()
-            .getKnexQuery()
-            .count(...[this.instance["metadata"].find(this.instance["entityName"])!.primaryKeys]);
-        const count = (await countQuery.then()) as number;
-        return Promise.all([this.instance.getResultList(), count]);
+        const countQuery = this.instance.clone().getKnexQuery().clearSelect().count("* as count");
+        const [results, [{ count }]] = await Promise.all([this.instance.getResultList(), countQuery.then()]);
+
+        const data: [Entity[], number] = [results, count];
+        return data;
+    }
+    update(data: ObjectLiteral) {
+        this.instance.update(data);
+        return this;
+    }
+    execute() {
+        return this.instance.execute();
     }
 
     // WhereExpression
@@ -60,7 +62,7 @@ export class BridgeQueryBuilder<Entity extends GenericEntity> implements BaseQue
         // knex.where(condition, parameters);
         // const knex = (this.repository.provider.orm.em as EntityManager).getKnex();
         // this.instance.where(knex.raw(condition, parameters))
-        this.instance.where(condition, Object.values(parameters));
+        this.instance.where(parameters);
         return this;
     }
     andWhere(condition: string, parameters?: ObjectLiteral) {
@@ -79,10 +81,7 @@ export class BridgeQueryBuilder<Entity extends GenericEntity> implements BaseQue
             onProperty: join.path,
         }));
     }
-    // getWhereConditions(){
-    //     return Object.entries(this.instance["_cond"]);
-    // }
-    getSelecteds() {
+    getSelectedFields() {
         return this.instance._fields as string[];
     }
 }

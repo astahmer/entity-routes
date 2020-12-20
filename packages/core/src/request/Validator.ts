@@ -1,10 +1,10 @@
 import { EntityValidator, EntityValidatorFunctionOptions } from "@astahmer/entity-validator";
 import { ValidatorOptions, validate } from "class-validator";
 import { Container, Service } from "typedi";
-import { EntityMetadata } from "typeorm";
 
 import { ObjectLiteral, isDev, isObjectLiteral, isType } from "@entity-routes/shared";
 
+import { BaseEntityMeta } from "../orm";
 import { RequestContextMinimal } from "../router";
 import { GenericEntity } from "../types";
 
@@ -12,7 +12,7 @@ import { GenericEntity } from "../types";
 export class Validator {
     /** Validates sent values & return a record of validation errors */
     public async validateItem<Entity extends GenericEntity = GenericEntity>(
-        rootMetadata: EntityMetadata,
+        rootMetadata: BaseEntityMeta,
         item: Entity,
         options: ValidateItemOptions = {}
     ) {
@@ -33,7 +33,7 @@ export class Validator {
 
     /** Recursively validate sent values & returns errors for each entity not passing validation */
     private async recursiveValidate<Entity extends GenericEntity = GenericEntity>(
-        rootMetadata: EntityMetadata,
+        rootMetadata: BaseEntityMeta,
         item: Entity,
         currentPath: string,
         errorResults: Record<string, EntityError[]>,

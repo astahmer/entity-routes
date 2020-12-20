@@ -1,10 +1,10 @@
 import { Container } from "typedi";
-import { Brackets, ObjectLiteral, WhereExpression } from "typeorm";
 
-import { get, isDefined, setNestedKey, sortBy, sortObjectByKeys } from "@entity-routes/shared";
+import { ObjectLiteral, get, isDefined, setNestedKey, sortBy, sortObjectByKeys } from "@entity-routes/shared";
 
 import { RelationManager } from "../database";
 import { formatIriToId, isIriValidForProperty, isWhereType } from "../functions";
+import { OrmProvider, WhereExpression } from "../orm";
 import {
     AbstractFilter,
     AbstractFilterApplyArgs,
@@ -20,6 +20,10 @@ import { StrategyType, WhereManager } from ".";
 
 /** Add a/multiple where clause on any (deep?) properties of the decorated entity  */
 export class SearchFilter extends AbstractFilter<SearchFilterOptions, StrategyType> {
+    get ormProvider() {
+        return OrmProvider.get();
+    }
+
     get relationManager() {
         return Container.get(RelationManager);
     }
@@ -40,7 +44,8 @@ export class SearchFilter extends AbstractFilter<SearchFilterOptions, StrategyTy
 
         // Fix TypeORM queryBuilder behavior where the first parsed "where" clause is of type "OR"
         // -> it would end up as a simple where clause, losing the OR
-        qb.expressionMap.wheres = sortBy(qb.expressionMap.wheres, "type");
+        // TODO
+        // qb.expressionMap.wheres = sortBy(qb.expressionMap.wheres, "type");
     }
 
     /** Returns a FilterParam from splitting a string query param key */
@@ -245,7 +250,7 @@ export class SearchFilter extends AbstractFilter<SearchFilterOptions, StrategyTy
 
                         // Add parenthesis around condition identifier
                         whereExp[(whereType + "Where") as WhereMethod](
-                            new Brackets((nestedWhereExp) => {
+                            this.ormProvider.makeNestedWhereExpression((nestedWhereExp) => {
                                 sortedFilterParams.forEach((filter: FilterParam) => {
                                     this.applyFilterParam({
                                         qb,
@@ -266,7 +271,7 @@ export class SearchFilter extends AbstractFilter<SearchFilterOptions, StrategyTy
                     // and|or object containing either FilterParam or an other and|or object
                     // Wrap nested filters in WhereType
                     whereExp[(property.toLowerCase() + "Where") as WhereMethod](
-                        new Brackets((nestedWhereExp) => {
+                        this.ormProvider.makeNestedWhereExpression((nestedWhereExp) => {
                             recursiveBrowseFilter(nested, nestedWhereExp);
                         })
                     );

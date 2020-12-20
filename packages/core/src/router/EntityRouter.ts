@@ -1,11 +1,10 @@
-import { ObjectType, Repository, getRepository } from "typeorm";
-
-import { AnyFunction, deepMerge } from "@entity-routes/shared";
+import { AnyFunction, ObjectType, deepMerge } from "@entity-routes/shared";
 
 import { JoinAndSelectExposedPropsOptions } from "../database";
 import { GroupsOperation, RouteOperation } from "../decorators";
 import { AbstractFilterConfig } from "../filters";
 import { formatRouteName } from "../functions";
+import { BaseRepository, OrmProvider } from "../orm";
 import { HookSchema } from "../request";
 import { WriterOptions } from "../response";
 import { GenericEntity } from "../types";
@@ -41,10 +40,14 @@ export class EntityRouter<Entity extends GenericEntity> {
     public readonly subresourceMaker: SubresourceMaker<Entity>;
 
     // EntityRouter specifics
-    private readonly repository: Repository<Entity>;
+    private readonly repository: BaseRepository<Entity>;
     private readonly options: EntityRouteConfig;
     private readonly factoryOptions: EntityRouterFactoryOptions;
     private _router: BridgeRouter;
+
+    get ormProvider() {
+        return OrmProvider.get();
+    }
 
     get router() {
         return this._router;
@@ -60,7 +63,7 @@ export class EntityRouter<Entity extends GenericEntity> {
         this.factoryOptions = { routerFactoryFn, routerRegisterFn, middlewareAdapter };
 
         // EntityRouter specifics
-        this.repository = getRepository(entity);
+        this.repository = this.ormProvider.getRepository(entity);
         this.options = deepMerge({}, globalOptions, this.routeMetadata.options);
 
         // Managers/services
@@ -78,11 +81,6 @@ export class EntityRouter<Entity extends GenericEntity> {
         const routerFactory = this.factoryOptions.routerFactoryFn;
         const router = new BridgeRouter<T>(routerFactory, this.factoryOptions.routerRegisterFn);
         const mwAdapter = this.factoryOptions.middlewareAdapter;
-
-        // Add restore route for soft deletion
-        if (this.options.allowSoftDelete && this.routeMetadata.operations.includes("delete")) {
-            this.routeMetadata.operations.push("restore");
-        }
 
         // CRUD routes
         let i = 0;
@@ -110,7 +108,7 @@ export class EntityRouter<Entity extends GenericEntity> {
                 ],
             });
 
-            // No need for a mapping route on delete/restore operation
+            // No need for a mapping route on delete operation
             if (operationsWithoutMapping.includes(operation)) {
                 continue;
             }
@@ -154,7 +152,7 @@ export class EntityRouter<Entity extends GenericEntity> {
     }
 }
 
-export const operationsWithoutMapping = ["delete", "restore"];
+export const operationsWithoutMapping = ["delete"];
 
 export const ROUTE_METAKEY = Symbol("route");
 export const getRouteMetadata = (entity: Function): RouteMetadata => Reflect.getOwnMetadata(ROUTE_METAKEY, entity);
@@ -206,8 +204,6 @@ export type EntityRouteOptions = {
     defaultSubresourcesOptions?: SubresourceMakerOptions;
     /** Default subresources options, deep merged with defaultEntityRouteOptions */
     defaultWriterOptions?: WriterOptions;
-    /** Allow soft deletion using TypeORM @DeleteDateColumn */
-    allowSoftDelete?: boolean;
     /** Hook schema of custom functions to be run at specific operations in a request processing */
     hooks?: HookSchema;
     /** Middlewares to be pushed before requestContext middleware */

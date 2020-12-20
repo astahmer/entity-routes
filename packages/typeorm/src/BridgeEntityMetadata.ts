@@ -6,6 +6,10 @@ import { BridgeColumnMetadata } from "./BridgeColumnMetadata";
 import { BridgeRelationMetadata } from "./BridgeRelationMetadata";
 
 export class BridgeEntityMetadata implements BaseEntityMeta {
+    get name() {
+        return this.instance.name;
+    }
+
     get target() {
         return this.instance.target;
     }
@@ -19,7 +23,7 @@ export class BridgeEntityMetadata implements BaseEntityMeta {
     }
 
     get columns() {
-        return this.instance.columns.map((col) => new BridgeColumnMetadata(col));
+        return this.instance.columns.map((col) => new BridgeColumnMetadata(col, this));
     }
 
     constructor(public readonly instance: EntityMetadata) {}

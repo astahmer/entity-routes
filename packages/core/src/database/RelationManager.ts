@@ -1,13 +1,11 @@
 import { Service } from "typedi";
 import { Container } from "typedi/Container";
-import { EntityMetadata, SelectQueryBuilder } from "typeorm";
-import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
-import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
 
 import { isDev } from "@entity-routes/shared";
 
 import { MaxDeptMetadata, RouteOperation, getDependsOnMetadata, getMaxDepthMetadata } from "../decorators";
 import { MappingManager } from "../mapping";
+import { BaseEntityMeta, BaseQueryBuilder, ColumnMetadata, RelationMetadata } from "../orm";
 import { getComputedPropMethodAndKey } from "../response";
 import { SubresourceRelation } from "../router";
 import { GenericEntity } from "../types";
@@ -38,7 +36,7 @@ export class RelationManager {
         prevAlias,
     }: MakeJoinsFromPropPathArgs): { entityAlias: string; propName: string; columnMeta: ColumnMetadata } {
         const column = entityMetadata.findColumnWithPropertyName(currentProp);
-        const relation = column ? column.relationMetadata : entityMetadata.findRelationWithPropertyPath(currentProp);
+        const relation = column ? column.relationMetadata : entityMetadata.findRelationWithPropertyName(currentProp);
 
         if (!column && !relation) {
             isDev() && console.warn(`No prop named <${currentProp}> found in entity <${entityMetadata.tableName}>`);
@@ -49,7 +47,7 @@ export class RelationManager {
         if (column && !relation) {
             return {
                 entityAlias: prevAlias || entityMetadata.tableName,
-                propName: column.databaseName,
+                propName: column.propertyName,
                 columnMeta: column,
             };
         } else {
@@ -175,9 +173,7 @@ export class RelationManager {
                     });
 
                     const selectProp = (alias || entityAlias) + "." + propName;
-                    const isAlreadySelected = qb.expressionMap.selects.find(
-                        (select) => select.selection === selectProp
-                    );
+                    const isAlreadySelected = qb.getSelectedFields().find((select) => select === selectProp);
 
                     if (!isAlreadySelected) {
                         qb.addSelect([selectProp]);
@@ -202,13 +198,10 @@ export class RelationManager {
             );
         }
 
-        const property = (prevAlias || entityMetadata.tableName) + "." + relation.inverseSidePropertyPath;
+        const property = (prevAlias || entityMetadata.tableName) + "." + relation.inversePropertyName;
         const alias = aliasHandler.getAliasForRelation(qb, relation.inverseRelation, prevAlias).alias;
 
-        const param = subresourceRelation.param && { parentId: subresourceRelation.id };
-        const condition = subresourceRelation.param && alias + ".id = :parentId";
-
-        qb.innerJoin(property, alias, condition, param);
+        qb.innerJoin(property, alias, subresourceRelation.param && { [alias + ".id"]: subresourceRelation.id });
 
         return alias;
     }
@@ -229,15 +222,13 @@ export class RelationManager {
 
         // Most specific maxDepthLvl found (prop > class > global options)
         const maxDepthLvl =
-            maxDepthMeta?.fields[relation.inverseSidePropertyPath] ||
-            maxDepthMeta?.depthLvl ||
-            options.defaultMaxDepthLvl;
+            maxDepthMeta?.fields[relation.inversePropertyName] || maxDepthMeta?.depthLvl || options.defaultMaxDepthLvl;
 
         // Checks for global option, class & prop decorator
         const hasGlobalMaxDepth = options.isMaxDepthEnabledByDefault && currentDepthLvl >= maxDepthLvl;
         const hasLocalClassMaxDepth = maxDepthMeta?.enabled && currentDepthLvl >= maxDepthLvl;
         const hasSpecificPropMaxDepth =
-            maxDepthMeta?.fields[relation.inverseSidePropertyPath] && currentDepthLvl >= maxDepthLvl;
+            maxDepthMeta?.fields[relation.inversePropertyName] && currentDepthLvl >= maxDepthLvl;
 
         // Should stop getting nested relations ?
         if (hasGlobalMaxDepth || hasLocalClassMaxDepth || hasSpecificPropMaxDepth) {
@@ -246,7 +237,7 @@ export class RelationManager {
     }
 
     /** Retrieve & store entity maxDepthMeta for each entity */
-    private getMaxDepthMetaFor(entityMetadata: EntityMetadata) {
+    private getMaxDepthMetaFor(entityMetadata: BaseEntityMeta) {
         if (!this.maxDepthMetas[entityMetadata.tableName]) {
             this.maxDepthMetas[entityMetadata.tableName] = getMaxDepthMetadata(entityMetadata.target as Function);
         }
@@ -255,8 +246,8 @@ export class RelationManager {
 }
 
 export type RelationManagerBaseArgs<Entity extends GenericEntity = GenericEntity> = {
-    qb: SelectQueryBuilder<Entity>;
-    entityMetadata: EntityMetadata;
+    qb: BaseQueryBuilder<Entity>;
+    entityMetadata: BaseEntityMeta;
     aliasHandler: AliasHandler;
 };
 
@@ -271,7 +262,7 @@ export type MakeJoinsFromPropPathArgs<
 export type JoinAndSelectExposedPropsArgs<
     Entity extends GenericEntity = GenericEntity
 > = RelationManagerBaseArgs<Entity> & {
-    rootMetadata: EntityMetadata;
+    rootMetadata: BaseEntityMeta;
     operation: RouteOperation;
     currentPath: string;
     prevProp: string;
@@ -281,7 +272,7 @@ export type JoinAndSelectExposedPropsArgs<
 export type JoinAndSelectPropsThatComputedPropsDependsOnArgs<
     Entity extends GenericEntity = GenericEntity
 > = RelationManagerBaseArgs<Entity> & {
-    rootMetadata: EntityMetadata;
+    rootMetadata: BaseEntityMeta;
     operation: RouteOperation;
     alias?: string;
 };
@@ -295,7 +286,7 @@ export type JoinSubresourceOnInverseSideArgs<
 
 export type IsRelationPropCircularArgs = {
     currentPath: string;
-    entityMetadata: EntityMetadata;
+    entityMetadata: BaseEntityMeta;
     relation: RelationMetadata;
     options?: IsRelationPropCircularOptions;
 };

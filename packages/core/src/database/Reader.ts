@@ -1,7 +1,7 @@
 import { Container, Service } from "typedi";
-import { EntityMetadata, SelectQueryBuilder } from "typeorm";
 
 import { MappingManager } from "../mapping";
+import { BaseEntityMeta, BaseQueryBuilder } from "../orm";
 import { EntityRouteOptions, RequestContext } from "../router";
 import { GenericEntity } from "../types";
 import { AliasHandler, JoinAndSelectExposedPropsOptions, RelationManager } from ".";
@@ -94,7 +94,6 @@ export class Reader {
             aliasHandler,
         });
 
-        // TODO use getRawOne + marshal-ts instead of typeorm class-transformer ?
         await hooks?.beforeRead?.({ requestId, options });
         const result = await qb.getOne();
         const ref = { result }; // Pass an object with result key editable by afterRead hook if needed
@@ -112,8 +111,8 @@ export class Reader {
 export type ReaderOptions = Pick<JoinAndSelectExposedPropsOptions, "shouldMaxDepthReturnRelationPropsId">;
 
 export type GetCollectionArgs<Entity extends GenericEntity = GenericEntity> = {
-    entityMetadata: EntityMetadata;
-    qb: SelectQueryBuilder<Entity>;
+    entityMetadata: BaseEntityMeta;
+    qb: BaseQueryBuilder<Entity>;
     aliasHandler: AliasHandler;
     operation?: RequestContext<Entity>["operation"];
     options?: ReaderOptions;

@@ -1,16 +1,20 @@
 import { isDate } from "class-validator";
 import { Container, Service } from "typedi";
-import { EntityMetadata, getRepository } from "typeorm";
 
 import { ObjectLiteral, isDev, isPrimitive } from "@entity-routes/shared";
 
 import { isEntity } from "../functions";
 import { MappingManager } from "../mapping";
+import { BaseEntityMeta, OrmProvider } from "../orm";
 import { GenericEntity } from "../types";
 
 @Service()
 /** Recursively traverses an item to decorate it */
 export class Decorator {
+    get ormProvider() {
+        return OrmProvider.get();
+    }
+
     get mappingManager() {
         return Container.get(MappingManager);
     }
@@ -49,9 +53,9 @@ export class Decorator {
         promises,
         isRoot,
     }: RecursiveDecorateItemArgs<Entity>): Entity {
-        let key: string, prop: any, entityMetadata: EntityMetadata;
+        let key: string, prop: any, entityMetadata: BaseEntityMeta;
         try {
-            entityMetadata = isRoot ? rootMetadata : getRepository(item.constructor.name).metadata;
+            entityMetadata = isRoot ? rootMetadata : this.ormProvider.getRepository(item.constructor.name).metadata;
         } catch (error) {
             return item;
         }
@@ -68,7 +72,7 @@ export class Decorator {
         }: {
             cloneRef: { ref: any };
             nestedItem: Entity;
-            itemMetadata: EntityMetadata;
+            itemMetadata: BaseEntityMeta;
             isRoot?: boolean;
         }): Promise<void> => {
             return new Promise((resolve) =>
@@ -149,7 +153,7 @@ export type DecorateFnArgs<Entity extends GenericEntity = GenericEntity, Data = 
     /** Current entity being decorated */
     item: Entity;
     /** Current entity metadata */
-    itemMetadata: EntityMetadata;
+    itemMetadata: BaseEntityMeta;
     /** Is item the root item */
     isRoot?: boolean;
 };
@@ -163,7 +167,7 @@ export type DecorateItemArgs<Entity extends GenericEntity = GenericEntity, Fn = 
     /** Root item to decorate */
     rootItem: Entity;
     /** Root item entity metadata */
-    rootMetadata: EntityMetadata;
+    rootMetadata: BaseEntityMeta;
     /** Decorator function called on each item recursively */
     decorateFn: Fn;
     /** Data to pass to decorateFn */

@@ -19,6 +19,10 @@ export class BridgeColumnMetadata implements ColumnMetadata {
         return this.instance.name;
     }
 
+    get databaseName() {
+        return this.instance.fieldNames.length === 1 && this.instance.fieldNames[0];
+    }
+
     get type() {
         return this.instance.type;
     }

@@ -1,20 +1,22 @@
 import { Container } from "typedi";
-import { DeleteResult, Repository } from "typeorm";
 
 import { ComparatorFn, ObjectLiteral, deepSort, isObject, isType, pipe } from "@entity-routes/shared";
 
 import { EntityErrorResponse } from "../database";
 import { GroupsOperation } from "../decorators";
-import { ContextWithState, EntityRouteState } from "../request";
+import { BaseRepository } from "../orm";
+import { Cleaner, ContextWithState, EntityRouteState } from "../request";
 import {
     CollectionResult,
     Context,
+    DeleteResult,
     RequestContext,
     ResponseTypeFromCtxWithOperation,
     ResponseTypeFromOperation,
     RouteController,
     RouteControllerResult,
     RouteResponse,
+    UnlinkResult,
 } from "../router";
 import { GenericEntity } from "../types";
 import {
@@ -36,12 +38,16 @@ export class Writer<Entity extends GenericEntity> {
         return Container.get(Decorator);
     }
 
+    get cleaner() {
+        return Container.get(Cleaner);
+    }
+
     get options() {
         return this.routeOptions.defaultWriterOptions;
     }
 
     constructor(
-        private repository: Repository<Entity>,
+        private repository: BaseRepository<Entity>,
         private routeOptions: RouteController<Entity>["options"] = {}
     ) {}
 
@@ -130,8 +136,9 @@ export class Writer<Entity extends GenericEntity> {
         requestContext: RequestContext<Entity>;
         options?: WriterOptions;
     }) {
-        const { result, response, ctx, requestContext } = args;
-        const { operation, entityId } = requestContext || {};
+        const { result, response, ctx, requestContext, options: innerOptions } = args;
+        const { operation, entityId, responseOperation } = requestContext || {};
+        const cleanArgs = { rootMetadata: this.repository.metadata, operation: responseOperation || operation };
 
         if (isType<EntityErrorResponse>(result, "hasValidationErrors" in result)) {
             (response as RouteResponse<"persist">)["@context"].validationErrors = result.errors;
@@ -139,22 +146,26 @@ export class Writer<Entity extends GenericEntity> {
         } else if ("error" in result) {
             (response as RouteResponse<"error">)["@context"].error = result.error;
             ctx.status = 400;
+            if (Object.keys(result).length === 1) return;
         }
 
-        if (isType<DeleteResult>(result, "raw" in result)) {
-            (response as RouteResponse<"delete">).deleted = result.affected ? entityId : null;
+        if (isType<DeleteResult>(result, "deleted" in result)) {
+            (response as RouteResponse<"delete">).deleted = result ? entityId : null;
+        } else if (isType<UnlinkResult>(result, "unlinked" in result)) {
+            (response as RouteResponse<"unlink">).unlinked = result ? entityId : null;
         } else if (
             isType<CollectionResult<Entity>>(result, operation === "list") &&
             isType<RouteResponse<"collection">>(response, true)
         ) {
             response["@context"].retrievedItems = result.items.length;
             response["@context"].totalItems = result.totalItems;
-            const items = await Promise.all(
-                this.fromCollection({ items: result.items, requestContext, innerOptions: args.options })
-            );
+
+            const cleaned = result.items.map((values) => this.cleaner.cleanItem({ ...cleanArgs, values })) as Entity[];
+            const items = await Promise.all(this.fromCollection({ items: cleaned, requestContext, innerOptions }));
             response.items = items;
         } else if (isType<Entity>(result, ["details", "create", "update"].includes(operation))) {
-            const item = await this.fromItem({ item: result, requestContext, innerOptions: args.options });
+            const cleaned = this.cleaner.cleanItem({ ...cleanArgs, values: result }) as Entity;
+            const item = await this.fromItem({ item: cleaned, requestContext, innerOptions });
             args.response = { ...response, ...item };
         }
     }

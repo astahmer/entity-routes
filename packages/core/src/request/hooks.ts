@@ -1,9 +1,14 @@
-import { DeleteResult } from "typeorm";
-
 import { DeepPartial } from "@entity-routes/shared";
 
 import { ReaderOptions } from "../database";
-import { RequestContext, RouteControllerResult, RouteResponse, SubresourceRelation } from "../router";
+import {
+    DeleteResult,
+    RequestContext,
+    RouteControllerResult,
+    RouteResponse,
+    SubresourceRelation,
+    UnlinkResult,
+} from "../router";
 import { GenericEntity } from "../types";
 import { CleanerArgs, ContextWithState, EntityErrorResults, RequestContextWithState, ValidateItemOptions } from ".";
 
@@ -58,9 +63,9 @@ export type HookSchema = Partial<{
     // Called right after reading an item or a collection from database
     afterRead: HookFnAfterRead;
 
-    // Called right before removing (or softDelete entity/unlink subresource) an entity from database
+    // Called right before removing (or unlink subresource) an entity from database
     beforeRemove: HookFnBeforeRemove;
-    // Called right after removing (or softDelete entity/unlink subresource) an entity from database
+    // Called right after removing (or unlink subresource) an entity from database
     afterRemove: HookFnAfterRemove;
 }>;
 
@@ -114,5 +119,5 @@ export type HookFnAfterRead = HookFn<HookFnOnAfterReadArgs>;
 export type HookFnOnBeforeRemoveArgs = WithRequestId &
     Pick<RequestContext, "entityId"> & { subresourceRelation: SubresourceRelation };
 export type HookFnBeforeRemove = HookFn<HookFnOnBeforeRemoveArgs>;
-export type HookFnOnAfterRemoveArgs = HookFnOnBeforeRemoveArgs & { result: DeleteResult };
+export type HookFnOnAfterRemoveArgs = HookFnOnBeforeRemoveArgs & { result: DeleteResult | UnlinkResult };
 export type HookFnAfterRemove = HookFn<HookFnOnAfterRemoveArgs>;

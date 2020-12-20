@@ -1,8 +1,7 @@
-import { EntityMetadata } from "typeorm";
-
 import { PartialRecord } from "@entity-routes/shared";
 
 import { EntityGroupsMetadata, GroupsMetadata } from "../mapping";
+import { BaseEntityMeta } from "../orm";
 
 /**
  * Expose decorated property for each operation for each listed EntityRoute scope
@@ -78,7 +77,7 @@ export function registerGroupsDecorator<G extends GroupsMetadata>({
 export type RegisterGroupsDecoratorArgs<G extends GroupsMetadata> = {
     metaKey: GroupsMetadata["metaKey"];
     /** Metadata class stored */
-    metaClass: new (metaKey: MetaKey, entityOrMeta: EntityMetadata | Function) => G;
+    metaClass: new (metaKey: MetaKey, entityOrMeta: BaseEntityMeta | Function) => G;
     /** Groups array or array by (route) context, or just "all" */
     groups: GroupsOperationOrShortcuts | GroupsDecoratorArg;
     /** Alias to be used rather than function name if @Groups is used as MethodDecorator */

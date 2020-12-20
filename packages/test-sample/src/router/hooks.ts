@@ -4,6 +4,8 @@ import { CRUD_OPERATIONS, EntityRouteOptions, HookSchema, RouteDefaultOperation,
 import { fromEntries } from "@entity-routes/shared";
 import { closeTestConnection } from "@entity-routes/test-utils";
 
+import { TestRequestConfig } from "./requests";
+
 // An object of hooks name called for each operation
 type HooksCalled = Record<RouteDefaultOperation, string[]>;
 let hooksCalled: HooksCalled;
@@ -22,15 +24,14 @@ const pushHook = (operation: RouteDefaultOperation) => (name: string) => () => h
 const pushTo = fromEntries(CRUD_OPERATIONS.map((ope) => [ope, pushHook(ope)]));
 
 type TestHookConfigResult = Array<keyof HookSchema>;
-export type TestHookConfig = AxiosRequestConfig & {
-    operation: RouteDefaultOperation;
-    result: TestHookConfigResult;
-    dependsOn?: TestHookConfig;
-    routeOptions?: EntityRouteOptions;
-    itSuffix?: string;
-    only?: boolean;
-    skip?: boolean;
-};
+export type TestHookConfig = AxiosRequestConfig &
+    Pick<TestRequestConfig, "only" | "skip"> & {
+        operation: RouteDefaultOperation;
+        result: TestHookConfigResult;
+        dependsOn?: TestHookConfig;
+        routeOptions?: EntityRouteOptions;
+        itSuffix?: string;
+    };
 
 const createWithoutAutoreload: TestHookConfig = {
     itSuffix: "- without AutoReload",

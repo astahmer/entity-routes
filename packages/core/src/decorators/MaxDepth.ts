@@ -1,6 +1,6 @@
-import { EntityMetadata } from "typeorm";
-
 import { AnyDecorator } from "@entity-routes/shared";
+
+import { BaseEntityMeta } from "../orm";
 
 /**
  * Will apply MaxDepth attribute on every properties of this entity when used as a ClassDecorator
@@ -27,7 +27,7 @@ export const getMaxDepthMetadata = (entity: Function): MaxDeptMetadata =>
     Reflect.getOwnMetadata(MAX_DEPTH_METAKEY, entity);
 
 export type MaxDeptMetadata = {
-    enabled?: EntityMetadata;
+    enabled?: BaseEntityMeta;
     depthLvl?: number;
     fields: {
         [propName: string]: number;

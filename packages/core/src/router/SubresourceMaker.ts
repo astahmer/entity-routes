@@ -1,9 +1,7 @@
-import { EntityMetadata, Repository } from "typeorm";
-import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
-
 import { ObjectOrCollectionKeys, last, pick, prop } from "@entity-routes/shared";
 
 import { formatRouteName, formatRoutePath, isRelationSingle } from "../functions";
+import { BaseEntityMeta, BaseRepository, RelationMetadata } from "../orm";
 import { GenericEntity } from "../types";
 import { EntityRouter, EntityRouterOptions, RouteMetadata, getRouteSubresourcesMetadata } from "./EntityRouter";
 import { BridgeRouter, CRUD_ACTIONS } from ".";
@@ -12,7 +10,7 @@ export class SubresourceMaker<Entity extends GenericEntity> {
     private subresourcesMeta: RouteSubresourcesMeta<Entity>;
 
     constructor(
-        private repository: Repository<Entity>,
+        private repository: BaseRepository<Entity>,
         private routeMetadata: RouteMetadata,
         private mwAdapter: EntityRouterOptions["middlewareAdapter"],
         protected options?: SubresourceMakerOptions
@@ -168,7 +166,7 @@ export class SubresourceMaker<Entity extends GenericEntity> {
 }
 
 type ParentSubresources = {
-    rootMetadata: EntityMetadata;
+    rootMetadata: BaseEntityMeta;
     entities: string[];
     path: string;
     maxDepths?: number[];
@@ -190,11 +188,11 @@ export type SubresourceMakerOptions = {
 
 export function getSubresourceRelation<E extends Function>(
     parent: E,
-    parentEntityMetadata: EntityMetadata,
+    parentEntityMetadata: BaseEntityMeta,
     propertyName: ObjectOrCollectionKeys<E extends new (...args: any) => any ? InstanceType<E> : never>
 ): SubresourceRelation {
     const parentDetailsParam = (parent as Function).name + "Id";
-    const relationMeta = parentEntityMetadata.findRelationWithPropertyPath(propertyName as string);
+    const relationMeta = parentEntityMetadata.findRelationWithPropertyName(propertyName as string);
     return {
         param: parentDetailsParam,
         propertyName: propertyName as string,

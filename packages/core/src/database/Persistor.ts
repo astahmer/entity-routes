@@ -1,15 +1,19 @@
 import { Container, Service } from "typedi";
-import { EntityMetadata, getRepository } from "typeorm";
 
 import { deepMerge } from "@entity-routes/shared";
 
 import { EntityMapperMakeOptions } from "../mapping";
+import { BaseEntityMeta, OrmProvider } from "../orm";
 import { Cleaner, EntityErrorResults, ValidateItemOptions, Validator } from "../request";
 import { EntityRouteOptions, RequestContextMinimal, SubresourceRelation } from "../router";
 import { GenericEntity } from "../types";
 
 @Service()
 export class Persistor {
+    get ormProvider() {
+        return OrmProvider.get();
+    }
+
     get cleaner() {
         return Container.get(Cleaner);
     }
@@ -28,7 +32,7 @@ export class Persistor {
         hooks,
     }: SaveItemArgs<Entity>) {
         const { requestId, operation, values } = ctx;
-        const repository = getRepository<Entity>(rootMetadata.target);
+        const repository = this.ormProvider.getRepository<Entity>(rootMetadata.target);
         // TODO Add options to bypass clean/validate steps
 
         const cleanOptions = { rootMetadata, operation, values, options: mapperMakeOptions };
@@ -79,7 +83,7 @@ export type EntityErrorResponse = { hasValidationErrors: true; errors: EntityErr
 
 export type SaveItemArgs<Entity extends GenericEntity = GenericEntity> = {
     /** Metadata from entity to save */
-    rootMetadata: EntityMetadata;
+    rootMetadata: BaseEntityMeta;
     /** Minimal request context (with only relevant parts) */
     ctx: RequestContextMinimal<Entity>;
     /** Used by class-validator & entity-validator */

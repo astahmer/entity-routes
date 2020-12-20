@@ -11,6 +11,7 @@ export interface BaseEntityMeta {
 export interface RelationMetadata {
     target: Function | string;
     propertyName: string;
+    databaseName: string;
     entityMetadata: BaseEntityMeta;
     isOneToOne: boolean;
     isOneToMany: boolean;
@@ -30,6 +31,7 @@ export type ColumnType = StringColumnType | FunctionColumnType;
 export interface ColumnMetadata {
     type: ColumnType;
     propertyName: string;
+    databaseName: string;
     entityMetadata: BaseEntityMeta;
     relationMetadata?: RelationMetadata | undefined;
 }

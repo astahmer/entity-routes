@@ -1,5 +1,4 @@
 import { Container } from "typedi";
-import { QueryRunner, Repository } from "typeorm";
 
 import {
     DeepPartial,
@@ -14,6 +13,7 @@ import {
 import { GroupsDefaultOperation, GroupsOperation, RouteOperation } from "../decorators";
 import { QueryParams } from "../filters";
 import { MappingManager } from "../mapping";
+import { BaseRepository } from "../orm";
 import { ContextWithState, EntityErrorResults, Handler, makeRequestContext, removeRequestContext } from "../request";
 import { Writer } from "../response";
 import { GenericEntity } from "../types";
@@ -31,7 +31,7 @@ export class MiddlewareMaker<Entity extends GenericEntity> {
     private handler: Handler<Entity>;
     private writer: Writer<Entity>;
 
-    constructor(private repository: Repository<Entity>, private options: EntityRouter<Entity>["options"] = {}) {
+    constructor(private repository: BaseRepository<Entity>, private options: EntityRouter<Entity>["options"] = {}) {
         this.handler = new Handler(repository, options);
         this.writer = new Writer(repository, options);
     }
@@ -64,6 +64,7 @@ export class MiddlewareMaker<Entity extends GenericEntity> {
                 // On controller unhandled error
                 response = this.writer.getBaseResponse(operation);
                 (response as RouteResponse<"error">)["@context"].error = isDev() ? error.message : "Bad request";
+                result = { error: (response as RouteResponse<"error">)["@context"].error };
                 isDev() && console.error(error);
             }
 
@@ -116,7 +117,6 @@ export const CRUD_ACTIONS: CrudActions = {
     details: { path: "/:id(\\d+)", verb: "get", method: "getDetails" },
     update: { path: "/:id(\\d+)", verb: "put", method: "update" },
     delete: { path: "/:id(\\d+)", verb: "delete", method: "delete" },
-    restore: { path: "/:id(\\d+)/restore", verb: "put", method: "restore" },
 };
 
 export type CrudAction = {
@@ -153,6 +153,8 @@ export type RequestContext<
     operation?: Operation;
     /** Was entity re-fetched after a persist operation ? */
     wasAutoReloaded?: boolean;
+    /** Response operation when entity is re-fetch after a persist operation */
+    responseOperation?: Operation;
 };
 export type RequestContextMinimal<Entity extends GenericEntity = GenericEntity> = Pick<
     RequestContext<Entity>,
@@ -166,7 +168,6 @@ export type RequestState<
 > = {
     requestId: string;
     requestContext: RequestContext<Entity, Operation>;
-    queryRunner: QueryRunner;
 };
 
 export type GenericRouteResponse = {
@@ -191,7 +192,7 @@ export type GenericRouteResponse = {
     /** Entity props */
     [k: string]: any;
 };
-export type RouteResponseType = "item" | "collection" | "error" | "persist" | "delete";
+export type RouteResponseType = "item" | "collection" | "error" | "persist" | "delete" | "unlink";
 export type RouteResponse<T extends RouteResponseType = any, Entity extends GenericEntity = GenericEntity> = (T extends
     | "item"
     | "persist"
@@ -230,6 +231,11 @@ export type RouteResponse<T extends RouteResponseType = any, Entity extends Gene
               /** deleted entity id */
               deleted: any;
           }
+        : T extends "unlink"
+        ? {
+              /** unlinked entity id */
+              unlinked: any;
+          }
         : {});
 
 export type ResponseTypeFromOperation<O> = O extends GroupsDefaultOperation
@@ -257,3 +263,6 @@ export type CollectionResult<Entity extends GenericEntity> = {
 };
 
 export type RouteControllerResult = Unpacked<ReturnType<RouteController<GenericEntity>[CrudAction["method"]]>>;
+
+export type DeleteResult = { deleted: string | number };
+export type UnlinkResult = { unlinked: string | number };

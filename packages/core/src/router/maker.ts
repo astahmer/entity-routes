@@ -1,13 +1,19 @@
 import { getMetadataStorage } from "class-validator";
-import { ObjectType } from "typeorm";
+import { Container } from "typedi";
 
-import { AnyFunction, deepMerge } from "@entity-routes/shared";
+import { AnyFunction, ObjectType, deepMerge } from "@entity-routes/shared";
 
+import { OrmProvider } from "../orm/OrmProvider";
 import { GenericEntity } from "../types";
 import { EntityRouteOptions, EntityRouter, EntityRouterOptions, getRouteMetadata } from ".";
 
 /** Make an EntityRouter out of each given entities and assign them a global options object (overridable with @EntityRoute) */
-export async function makeEntityRouters<T extends AnyFunction = any>({ entities, options }: MakeEntityRouters<T>) {
+export async function makeEntityRouters<T extends AnyFunction = any>({
+    ormProvider,
+    entities,
+    options,
+}: MakeEntityRouters<T>) {
+    Container.set("ER-OrmProvider", ormProvider);
     options = deepMerge({}, defaultEntityRouteOptions, options);
 
     // Fix class-validator shitty default behavior with groups
@@ -36,7 +42,7 @@ export async function makeEntityRouters<T extends AnyFunction = any>({ entities,
 /** The default options for every EntityRouter, unless overriden in the MakeEntityRouters["options"] key */
 export const defaultEntityRouteOptions: EntityRouteOptions = {
     defaultMaxDepthOptions: { isMaxDepthEnabledByDefault: true, defaultMaxDepthLvl: 2 },
-    defaultListDetailsOptions: { shouldMaxDepthReturnRelationPropsId: true, withDeleted: false },
+    defaultListDetailsOptions: { shouldMaxDepthReturnRelationPropsId: true },
     defaultWriterOptions: {
         useIris: true,
         shouldEntityWithOnlyIdBeFlattened: true,
@@ -45,7 +51,6 @@ export const defaultEntityRouteOptions: EntityRouteOptions = {
     },
     defaultCreateUpdateOptions: { shouldAutoReload: true },
     defaultSubresourcesOptions: { defaultSubresourceMaxDepthLvl: 2 },
-    allowSoftDelete: false,
 };
 
 export type MakeEntityRouters<T extends AnyFunction = any> = {
@@ -53,6 +58,8 @@ export type MakeEntityRouters<T extends AnyFunction = any> = {
     entities: ObjectType<GenericEntity>[];
     /** Each EntityRouter will take its default options from this, this is deep merged with the defaultEntityRouteOptions */
     options: EntityRouterOptions<T>;
+    /** ORM Provider that will be responsible for handling entities */
+    ormProvider: OrmProvider;
 };
 
 /** Set "always" validator option to true when no groups are passed to validation decorators */

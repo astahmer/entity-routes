@@ -1,8 +1,8 @@
 import { Container } from "typedi";
-import { SelectQueryBuilder } from "typeorm";
 
 import { AliasHandler, RelationManager } from "../database";
 import { OrderByOptions } from "../decorators";
+import { BaseQueryBuilder } from "../orm";
 import {
     AbstractFilter,
     AbstractFilterApplyArgs,
@@ -65,7 +65,7 @@ export class PaginationFilter extends AbstractFilter<PaginationFilterOptions> {
      * @example req = /pictures/?orderBy=title:desc&orderBy=downloads:desc
      * will generate this SQL: ORDER BY `picture`.`title` DESC, `picture`.`downloads` DESC
      */
-    protected addOrderBy(qb: SelectQueryBuilder<any>, aliasHandler: AliasHandler, orderBy: QueryParamValue) {
+    protected addOrderBy(qb: BaseQueryBuilder<any>, aliasHandler: AliasHandler, orderBy: QueryParamValue) {
         if (!Array.isArray(orderBy)) {
             orderBy = [orderBy];
         }
@@ -87,7 +87,7 @@ export class PaginationFilter extends AbstractFilter<PaginationFilterOptions> {
 
             // If last part of propPath is a relation (instead of a column), append ".id" to it
             if (
-                this.entityMetadata.findRelationWithPropertyPath(props[0]) &&
+                this.entityMetadata.findRelationWithPropertyName(props[0]) &&
                 column.propertyName === "id" &&
                 !propPath.endsWith(".id")
             ) {

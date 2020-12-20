@@ -1,14 +1,11 @@
-import { EntityMetadata, SelectQueryBuilder } from "typeorm";
-import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
-import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
-
 import { isDefined, pick } from "@entity-routes/shared";
 
 import { AliasHandler } from "../database";
+import { BaseEntityMeta, BaseQueryBuilder, ColumnMetadata, RelationMetadata } from "../orm";
 
 export abstract class AbstractFilter<FilterOptions extends DefaultFilterOptions = DefaultFilterOptions, T = string> {
     protected readonly config: AbstractFilterConfig<FilterOptions, T>;
-    protected readonly entityMetadata: EntityMetadata;
+    protected readonly entityMetadata: BaseEntityMeta;
 
     constructor({ config, entityMetadata }: AbstractFilterConstructor) {
         this.config = config as AbstractFilterConfig<FilterOptions, T>;
@@ -48,21 +45,21 @@ export abstract class AbstractFilter<FilterOptions extends DefaultFilterOptions 
         return this.getPropMetaAtPathInEntity(propPath, this.entityMetadata, options);
     }
 
-    protected getPropMetaAtPathInEntity(propPath: string | string[], entityMetadata: EntityMetadata): ColumnMetadata;
+    protected getPropMetaAtPathInEntity(propPath: string | string[], entityMetadata: BaseEntityMeta): ColumnMetadata;
     protected getPropMetaAtPathInEntity<T extends boolean>(
         propPath: string | string[],
-        entityMetadata: EntityMetadata,
+        entityMetadata: BaseEntityMeta,
         options: GetPropMetaAtPathOptions<T>
     ): T extends true ? RelationMetadata : ColumnMetadata;
     protected getPropMetaAtPathInEntity(
         propPath: string | string[],
-        entityMetadata: EntityMetadata,
+        entityMetadata: BaseEntityMeta,
         options?: GetPropMetaAtPathOptions
     ): ColumnMetadata | RelationMetadata {
         propPath = Array.isArray(propPath) ? propPath : propPath.split(".");
 
         const column = entityMetadata.findColumnWithPropertyName(propPath[0]);
-        const relation = column ? column.relationMetadata : entityMetadata.findRelationWithPropertyPath(propPath[0]);
+        const relation = column ? column.relationMetadata : entityMetadata.findRelationWithPropertyName(propPath[0]);
         const nextProp = propPath.length > 1 ? propPath.slice(1) : ["id"];
 
         if (!column && !relation) {
@@ -113,7 +110,7 @@ export abstract class AbstractFilter<FilterOptions extends DefaultFilterOptions 
 }
 
 export type AbstractFilterConstructor = {
-    entityMetadata: EntityMetadata;
+    entityMetadata: BaseEntityMeta;
     config: Omit<AbstractFilterConfig, "class">;
 };
 
@@ -122,7 +119,7 @@ export type QueryParams = Record<string, QueryParamValue>;
 
 export type AbstractFilterApplyArgs = {
     queryParams: QueryParams;
-    qb: SelectQueryBuilder<any>;
+    qb: BaseQueryBuilder<any>;
     aliasHandler: AliasHandler;
 };
 

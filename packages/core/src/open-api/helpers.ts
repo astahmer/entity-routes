@@ -1,9 +1,9 @@
 import { SchemaObject } from "openapi3-ts";
-import { ColumnType } from "typeorm";
 
 import { upperFirstLetter } from "@entity-routes/shared";
 
 import { RouteOperation } from "../decorators";
+import { ColumnType, FunctionColumnType } from "../orm";
 import { RouteResponseType } from "../router";
 
 const idParamType = "(\\d+)";
@@ -51,8 +51,10 @@ export const openApiSchemaTypeByColumnType: Partial<Record<Extract<ColumnType, s
 /** Get OpenAPI SchemObject.type by TypeORM.ColumnType, if no direct association -> defaults to string */
 export const typeOrmTypeToOpenApiType = (type: ColumnType) =>
     (typeof type === "string"
-        ? openApiSchemaTypeByColumnType[type]
-        : openApiSchemaTypeByColumnType[type.name as keyof typeof openApiSchemaTypeByColumnType]) || "string";
+        ? (openApiSchemaTypeByColumnType as any)[type]
+        : (openApiSchemaTypeByColumnType as any)[
+              (type as Function).name as keyof typeof openApiSchemaTypeByColumnType
+          ]) || "string";
 
 export const makeResponseFromSchema = (schema: SchemaObject, description = "OK") => ({
     description,

@@ -1,9 +1,8 @@
-import { EntityMetadata } from "typeorm";
-
 import { AnyFunction, isType } from "@entity-routes/shared";
 
 import { RouteOperation } from "../decorators";
 import { formatRouteName } from "../functions";
+import { BaseEntityMeta } from "../orm";
 import { BridgeRouter, CrudAction, EntityRouterFactoryOptions, RouteMetadata } from ".";
 
 export function makeRouterFromActions<Data extends object = object, T extends AnyFunction = any>(
@@ -48,7 +47,7 @@ export function makeRouterFromActions<Data extends object = object, T extends An
 }
 
 export type RouteActionConstructorArgs = { middlewares: Function[] };
-export type RouteActionConstructorData = { routeMetadata: RouteMetadata; entityMetadata: EntityMetadata };
+export type RouteActionConstructorData = { routeMetadata: RouteMetadata; entityMetadata: BaseEntityMeta };
 
 export interface IRouteAction {
     onRequest: Function;

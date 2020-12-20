@@ -1,9 +1,21 @@
 import { AxiosInstance, AxiosRequestConfig } from "axios";
 
-export type TestRequestConfig = AxiosRequestConfig & { it: string; result?: any; only?: boolean; skip?: boolean };
+export type TestRequestConfig = AxiosRequestConfig & {
+    it: string;
+    result: any;
+    only?: boolean;
+    skip?: boolean;
+    willThrow?: boolean;
+    debug?: boolean;
+};
 export async function testRoute(client: AxiosInstance, config: TestRequestConfig) {
-    const result = await client.request(config);
-    expect(result.data).toEqualMessy(config.result);
+    if (config.debug) debugger;
+    if (config.willThrow) {
+        expect(() => client.request(config)).rejects.toThrow(config.result.error);
+    } else {
+        const result = await client.request(config);
+        expect(result.data).toEqualMessy(config.result);
+    }
 }
 
 export const testRouteConfigs: TestRequestConfig[] = [
@@ -139,6 +151,7 @@ export const testRouteConfigs: TestRequestConfig[] = [
     },
     {
         it: "should create new mainRole for user 123",
+        // debug: true,
         url: "/user/123/mainRole",
         method: "post",
         data: { id: 456, label: "Admin" },
@@ -206,5 +219,50 @@ export const testRouteConfigs: TestRequestConfig[] = [
             },
             items: ["/api/upvote/444"],
         },
+    },
+    {
+        it: "should remove comment 222 from article 111 collection",
+        url: "/article/111/comments/222",
+        method: "delete",
+        result: {
+            "@context": {
+                entity: "comment",
+                operation: "delete",
+            },
+            unlinked: 222,
+        },
+    },
+    {
+        it: "should not find comment 222 of article 111 comments list after it was unlinked",
+        url: "/article/111/comments",
+        method: "get",
+        result: {
+            "@context": {
+                entity: "comment",
+                operation: "list",
+                retrievedItems: 0,
+                totalItems: 0,
+            },
+            items: [],
+        },
+    },
+    {
+        it: "should delete comment entity 222",
+        url: "/comment/222",
+        method: "delete",
+        result: {
+            "@context": {
+                entity: "comment",
+                operation: "delete",
+            },
+            deleted: 222,
+        },
+    },
+    {
+        it: "should not find comment entity after it was deleted",
+        url: "/comment/222",
+        method: "get",
+        willThrow: true,
+        result: { error: "Not found." },
     },
 ];

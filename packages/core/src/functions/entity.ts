@@ -1,9 +1,6 @@
-import { EntityMetadata } from "typeorm";
-import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
-import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
-
 import { CType } from "@entity-routes/shared";
 
+import { BaseEntityMeta, ColumnMetadata, RelationMetadata } from "../orm";
 import { EntityRouter, getRouteMetadata } from "../router";
 import { GenericEntity, Props } from "../types";
 import { formatRoutePath } from ".";
@@ -31,7 +28,7 @@ export const isIriValidForProperty = (iri: string, column: ColumnMetadata) => {
 };
 
 export type IdToIRIOptions = { useClassNameAsEntrypoint: boolean };
-export function idToIRI(entityMeta: EntityMetadata, id: string | number, options?: IdToIRIOptions) {
+export function idToIRI(entityMeta: BaseEntityMeta, id: string | number, options?: IdToIRIOptions) {
     const routeMetadata = getRouteMetadata(entityMeta.target as Function);
     if (!routeMetadata || options?.useClassNameAsEntrypoint) {
         return `/api/${entityMeta.tableName}/${id}`;

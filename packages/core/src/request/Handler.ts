@@ -1,6 +1,5 @@
-import { Repository } from "typeorm";
-
 import { GroupsOperation } from "../decorators";
+import { BaseRepository } from "../orm";
 import { CRUD_ACTIONS, EntityRouteOptions, ListDetailsOptions, MiddlewareMaker, RouteController } from "../router";
 import { GenericEntity } from "../types";
 import { ContextWithState } from "./store";
@@ -13,7 +12,7 @@ export class Handler<Entity extends GenericEntity> {
 
     private controller: RouteController<Entity>;
 
-    constructor(private repository: Repository<Entity>, private options: MiddlewareMaker<Entity>["options"] = {}) {
+    constructor(private repository: BaseRepository<Entity>, private options: MiddlewareMaker<Entity>["options"] = {}) {
         this.controller = new RouteController(repository, options);
     }
 

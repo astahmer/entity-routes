@@ -1,11 +1,11 @@
 import { Container, Service } from "typedi";
-import { EntityMetadata } from "typeorm";
 
 import { DeepPartial, Primitive, isDate, isObject, isPrimitive, isType } from "@entity-routes/shared";
 
 import { SaveItemArgs } from "../database";
 import { formatIriToId } from "../functions";
 import { ENTITY_META_SYMBOL, EntityMapperMakeOptions, MappingItem, MappingManager } from "../mapping";
+import { BaseEntityMeta } from "../orm";
 import { RequestContext } from "../router";
 import { GenericEntity } from "../types";
 
@@ -72,7 +72,7 @@ export class Cleaner {
                     clone[key] = prop;
                 }
             } else if (isPrimitive(prop)) {
-                const isRelation = mapping[ENTITY_META_SYMBOL].findRelationWithPropertyPath(key);
+                const isRelation = mapping[ENTITY_META_SYMBOL].findRelationWithPropertyName(key);
                 // Format IRI to id && string "id" to int id
                 if (isType<string>(prop, typeof prop === "string") && (isRelation || key === "id")) {
                     clone[key] = formatIriToId(prop, true);
@@ -104,6 +104,6 @@ export type CleanerArgs<Entity extends GenericEntity = GenericEntity> = Pick<
     "operation" | "values"
 > &
     Pick<SaveItemArgs, "rootMetadata"> & {
-        rootMetadata: EntityMetadata;
+        rootMetadata: BaseEntityMeta;
         options?: EntityMapperMakeOptions;
     };

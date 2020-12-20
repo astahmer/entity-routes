@@ -1,5 +1,4 @@
-import { SelectQueryBuilder } from "typeorm";
-import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
+import { BaseQueryBuilder, RelationMetadata } from "../orm";
 
 export type AliasList = Record<string, number>;
 
@@ -22,13 +21,13 @@ export class AliasHandler {
         return entityTableName + "_" + propName + (lastAlias ? "_" + lastAlias : "");
     }
 
-    public isJoinAlreadyMade(qb: SelectQueryBuilder<any>, relation: RelationMetadata, prevAlias?: string) {
+    public isJoinAlreadyMade(qb: BaseQueryBuilder<any>, relation: RelationMetadata, prevAlias?: string) {
         const entityOrProperty = `${prevAlias || relation.entityMetadata.tableName}.${relation.propertyName}`;
-        const join = qb.expressionMap.joinAttributes.find((join) => join.entityOrProperty === entityOrProperty);
+        const join = qb.getJoins().find((join) => join.onProperty === entityOrProperty);
         return join;
     }
 
-    public getAliasForRelation(qb: SelectQueryBuilder<any>, relation: RelationMetadata, prevAlias?: string) {
+    public getAliasForRelation(qb: BaseQueryBuilder<any>, relation: RelationMetadata, prevAlias?: string) {
         const isJoinAlreadyMade = this.isJoinAlreadyMade(qb, relation, prevAlias);
 
         const alias = isJoinAlreadyMade

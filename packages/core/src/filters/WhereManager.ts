@@ -1,9 +1,8 @@
 import { Service } from "typedi";
-import { Brackets, WhereExpression } from "typeorm";
-import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
 
 import { camelToSnake, isType, parseStringAsBoolean } from "@entity-routes/shared";
 
+import { ColumnMetadata, OrmProvider, WhereExpression } from "../orm";
 import {
     AbstractFilterConfig,
     COMPARISON_OPERATOR,
@@ -16,6 +15,10 @@ import {
 
 @Service()
 export class WhereManager {
+    get ormProvider() {
+        return OrmProvider.get();
+    }
+
     /**
      * Retrieve a property default where strategy from its propName/propPath
      * @example
@@ -252,11 +255,12 @@ export class WhereManager {
         const whereOperator = this.getWhereOperatorByStrategy(strategy, not, propCount);
         const whereParamSlot = this.getWhereParamSlotByStrategy(strategy, paramName);
         const whereParam = this.getWhereParamByStrategy(strategy, paramName, value);
+        const wherePropAlias = `${entityAlias}.${propName}`;
 
-        const whereCondition = `${entityAlias}.${propName} ${whereOperator}${
+        const whereCondition = `${wherePropAlias} ${whereOperator}${
             whereParamSlot ? " " + whereParamSlot : whereParamSlot
         }`;
-        return { whereOperator, whereCondition, whereParam };
+        return { whereOperator, whereCondition, wherePropAlias, whereParam };
     }
 
     /** Add where condition by a given strategy type  */
@@ -278,7 +282,7 @@ export class WhereManager {
         // Both IN and BETWEEN strategies use an array as value in a single condition
         if (Array.isArray(filter.value) && "IN" !== filter.strategy && "BETWEEN" !== filter.strategy) {
             whereExp[mainMethod](
-                new Brackets((qb) => {
+                this.ormProvider.makeNestedWhereExpression((qb) => {
                     for (let i = 0; i < filter.value.length; i++) {
                         const { whereCondition, whereParam } = this.getWhereArgs({
                             strategy: filter.strategy,
@@ -386,5 +390,8 @@ export enum DAY {
     END = "23:59:59",
 }
 
+// TODO "as any"
 export const isColumnBoolean = (column: ColumnMetadata) =>
-    typeof column.type === "function" ? column.type.name === "Boolean" : ["bool", "boolean"].includes(column.type);
+    typeof column.type === "function"
+        ? column.type.name === "Boolean"
+        : ["bool", "boolean"].includes(column.type as any);

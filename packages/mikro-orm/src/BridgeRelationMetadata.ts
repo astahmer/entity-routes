@@ -19,6 +19,10 @@ export class BridgeRelationMetadata implements RelationMetadata {
         return this.instance.name;
     }
 
+    get databaseName() {
+        return this.instance.fieldNames.length === 1 && this.instance.fieldNames[0];
+    }
+
     get inverseRelation() {
         const hasInverse = this.inversePropertyName;
         const rel = hasInverse

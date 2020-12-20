@@ -1,15 +1,20 @@
 import { Container, Service } from "typedi";
-import { EntityMetadata, ObjectType } from "typeorm";
 
-import { ObjectLiteral, get, pluck } from "@entity-routes/shared";
+import { ObjectLiteral, ObjectType, get, pluck } from "@entity-routes/shared";
 
 import { JoinAndSelectExposedPropsOptions, RelationManager } from "../database";
 import { GROUPS_METAKEY, RouteOperation } from "../decorators";
+import { isRelationSingle } from "../functions";
+import { BaseEntityMeta, OrmProvider } from "../orm";
 import { EntityGroupsMetadata, GroupsMetaByRoutes, GroupsMetadata } from ".";
 
 @Service()
 export class MappingManager {
     private groupsMetas: Record<string, GroupsMetaByRoutes<any>> = {};
+
+    get ormProvider() {
+        return OrmProvider.get();
+    }
 
     get relationManager() {
         return Container.get(RelationManager);
@@ -17,7 +22,7 @@ export class MappingManager {
 
     /** Make the mapping object for this entity on a given operation */
     public make<O extends EntityMapperMakeOptions = EntityMapperMakeOptions>(
-        rootMetadata: EntityMetadata,
+        rootMetadata: BaseEntityMeta,
         operation: RouteOperation,
         options: O = {} as any
     ): O extends { pretty: true } ? ObjectLiteral : MappingItem {
@@ -45,7 +50,7 @@ export class MappingManager {
     }
 
     /** Get selects props (from groups) of a given entity for a specific operation */
-    public getExposedProps(rootMetadata: EntityMetadata, operation: RouteOperation, entityMetadata: EntityMetadata) {
+    public getExposedProps(rootMetadata: BaseEntityMeta, operation: RouteOperation, entityMetadata: BaseEntityMeta) {
         return this.getGroupsMetadataFor(entityMetadata, EntityGroupsMetadata).getExposedPropsOn(
             operation,
             rootMetadata
@@ -54,9 +59,9 @@ export class MappingManager {
 
     /** Get selects props (from groups) of a given entity for a specific operation */
     public getSelectProps(
-        rootMetadata: EntityMetadata,
+        rootMetadata: BaseEntityMeta,
         operation: RouteOperation,
-        entityMetadata: EntityMetadata,
+        entityMetadata: BaseEntityMeta,
         withPrefix = true,
         prefix?: string
     ) {
@@ -70,9 +75,9 @@ export class MappingManager {
 
     /** Get relation props metas (from groups) of a given entity for a specific operation */
     public getRelationPropsMetas(
-        rootMetadata: EntityMetadata,
+        rootMetadata: BaseEntityMeta,
         operation: RouteOperation,
-        entityMetadata: EntityMetadata
+        entityMetadata: BaseEntityMeta
     ) {
         return this.getGroupsMetadataFor(entityMetadata, EntityGroupsMetadata).getRelationPropsMetas(
             operation,
@@ -81,7 +86,7 @@ export class MappingManager {
     }
 
     /** Get computed props metas (from groups) of a given entity for a specific operation */
-    public getComputedProps(rootMetadata: EntityMetadata, operation: RouteOperation, entityMetadata: EntityMetadata) {
+    public getComputedProps(rootMetadata: BaseEntityMeta, operation: RouteOperation, entityMetadata: BaseEntityMeta) {
         return this.getGroupsMetadataFor(entityMetadata, EntityGroupsMetadata).getComputedProps(
             operation,
             rootMetadata
@@ -90,8 +95,8 @@ export class MappingManager {
 
     /** Get GroupsMetada of a given entity */
     public getGroupsMetadataFor<G extends GroupsMetadata>(
-        entityMetadata: EntityMetadata,
-        metaClass: new (metaKey: string, entityOrMeta: EntityMetadata | ObjectType<G>) => G,
+        entityMetadata: BaseEntityMeta,
+        metaClass: new (metaKey: string, entityOrMeta: BaseEntityMeta | ObjectType<G>) => G,
         metaKeyProp = GROUPS_METAKEY
     ): G {
         // since TS doesn't allow Symbol as index (why ??)
@@ -108,7 +113,7 @@ export class MappingManager {
         return this.groupsMetas[metaKey][entityMetadata.tableName];
     }
 
-    public isPropSimple(entityMetadata: EntityMetadata, propName: string) {
+    public isPropSimple(entityMetadata: BaseEntityMeta, propName: string) {
         const column = entityMetadata.findColumnWithPropertyName(propName);
         if (!column) return false;
 
@@ -126,10 +131,10 @@ export class MappingManager {
      * @param currentTableNamePath used to check max depth
      */
     private getMappingFor(
-        rootMetadata: EntityMetadata,
+        rootMetadata: BaseEntityMeta,
         mapping: MappingResponse,
         operation: RouteOperation,
-        entityMetadata: EntityMetadata,
+        entityMetadata: BaseEntityMeta,
         currentPath: string,
         currentTableNamePath: string,
         options: EntityMapperOptions = {}
@@ -190,8 +195,8 @@ export class MappingManager {
                 if (nestedMapping.exposedProps.length === 1 && nestedMapping.exposedProps[0] === "id") {
                     // If this relation has only exposed its id, then don't bother nesting it like entity: { id: "number "}
                     // Instead, directly associate relation with "@id" or "@id[]"
-                    const relation = mapping[ENTITY_META_SYMBOL].findRelationWithPropertyPath(relationName);
-                    acc[relationName] = "@id" + (relation.relationType.endsWith("to-many") ? "[]" : "");
+                    const relation = mapping[ENTITY_META_SYMBOL].findRelationWithPropertyName(relationName);
+                    acc[relationName] = "@id" + (!isRelationSingle(relation) ? "[]" : "");
                 } else {
                     // There are still props to select deeper, recursive prettify at currentPath
                     const prettyMappingItem = this.prettify(this.getNestedMappingAt(relationName, mapping));
@@ -202,8 +207,8 @@ export class MappingManager {
 
                 // If max depth is reached, then associate relation with "@id" or "@id[]"
                 const relations = mapping.relationProps.reduce((acc, propName) => {
-                    const relation = mapping[ENTITY_META_SYMBOL].findRelationWithPropertyPath(propName);
-                    acc[propName] = "@id" + (relation.relationType.endsWith("to-many") ? "[]" : "");
+                    const relation = mapping[ENTITY_META_SYMBOL].findRelationWithPropertyName(propName);
+                    acc[propName] = "@id" + (!isRelationSingle(relation) ? "[]" : "");
                     return acc;
                 }, {} as ObjectLiteral);
                 acc[relationName] = { ...primitives, ...relations };
@@ -222,7 +227,7 @@ export type MappingItem = {
     exposedProps: string[];
     selectProps: string[];
     relationProps: string[];
-    [ENTITY_META_SYMBOL]: EntityMetadata;
+    [ENTITY_META_SYMBOL]: BaseEntityMeta;
 };
 
 export type MappingResponse = Record<string, MappingItem>;
