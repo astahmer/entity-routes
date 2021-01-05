@@ -39,6 +39,8 @@ export class BridgeQueryBuilder<Entity extends GenericEntity> implements BaseQue
         return this;
     }
     getOne() {
+        // TODO
+        // console.log(this.instance.getFormattedQuery());
         return this.instance.getSingleResult();
     }
     async getManyAndCount() {
@@ -57,11 +59,14 @@ export class BridgeQueryBuilder<Entity extends GenericEntity> implements BaseQue
     }
 
     // WhereExpression
-    where(condition: string, parameters?: ObjectLiteral) {
+    where(_condition: string, parameters?: ObjectLiteral) {
+        // TODO
         // const knex = this.instance.getKnex();
         // knex.where(condition, parameters);
         // const knex = (this.repository.provider.orm.em as EntityManager).getKnex();
         // this.instance.where(knex.raw(condition, parameters))
+        // this.instance.where(condition, Object.values(parameters));
+        // console.log(condition, parameters);
         this.instance.where(parameters);
         return this;
     }

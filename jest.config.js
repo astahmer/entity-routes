@@ -14,7 +14,7 @@ const base = {
     moduleNameMapper: {
         "@entity-routes/(.*)": "<rootDir>/packages/$1/src",
     },
-    globals: { "ts-jest": { tsconfig: path.join(rootDir, "./tsconfig.test.json") } },
+    globals: { "ts-jest": { diagnostics: false, tsconfig: path.join(rootDir, "./tsconfig.test.json") } },
     setupFilesAfterEnv: ["jest-extended", setupFilePath],
     collectCoverageFrom: ["<rootDir>/packages/*/src/**/*.ts"],
     coverageThreshold: {

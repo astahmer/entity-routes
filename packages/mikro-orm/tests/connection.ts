@@ -16,7 +16,7 @@ const config: Options = {
 
 let orm: MikroORM;
 
-export const closeTestConnection = () => orm?.close();
+export const closeTestConnection = () => orm?.close(true);
 export async function createTestConnection(entities: Function[] = config.entities as Function[]) {
     const isConnected = await orm?.isConnected();
     isConnected && (await closeTestConnection());
